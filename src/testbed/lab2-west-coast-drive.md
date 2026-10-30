@@ -420,6 +420,7 @@ Change **one thing at a time**, deploy, and test again on blocks.
 | The **left stick moves the right wheels** | The left and right CAN IDs are swapped in `Constants`. Swap them back. |
 | One side doesn't move at all | That side's leader CAN ID is wrong, or its breaker is tripped |
 | A gearbox grinds or a breaker trips | Leader and follower are fighting. Check the `follow` CAN IDs. |
+| Nothing moves, and the console repeats `[Spark Max] IDs: 1, timed out while waiting for Periodic Status 0: HAL: CAN Receive has Timed Out` and `Setpoint command: Unknown error status` | The roboRIO can't hear that SPARK MAX on CAN. Check, in order: the **yellow and green CAN wires** aren't swapped (yellow to **H**, green to **L**, especially at the roboRIO); the controller's CAN ID in the REV Hardware Client matches `Constants`; it has power; the CAN chain is connected all the way to the PDH, with **TERM** on ([Lesson 4](../hardware/04-electronics.md#can-bus)). |
 
 ### Step 9: Drive on the floor
 Once every row in Step 7 passes on blocks:

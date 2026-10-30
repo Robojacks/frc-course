@@ -324,8 +324,16 @@ try {
 <td>"CAN frame not received" errors in the console</td>
 <td>The device the code expects isn't on the bus at that ID</td>
 </tr>
+<tr>
+<td><strong>Every</strong> device times out (for REV: <code>timed out while waiting for Periodic Status 0: CAN Receive has Timed Out</code>)</td>
+<td>The <strong>yellow and green wires are swapped</strong> somewhere, often right at the roboRIO. Yellow goes to CAN-H and green to CAN-L at <strong>every</strong> connection.</td>
+</tr>
 </tbody>
 </table>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Check the colors at the roboRIO first</p>
+<p>The roboRIO's CAN port is labeled <strong>H</strong> and <strong>L</strong>. Yellow goes to <strong>H</strong>, green goes to <strong>L</strong>. One swapped connection anywhere in the chain can silence the whole bus, so when nothing on CAN responds, check the colors at each connector, starting at the roboRIO.</p>
 </div>
 <p>Keep a <strong>CAN ID map</strong>, a list of every device, its ID, and what it does, somewhere the whole team can see it.</p>
 <h3 id="safety-basics">Safety basics<a class="headerlink" href="#safety-basics" title="Permanent link">#</a></h3>
