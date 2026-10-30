@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>13. Feedforward | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<link rel="stylesheet" href="../assets/wpilib/pid-tune.css">
+<script src="../assets/wpilib/pid-tune.js"></script>
+<script src="../assets/wpilib/pid-tune-fixes.js"></script>
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section" open><summary>Controls</summary><ul><li><a href="12-pid.html">12. PID Feedback</a></li><li><a href="13-feedforward.html" class="current" aria-current="page">13. Feedforward</a></li><li><a href="13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="13-feedforward">13. Feedforward<a class="headerlink" href="#13-feedforward" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>PID only reacts <strong>after</strong> something goes wrong: it needs error before it does anything. That means a PID-only arm always sags a little below its target (the error has to exist to make the output that holds it up), and a PID-only flywheel always runs a little slow.</p>
+<p><strong>Feedforward</strong> predicts what the motor needs <strong>before</strong> there's any error, using a simple model of the mechanism. Most good FRC control is <em>mostly feedforward, with a little PID for cleanup</em>. Add feedforward and your PID gains get smaller, your mechanisms get faster and smoother, and tuning gets easier.</p>
+<div class="admonition example">
+<p class="admonition-title">Analogy: driving up a hill</p>
+<p>Feedforward is pressing the gas <strong>because you see the hill coming</strong>. PID is pressing harder <strong>after you notice you're slowing down</strong>. A good driver does both: most of the pedal from looking ahead, a little correction from feeling the speed.</p>
+</div>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-feedforward.html">Introduction to DC Motor Feedforward</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/feedforward.html">Feedforward Control in WPILib</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/introduction.html">Introduction to System Identification</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="feedforward-vs-feedback">Feedforward vs. feedback<a class="headerlink" href="#feedforward-vs-feedback" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Feedforward</th>
+<th>Feedback (PID)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Uses</td>
+<td>A model of the mechanism + the target</td>
+<td>The error from a sensor</td>
+</tr>
+<tr>
+<td>Acts</td>
+<td><strong>Before</strong> error appears</td>
+<td><strong>After</strong> error appears</td>
+</tr>
+<tr>
+<td>Good at</td>
+<td>The predictable part: gravity, friction, the voltage to hold a speed</td>
+<td>The unpredictable part: bumps, game pieces, model mistakes</td>
+</tr>
+<tr>
+<td>Needs a sensor?</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>On its own</td>
+<td>Close, but drifts</td>
+<td>Works, but lags and sags</td>
+</tr>
+</tbody>
+</table>
+<p>Used together, the output is simply added:</p>
+<div class="highlight"><pre><span></span><code>volts = feedforward(target) + PID(measurement, target)
+</code></pre></div>
+<div class="mermaid">flowchart LR
+    T[Target] --&gt; FF[Feedforward]
+    T --&gt; E((error))
+    FF --&gt; Sum((+))
+    E --&gt; PID --&gt; Sum
+    Sum --&gt; M[Motor] --&gt; Mech[Mechanism] --&gt; S[Sensor]
+    S --&gt; E</div>
+<h3 id="where-the-voltage-goes-the-motor-model">Where the voltage goes: the motor model<a class="headerlink" href="#where-the-voltage-goes-the-motor-model" title="Permanent link">#</a></h3>
+<p>A DC motor's voltage goes to three jobs, plus a fourth for mechanisms that lift something:</p>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Name</th>
+<th>What the voltage is for</th>
+<th>Unit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>kS</strong></td>
+<td>Static</td>
+<td>Overcoming friction, just to start moving</td>
+<td>volts</td>
+</tr>
+<tr>
+<td><strong>kV</strong></td>
+<td>Velocity</td>
+<td>Holding a speed (faster needs more voltage)</td>
+<td>volts per (unit/second)</td>
+</tr>
+<tr>
+<td><strong>kA</strong></td>
+<td>Acceleration</td>
+<td>Speeding up (accelerating takes extra)</td>
+<td>volts per (unit/second²)</td>
+</tr>
+<tr>
+<td><strong>kG</strong></td>
+<td>Gravity</td>
+<td>Holding the mechanism up against gravity</td>
+<td>volts</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Flywheel or drivetrain:</strong>
+<div class="highlight"><pre><span></span><code>volts = kS·sign(v) + kV·v + kA·a
+</code></pre></div></p>
+<p><code>sign(v)</code> is +1 when moving forward and −1 when moving backward, because friction always opposes motion.</p>
+<p><strong>Elevator</strong> (gravity is the same at every height):
+<div class="highlight"><pre><span></span><code>volts = kS·sign(v) + kG + kV·v + kA·a
+</code></pre></div></p>
+<p><strong>Arm</strong> (gravity's pull depends on the angle):
+<div class="highlight"><pre><span></span><code>volts = kS·sign(v) + kG·cos(θ) + kV·v + kA·a
+</code></pre></div></p>
+<h3 id="why-cos-for-an-arm">Why cos(θ) for an arm<a class="headerlink" href="#why-cos-for-an-arm" title="Permanent link">#</a></h3>
+<p>Gravity pulls straight down. How much of that pull tries to <strong>rotate</strong> the arm depends on its angle:</p>
+<table>
+<thead>
+<tr>
+<th>Arm angle (θ)</th>
+<th>cos(θ)</th>
+<th>Gravity's effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0° (horizontal)</td>
+<td>1.0</td>
+<td>Strongest. The full weight acts as torque.</td>
+</tr>
+<tr>
+<td>45°</td>
+<td>0.71</td>
+<td>About 71%</td>
+</tr>
+<tr>
+<td>90° (straight up)</td>
+<td>0.0</td>
+<td>None. The weight is directly over the pivot.</td>
+</tr>
+<tr>
+<td>−90° (straight down)</td>
+<td>0.0</td>
+<td>None. The weight hangs from the pivot.</td>
+</tr>
+</tbody>
+</table>
+<p>So kG is the voltage needed to hold the arm <strong>level</strong>, and <code>kG·cos(θ)</code> gives the right amount at every other angle.</p>
+<h3 id="a-worked-example">A worked example<a class="headerlink" href="#a-worked-example" title="Permanent link">#</a></h3>
+<p>A flywheel has kS = 0.2 V and kV = 0.12 V per (rotation/second). To hold 50 rotations/second (3000 RPM):</p>
+<div class="highlight"><pre><span></span><code>volts = 0.2 + 0.12 × 50 = 6.2 V
+</code></pre></div>
+<p>Without any feedback at all, sending 6.2 V gets the flywheel close to 50 rot/s. PID then only has to correct small differences, like when a game piece passes through and slows the wheel.</p>
+<h3 id="why-volts-instead-of-percent">Why volts instead of percent?<a class="headerlink" href="#why-volts-instead-of-percent" title="Permanent link">#</a></h3>
+<p>Battery voltage sags during a match. 50% output at 12.5 V is 6.25 V to the motor; 50% at 10.5 V is only 5.25 V. Same command, different result.</p>
+<p>Commanding <strong>volts</strong> with <code>setVoltage()</code> compensates for this: the motor controller adjusts the percent to deliver the voltage you asked for. Feedforward gains are measured in volts, so always use <code>setVoltage()</code> with feedforward.</p>
+<div class="highlight"><pre><span></span><code><span class="n">motor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="mf">6.2</span><span class="p">);</span><span class="w">   </span><span class="c1">// ✅ 6.2 V, whatever the battery reads</span>
+<span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span><span class="w">          </span><span class="c1">// ❌ changes as the battery sags</span>
+</code></pre></div>
+<h3 id="the-wpilib-classes">The WPILib classes<a class="headerlink" href="#the-wpilib-classes" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Class</th>
+<th>Constructor</th>
+<th><code>calculate(...)</code> takes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Flywheel, roller, drivetrain side</td>
+<td><code>SimpleMotorFeedforward</code></td>
+<td><code>(kS, kV, kA)</code></td>
+<td>velocity</td>
+</tr>
+<tr>
+<td>Elevator</td>
+<td><code>ElevatorFeedforward</code></td>
+<td><code>(kS, kG, kV, kA)</code></td>
+<td>velocity</td>
+</tr>
+<tr>
+<td>Arm</td>
+<td><code>ArmFeedforward</code></td>
+<td><code>(kS, kG, kV, kA)</code></td>
+<td>angle (radians), velocity</td>
+</tr>
+</tbody>
+</table>
+<h3 id="code-it-a-flywheel-with-feedforward-pid">Code it: a flywheel with feedforward + PID<a class="headerlink" href="#code-it-a-flywheel-with-feedforward-pid" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SimpleMotorFeedforward</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SimpleMotorFeedforward</span><span class="p">(</span><span class="n">kS</span><span class="p">,</span><span class="w"> </span><span class="n">kV</span><span class="p">);</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PIDController</span><span class="w"> </span><span class="n">pid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span><span class="n">kP</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinAt</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">targetRotPerSec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">ffVolts</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">ff</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">targetRotPerSec</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">pidVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getVelocityRotPerSec</span><span class="p">(),</span><span class="w"> </span><span class="n">targetRotPerSec</span><span class="p">);</span>
+<span class="w">        </span><span class="n">motor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">ffVolts</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">pidVolts</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Shooter "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">targetRotPerSec</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Because feedforward does most of the work, kP here is small and only cleans up.</p>
+<h3 id="code-it-an-arm-with-feedforward-pid">Code it: an arm with feedforward + PID<a class="headerlink" href="#code-it-an-arm-with-feedforward-pid" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.controller.ArmFeedforward</span><span class="p">;</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ArmFeedforward</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArmFeedforward</span><span class="p">(</span><span class="n">kS</span><span class="p">,</span><span class="w"> </span><span class="n">kG</span><span class="p">,</span><span class="w"> </span><span class="n">kV</span><span class="p">);</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PIDController</span><span class="w"> </span><span class="n">pid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span><span class="n">kP</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">kD</span><span class="p">);</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">holdAt</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">targetRadians</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">ffVolts</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="n">ff</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">targetRadians</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">   </span><span class="c1">// position, velocity</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">pidVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getAngleRadians</span><span class="p">(),</span><span class="w"> </span><span class="n">targetRadians</span><span class="p">);</span>
+<span class="w">        </span><span class="n">motor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">ffVolts</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">pidVolts</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Arm hold"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Angle convention</p>
+<p><code>ArmFeedforward</code> expects <strong>radians</strong> with <strong>0 = horizontal</strong> and positive angles going up. If your encoder reads 0 when the arm hangs straight down, subtract π/2 before passing the angle in. Get this wrong and the gravity term pushes hardest at the wrong angle.</p>
+</div>
+<p>Here the velocity passed to feedforward is 0, because <code>holdAt</code> jumps straight to the target. In <a href="14-profiles.html">Lesson 14</a>, a motion profile supplies a real velocity for every step of the move, and kV and kA start pulling their weight.</p>
+<h3 id="getting-the-numbers">Getting the numbers<a class="headerlink" href="#getting-the-numbers" title="Permanent link">#</a></h3>
+<p><strong>Quick and dirty, by hand:</strong></p>
+<ol>
+<li><strong>kG</strong> (arm or elevator): slowly raise the voltage until the mechanism holds still without drifting. For an arm, do this with it horizontal. That voltage is roughly kG.</li>
+<li><strong>kS</strong>: on a flywheel or roller with no gravity, raise the voltage slowly from 0 until it just starts to turn. That's roughly kS.</li>
+<li><strong>kV</strong>: run at a few steady voltages, measure the speed each time, and calculate (volts − kS) ÷ speed.</li>
+</ol>
+<p><strong>The right way:</strong> use <strong>SysId</strong>. It runs the mechanism through test motions and calculates kS, kV, kA, and kG from real data. <a href="13b-sysid.html">Lesson 13.1</a> walks through it step by step.</p>
+<p><strong>For motors you haven't built yet:</strong> WPILib's <code>DCMotor</code> models (like <code>DCMotor.getKrakenX60(1)</code>) and online calculators like ReCalc can estimate kV and kA from the motor, gear ratio, and load.</p>
+<h3 id="tuning-with-feedforward">Tuning with feedforward<a class="headerlink" href="#tuning-with-feedforward" title="Permanent link">#</a></h3>
+<ol>
+<li>Set kP, kI, and kD to 0.</li>
+<li>Set the feedforward gains (from SysId, or by hand).</li>
+<li>Run the mechanism. It should get <strong>close</strong> to the target with no PID at all.</li>
+<li>Add a small kP to remove what's left. It'll be much smaller than your PID-only kP.</li>
+<li>Add kD only if it overshoots.</li>
+</ol>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<p>This is WPILib's vertical arm simulator, with <strong>feedforward and feedback</strong> together. Click a point around the arm's circle to set a new angle, or click and drag for smooth motion.</p>
+<div class="viz-div" id="lesson_arm_container">
+<div>
+<div class="col" id="lesson_arm_plotVals"></div>
+<div class="col" id="lesson_arm_plotVolts"></div>
+</div>
+<div class="flex-grid">
+<div class="col" id="lesson_arm_viz"></div>
+<div id="lesson_arm_ctrls"></div>
+</div>
+<script>new VerticalArmPIDF("lesson_arm", "both");</script>
+</div>
+
+<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html">Tuning a Vertical Arm Position Controller</a> (CC BY 4.0).</p>
+
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set every PID gain to 0. Set <strong>kG</strong> until the arm holds still at horizontal.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Move the setpoint to other angles. Does the arm stay close with feedforward alone?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a small kP to remove the remaining error</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Compare with your PID-only gains from Lesson 12. How much smaller is kP now? How much better does it hold?</li>
+</ul>
+<p>In code:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Calculate by hand the feedforward voltage for kS = 0.25, kV = 0.1, at 40 rot/s</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>ArmFeedforward</code> to your arm from Lesson 12, using <code>setVoltage()</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In the <strong>ArmSimulation</strong> example, find kG by raising the voltage until the arm holds level</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the main difference between feedforward and feedback?</summary>
+<p>Feedforward predicts the output from a model <strong>before</strong> error appears. Feedback (PID) reacts to error <strong>after</strong> it appears.</p>
+</details>
+<details class="question">
+<summary>Why does a PID-only arm sag a little below its target?</summary>
+<p>PID only produces output when there's error. Holding the arm up takes output, so some error has to exist to produce it.</p>
+</details>
+<details class="question">
+<summary>Why does an arm use <code>cos(θ)</code> for gravity but an elevator doesn't?</summary>
+<p>Gravity's torque on an arm depends on its angle: maximum when horizontal, zero when vertical. An elevator lifts the same weight at every height.</p>
+</details>
+<details class="question">
+<summary>kS = 0.3 V and kV = 0.15 V per (m/s). How many volts does feedforward give at 2 m/s?</summary>
+<p>0.3 + 0.15 × 2 = <strong>0.6 V</strong></p>
+</details>
+<details class="question">
+<summary>Why is <code>setVoltage()</code> better than <code>set()</code> with feedforward?</summary>
+<p>Feedforward gains are in volts. <code>setVoltage()</code> delivers that voltage no matter how much the battery has sagged, so the same command produces the same motion all match.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="12-pid.html"><span>Previous</span>12. PID Feedback</a><a class="pager-next" href="13b-sysid.html"><span>Next</span>13.1 Characterizing with SysId</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

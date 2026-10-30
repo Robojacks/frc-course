@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5. Pneumatics | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section" open><summary>Hardware</summary><ul><li><a href="04-electronics.html">4. Electronics</a></li><li><a href="04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="04d-sensors.html">4.3 Sensors</a></li><li><a href="05-pneumatics.html" class="current" aria-current="page">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="5-pneumatics">5. Pneumatics<a class="headerlink" href="#5-pneumatics" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Pneumatics use <strong>compressed air</strong> to push and pull pistons. They're great for mechanisms that only need two positions, moved fast and with force:</p>
+<ul>
+<li>a claw: open or closed</li>
+<li>an intake: deployed or stowed</li>
+<li>a gearbox: high gear or low gear</li>
+<li>a climber hook: extended or retracted</li>
+</ul>
+<p>Pneumatics are simple to control in code (usually just "extend" or "retract"), but they come with their own hardware, safety rules, and failure modes. Many teams have moved away from pneumatics in recent years, but they still show up often, so you should know how they work.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/wiring-pneumatics-ph.html">Wiring Pneumatics - REV Pneumatic Hub</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/pneumatics/index.html">Pneumatics APIs</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="the-air-path">The air path<a class="headerlink" href="#the-air-path" title="Permanent link">#</a></h3>
+<div class="mermaid">flowchart LR
+    C[Compressor] --&gt; T[Storage tanks&lt;br/&gt;up to ~120 psi]
+    T --&gt; R[Regulator&lt;br/&gt;~60 psi working]
+    R --&gt; S[Solenoid valve]
+    S --&gt; Cy[Cylinder]
+    PH[Pneumatic Hub / PCM] -. controls .-&gt; C
+    PH -. controls .-&gt; S
+    PS[Pressure switch /&lt;br/&gt;sensor] -. reports to .-&gt; PH</div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Compressor</strong></td>
+<td>An electric pump that fills the tanks with air</td>
+</tr>
+<tr>
+<td><strong>Storage tanks</strong></td>
+<td>Hold a supply of air so mechanisms can move many times between refills</td>
+</tr>
+<tr>
+<td><strong>Pressure switch or analog pressure sensor</strong></td>
+<td>Tells the control module when the tanks are full so the compressor stops</td>
+</tr>
+<tr>
+<td><strong>Relief valve</strong></td>
+<td>Vents air automatically if the pressure gets dangerously high. A required safety part.</td>
+</tr>
+<tr>
+<td><strong>Regulator</strong></td>
+<td>Lowers tank pressure to a steady, lower working pressure for the mechanisms</td>
+</tr>
+<tr>
+<td><strong>Gauges</strong></td>
+<td>Show the stored and working pressure so you can see them at a glance</td>
+</tr>
+<tr>
+<td><strong>Solenoid valve</strong></td>
+<td>An electrically controlled valve. <strong>This is what your code switches.</strong></td>
+</tr>
+<tr>
+<td><strong>Cylinder (piston)</strong></td>
+<td>Moves in or out when air is sent to one side or the other</td>
+</tr>
+<tr>
+<td><strong>Pneumatic Hub (REV) or PCM (CTRE)</strong></td>
+<td>The control module: runs the compressor and powers the solenoids, connected to the roboRIO over CAN</td>
+</tr>
+<tr>
+<td><strong>Dump (vent) valve</strong></td>
+<td>A manual valve that releases all the stored air</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-two-pressures">Why two pressures?<a class="headerlink" href="#why-two-pressures" title="Permanent link">#</a></h3>
+<p>The tanks store air at high pressure (up to about 120 psi) so they hold a lot of it. The mechanisms run at a lower working pressure (about 60 psi) from the regulator, which keeps the force steady and stays within the rules. As the tanks drain during a match, the working pressure stays the same until the tanks drop below it.</p>
+<div class="admonition danger">
+<p class="admonition-title">Safety first</p>
+<p>Stored air is stored energy, and a cylinder can move with real force without warning.</p>
+<ul>
+<li>Always <strong>open the dump valve</strong> and check that the gauges read zero before touching fittings, tubing, or cylinders.</li>
+<li>Wear safety glasses around pressurized systems.</li>
+<li>Keep hands out of a pneumatic mechanism's path, even when the robot is disabled. A valve can still be holding air in the cylinder.</li>
+</ul>
+</div>
+<h3 id="how-a-cylinder-moves">How a cylinder moves<a class="headerlink" href="#how-a-cylinder-moves" title="Permanent link">#</a></h3>
+<p>A double-acting cylinder has two ports. Air into one side pushes the piston <strong>out</strong>; air into the other side pulls it <strong>in</strong>. The solenoid valve decides which side gets air.</p>
+<p><strong>Single vs. double solenoids:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Single solenoid</th>
+<th>Double solenoid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Control wires</td>
+<td>One channel</td>
+<td>Two channels (forward and reverse)</td>
+</tr>
+<tr>
+<td>Powered</td>
+<td>Moves to one position</td>
+<td>Forward channel: one way. Reverse channel: the other way.</td>
+</tr>
+<tr>
+<td>Unpowered</td>
+<td>A spring returns the valve to its rest position</td>
+<td>Usually stays wherever it was last set</td>
+</tr>
+<tr>
+<td>When the robot disables</td>
+<td>Returns to rest position</td>
+<td>Usually holds its last position</td>
+</tr>
+<tr>
+<td>Good for</td>
+<td>Mechanisms with a clear safe position</td>
+<td>Mechanisms that should hold position when disabled</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">What happens when the robot disables matters</p>
+<p>When the robot is disabled at the end of a match, all solenoid outputs turn off. A single-solenoid intake springs back to its rest position, which might drop a game piece. A double-solenoid claw usually stays where it was. Your mechanism team should choose the valve with this in mind.</p>
+</div>
+<h3 id="code-it">Code it<a class="headerlink" href="#code-it" title="Permanent link">#</a></h3>
+<p>WPILib needs to know which control module you have. Use <code>PneumaticsModuleType.REVPH</code> for a REV Pneumatic Hub or <code>PneumaticsModuleType.CTREPCM</code> for a CTRE PCM.</p>
+<p><strong>A double solenoid:</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.DoubleSolenoid</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.PneumaticsModuleType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Claw</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Forward channel 0, reverse channel 1 on the Pneumatic Hub</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSolenoid</span><span class="w"> </span><span class="n">piston</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">DoubleSolenoid</span><span class="p">(</span><span class="n">PneumaticsModuleType</span><span class="p">.</span><span class="na">REVPH</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">open</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">piston</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">DoubleSolenoid</span><span class="p">.</span><span class="na">Value</span><span class="p">.</span><span class="na">kForward</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">close</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">piston</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">DoubleSolenoid</span><span class="p">.</span><span class="na">Value</span><span class="p">.</span><span class="na">kReverse</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">toggle</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="n">piston</span><span class="p">::</span><span class="n">toggle</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></p>
+<table>
+<thead>
+<tr>
+<th><code>DoubleSolenoid.Value</code></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kForward</code></td>
+<td>Power the forward channel</td>
+</tr>
+<tr>
+<td><code>kReverse</code></td>
+<td>Power the reverse channel</td>
+</tr>
+<tr>
+<td><code>kOff</code></td>
+<td>Power neither. The valve usually stays where it was.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>A single solenoid:</strong>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Solenoid</span><span class="w"> </span><span class="n">intakeDeploy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Solenoid</span><span class="p">(</span><span class="n">PneumaticsModuleType</span><span class="p">.</span><span class="na">REVPH</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">deploy</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">intakeDeploy</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="kc">true</span><span class="p">));</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">stow</span><span class="p">()</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">intakeDeploy</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="kc">false</span><span class="p">));</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div></p>
+<p><strong>Bind them to buttons</strong> in <code>RobotContainer</code>:
+<div class="highlight"><pre><span></span><code><span class="n">driver</span><span class="p">.</span><span class="na">leftBumper</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">claw</span><span class="p">.</span><span class="na">open</span><span class="p">());</span>
+<span class="n">driver</span><span class="p">.</span><span class="na">rightBumper</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">claw</span><span class="p">.</span><span class="na">close</span><span class="p">());</span>
+</code></pre></div></p>
+<p>Each command is <code>runOnce</code> because setting a solenoid is instant: it sends the signal and is done. The air does the rest.</p>
+<h3 id="the-compressor">The compressor<a class="headerlink" href="#the-compressor" title="Permanent link">#</a></h3>
+<p>The compressor runs automatically by default whenever the robot is enabled and the tanks aren't full. You can create a <code>Compressor</code> object to check it or change its behavior:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Compressor</span><span class="w"> </span><span class="n">compressor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Compressor</span><span class="p">(</span><span class="n">PneumaticsModuleType</span><span class="p">.</span><span class="na">REVPH</span><span class="p">);</span>
+
+<span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putBoolean</span><span class="p">(</span><span class="s">"Pneumatics/Compressor Running"</span><span class="p">,</span><span class="w"> </span><span class="n">compressor</span><span class="p">.</span><span class="na">isEnabled</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Pneumatics/Pressure (psi)"</span><span class="p">,</span><span class="w"> </span><span class="n">compressor</span><span class="p">.</span><span class="na">getPressure</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>getPressure()</code> only works if the robot has an <strong>analog pressure sensor</strong> wired to the Pneumatic Hub.</p>
+<div class="admonition tip">
+<p class="admonition-title">Turn the compressor off when you need power</p>
+<p>The compressor pulls a lot of current. Some teams disable it during climbing or other high-power moments to avoid brownouts: <code>compressor.disable()</code>, then <code>compressor.enableDigital()</code> (or <code>enableAnalog(min, max)</code> with a pressure sensor) afterward.</p>
+</div>
+<h3 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nothing moves, compressor never runs</td>
+<td>Pneumatic Hub not powered, wrong module type in code, or its CAN ID doesn't match</td>
+</tr>
+<tr>
+<td>Compressor runs but pressure never builds</td>
+<td>A leak. Listen for hissing, check fittings, or a tank or the dump valve is open.</td>
+</tr>
+<tr>
+<td>Mechanism moves the wrong direction</td>
+<td>Tubes swapped on the cylinder, or forward and reverse channels swapped in code</td>
+</tr>
+<tr>
+<td>Mechanism moves slowly or weakly</td>
+<td>Working pressure too low, or the tanks are nearly empty</td>
+</tr>
+<tr>
+<td>Solenoid clicks but the cylinder doesn't move</td>
+<td>No air reaching the valve, or a kinked or disconnected tube</td>
+</tr>
+</tbody>
+</table>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<p>With a mentor, on a robot with pneumatics:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find each part in the table: compressor, tanks, relief valve, regulator, gauges, solenoids, cylinders, dump valve</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Trace the air from the compressor to one cylinder</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find which solenoid channels your team's mechanism uses</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Write <code>open()</code> and <code>close()</code> commands and bind them to two buttons</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Put the compressor status on the dashboard and watch it turn off when the tanks are full</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Vent the system with the dump valve and confirm both gauges read zero</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why is there a regulator between the tanks and the solenoids?</summary>
+<p>The tanks store air at high pressure for capacity, while mechanisms run at a lower, steady working pressure. The regulator steps it down.</p>
+</details>
+<details class="question">
+<summary>Why do solenoid commands use <code>runOnce</code> instead of <code>run</code>?</summary>
+<p>Setting a solenoid is a single, instant action. Once the valve is switched, there's nothing more for the command to do every loop.</p>
+</details>
+<details class="question">
+<summary>A single-solenoid intake is deployed when the match ends. What happens when the robot disables?</summary>
+<p>The solenoid loses power and its spring returns it to the rest position, so the intake moves to wherever that is, probably stowed.</p>
+</details>
+<details class="question">
+<summary>The compressor runs constantly and pressure never reaches the target. What's the most likely problem?</summary>
+<p>A leak somewhere in the system, or the dump valve left open.</p>
+</details>
+<details class="question">
+<summary>What must you do before touching a cylinder or fitting?</summary>
+<p>Open the dump valve and confirm both gauges read zero.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="04d-sensors.html"><span>Previous</span>4.3 Sensors</a><a class="pager-next" href="../robot-code/06-robot-program.html"><span>Next</span>6. How a Robot Program Runs</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

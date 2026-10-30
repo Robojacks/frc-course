@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7.1 How the Command Scheduler Works | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section" open><summary>Robot Code</summary><ul><li><a href="06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="07-command-based.html">7. Command-Based Programming</a></li><li><a href="07b-scheduler.html" class="current" aria-current="page">7.1 How the Command Scheduler Works</a></li><li><a href="08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="71-how-the-command-scheduler-works">7.1 How the Command Scheduler Works<a class="headerlink" href="#71-how-the-command-scheduler-works" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>In <a href="07-command-based.html">Lesson 7</a> you bound a button to a command and it "just worked." That's the <strong>command scheduler</strong> doing its job. Most confusing command-based bugs come from not knowing what the scheduler does:</p>
+<ul>
+<li>a command that never stops</li>
+<li>a command that stops the moment it starts</li>
+<li>a button that does nothing</li>
+<li>two mechanisms fighting each other</li>
+</ul>
+<p>Once you can picture what the scheduler does every 20 ms, you can predict exactly what your robot will do, and debugging gets much easier.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/command-scheduler.html">The Command Scheduler</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/commands.html">Commands</a>, especially the command lifecycle</li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/binding-commands-to-triggers.html">Binding Commands to Triggers</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html">Command Compositions</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="the-scheduler-is-one-object-run-once-per-loop">The scheduler is one object, run once per loop<a class="headerlink" href="#the-scheduler-is-one-object-run-once-per-loop" title="Permanent link">#</a></h3>
+<p>There is exactly <strong>one</strong> scheduler in your robot program: <code>CommandScheduler.getInstance()</code>. It doesn't run on its own. The Command Robot template calls it from <code>Robot.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">robotPeriodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">run</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Remember the 20 ms loop from <a href="06-robot-program.html">Lesson 6</a>. Every time <code>robotPeriodic()</code> runs, the scheduler gets <strong>one turn</strong>. Everything it does happens inside that turn, on one thread, one step at a time. Nothing happens "in the background."</p>
+<div class="admonition warning">
+<p class="admonition-title">If you delete that line, nothing works</p>
+<p>No commands run, no buttons respond, and no subsystem <code>periodic()</code> methods are called. The robot code still builds and deploys without errors, which makes this hard to spot.</p>
+</div>
+<h3 id="what-happens-in-one-run">What happens in one <code>run()</code><a class="headerlink" href="#what-happens-in-one-run" title="Permanent link">#</a></h3>
+<p>Every 20 ms, the scheduler does these steps, in this order:</p>
+<div class="mermaid">flowchart TD
+    A["1. Run every subsystem's periodic()"] --&gt; B["2. Check every trigger&lt;br/&gt;(buttons, sensors, conditions)"]
+    B --&gt; C["3. Schedule or cancel commands&lt;br/&gt;based on those triggers"]
+    C --&gt; D["4. For each running command:&lt;br/&gt;execute(), then isFinished()"]
+    D --&gt; E["5. End finished commands:&lt;br/&gt;end(false)"]
+    E --&gt; F["6. Start default commands for&lt;br/&gt;subsystems with nothing running"]</div>
+<p>Here's the same sequence as drawn in the WPILib docs:</p>
+<p><img alt="Flowchart of one scheduler run: subsystem periodic, schedule commands from triggers, then for each command initialize, execute, isFinished, and end" src="../assets/wpilib/scheduler-run-sequence.drawio.svg" /></p>
+<p class="credit">One run of the scheduler. From the WPILib docs source, <a href="https://github.com/wpilibsuite/frc-docs/blob/stable/source/docs/software/commandbased/diagrams/scheduler-run-sequence.drawio.svg">scheduler-run-sequence.drawio.svg</a> (CC BY 4.0).</p>
+
+<ol>
+<li><strong>Subsystem <code>periodic()</code> methods run.</strong> Every registered subsystem gets its <code>periodic()</code> called, whether or not a command is using it. This is the place for telemetry and reading sensors.</li>
+<li><strong>Triggers are checked.</strong> Every button binding and other trigger you set up in <code>configureBindings()</code> is checked: is the A button pressed right now? Was it pressed last loop?</li>
+<li><strong>Commands are scheduled or canceled.</strong> If a trigger changed (button just pressed, just released), the scheduler starts or cancels the bound command.</li>
+<li><strong>Running commands run.</strong> For each scheduled command, it calls <code>execute()</code>, then asks <code>isFinished()</code>.</li>
+<li><strong>Finished commands end.</strong> Any command that returned <code>true</code> from <code>isFinished()</code> gets <code>end(false)</code> called and is removed.</li>
+<li><strong>Default commands start.</strong> Any subsystem that now has <strong>no</strong> command using it gets its default command scheduled.</li>
+</ol>
+<p>Then <code>run()</code> returns, the loop finishes, and 20 ms later it all happens again.</p>
+<h3 id="the-life-of-a-command">The life of a command<a class="headerlink" href="#the-life-of-a-command" title="Permanent link">#</a></h3>
+<p>Every command has four methods. The scheduler, not you, decides when each one is called.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>When the scheduler calls it</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>initialize()</code></td>
+<td><strong>Once</strong>, when the command is scheduled</td>
+<td>Reset a timer, reset a PID controller, set a target</td>
+</tr>
+<tr>
+<td><code>execute()</code></td>
+<td><strong>Every loop</strong> while it's running</td>
+<td>Set motor outputs, read sensors</td>
+</tr>
+<tr>
+<td><code>isFinished()</code></td>
+<td><strong>Every loop</strong>, right after <code>execute()</code></td>
+<td>Return <code>true</code> when the job is done</td>
+</tr>
+<tr>
+<td><code>end(boolean interrupted)</code></td>
+<td><strong>Once</strong>, when it stops</td>
+<td>Stop motors. <code>interrupted</code> is <code>true</code> if it was canceled instead of finishing</td>
+</tr>
+</tbody>
+</table>
+<div class="mermaid">stateDiagram-v2
+    [*] --&gt; Scheduled: schedule()
+    Scheduled --&gt; Running: initialize()
+    Running --&gt; Running: execute() then isFinished() == false
+    Running --&gt; Ended: isFinished() == true → end(false)
+    Running --&gt; Ended: canceled or interrupted → end(true)
+    Ended --&gt; [*]</div>
+<p>Here's a command written out longhand so you can see all four:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">SpinUpShooter</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Shooter</span><span class="w"> </span><span class="n">shooter</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">targetRpm</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">SpinUpShooter</span><span class="p">(</span><span class="n">Shooter</span><span class="w"> </span><span class="n">shooter</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">targetRpm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">shooter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shooter</span><span class="p">;</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">targetRpm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">targetRpm</span><span class="p">;</span>
+<span class="w">        </span><span class="n">addRequirements</span><span class="p">(</span><span class="n">shooter</span><span class="p">);</span><span class="w">   </span><span class="c1">// "I need the shooter" (see below)</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">initialize</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">shooter</span><span class="p">.</span><span class="na">setTarget</span><span class="p">(</span><span class="n">targetRpm</span><span class="p">);</span><span class="w">          </span><span class="c1">// runs once</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">execute</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">shooter</span><span class="p">.</span><span class="na">runControlLoop</span><span class="p">();</span><span class="w">              </span><span class="c1">// runs every 20 ms</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isFinished</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">shooter</span><span class="p">.</span><span class="na">isAtSpeed</span><span class="p">();</span><span class="w">            </span><span class="c1">// checked every 20 ms</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">end</span><span class="p">(</span><span class="kt">boolean</span><span class="w"> </span><span class="n">interrupted</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">interrupted</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">shooter</span><span class="p">.</span><span class="na">stop</span><span class="p">();</span><span class="w">                    </span><span class="c1">// only stop if we were canceled</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The shortcut factories from Lesson 7 build these same four methods for you:</p>
+<table>
+<thead>
+<tr>
+<th>Factory</th>
+<th><code>initialize()</code></th>
+<th><code>execute()</code></th>
+<th><code>isFinished()</code></th>
+<th><code>end()</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>runOnce(a)</code></td>
+<td><code>a</code></td>
+<td>nothing</td>
+<td><code>true</code> right away</td>
+<td>nothing</td>
+</tr>
+<tr>
+<td><code>run(a)</code></td>
+<td>nothing</td>
+<td><code>a</code></td>
+<td>never finishes</td>
+<td>nothing</td>
+</tr>
+<tr>
+<td><code>startEnd(a, b)</code></td>
+<td><code>a</code></td>
+<td>nothing</td>
+<td>never finishes</td>
+<td><code>b</code></td>
+</tr>
+<tr>
+<td><code>runEnd(a, b)</code></td>
+<td>nothing</td>
+<td><code>a</code></td>
+<td>never finishes</td>
+<td><code>b</code></td>
+</tr>
+</tbody>
+</table>
+<p>Most of these never finish on their own. They run until a button release, a timeout, or another command interrupts them. Add <code>.until(condition)</code> or <code>.withTimeout(seconds)</code> when you want one to stop by itself.</p>
+<h3 id="requirements-one-command-per-subsystem">Requirements: one command per subsystem<a class="headerlink" href="#requirements-one-command-per-subsystem" title="Permanent link">#</a></h3>
+<p>A <strong>requirement</strong> is a command saying "I'm using this subsystem." The scheduler enforces a simple rule:</p>
+<blockquote>
+<p><strong>Only one running command may require a given subsystem at a time.</strong></p>
+</blockquote>
+<p>This is what stops two commands from setting the same motor to different speeds in the same loop. Factories made from a subsystem (<code>intake.run(...)</code>) require that subsystem automatically. A longhand command calls <code>addRequirements(...)</code> in its constructor.</p>
+<p>When you schedule a command whose requirements are already in use, the scheduler has to pick one:</p>
+<ul>
+<li><strong>By default, the new command wins.</strong> The old command is interrupted: its <code>end(true)</code> runs, then the new one starts.</li>
+<li><strong>A command can refuse to be interrupted.</strong> If the running command was built with <code>.withInterruptBehavior(InterruptionBehavior.kCancelIncoming)</code>, the <strong>new</strong> command is ignored instead.</li>
+</ul>
+<p>Here's how the scheduler decides, as a flowchart:</p>
+<p><img alt="Flowchart of scheduling a command: check if already scheduled, check requirements, interrupt conflicting commands if they're interruptible" src="../assets/wpilib/scheduler.drawio.svg" /></p>
+<p class="credit">What happens when a command is scheduled. From the WPILib docs source, <a href="https://github.com/wpilibsuite/frc-docs/blob/stable/source/docs/software/commandbased/diagrams/scheduler.drawio.svg">scheduler.drawio.svg</a> (CC BY 4.0).</p>
+
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: What schedule() checks</p>
+<p>When a command is scheduled, the scheduler:</p>
+<ol>
+<li>Checks that the command isn't part of a composition.</li>
+<li>Does nothing if the scheduler is disabled, the command is already running, or the robot is disabled and the command isn't allowed to run while disabled.</li>
+<li>If the command's requirements are in use:<ul>
+<li>If all the conflicting commands can be interrupted, cancels them.</li>
+<li>If not, doesn't schedule the new command.</li>
+</ul>
+</li>
+<li>Calls the command's <code>initialize()</code>.</li>
+</ol>
+<p>Users <strong>must</strong> call <code>CommandScheduler.getInstance().run()</code> from <code>robotPeriodic()</code>. If this isn't done, the scheduler never runs, and the command framework won't work. The template already includes this call.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/command-scheduler.html">The Command Scheduler</a>, CC BY 4.0.</em></p>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Forgetting a requirement</p>
+<p>If a command uses a motor but doesn't require its subsystem, the scheduler can't protect it. Two commands will both run and fight over the motor every loop, and the mechanism twitches or does whichever one ran last. Using the subsystem's own factories avoids this.</p>
+</div>
+<h3 id="default-commands">Default commands<a class="headerlink" href="#default-commands" title="Permanent link">#</a></h3>
+<p>A <strong>default command</strong> runs whenever nothing else requires its subsystem. The drivetrain's joystick command from <a href="../project/10-teleop.html">Lesson 10</a> is the classic example.</p>
+<ul>
+<li>When another command takes the subsystem, the default command is <strong>interrupted</strong>.</li>
+<li>When that command ends, the scheduler <strong>restarts</strong> the default command in step 6 of the same loop.</li>
+<li>A default command must require its own subsystem, and it shouldn't finish on its own. If it finishes, the scheduler just starts it again the next loop.</li>
+</ul>
+<h3 id="how-triggers-turn-button-presses-into-commands">How triggers turn button presses into commands<a class="headerlink" href="#how-triggers-turn-button-presses-into-commands" title="Permanent link">#</a></h3>
+<p>Triggers are checked every loop (step 2). The scheduler remembers whether each one was true <strong>last</strong> loop, so it can tell a press from a hold:</p>
+<table>
+<thead>
+<tr>
+<th>Binding</th>
+<th>Starts the command</th>
+<th>Cancels the command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>onTrue(cmd)</code></td>
+<td>When the button goes from released to pressed</td>
+<td>Never. It runs until it finishes.</td>
+</tr>
+<tr>
+<td><code>whileTrue(cmd)</code></td>
+<td>When the button is pressed</td>
+<td>When the button is released</td>
+</tr>
+<tr>
+<td><code>onFalse(cmd)</code></td>
+<td>When the button is released</td>
+<td>Never</td>
+</tr>
+<tr>
+<td><code>toggleOnTrue(cmd)</code></td>
+<td>First press</td>
+<td>Second press</td>
+</tr>
+</tbody>
+</table>
+<p>Triggers aren't only buttons. Any <code>BooleanSupplier</code> can be a trigger:</p>
+<div class="highlight"><pre><span></span><code><span class="k">new</span><span class="w"> </span><span class="n">Trigger</span><span class="p">(</span><span class="n">intake</span><span class="p">::</span><span class="n">hasGamePiece</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="na">onTrue</span><span class="p">(</span><span class="n">leds</span><span class="p">.</span><span class="na">flashGreen</span><span class="p">().</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">1.0</span><span class="p">));</span>
+</code></pre></div>
+<h3 id="walk-through-it-loop-by-loop">Walk through it loop by loop<a class="headerlink" href="#walk-through-it-loop-by-loop" title="Permanent link">#</a></h3>
+<p>Here's exactly what happens when a driver holds A, which is bound with <code>driver.a().whileTrue(intake.runIntake())</code>, while the intake has a default command that holds the rollers still.</p>
+<table>
+<thead>
+<tr>
+<th>Loop</th>
+<th>Driver</th>
+<th>What the scheduler does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Not pressing A</td>
+<td>Intake default command runs its <code>execute()</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Presses A</strong></td>
+<td>Trigger sees a new press. <code>runIntake()</code> requires the intake, so the default command is interrupted: <code>end(true)</code>. <code>runIntake()</code> is scheduled: <code>initialize()</code> sets rollers to 0.75</td>
+</tr>
+<tr>
+<td>3 to 40</td>
+<td>Holding A</td>
+<td><code>runIntake()</code> keeps running. Its <code>isFinished()</code> is always false</td>
+</tr>
+<tr>
+<td>41</td>
+<td><strong>Releases A</strong></td>
+<td>Trigger sees the release and cancels <code>runIntake()</code>: <code>end(true)</code> sets rollers to 0. The intake is free, so the default command starts again</td>
+</tr>
+<tr>
+<td>42</td>
+<td>Not pressing A</td>
+<td>Default command runs</td>
+</tr>
+</tbody>
+</table>
+<p>The driver held the button for about 40 loops × 20 ms = 0.8 seconds.</p>
+<h3 id="compositions-and-the-scheduler">Compositions and the scheduler<a class="headerlink" href="#compositions-and-the-scheduler" title="Permanent link">#</a></h3>
+<p>When you combine commands, such as <code>a.andThen(b)</code>, the scheduler sees <strong>one</strong> command: the composition. It requires every subsystem that <code>a</code> or <code>b</code> needs, for its whole run. That has two consequences that surprise people:</p>
+<ol>
+<li><strong>A sequence holds every subsystem, the whole time.</strong> In <code>drive.andThen(shoot)</code>, the shooter is reserved even while the robot is still driving, so the shooter's default command won't run.</li>
+<li><strong>A command inside a composition belongs to it.</strong> You can't schedule it separately or put the same command object in two compositions. Build a fresh one each time, which is one reason factory methods that return a new command are the standard pattern.</li>
+</ol>
+<h3 id="disabled-mode">Disabled mode<a class="headerlink" href="#disabled-mode" title="Permanent link">#</a></h3>
+<p>When the robot is disabled, the scheduler still runs every loop, but it <strong>cancels</strong> running commands, and it won't start new ones unless they're marked <code>.ignoringDisable(true)</code>. Use that for things that are safe when disabled, like LEDs or resetting a sensor.</p>
+<h3 id="seeing-the-scheduler-work">Seeing the scheduler work<a class="headerlink" href="#seeing-the-scheduler-work" title="Permanent link">#</a></h3>
+<p><strong>On the dashboard.</strong> Add this to <code>RobotContainer</code>, then open SmartDashboard, Shuffleboard, or Elastic:
+<div class="highlight"><pre><span></span><code><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span>
+</code></pre></div>
+It lists every running command, live. You can also put a subsystem on the dashboard (<code>SmartDashboard.putData(intake)</code>) to see which command currently owns it.</p>
+<p><strong>In the console.</strong> The scheduler can call your code whenever a command starts, gets interrupted, or finishes:
+<div class="highlight"><pre><span></span><code><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">onCommandInitialize</span><span class="p">(</span>
+<span class="w">    </span><span class="n">cmd</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"START  "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">cmd</span><span class="p">.</span><span class="na">getName</span><span class="p">()));</span>
+<span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">onCommandInterrupt</span><span class="p">(</span>
+<span class="w">    </span><span class="n">cmd</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"CANCEL "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">cmd</span><span class="p">.</span><span class="na">getName</span><span class="p">()));</span>
+<span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">onCommandFinish</span><span class="p">(</span>
+<span class="w">    </span><span class="n">cmd</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"DONE   "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">cmd</span><span class="p">.</span><span class="na">getName</span><span class="p">()));</span>
+</code></pre></div></p>
+<p>Give commands readable names with <code>.withName("Intake")</code>.</p>
+<p><strong>Loop overruns.</strong> If the scheduler's turn takes longer than 20 ms, you'll see a <em>loop overrun</em> warning that lists how long each step took: each subsystem's <code>periodic()</code>, and each command's <code>execute()</code>. The slow one is your culprit, usually blocking code (Lesson 6) or slow logging.</p>
+<h3 id="common-scheduler-bugs">Common scheduler bugs<a class="headerlink" href="#common-scheduler-bugs" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nothing responds at all</td>
+<td><code>CommandScheduler.getInstance().run()</code> missing from <code>robotPeriodic()</code></td>
+<td>Put it back</td>
+</tr>
+<tr>
+<td>Command ends the instant it starts</td>
+<td><code>isFinished()</code> is already <code>true</code> (sensor already "at target," or <code>runOnce</code> used by mistake)</td>
+<td>Check the condition. Use <code>run()</code> for something that should keep going.</td>
+</tr>
+<tr>
+<td>Command never ends</td>
+<td><code>run()</code>/<code>startEnd()</code> with no <code>until</code>, timeout, or <code>whileTrue</code> binding</td>
+<td>Add an end condition</td>
+</tr>
+<tr>
+<td>Mechanism twitches between two speeds</td>
+<td>Two commands use the motor and one doesn't require the subsystem</td>
+<td>Add the requirement, or use the subsystem's factories</td>
+</tr>
+<tr>
+<td>Default command doesn't come back</td>
+<td>Another command (often a sequence) still requires the subsystem</td>
+<td>Check what's running on the dashboard</td>
+</tr>
+<tr>
+<td>Error about a command already in a composition</td>
+<td>Same command object used twice</td>
+<td>Call the factory again to make a new command</td>
+</tr>
+<tr>
+<td>Command restarts constantly</td>
+<td>Scheduling it every loop from <code>periodic()</code></td>
+<td>Bind it to a trigger instead</td>
+</tr>
+</tbody>
+</table>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add the three <code>onCommand...</code> print hooks and <code>SmartDashboard.putData(CommandScheduler.getInstance())</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In simulation, press and hold your intake button. Match what prints to the loop-by-loop table above.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Give the intake a default command that sets the motor to 0. Watch it get interrupted and come back.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change the intake binding from <code>whileTrue</code> to <code>onTrue</code>. What happens now when you release the button, and why?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Write the <code>SpinUpShooter</code> command longhand, then rewrite it with <code>runOnce</code>, <code>run</code>, and <code>.until()</code>. Both should behave the same.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Break it on purpose: make a command that sets the intake motor <strong>without</strong> requiring the intake, bind it to B, and press A and B together. Explain what you see.</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>In what order does the scheduler do its work each loop?</summary>
+<p>Subsystem <code>periodic()</code> methods, then triggers, then scheduling or canceling commands, then <code>execute()</code> and <code>isFinished()</code> for each running command, then ending finished commands, then starting default commands.</p>
+</details>
+<details class="question">
+<summary>What's the difference between <code>end(true)</code> and <code>end(false)</code>?</summary>
+<p><code>end(false)</code> means the command finished on its own because <code>isFinished()</code> returned true. <code>end(true)</code> means it was interrupted: canceled, its button released, or another command took its subsystem.</p>
+</details>
+<details class="question">
+<summary>A command is running on the arm. You schedule a different command that also requires the arm. What happens?</summary>
+<p>By default the running command is interrupted (<code>end(true)</code>) and the new one starts. If the running command was set to <code>kCancelIncoming</code>, the new command is ignored instead.</p>
+</details>
+<details class="question">
+<summary>Why does <code>drive.andThen(shoot)</code> stop the shooter's default command, even while driving?</summary>
+<p>A composition requires every subsystem any of its parts needs, for its whole run. The shooter is reserved from the first loop of the sequence.</p>
+</details>
+<details class="question">
+<summary>Your intake binding uses <code>onTrue(intake.runIntake())</code>. The driver taps A. When does the intake stop?</summary>
+<p>Never on its own. <code>runIntake()</code> doesn't finish and <code>onTrue</code> doesn't cancel on release, so it runs until something else requires the intake or the robot is disabled.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="07-command-based.html"><span>Previous</span>7. Command-Based Programming</a><a class="pager-next" href="08-sensors.html"><span>Next</span>8. Sensors &amp; Units</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

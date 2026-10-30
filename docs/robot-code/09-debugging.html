@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9. Testing, Debugging &amp; Simulation | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section" open><summary>Robot Code</summary><ul><li><a href="06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="07-command-based.html">7. Command-Based Programming</a></li><li><a href="07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="09-debugging.html" class="current" aria-current="page">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="9-testing-debugging-simulation">9. Testing, Debugging &amp; Simulation<a class="headerlink" href="#9-testing-debugging-simulation" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Robot time is scarce. Mechanical always needs the robot "for just one more hour," and at competition you get a few minutes between matches. Good programmers find most of their bugs <strong>before</strong> the robot is available, and fix the rest quickly when it is.</p>
+<p>This lesson covers three skills:</p>
+<ol>
+<li><strong>Seeing what your code is doing</strong> with dashboards and logs</li>
+<li><strong>Finding bugs</strong> with a step-by-step process instead of guessing</li>
+<li><strong>Simulating</strong> mechanisms so you can test without a robot</li>
+</ol>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/introduction.html">Robot Simulation Introduction</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/simulation-gui.html">Simulation GUI</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/physics-sim.html">Physics Simulation with WPILib</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/dashboards/glass/index.html">Glass</a>, <a href="https://frc-elastic.gitbook.io/docs">Elastic</a>, and <a href="https://docs.advantagescope.org/">AdvantageScope</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/telemetry/datalog.html">On-Robot Telemetry Recording (DataLog)</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="seeing-what-your-code-is-doing">Seeing what your code is doing<a class="headerlink" href="#seeing-what-your-code-is-doing" title="Permanent link">#</a></h3>
+<p>Your robot runs 50 loops a second, so you need a way to watch values change live.</p>
+<p><strong>Don't use <code>System.out.println</code> for live values.</strong> Fifty lines a second floods the console, and you can't read any of them.</p>
+<p><strong>Use NetworkTables through <code>SmartDashboard</code>.</strong> It sends each value to the dashboard and updates it in place:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Arm/Angle (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getAngleDegrees</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Arm/Target (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">targetDegrees</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Arm/Output (V)"</span><span class="p">,</span><span class="w"> </span><span class="n">lastVoltage</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putBoolean</span><span class="p">(</span><span class="s">"Arm/At Target"</span><span class="p">,</span><span class="w"> </span><span class="n">atTarget</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>A subsystem's <code>periodic()</code> runs every loop, which makes it the right place for telemetry.</p>
+<div class="admonition tip">
+<p class="admonition-title">Name values like folders</p>
+<p><code>"Arm/Angle (deg)"</code> groups every arm value under <strong>Arm</strong> on the dashboard, and the unit in parentheses means nobody has to guess.</p>
+</div>
+<p><strong>What to publish for any mechanism:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The sensor reading (position, velocity)</td>
+<td>Is the sensor working and pointing the right way?</td>
+</tr>
+<tr>
+<td>The target (setpoint)</td>
+<td>Is the code asking for what you think?</td>
+</tr>
+<tr>
+<td>The output (percent or volts)</td>
+<td>Is the code actually commanding the motor?</td>
+</tr>
+<tr>
+<td>Any state booleans (at target, has piece, at limit)</td>
+<td>Do your conditions flip when they should?</td>
+</tr>
+</tbody>
+</table>
+<p>With those four, you can usually tell in seconds whether a problem is the sensor, the logic, or the hardware.</p>
+<h3 id="dashboards">Dashboards<a class="headerlink" href="#dashboards" title="Permanent link">#</a></h3>
+<p>All of these read the same NetworkTables data, so you can switch freely:</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sim GUI</strong></td>
+<td>Quick checks during simulation</td>
+</tr>
+<tr>
+<td><strong>Glass</strong></td>
+<td>Plotting values live, viewing field and mechanism widgets</td>
+</tr>
+<tr>
+<td><strong>Elastic</strong></td>
+<td>A clean driver dashboard for matches</td>
+</tr>
+<tr>
+<td><strong>AdvantageScope</strong></td>
+<td>Graphs, 3D robot views, and replaying log files after a match</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Seeing commands on the dashboard:</strong>
+<div class="highlight"><pre><span></span><code><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span><span class="w"> </span><span class="c1">// what's running right now</span>
+<span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="n">intake</span><span class="p">);</span><span class="w">                         </span><span class="c1">// which command owns the intake</span>
+</code></pre></div></p>
+<h3 id="logging-what-happened-during-the-match">Logging: what happened during the match?<a class="headerlink" href="#logging-what-happened-during-the-match" title="Permanent link">#</a></h3>
+<p>NetworkTables shows what's happening <strong>now</strong>. Logs record <strong>everything</strong>, so you can look back after a match:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// In Robot's constructor:</span>
+<span class="n">DataLogManager</span><span class="p">.</span><span class="na">start</span><span class="p">();</span><span class="w">                          </span><span class="c1">// record NetworkTables and console output</span>
+<span class="n">DriverStation</span><span class="p">.</span><span class="na">startDataLog</span><span class="p">(</span><span class="n">DataLogManager</span><span class="p">.</span><span class="na">getLog</span><span class="p">());</span><span class="w"> </span><span class="c1">// also record joystick and mode data</span>
+</code></pre></div>
+<p>Logs are saved on the roboRIO (or a USB stick plugged into it). Download them with <strong>DataLogTool</strong> and open them in <strong>AdvantageScope</strong> to scrub through a match like a video, with every value graphed.</p>
+<div class="admonition info">
+<p class="admonition-title">When the robot did something weird in a match</p>
+<p>Don't guess. Pull the log, find the moment, and look at the target, the sensor, and the output side by side. The log also shows battery voltage and brownouts.</p>
+</div>
+<h3 id="a-debugging-process">A debugging process<a class="headerlink" href="#a-debugging-process" title="Permanent link">#</a></h3>
+<p>When something doesn't work, resist changing code at random. Work through the layers in order, from the most basic to the most specific:</p>
+<ol>
+<li><strong>Is the code running?</strong> Check the Driver Station: does it show robot code (green "Robot Code" light)? Any errors in the console?</li>
+<li><strong>Is the robot enabled, in the mode you think?</strong></li>
+<li><strong>Is the command scheduled?</strong> Check the scheduler on the dashboard. Did the button binding fire?</li>
+<li><strong>Is the code commanding output?</strong> Is the "Output" value on the dashboard what you expect?</li>
+<li><strong>Is the output reaching the motor?</strong> Check the motor controller's status light and its vendor tool.</li>
+<li><strong>Is it electrical?</strong> CAN IDs, breakers, unplugged wires (<a href="../hardware/04-electronics.html">Lesson 4</a>).</li>
+<li><strong>Is it mechanical?</strong> Jammed, inverted, belt slipping, a set screw loose.</li>
+</ol>
+<p>The first layer where something looks wrong is where the bug is.</p>
+<div class="admonition tip">
+<p class="admonition-title">Change one thing at a time</p>
+<p>If you change three things and it starts working, you don't know which one fixed it, and the other two might have caused a new bug you won't see until competition.</p>
+</div>
+<p><strong>Other habits that help:</strong></p>
+<ul>
+<li><strong>Reproduce it first.</strong> If you can't make the bug happen on purpose, you can't confirm you fixed it.</li>
+<li><strong>Read the whole error.</strong> The first line of a stack trace says what happened; the first line in <code>frc.robot</code> says where (<a href="../foundations/03-java.html">Lesson 3</a>).</li>
+<li><strong>Explain it out loud.</strong> Walk a teammate (or a rubber duck) through what the code does, line by line. You'll often spot the bug mid-sentence.</li>
+<li><strong>Check Git.</strong> If it worked yesterday, <code>git diff</code> or <code>git log</code> shows exactly what changed since then.</li>
+</ul>
+<h3 id="common-bugs-by-symptom">Common bugs by symptom<a class="headerlink" href="#common-bugs-by-symptom" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Check first</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nothing works at all</td>
+<td>Robot code light on the Driver Station, console errors</td>
+</tr>
+<tr>
+<td>One mechanism doesn't move</td>
+<td>Is its command running? Is the output nonzero? CAN ID and breaker.</td>
+</tr>
+<tr>
+<td>Mechanism moves the wrong way</td>
+<td>Motor inversion, or sensor direction</td>
+</tr>
+<tr>
+<td>Mechanism moves the right way, then runs away</td>
+<td>Sensor direction doesn't match motor direction, so feedback pushes the wrong way</td>
+</tr>
+<tr>
+<td>Works in sim, not on the robot</td>
+<td>Wrong ports or CAN IDs, unset vendor config, inversion</td>
+</tr>
+<tr>
+<td>Works sometimes</td>
+<td>Loose wire, low battery, or a race between two commands</td>
+</tr>
+<tr>
+<td>Robot stutters</td>
+<td>Loop overruns (Lesson 6) or brownouts (Lesson 4)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="simulation-testing-without-a-robot">Simulation: testing without a robot<a class="headerlink" href="#simulation-testing-without-a-robot" title="Permanent link">#</a></h3>
+<p>WPILib's simulation runs your real robot code on your laptop. By default, motors and sensors are fake but <strong>don't move</strong>: setting a motor to 0.5 shows 0.5 in the Sim GUI, but the encoder stays at 0.</p>
+<p><strong>Physics simulation</strong> fixes that. WPILib includes models of common mechanisms that calculate how they'd move:</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Simulates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DCMotorSim</code></td>
+<td>A motor spinning a load: flywheels, rollers</td>
+</tr>
+<tr>
+<td><code>FlywheelSim</code></td>
+<td>A flywheel</td>
+</tr>
+<tr>
+<td><code>ElevatorSim</code></td>
+<td>An elevator, with gravity</td>
+</tr>
+<tr>
+<td><code>SingleJointedArmSim</code></td>
+<td>An arm on one pivot, with gravity</td>
+</tr>
+<tr>
+<td><code>DifferentialDrivetrainSim</code></td>
+<td>A tank drivetrain</td>
+</tr>
+</tbody>
+</table>
+<p>You feed the model the motor's voltage, step it forward 20 ms, and write its position back into the simulated encoder:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SingleJointedArmSim</span><span class="w"> </span><span class="n">armSim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SingleJointedArmSim</span><span class="p">(</span>
+<span class="w">    </span><span class="n">DCMotor</span><span class="p">.</span><span class="na">getNEO</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w">           </span><span class="c1">// one NEO motor</span>
+<span class="w">    </span><span class="mf">60.0</span><span class="p">,</span><span class="w">                        </span><span class="c1">// gear ratio</span>
+<span class="w">    </span><span class="n">SingleJointedArmSim</span><span class="p">.</span><span class="na">estimateMOI</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span><span class="w"> </span><span class="mf">4.0</span><span class="p">),</span><span class="w"> </span><span class="c1">// arm length (m), mass (kg)</span>
+<span class="w">    </span><span class="mf">0.6</span><span class="p">,</span><span class="w">                         </span><span class="c1">// arm length (m)</span>
+<span class="w">    </span><span class="n">Units</span><span class="p">.</span><span class="na">degreesToRadians</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">),</span><span class="w"> </span><span class="c1">// min angle</span>
+<span class="w">    </span><span class="n">Units</span><span class="p">.</span><span class="na">degreesToRadians</span><span class="p">(</span><span class="mi">90</span><span class="p">),</span><span class="w">  </span><span class="c1">// max angle</span>
+<span class="w">    </span><span class="kc">true</span><span class="p">,</span><span class="w">                        </span><span class="c1">// simulate gravity</span>
+<span class="w">    </span><span class="n">Units</span><span class="p">.</span><span class="na">degreesToRadians</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">)</span><span class="w">  </span><span class="c1">// starting angle</span>
+<span class="p">);</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">EncoderSim</span><span class="w"> </span><span class="n">encoderSim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">EncoderSim</span><span class="p">(</span><span class="n">armEncoder</span><span class="p">);</span>
+
+<span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">simulationPeriodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">armSim</span><span class="p">.</span><span class="na">setInputVoltage</span><span class="p">(</span><span class="n">motor</span><span class="p">.</span><span class="na">get</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">RobotController</span><span class="p">.</span><span class="na">getBatteryVoltage</span><span class="p">());</span>
+<span class="w">    </span><span class="n">armSim</span><span class="p">.</span><span class="na">update</span><span class="p">(</span><span class="mf">0.020</span><span class="p">);</span><span class="w">                                      </span><span class="c1">// step 20 ms</span>
+<span class="w">    </span><span class="n">encoderSim</span><span class="p">.</span><span class="na">setDistance</span><span class="p">(</span><span class="n">Units</span><span class="p">.</span><span class="na">radiansToDegrees</span><span class="p">(</span><span class="n">armSim</span><span class="p">.</span><span class="na">getAngleRads</span><span class="p">()));</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>simulationPeriodic()</code> runs every loop, but only in simulation. It never runs on the real robot.</p>
+<div class="admonition tip">
+<p class="admonition-title">Start from an example</p>
+<p><span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Create a new project → Example</strong>, then pick <strong>ArmSimulation</strong>, <strong>ElevatorSimulation</strong>, or <strong>DriveDistanceOffboard</strong>. They're complete, working simulations to learn from and copy.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Simulation isn't the real robot</p>
+<p>Sim models are idealized: no friction you didn't model, no loose belts, perfect sensors. Use sim to catch logic bugs and get gains roughly right, then confirm on the real robot.</p>
+</div>
+<h3 id="visualizing-mechanisms">Visualizing mechanisms<a class="headerlink" href="#visualizing-mechanisms" title="Permanent link">#</a></h3>
+<p><code>Mechanism2d</code> draws a simple stick-figure of your arm or elevator on the dashboard, so you can see it move in simulation:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Mechanism2d</span><span class="w"> </span><span class="n">mech</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Mechanism2d</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MechanismLigament2d</span><span class="w"> </span><span class="n">armLigament</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">mech</span><span class="p">.</span><span class="na">getRoot</span><span class="p">(</span><span class="s">"pivot"</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="p">).</span><span class="na">append</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">MechanismLigament2d</span><span class="p">(</span><span class="s">"arm"</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="nf">Arm</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Arm/Mechanism"</span><span class="p">,</span><span class="w"> </span><span class="n">mech</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">armLigament</span><span class="p">.</span><span class="na">setAngle</span><span class="p">(</span><span class="n">getAngleDegrees</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add the four standard values (sensor, target, output, state) for a subsystem to the dashboard, and watch them in Sim GUI or Glass</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>SmartDashboard.putData(CommandScheduler.getInstance())</code> and watch commands start and stop as you press buttons</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Open the <strong>ArmSimulation</strong> example, run it, and move the arm with the joystick. Find its <code>simulationPeriodic()</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>DataLogManager.start()</code>, run in sim for a minute, then open the log in AdvantageScope</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Break your intake on purpose (wrong PWM port), then walk the debugging process to find it. Which layer revealed it?</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why use SmartDashboard instead of <code>println</code> for live values?</summary>
+<p>It updates one value in place instead of printing 50 lines per second.</p>
+</details>
+<details class="question">
+<summary>What four values should you publish for any mechanism?</summary>
+<p>The sensor reading, the target, the motor output, and any state booleans like "at target."</p>
+</details>
+<details class="question">
+<summary>The dashboard shows a target of 90°, an output of 0 V, and the arm sitting still. Where's the bug?</summary>
+<p>In the code between the target and the output: the command or controller isn't producing output. The sensor and hardware may be fine.</p>
+</details>
+<details class="question">
+<summary>What's the difference between NetworkTables and a log file?</summary>
+<p>NetworkTables shows live values right now. A log records everything over time, so you can review a match afterward.</p>
+</details>
+<details class="question">
+<summary>What does <code>simulationPeriodic()</code> do, and when does it run?</summary>
+<p>It updates physics models so simulated sensors respond to simulated motors. It runs every loop, only in simulation.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="08-sensors.html"><span>Previous</span>8. Sensors &amp; Units</a><a class="pager-next" href="../project/10-teleop.html"><span>Next</span>10. Teleop</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

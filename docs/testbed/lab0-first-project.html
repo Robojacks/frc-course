@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 0: Set Up the TestBed Project | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html" class="current" aria-current="page">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-0-set-up-and-create-the-testbed-project">Lab 0: Set Up and Create the TestBed Project<a class="headerlink" href="#lab-0-set-up-and-create-the-testbed-project" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Before you can make anything move, you need the right tools on your laptop and a project that can reach the test bed. That's this lab. Nothing will spin yet. By the end you'll have:</p>
+<ul>
+<li>every program an FRC programmer needs, installed</li>
+<li>a robot project named <strong>TestBed</strong>, with REV's library added</li>
+<li>that project <strong>deployed</strong> to the test bed's roboRIO</li>
+<li>a message you wrote, printed by the real robot</li>
+</ul>
+<p>You'll keep using this <strong>same TestBed project</strong> in every lab after this one, so take your time and get it right.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html">WPILib Installation Guide</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html">FRC Game Tools</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/3rd-party-libraries.html">3rd Party Libraries (vendor dependencies)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/deploying-robot-code.html">Building and Deploying Robot Code</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="part-1-install-the-tools">Part 1: Install the tools<a class="headerlink" href="#part-1-install-the-tools" title="Permanent link">#</a></h3>
+<p>Install all four. Each one is free. Use <strong>this season's</strong> version of each, the same as the rest of the team.</p>
+<table>
+<thead>
+<tr>
+<th>Program</th>
+<th>What it's for</th>
+<th>Where to get it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WPILib</strong></td>
+<td>VS Code, Java, and the tools to build and deploy robot code</td>
+<td><a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html">WPILib Installation Guide</a>. Step-by-step in <a href="../foundations/00-setup.html">Lesson 0</a>.</td>
+</tr>
+<tr>
+<td><strong>FRC Game Tools</strong> (Windows only)</td>
+<td>Installs the <strong>Driver Station</strong>, the program that enables and disables the robot</td>
+<td><a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/frc-game-tools.html">FRC Game Tools</a></td>
+</tr>
+<tr>
+<td><strong>REV Hardware Client</strong> (Windows only)</td>
+<td>Checks and sets up the SPARK MAX controllers: CAN IDs, firmware, and motor type</td>
+<td><a href="https://docs.revrobotics.com/rev-hardware-client">REV Hardware Client</a></td>
+</tr>
+<tr>
+<td><strong>Git</strong></td>
+<td>Saves your work and shares it with the team (<a href="../foundations/01-git.html">Lesson 1</a>)</td>
+<td><a href="https://git-scm.com/downloads">git-scm.com</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Mac or Chromebook?</p>
+<p>WPILib runs on Mac and Linux, so you can write and build code. The Driver Station and REV Hardware Client only run on Windows, so you'll need a team laptop to enable the test bed.</p>
+</div>
+<p><strong>Check your installs:</strong></p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> WPILib VS Code opens (look for the WPILib logo)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> The <strong>FRC Driver Station</strong> opens</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>REV Hardware Client</strong> opens</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In a terminal, <code>git --version</code> prints a version number</li>
+</ul>
+<h3 id="part-2-create-the-testbed-project">Part 2: Create the TestBed project<a class="headerlink" href="#part-2-create-the-testbed-project" title="Permanent link">#</a></h3>
+<ol>
+<li>Open <strong>WPILib VS Code</strong>.</li>
+<li>Press <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> and run <strong>WPILib: Create a new project</strong>.</li>
+<li>
+<p>Fill in the form:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project type</td>
+<td>Template</td>
+</tr>
+<tr>
+<td>Language</td>
+<td>Java</td>
+</tr>
+<tr>
+<td>Project base</td>
+<td><strong>Command Robot</strong></td>
+</tr>
+<tr>
+<td>Base folder</td>
+<td>Your <code>robotics</code> folder</td>
+</tr>
+<tr>
+<td>Project name</td>
+<td><strong>TestBed</strong></td>
+</tr>
+<tr>
+<td>Team number</td>
+<td><strong>4674</strong></td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>Click <strong>Generate Project</strong> and open it.</p>
+</li>
+</ol>
+<p><img alt="The WPILib New Project Creator, filled in" src="../assets/wpilib/new-project-creator-configured.png" /></p>
+<p class="credit">The New Project Creator, filled in. Your folder, name, and team number will differ. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html">Creating a Robot Program</a> (CC BY 4.0).</p>
+
+<div class="admonition tip">
+<p class="admonition-title">No spaces in project names</p>
+<p><code>TestBed</code>, not <code>Test Bed</code>. Spaces in folder names cause problems in the terminal (<a href="../foundations/02-terminal.html">Lesson 2</a>).</p>
+</div>
+<p>The <strong>team number</strong> matters more than it looks. When you deploy, WPILib uses it to find the robot on the network (as <code>roboRIO-4674-FRC.local</code>). The wrong number means "roboRIO not found."</p>
+<h3 id="part-3-look-around">Part 3: Look around<a class="headerlink" href="#part-3-look-around" title="Permanent link">#</a></h3>
+<p>Open these files. You don't need to change them yet, but you should know what each is for:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Robot.java</code></td>
+<td>Runs the robot loop and switches between modes (<a href="../robot-code/06-robot-program.html">Lesson 6</a>)</td>
+</tr>
+<tr>
+<td><code>RobotContainer.java</code></td>
+<td>Creates subsystems and binds controller buttons (<a href="../robot-code/07-command-based.html">Lesson 7</a>)</td>
+</tr>
+<tr>
+<td><code>Constants.java</code></td>
+<td>Holds numbers like CAN IDs, speeds, and ports</td>
+</tr>
+<tr>
+<td><code>Main.java</code></td>
+<td>Starts the program. Never edit it.</td>
+</tr>
+<tr>
+<td><code>subsystems/ExampleSubsystem.java</code></td>
+<td>An empty example from the template</td>
+</tr>
+<tr>
+<td><code>commands/ExampleCommand.java</code>, <code>Autos.java</code></td>
+<td>An example command and auto from the template</td>
+</tr>
+<tr>
+<td><code>deploy/</code></td>
+<td>Files copied to the roboRIO along with your code (you won't need it yet)</td>
+</tr>
+<tr>
+<td><code>vendordeps/</code></td>
+<td>Vendor libraries. Only WPILib's own are here so far.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="part-4-install-revlib">Part 4: Install REVLib<a class="headerlink" href="#part-4-install-revlib" title="Permanent link">#</a></h3>
+<p>The test bed's motor controllers are REV <strong>SPARK MAX</strong>es. WPILib doesn't include code for them, so you add REV's library, <strong>REVLib</strong>, as a <strong>vendor dependency</strong> ("vendordep").</p>
+<ol>
+<li>Click the <strong>WPILib</strong> icon in VS Code's left sidebar and open <strong>Vendor Dependencies</strong>.</li>
+<li>Find <strong>REVLib</strong> in the list and click <strong>Install</strong>.</li>
+<li>If VS Code asks to build or refresh the project, say yes.</li>
+<li>Check that a file like <code>REVLib.json</code> now appears in the <code>vendordeps/</code> folder.</li>
+</ol>
+<p><img alt="The WPILib Vendor Dependencies sidebar, with installed and available libraries" src="../assets/wpilib/dependency-sidebar.png" /></p>
+<p class="credit">The Vendor Dependencies sidebar: installed libraries at the top, available ones below, each with an Install button. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/3rd-party-libraries.html">3rd Party Libraries</a> (CC BY 4.0).</p>
+
+<p>If you don't see the sidebar, use <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Manage Vendor Libraries</strong> instead.</p>
+<div class="admonition warning">
+<p class="admonition-title">Same season, same library</p>
+<p>The REVLib version must match your WPILib season. Installing from the WPILib vendor list picks a compatible one for you. You need internet for this step.</p>
+</div>
+<h3 id="part-5-say-hello">Part 5: Say hello<a class="headerlink" href="#part-5-say-hello" title="Permanent link">#</a></h3>
+<p>Open <code>Robot.java</code> and find the constructor, <code>public Robot()</code>. Add one line at the top, with your real name:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="nf">Robot</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Hello from the TestBed! Written by YOUR NAME."</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Instantiate our RobotContainer. This will perform all our button bindings, and put our</span>
+<span class="w">    </span><span class="c1">// autonomous chooser on the dashboard.</span>
+<span class="w">    </span><span class="n">m_robotContainer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RobotContainer</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This line runs <strong>once</strong>, when the robot program starts.</p>
+<h3 id="part-6-build">Part 6: Build<a class="headerlink" href="#part-6-build" title="Permanent link">#</a></h3>
+<p>Make sure the code compiles before touching the robot:</p>
+<p><span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Build Robot Code</strong></p>
+<p>You should see <code>BUILD SUCCESSFUL</code> in the terminal at the bottom. If it fails, read the <strong>first</strong> <code>error:</code> line, fix it, and build again (<a href="../foundations/02-terminal.html">Lesson 2</a>).</p>
+<p><img alt="VS Code with BUILD SUCCESSFUL shown in the terminal" src="../assets/wpilib/build-successful.png" /></p>
+<p class="credit">Where to look: BUILD SUCCESSFUL appears in the terminal panel (1). From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/deploying-robot-code.html">Building and Deploying Robot Code</a> (CC BY 4.0).</p>
+
+<h3 id="part-7-power-up-and-connect">Part 7: Power up and connect<a class="headerlink" href="#part-7-power-up-and-connect" title="Permanent link">#</a></h3>
+<div class="admonition danger">
+<p class="admonition-title">Safety check</p>
+<p>The template has no motor code, so nothing should move in this lab. Still, build the habit now: before powering the test bed, check that hands are clear of the wheel and that the battery is secured.</p>
+</div>
+<ol>
+<li>Plug a <strong>charged</strong> battery into the test bed and turn on the <strong>main breaker</strong>.</li>
+<li>Wait about 30 seconds for the roboRIO to boot.</li>
+<li>Connect your laptop to the roboRIO with an Ethernet or USB cable. The test bed has no radio, so there's no Wi-Fi.</li>
+<li>Open the <strong>Driver Station</strong> and set the team number to <strong>4674</strong> (the gear tab, on the left).</li>
+<li>The <strong>Communications</strong> light on the Driver Station should turn green.</li>
+</ol>
+<p>The <strong>Robot Code</strong> light is probably red. That's fine: there's no code on the robot yet, or it's someone else's old code.</p>
+<div class="admonition info">
+<p class="admonition-title">The roboRIO must be set up for this season</p>
+<p>Each season, the roboRIO gets a new system image that matches that year's WPILib. A mentor or lead programmer does this once. If deploy complains about the image version, ask them.</p>
+</div>
+<h3 id="part-8-deploy">Part 8: Deploy<a class="headerlink" href="#part-8-deploy" title="Permanent link">#</a></h3>
+<p><span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Deploy Robot Code</strong></p>
+<p>This builds your code, copies it to the roboRIO, and restarts the robot program. It takes about 15 to 30 seconds. Near the end, the terminal shows lines like this:</p>
+<div class="highlight"><pre><span></span><code>-C-&gt; . /etc/profile.d/natinst-path.sh; /usr/local/frc/bin/frcKillRobot.sh -t -r ...
+BUILD SUCCESSFUL in 12s
+</code></pre></div>
+<p><code>frcKillRobot</code> stops the old robot program and starts yours. When it finishes, the <strong>Robot Code</strong> light on the Driver Station turns <strong>green</strong>. That's your code running on real hardware.</p>
+<h3 id="part-9-see-your-message">Part 9: See your message<a class="headerlink" href="#part-9-see-your-message" title="Permanent link">#</a></h3>
+<p>Your <code>println</code> went to the robot's console. Open it either way:</p>
+<ul>
+<li>In VS Code: <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Start RioLog</strong></li>
+<li>In the Driver Station: click the <strong>gear icon</strong> above the message box and choose <strong>View Console</strong></li>
+</ul>
+<p><img alt="The RioLog window in VS Code, with its buttons along the bottom" src="../assets/wpilib/riolog-window.png" /></p>
+<p class="credit">The RioLog window. Your messages appear in the big area; the buttons below pause, clear, and filter it. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html">Viewing Console Output</a> (CC BY 4.0).</p>
+
+<p>Look for:</p>
+<div class="highlight"><pre><span></span><code>Hello from the TestBed! Written by YOUR NAME.
+</code></pre></div>
+<p>If you missed it, restart the robot code from the Driver Station (<strong>Restart Robot Code</strong> on the Diagnostics tab) and watch it print again.</p>
+<h3 id="part-10-enable-nothing-should-move">Part 10: Enable (nothing should move)<a class="headerlink" href="#part-10-enable-nothing-should-move" title="Permanent link">#</a></h3>
+<ol>
+<li>Say <strong>"Enabling!"</strong> out loud.</li>
+<li>In the Driver Station, choose <strong>TeleOperated</strong> and click <strong>Enable</strong>.</li>
+<li>Watch the orange <strong>Robot Signal Light</strong> on the test bed: it <strong>blinks</strong> while enabled.</li>
+<li>Click <strong>Disable</strong>, or press <span class="keys"><kbd class="key-enter">Enter</kbd></span>. The light goes back to <strong>solid</strong>.</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Know your emergency keys</p>
+<p>In the Driver Station, <span class="keys"><kbd class="key-enter">Enter</kbd></span> <strong>disables</strong> the robot, and <span class="keys"><kbd class="key-space">Space</kbd></span> is the <strong>emergency stop</strong>. An emergency stop requires restarting the roboRIO before you can enable again. Use it if anything goes wrong.</p>
+</div>
+<h3 id="part-11-save-it-with-git">Part 11: Save it with Git<a class="headerlink" href="#part-11-save-it-with-git" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>init
+git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 0: TestBed project with REVLib"</span>
+</code></pre></div>
+<p>From now on, commit after each lab, so you can always get back to working code.</p>
+<h3 id="when-it-doesnt-work">When it doesn't work<a class="headerlink" href="#when-it-doesnt-work" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deploy says it can't find the roboRIO</td>
+<td>Check the cable, wait for the roboRIO to finish booting, and check that the team number is 4674 (<code>.wpilib/wpilib_preferences.json</code>)</td>
+</tr>
+<tr>
+<td>Driver Station Communications light stays red</td>
+<td>Same as above, plus check the team number in the Driver Station</td>
+</tr>
+<tr>
+<td>Deploy says the roboRIO image is the wrong version</td>
+<td>The roboRIO needs this season's image. Ask a mentor.</td>
+</tr>
+<tr>
+<td>Build fails after installing REVLib</td>
+<td>You may have been offline, so it couldn't download the library. Connect to the internet and build again.</td>
+</tr>
+<tr>
+<td>Robot Code light red after deploy</td>
+<td>Your code crashed on startup. Open RioLog and read the first error.</td>
+</tr>
+<tr>
+<td>No message in the console</td>
+<td>Make sure you deployed after adding the line</td>
+</tr>
+</tbody>
+</table>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Install WPILib, FRC Game Tools, REV Hardware Client, and Git</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Create <strong>TestBed</strong> from the Command Robot template with team number 4674</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Install REVLib and find its file in <code>vendordeps/</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add your hello message and build successfully</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Deploy to the test bed and get a green <strong>Robot Code</strong> light</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find your message in RioLog or the Driver Station console</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Enable and disable, and watch the Robot Signal Light change</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Commit TestBed to Git</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What does each of the four programs do?</summary>
+<p><strong>WPILib</strong> writes, builds, and deploys code. The <strong>Driver Station</strong> enables and disables the robot. The <strong>REV Hardware Client</strong> sets up SPARK MAX controllers. <strong>Git</strong> saves and shares your code.</p>
+</details>
+<details class="question">
+<summary>Why does the project need the team number?</summary>
+<p>Deploy uses it to find the robot on the network, at <code>roboRIO-4674-FRC.local</code>.</p>
+</details>
+<details class="question">
+<summary>What's a vendor dependency, and why does TestBed need REVLib?</summary>
+<p>A library from a hardware maker that adds code for their devices. The test bed's SPARK MAX controllers are made by REV, and WPILib doesn't include code for them.</p>
+</details>
+<details class="question">
+<summary>What's the difference between Build and Deploy?</summary>
+<p><strong>Build</strong> only compiles the code on your laptop. <strong>Deploy</strong> builds it, copies it to the roboRIO, and restarts the robot program.</p>
+</details>
+<details class="question">
+<summary>How can you tell your code is running on the robot?</summary>
+<p>The Driver Station's <strong>Robot Code</strong> light is green, and your message shows up in the console.</p>
+</details>
+<details class="question">
+<summary>Which key disables the robot from the Driver Station?</summary>
+<p><span class="keys"><kbd class="key-enter">Enter</kbd></span>. <span class="keys"><kbd class="key-space">Space</kbd></span> is the emergency stop.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="index.html"><span>Previous</span>Overview</a><a class="pager-next" href="lab1-spin-motor.html"><span>Next</span>Lab 1: Spin a Brushless Motor</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7. Command-Based Programming | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section" open><summary>Robot Code</summary><ul><li><a href="06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="07-command-based.html" class="current" aria-current="page">7. Command-Based Programming</a></li><li><a href="07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="7-command-based-programming">7. Command-Based Programming<a class="headerlink" href="#7-command-based-programming" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Imagine writing a whole robot inside <code>teleopPeriodic()</code>: the drivetrain, the intake, the arm, the shooter, every button, every timer, every "only do this if that." It works for a week. Then it's 600 lines of tangled if statements where changing the intake breaks the arm.</p>
+<p><strong>Command-based programming</strong> organizes the robot into small, reusable pieces:</p>
+<ul>
+<li><strong>Subsystems</strong> are the robot's parts (nouns).</li>
+<li><strong>Commands</strong> are the things those parts do (verbs).</li>
+<li><strong>Triggers</strong> decide when commands run.</li>
+</ul>
+<p>Almost every competitive FRC team uses it, and it's what the WPILib template is built for.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/what-is-command-based.html">What Is Command-Based Programming?</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/subsystems.html">Subsystems</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/commands.html">Commands</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/binding-commands-to-triggers.html">Binding Commands to Triggers</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/structuring-command-based-project.html">Structuring a Command-Based Robot Project</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="the-mental-model">The mental model<a class="headerlink" href="#the-mental-model" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>Grammar</th>
+<th>Example</th>
+<th>Lives in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Subsystem</strong></td>
+<td>Noun</td>
+<td><code>Intake</code>, <code>Arm</code>, <code>Drivetrain</code></td>
+<td><code>subsystems/</code></td>
+</tr>
+<tr>
+<td><strong>Command</strong></td>
+<td>Verb</td>
+<td>"run intake," "move arm to 90°"</td>
+<td>factory methods on the subsystem, or <code>commands/</code></td>
+</tr>
+<tr>
+<td><strong>Trigger</strong></td>
+<td>When</td>
+<td>"while the A button is held"</td>
+<td><code>RobotContainer.configureBindings()</code></td>
+</tr>
+</tbody>
+</table>
+<p>Only <strong>one command can use a subsystem at a time</strong>. The scheduler enforces this, so two commands can't fight over the same motor.</p>
+<p><img alt="Examples of subsystems (drivetrain, arm, elevator) and commands (move to scoring position, drive forward and score)" src="../assets/wpilib/subsystems-and-commands.drawio.svg" /></p>
+<p class="credit">Subsystems are the robot's parts; commands are things the robot does with them. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/what-is-command-based.html">What Is "Command-Based" Programming?</a> (CC BY 4.0).</p>
+
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: Why command-based?</p>
+<p>Command-based programming is <strong>declarative</strong>: you describe <em>what</em> should happen, and WPILib handles checking for it every loop. For example, "fire the piston when a condition becomes true" is one line:</p>
+<div class="highlight"><pre><span></span><code><span class="k">new</span><span class="w"> </span><span class="n">Trigger</span><span class="p">(</span><span class="n">condition</span><span class="p">::</span><span class="n">get</span><span class="p">).</span><span class="na">onTrue</span><span class="p">(</span><span class="n">Commands</span><span class="p">.</span><span class="na">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">piston</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">DoubleSolenoid</span><span class="p">.</span><span class="na">Value</span><span class="p">.</span><span class="na">kForward</span><span class="p">)));</span>
+</code></pre></div>
+<p>Without command-based, you'd have to check the button every loop yourself, and remember whether it was already pressed so the piston only fires once:</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">condition</span><span class="p">.</span><span class="na">get</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">pressed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">piston</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">DoubleSolenoid</span><span class="p">.</span><span class="na">Value</span><span class="p">.</span><span class="na">kForward</span><span class="p">);</span>
+<span class="w">    </span><span class="n">pressed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">pressed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Command-based code tends to be clean, extensible, and easy to reuse from year to year.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/what-is-command-based.html">What Is "Command-Based" Programming?</a>, CC BY 4.0.</em></p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">What's the scheduler?</p>
+<p>The <strong>command scheduler</strong> is the part of WPILib that runs your commands every 20 ms, checks your buttons, and enforces that one-command rule. This lesson uses it; <a href="07b-scheduler.html">Lesson 7.1</a> explains exactly how it works, step by step.</p>
+</div>
+<h3 id="what-goes-in-a-subsystem">What goes in a subsystem<a class="headerlink" href="#what-goes-in-a-subsystem" title="Permanent link">#</a></h3>
+<p>A subsystem owns <strong>hardware</strong> and offers <strong>actions</strong>. A good subsystem:</p>
+<ul>
+<li>creates its own motors and sensors as <code>private</code> fields, so nothing outside can touch them directly</li>
+<li>offers methods that read state, like <code>hasGamePiece()</code> or <code>getAngle()</code></li>
+<li>offers <strong>command factories</strong>: methods that return commands, like <code>runIntake()</code></li>
+<li>puts telemetry in its <code>periodic()</code> method, which runs every loop</li>
+</ul>
+<p>A subsystem should <strong>not</strong> know about buttons or controllers. "Run the intake" belongs in the subsystem; "when A is pressed" belongs in <code>RobotContainer</code>. Keeping them apart means you can reuse the same intake command in teleop, in autonomous, and in a test.</p>
+<h3 id="build-an-intake-subsystem">Build an Intake subsystem<a class="headerlink" href="#build-an-intake-subsystem" title="Permanent link">#</a></h3>
+<p>Create <code>src/main/java/frc/robot/subsystems/Intake.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.DigitalInput</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.SmartDashboard</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Intake</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="w"> </span><span class="n">motor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DigitalInput</span><span class="w"> </span><span class="n">beamBreak</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DigitalInput</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/** True when a game piece is blocking the beam break sensor. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">hasGamePiece</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="n">beamBreak</span><span class="p">.</span><span class="na">get</span><span class="p">();</span><span class="w">   </span><span class="c1">// many beam breaks read false when blocked</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Runs the rollers in. Stops them when the command ends. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">runIntake</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">startEnd</span><span class="p">(</span>
+<span class="w">            </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mf">0.75</span><span class="p">),</span><span class="w">   </span><span class="c1">// when it starts</span>
+<span class="w">            </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">     </span><span class="c1">// when it ends</span>
+<span class="w">        </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Intake"</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Spits a game piece out. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">outtake</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">startEnd</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">),</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Outtake"</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Intakes until a game piece is detected, then stops on its own. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">intakeUntilFull</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">runIntake</span><span class="p">().</span><span class="na">until</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">hasGamePiece</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Intake Until Full"</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putBoolean</span><span class="p">(</span><span class="s">"Intake/Has Piece"</span><span class="p">,</span><span class="w"> </span><span class="n">hasGamePiece</span><span class="p">());</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Intake/Output"</span><span class="p">,</span><span class="w"> </span><span class="n">motor</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Why <code>PWMSparkMax</code>?</p>
+<p>It works in simulation with no vendor libraries. On the real robot you'll use your vendor's class (TalonFX, SparkMax, etc.). The command-based structure is identical.</p>
+</div>
+<h3 id="command-factories">Command factories<a class="headerlink" href="#command-factories" title="Permanent link">#</a></h3>
+<p>The methods <code>startEnd</code>, <code>run</code>, and others come from <code>SubsystemBase</code>. Each one builds a command that <strong>automatically requires this subsystem</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Factory</th>
+<th>What the command does</th>
+<th>Ends by itself?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>runOnce(action)</code></td>
+<td>Runs <code>action</code> one time</td>
+<td>Yes, immediately</td>
+</tr>
+<tr>
+<td><code>run(action)</code></td>
+<td>Runs <code>action</code> every loop</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>startEnd(start, end)</code></td>
+<td>Runs <code>start</code> once, then <code>end</code> once when it stops</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>runEnd(action, end)</code></td>
+<td>Runs <code>action</code> every loop, then <code>end</code> when it stops</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Commands that don't end by themselves keep going until a button is released, another command takes over the subsystem, or you add an end condition.</p>
+<h3 id="changing-how-a-command-ends">Changing how a command ends<a class="headerlink" href="#changing-how-a-command-ends" title="Permanent link">#</a></h3>
+<p>Chain these onto any command:</p>
+<table>
+<thead>
+<tr>
+<th>Decorator</th>
+<th>Effect</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.until(condition)</code></td>
+<td>Ends when <code>condition</code> becomes true</td>
+<td><code>runIntake().until(this::hasGamePiece)</code></td>
+</tr>
+<tr>
+<td><code>.withTimeout(seconds)</code></td>
+<td>Ends after that many seconds</td>
+<td><code>outtake().withTimeout(0.5)</code></td>
+</tr>
+<tr>
+<td><code>.unless(condition)</code></td>
+<td>Doesn't start at all if <code>condition</code> is true</td>
+<td><code>runIntake().unless(this::hasGamePiece)</code></td>
+</tr>
+<tr>
+<td><code>.withName("...")</code></td>
+<td>Gives it a readable name on the dashboard</td>
+<td><code>.withName("Intake")</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-commands-helpers">The <code>Commands</code> helpers<a class="headerlink" href="#the-commands-helpers" title="Permanent link">#</a></h3>
+<p>The <code>Commands</code> class has factories for commands that don't belong to one subsystem:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Commands</span><span class="p">;</span>
+
+<span class="n">Commands</span><span class="p">.</span><span class="na">none</span><span class="p">()</span><span class="w">                  </span><span class="c1">// does nothing (useful as a placeholder)</span>
+<span class="n">Commands</span><span class="p">.</span><span class="na">waitSeconds</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span><span class="w">        </span><span class="c1">// waits one second</span>
+<span class="n">Commands</span><span class="p">.</span><span class="na">print</span><span class="p">(</span><span class="s">"Got here"</span><span class="p">)</span><span class="w">       </span><span class="c1">// prints a message</span>
+<span class="n">Commands</span><span class="p">.</span><span class="na">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"hi"</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="binding-commands-to-buttons">Binding commands to buttons<a class="headerlink" href="#binding-commands-to-buttons" title="Permanent link">#</a></h3>
+<p>All bindings go in <code>RobotContainer.java</code>, in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RobotContainer</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Intake</span><span class="w"> </span><span class="n">intake</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Intake</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="w"> </span><span class="n">driver</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotContainer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">configureBindings</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configureBindings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">driver</span><span class="p">.</span><span class="na">a</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">intake</span><span class="p">.</span><span class="na">runIntake</span><span class="p">());</span>
+<span class="w">        </span><span class="n">driver</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">intake</span><span class="p">.</span><span class="na">outtake</span><span class="p">());</span>
+<span class="w">        </span><span class="n">driver</span><span class="p">.</span><span class="na">x</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">intake</span><span class="p">.</span><span class="na">intakeUntilFull</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Read them out loud: <em>"While driver A is held, run the intake."</em> <em>"When X is pressed, intake until full."</em> Good command-based code reads like English.</p>
+<table>
+<thead>
+<tr>
+<th>Binding</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>whileTrue(cmd)</code></td>
+<td>Starts on press, <strong>cancels on release</strong></td>
+</tr>
+<tr>
+<td><code>onTrue(cmd)</code></td>
+<td>Starts on press, runs until it <strong>finishes on its own</strong></td>
+</tr>
+<tr>
+<td><code>onFalse(cmd)</code></td>
+<td>Starts on release</td>
+</tr>
+<tr>
+<td><code>toggleOnTrue(cmd)</code></td>
+<td>First press starts it, second press cancels it</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>whileTrue</code> with commands that never end on their own, like <code>runIntake()</code>, so the driver controls how long they run. Use <code>onTrue</code> with commands that do end, like <code>intakeUntilFull()</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title"><code>onTrue</code> with a command that never ends</p>
+<p><code>driver.a().onTrue(intake.runIntake())</code> starts the intake on the first press and never stops it, because <code>runIntake()</code> doesn't end by itself and <code>onTrue</code> doesn't cancel on release. This is one of the most common beginner bugs.</p>
+</div>
+<h3 id="controller-buttons">Controller buttons<a class="headerlink" href="#controller-buttons" title="Permanent link">#</a></h3>
+<p><code>CommandXboxController</code> gives you a trigger for every button:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Button</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a()</code>, <code>b()</code>, <code>x()</code>, <code>y()</code></td>
+<td>Face buttons</td>
+</tr>
+<tr>
+<td><code>leftBumper()</code>, <code>rightBumper()</code></td>
+<td>Bumpers</td>
+</tr>
+<tr>
+<td><code>leftTrigger()</code>, <code>rightTrigger()</code></td>
+<td>Analog triggers, pressed past halfway</td>
+</tr>
+<tr>
+<td><code>povUp()</code>, <code>povDown()</code>, <code>povLeft()</code>, <code>povRight()</code></td>
+<td>D-pad</td>
+</tr>
+<tr>
+<td><code>start()</code>, <code>back()</code></td>
+<td>Menu buttons</td>
+</tr>
+<tr>
+<td><code>getLeftX()</code>, <code>getLeftY()</code>, <code>getRightX()</code>, <code>getRightY()</code></td>
+<td>Stick positions, -1 to 1 (not triggers)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="combining-triggers">Combining triggers<a class="headerlink" href="#combining-triggers" title="Permanent link">#</a></h3>
+<p>Triggers can be combined, and any <code>true</code>/<code>false</code> check can be a trigger:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Only while both are held</span>
+<span class="n">driver</span><span class="p">.</span><span class="na">a</span><span class="p">().</span><span class="na">and</span><span class="p">(</span><span class="n">driver</span><span class="p">.</span><span class="na">rightBumper</span><span class="p">()).</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">intake</span><span class="p">.</span><span class="na">runIntake</span><span class="p">());</span>
+
+<span class="c1">// Automatically, whenever a game piece arrives</span>
+<span class="k">new</span><span class="w"> </span><span class="n">Trigger</span><span class="p">(</span><span class="n">intake</span><span class="p">::</span><span class="n">hasGamePiece</span><span class="p">).</span><span class="na">onTrue</span><span class="p">(</span><span class="n">Commands</span><span class="p">.</span><span class="na">print</span><span class="p">(</span><span class="s">"Got one!"</span><span class="p">));</span>
+</code></pre></div>
+<h3 id="longhand-command-classes">Longhand command classes<a class="headerlink" href="#longhand-command-classes" title="Permanent link">#</a></h3>
+<p>Factories cover most commands. For a command with more logic, you can write a full class in the <code>commands/</code> folder. It has four methods the scheduler calls for you:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RunIntake</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Intake</span><span class="w"> </span><span class="n">intake</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">RunIntake</span><span class="p">(</span><span class="n">Intake</span><span class="w"> </span><span class="n">intake</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">intake</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">intake</span><span class="p">;</span>
+<span class="w">        </span><span class="n">addRequirements</span><span class="p">(</span><span class="n">intake</span><span class="p">);</span><span class="w">   </span><span class="c1">// "this command uses the intake"</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">initialize</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* once, at the start */</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">execute</span><span class="p">()</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="cm">/* every loop */</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isFinished</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c1">// checked every loop</span>
+<span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">end</span><span class="p">(</span><span class="kt">boolean</span><span class="w"> </span><span class="n">interrupted</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="cm">/* once, at the end */</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><a href="07b-scheduler.html">Lesson 7.1</a> explains exactly when each of these runs.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Have the test bed?</p>
+<p><a href="../testbed/lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a> builds this same pattern on real hardware, and <a href="../testbed/lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a> tries every kind of binding.</p>
+</div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build the <code>Intake</code> subsystem above in your project</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Bind A to <code>runIntake()</code> and B to <code>outtake()</code> with <code>whileTrue</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run in Sim GUI. Drag your keyboard or a controller into Joystick 0 and watch <strong>PWM[0]</strong> change as you press buttons.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Bind X to <code>intakeUntilFull()</code> with <code>onTrue</code>. In the Sim GUI, toggle <strong>DIO[0]</strong> to fake a game piece arriving and watch the command end.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change A's binding to <code>onTrue(intake.runIntake())</code>. What happens when you release A? Change it back.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add an <code>outtake().withTimeout(0.5)</code> binding on Y, so one tap spits a piece out for half a second</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between a subsystem and a command?</summary>
+<p>A subsystem is a part of the robot that owns hardware (the intake). A command is an action that uses one or more subsystems (run the intake).</p>
+</details>
+<details class="question">
+<summary>Why shouldn't a subsystem know about controller buttons?</summary>
+<p>So its commands can be reused anywhere: teleop bindings, autonomous routines, and tests. Button choices belong in <code>RobotContainer</code>.</p>
+</details>
+<details class="question">
+<summary>What's the difference between <code>whileTrue</code> and <code>onTrue</code>?</summary>
+<p><code>whileTrue</code> runs the command while the button is held and cancels it on release. <code>onTrue</code> starts it once on press and lets it finish on its own.</p>
+</details>
+<details class="question">
+<summary>How do you make <code>runIntake()</code> stop automatically once a game piece is detected?</summary>
+<p>Add <code>.until(intake::hasGamePiece)</code>.</p>
+</details>
+<details class="question">
+<summary>Two commands that both require <code>Intake</code> are scheduled at the same time. What happens?</summary>
+<p>By default the newer command <strong>interrupts</strong> the older one, and the older one's end action runs. Lesson 7.1 covers the details.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="06-robot-program.html"><span>Previous</span>6. How a Robot Program Runs</a><a class="pager-next" href="07b-scheduler.html"><span>Next</span>7.1 How the Command Scheduler Works</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

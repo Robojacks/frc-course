@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8. Sensors &amp; Units | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section" open><summary>Robot Code</summary><ul><li><a href="06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="07-command-based.html">7. Command-Based Programming</a></li><li><a href="07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="08-sensors.html" class="current" aria-current="page">8. Sensors &amp; Units</a></li><li><a href="09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="8-sensors-units">8. Sensors &amp; Units<a class="headerlink" href="#8-sensors-units" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>To control something, you have to <strong>measure</strong> it. You can't hold an arm at 90° if you don't know where the arm is, drive 2 meters if you don't know how far you've gone, or stop the intake when it's full if nothing can see the game piece.</p>
+<p>Sensors turn the physical world into numbers your code can use. Getting those numbers into the <strong>right units</strong> is half the job, and getting it wrong is one of the most common sources of robot bugs.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/encoders-software.html">Encoders – Software</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/gyros-software.html">Gyroscopes – Software</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/digital-inputs-software.html">Digital Inputs (limit switches)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/java-units.html">Java Units Library</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="common-frc-sensors">Common FRC sensors<a class="headerlink" href="#common-frc-sensors" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Sensor</th>
+<th>Measures</th>
+<th>Output</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Encoder</strong></td>
+<td>Rotation of a shaft</td>
+<td>Position and velocity</td>
+<td>Drive distance, arm angle, flywheel speed</td>
+</tr>
+<tr>
+<td><strong>Absolute encoder</strong></td>
+<td>The shaft's angle, even right after power-on</td>
+<td>Angle</td>
+<td>Arm angle, swerve module direction</td>
+</tr>
+<tr>
+<td><strong>Gyro / IMU</strong></td>
+<td>Robot rotation</td>
+<td>Heading (yaw), sometimes pitch and roll</td>
+<td>Driving straight, field-relative swerve</td>
+</tr>
+<tr>
+<td><strong>Limit switch</strong></td>
+<td>Pressed or not</td>
+<td><code>true</code> / <code>false</code></td>
+<td>Hard stops, homing an elevator</td>
+</tr>
+<tr>
+<td><strong>Beam break</strong></td>
+<td>Something blocks a light beam</td>
+<td><code>true</code> / <code>false</code></td>
+<td>"Do we have a game piece?"</td>
+</tr>
+<tr>
+<td><strong>Distance sensor</strong> (time-of-flight, ultrasonic)</td>
+<td>Distance to an object</td>
+<td>Distance</td>
+<td>Detecting game pieces, measuring to a wall</td>
+</tr>
+<tr>
+<td><strong>Camera</strong></td>
+<td>Images, AprilTags, game pieces</td>
+<td>Targets and poses</td>
+<td>Aiming, pose estimation (later lessons)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="digital-sensors-limit-switches-and-beam-breaks">Digital sensors: limit switches and beam breaks<a class="headerlink" href="#digital-sensors-limit-switches-and-beam-breaks" title="Permanent link">#</a></h3>
+<p>These are the simplest: <code>true</code> or <code>false</code>, read from a <strong>DIO</strong> port.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DigitalInput</span><span class="w"> </span><span class="n">armDownSwitch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DigitalInput</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isArmDown</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="n">armDownSwitch</span><span class="p">.</span><span class="na">get</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Which way is pressed?</p>
+<p>Many switches are wired so that <code>get()</code> returns <code>true</code> when <strong>not</strong> pressed and <code>false</code> when pressed. That's why the example uses <code>!</code>. Don't guess: press the switch and watch the value on the dashboard, then write the method so the name tells the truth.</p>
+</div>
+<p>Name methods for what they <strong>mean</strong> (<code>isArmDown()</code>, <code>hasGamePiece()</code>), not for the hardware (<code>getSwitch1()</code>). Everywhere else in the code reads more clearly.</p>
+<h3 id="encoders-relative-vs-absolute">Encoders: relative vs. absolute<a class="headerlink" href="#encoders-relative-vs-absolute" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Relative (incremental) encoder</th>
+<th>Absolute encoder</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it reports</td>
+<td>How far it has turned <strong>since power-on or the last reset</strong></td>
+<td>The <strong>actual angle</strong> of the shaft, always</td>
+</tr>
+<tr>
+<td>After power-on</td>
+<td>Reads 0, wherever the mechanism is</td>
+<td>Reads the real angle</td>
+</tr>
+<tr>
+<td>Good for</td>
+<td>Wheels, flywheels, elevators with a homing switch</td>
+<td>Arms, wrists, swerve module steering</td>
+</tr>
+<tr>
+<td>Examples</td>
+<td>Motor built-in encoders, quadrature encoders</td>
+<td>Through Bore Encoder (absolute mode), CANcoder</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Relative encoders and arms</p>
+<p>If an arm uses a relative encoder, it reads 0 at power-on <strong>wherever the arm happens to be</strong>. Turn the robot on with the arm halfway up, and your code thinks halfway up is 0°. Either start the robot with the mechanism in a known position every time, home it against a limit switch, or use an absolute encoder.</p>
+</div>
+<p>Most modern motors (Kraken, Falcon, NEO) have an encoder built in, read through the vendor library. Separate encoders can be wired to DIO ports or the CAN bus.</p>
+<h3 id="encoders-count-rotations-conversion-factors">Encoders count rotations: conversion factors<a class="headerlink" href="#encoders-count-rotations-conversion-factors" title="Permanent link">#</a></h3>
+<p>An encoder reports how far a shaft turned, usually in <strong>rotations</strong> of the motor. To get something useful (meters, degrees), multiply by a <strong>conversion factor</strong> that accounts for gearing and wheel size.</p>
+<p><strong>Example 1: drivetrain wheel</strong></p>
+<ul>
+<li>Gear ratio: 8:1 (the motor turns 8 times for every 1 turn of the wheel)</li>
+<li>Wheel diameter: 4 in = 0.1016 m</li>
+<li>Circumference: π × 0.1016 ≈ 0.319 m</li>
+</ul>
+<div class="highlight"><pre><span></span><code>wheel rotations   = motor rotations / 8
+meters traveled   = wheel rotations × 0.319
+meters per motor rotation = 0.319 / 8 ≈ 0.0399
+</code></pre></div>
+<p>So if the motor encoder reads 50 rotations, the robot has driven about 50 × 0.0399 ≈ <strong>2.0 m</strong>.</p>
+<p><strong>Example 2: arm</strong></p>
+<ul>
+<li>Gear ratio: 60:1 from motor to arm</li>
+<li>One arm rotation = 360°</li>
+</ul>
+<div class="highlight"><pre><span></span><code>degrees per motor rotation = 360 / 60 = 6°
+</code></pre></div>
+<p>If the motor encoder reads 15 rotations, the arm has moved 15 × 6 = <strong>90°</strong>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Gear ratios multiply</p>
+<p>A 5:1 gearbox followed by a 3:1 chain reduction is 5 × 3 = <strong>15:1</strong> total. Ask the mechanical team for every stage.</p>
+</div>
+<p><strong>Velocity</strong> uses the same factor. Motor encoders often report rotations per <strong>minute</strong> or per <strong>second</strong>, so check the vendor docs and convert to per second:</p>
+<div class="highlight"><pre><span></span><code>wheel speed (m/s) = motor RPM / 60 × meters per motor rotation
+</code></pre></div>
+<h3 id="write-the-math-once-in-constants">Write the math once, in Constants<a class="headerlink" href="#write-the-math-once-in-constants" title="Permanent link">#</a></h3>
+<p>Never scatter magic numbers through your code. Put each one in <code>Constants.java</code> with its unit in the name:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Constants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DriveConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">GEAR_RATIO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">8.0</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">WHEEL_DIAMETER_METERS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1016</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">METERS_PER_MOTOR_ROTATION</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="p">(</span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">WHEEL_DIAMETER_METERS</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">GEAR_RATIO</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ArmConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">GEAR_RATIO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">60.0</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">DEGREES_PER_MOTOR_ROTATION</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">360.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">GEAR_RATIO</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Then write subsystem methods that return real units, so nothing else in the code ever sees raw encoder values:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getDistanceMeters</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">motorEncoderRotations</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">METERS_PER_MOTOR_ROTATION</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="a-wpilib-encoder-example">A WPILib encoder example<a class="headerlink" href="#a-wpilib-encoder-example" title="Permanent link">#</a></h3>
+<p>WPILib's <code>Encoder</code> class reads a quadrature encoder on two DIO ports. You set the conversion once with <code>setDistancePerPulse</code>, and then <code>getDistance()</code> returns real units:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Encoder</span><span class="w"> </span><span class="n">armEncoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Encoder</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span><span class="w">  </span><span class="c1">// DIO 2 and 3</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="nf">Arm</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// A 2048-pulse encoder on the arm shaft: 360° / 2048 pulses</span>
+<span class="w">    </span><span class="n">armEncoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span><span class="mf">360.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2048.0</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getAngleDegrees</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">armEncoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getVelocityDegPerSec</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">armEncoder</span><span class="p">.</span><span class="na">getRate</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Vendor motor encoders work the same way. Look up your controller's method for setting the conversion factor (for example, CTRE's <code>SensorToMechanismRatio</code> or REV's <code>positionConversionFactor</code>).</p>
+<h3 id="gyros">Gyros<a class="headerlink" href="#gyros" title="Permanent link">#</a></h3>
+<p>A gyro measures how much the robot has <strong>rotated</strong>. The value you'll use most is <strong>yaw</strong>, the robot's heading.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Rotation2d</span><span class="w"> </span><span class="nf">getHeading</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">();</span><span class="w">   </span><span class="c1">// most WPILib-compatible gyros offer this</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Sign conventions</p>
+<p>WPILib's math assumes <strong>counterclockwise is positive</strong> when looking down at the robot. Some gyros report clockwise as positive. If turning left makes the heading go down, your code needs to flip the sign, or your odometry will be mirrored.</p>
+</div>
+<p>Gyros drift a little over time and are zeroed at power-on. Many teams add a driver button that resets the heading to 0 when the robot is facing away from the driver.</p>
+<h3 id="units-pick-a-system-and-stick-to-it">Units: pick a system and stick to it<a class="headerlink" href="#units-pick-a-system-and-stick-to-it" title="Permanent link">#</a></h3>
+<p>WPILib's math classes (kinematics, odometry, controllers, feedforward) assume <strong>SI units</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Use</th>
+<th>Not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Distance</td>
+<td>meters</td>
+<td>inches, feet</td>
+</tr>
+<tr>
+<td>Angle</td>
+<td>radians (for math)</td>
+<td>degrees (fine for display)</td>
+</tr>
+<tr>
+<td>Time</td>
+<td>seconds</td>
+<td>milliseconds</td>
+</tr>
+<tr>
+<td>Velocity</td>
+<td>meters per second, radians per second</td>
+<td>RPM, feet per second</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Common mistake: mixing units</p>
+<p>The code runs fine, but every number is off. Inches passed where meters are expected are off by about 39×; degrees passed where radians are expected are off by about 57×. The robot drives or moves to completely wrong places with no error message.</p>
+</div>
+<p>Two habits prevent most unit bugs:</p>
+<ol>
+<li><strong>Put the unit in the name:</strong> <code>WHEEL_DIAMETER_METERS</code>, <code>getAngleRadians()</code>, <code>targetRpm</code>.</li>
+<li><strong>Convert at the edges:</strong> convert from vendor units as soon as you read a sensor, and to vendor units only when you set a motor. Everything in between uses SI.</li>
+</ol>
+<p>WPILib also has helpers for conversions:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mf">4.0</span><span class="p">);</span><span class="w">       </span><span class="c1">// 0.1016</span>
+<span class="n">Units</span><span class="p">.</span><span class="na">degreesToRadians</span><span class="p">(</span><span class="mi">90</span><span class="p">);</span><span class="w">      </span><span class="c1">// 1.5708</span>
+<span class="n">Units</span><span class="p">.</span><span class="na">rotationsPerMinuteToRadiansPerSecond</span><span class="p">(</span><span class="mi">6000</span><span class="p">);</span>
+</code></pre></div>
+<p>WPILib's <a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/java-units.html">Java Units Library</a> goes further, with types like <code>Distance</code> and <code>Angle</code> that make it a compile error to mix them up. Some vendor libraries use it directly.</p>
+<h3 id="check-sensors-before-you-trust-them">Check sensors before you trust them<a class="headerlink" href="#check-sensors-before-you-trust-them" title="Permanent link">#</a></h3>
+<p>Before writing any code that depends on a sensor, put it on the dashboard and check it by hand:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Arm/Angle (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getAngleDegrees</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putBoolean</span><span class="p">(</span><span class="s">"Arm/Down Switch"</span><span class="p">,</span><span class="w"> </span><span class="n">isArmDown</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li>Move the mechanism by hand (robot disabled). Does the number change in the right <strong>direction</strong>?</li>
+<li>Move it a known amount, like exactly one rotation or 90°. Is the number <strong>right</strong>?</li>
+<li>Press the switch. Does the boolean change, and is it the value the method name promises?</li>
+</ul>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Have the test bed?</p>
+<p>Labs <a href="../testbed/lab4-limit-switch.html">4</a> (limit switch), <a href="../testbed/lab5-knob-speed.html">5</a> (potentiometer), <a href="../testbed/lab6-encoder.html">6</a> (encoder), and <a href="../testbed/lab8-navx-gyro.html">8</a> (gyro) put each sensor in this lesson on real hardware.</p>
+</div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> For your team's drivetrain, get the gear ratio and wheel diameter, and calculate meters per motor rotation</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> For your team's arm or elevator, calculate degrees (or meters) per motor rotation, including every gear stage</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add both to <code>Constants.java</code> with units in the names</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a limit switch to a subsystem with a method named for what it means. In the Sim GUI, toggle its DIO and watch your boolean on the dashboard.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> On a real robot (with a mentor), put an encoder value on the dashboard, move the mechanism by hand, and check the direction and scale</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why use a conversion factor instead of raw encoder counts?</summary>
+<p>Raw counts depend on the encoder and gearing. Converting gives real units (meters, degrees) you can reason about and use with WPILib's math.</p>
+</details>
+<details class="question">
+<summary>A drivetrain has a 10:1 gear ratio and 6-inch wheels. How far does the robot move per motor rotation?</summary>
+<p>Circumference = π × 6 in ≈ 18.85 in ≈ 0.479 m. Divide by 10: about <strong>0.0479 m</strong> (4.8 cm) per motor rotation.</p>
+</details>
+<details class="question">
+<summary>Why is a relative encoder risky on an arm?</summary>
+<p>It reads 0 at power-on wherever the arm is, so if the arm isn't in the expected starting position, every angle is wrong.</p>
+</details>
+<details class="question">
+<summary>Why is mixing inches and meters dangerous?</summary>
+<p>The code runs without errors, but every number is off by about 39×, so the robot moves to completely wrong places.</p>
+</details>
+<details class="question">
+<summary>Your gyro heading goes down when the robot turns left. What's wrong?</summary>
+<p>The gyro reports clockwise as positive, but WPILib expects counterclockwise positive. Flip the sign.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="07b-scheduler.html"><span>Previous</span>7.1 How the Command Scheduler Works</a><a class="pager-next" href="09-debugging.html"><span>Next</span>9. Testing, Debugging &amp; Simulation</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

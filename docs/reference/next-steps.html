@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where to Go Next | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section" open><summary>Reference</summary><ul><li><a href="next-steps.html" class="current" aria-current="page">Where to Go Next</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="resources.html">Resources</a></li><li><a href="credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="where-to-go-next">Where to Go Next<a class="headerlink" href="#where-to-go-next" title="Permanent link">#</a></h1>
+<p>Once you're comfortable with Lessons 0–16, these are the topics most teams tackle next. They're listed roughly in the order teams usually learn them, with the best place to start for each.</p>
+<h2 id="odometry-and-pose-estimation">Odometry and pose estimation<a class="headerlink" href="#odometry-and-pose-estimation" title="Permanent link">#</a></h2>
+<p><strong>Odometry</strong> tracks where the robot is on the field by combining wheel encoders and the gyro. It's the foundation for path following and auto-aiming.</p>
+<ul>
+<li>Start: <a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/index.html">Kinematics and Odometry</a></li>
+<li>Then: add a <code>Field2d</code> to the dashboard to see the robot's estimated position move as it drives</li>
+<li>Next level: <strong>pose estimation</strong>, which corrects odometry drift with camera measurements of AprilTags. See <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/index.html">State-Space and Pose Estimators</a>.</li>
+</ul>
+<h2 id="swerve-drive">Swerve drive<a class="headerlink" href="#swerve-drive" title="Permanent link">#</a></h2>
+<p>Most competitive teams now drive swerve: each wheel steers and drives independently, so the robot can move in any direction while turning.</p>
+<ul>
+<li>Start: the swerve kinematics and odometry pages in the WPILib kinematics section above</li>
+<li>Then: your swerve module vendor's docs, and their example code</li>
+<li>Many teams start from a generated template, such as CTRE's swerve project generator in Phoenix Tuner, rather than writing swerve from scratch</li>
+</ul>
+<p>Everything from Lessons 10–14 still applies: a swerve module is a drive motor with velocity control and a steering motor with position control.</p>
+<h2 id="vision">Vision<a class="headerlink" href="#vision" title="Permanent link">#</a></h2>
+<p>Cameras let the robot see AprilTags (to know where it is) and game pieces (to aim or drive to them).</p>
+<ul>
+<li><a href="https://docs.photonvision.org/">PhotonVision</a></li>
+<li><a href="https://docs.limelightvision.io/">Limelight</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html">AprilTag introduction (WPILib)</a></li>
+</ul>
+<h2 id="path-following">Path following<a class="headerlink" href="#path-following" title="Permanent link">#</a></h2>
+<p>Instead of "drive 2 meters, turn 90°," draw a smooth path on a field diagram and let the robot follow it.</p>
+<ul>
+<li><a href="https://pathplanner.dev/">PathPlanner</a>: the most widely used tool, with a path editor, auto builder, and on-the-fly pathfinding</li>
+<li><a href="https://choreo.autos/">Choreo</a>: generates time-optimal paths</li>
+</ul>
+<h2 id="characterization">Characterization<a class="headerlink" href="#characterization" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/introduction.html">System Identification (SysId)</a>, covered in <a href="../controls/13b-sysid.html">Lesson 13.1</a></li>
+<li><a href="https://www.reca.lc/">ReCalc</a>: estimate gear ratios, speeds, and feedforward gains before the mechanism is built</li>
+</ul>
+<h2 id="logging-and-replay">Logging and replay<a class="headerlink" href="#logging-and-replay" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.advantagekit.org/">AdvantageKit</a>: logs every input so you can replay a match and re-run your code against it</li>
+<li><a href="https://docs.advantagescope.org/">AdvantageScope</a>: graphs, 3D field views, and log analysis</li>
+</ul>
+<h2 id="vendor-libraries">Vendor libraries<a class="headerlink" href="#vendor-libraries" title="Permanent link">#</a></h2>
+<p>Your team's motors run through vendor libraries. Read the docs for whichever you use:</p>
+<ul>
+<li><a href="https://v6.docs.ctr-electronics.com/">CTRE Phoenix 6</a> (TalonFX, Kraken, CANcoder, Pigeon 2)</li>
+<li><a href="https://docs.revrobotics.com/revlib">REVLib</a> (SPARK MAX, SPARK Flex, NEO)</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Learn from other teams</p>
+<p>Many top teams publish their robot code on GitHub, and some write up their software design each season. Reading a championship robot's code after finishing this course is one of the best ways to level up. Pick one mechanism and figure out how they did it.</p>
+</div>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../workflow/16-unit-testing.html"><span>Previous</span>16. Unit Testing &amp; CI</a><a class="pager-next" href="glossary.html"><span>Next</span>Glossary</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

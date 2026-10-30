@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 7: Timed Autonomous | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html" class="current" aria-current="page">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-7-timed-autonomous-on-the-wcd">Lab 7: Timed Autonomous on the WCD<a class="headerlink" href="#lab-7-timed-autonomous-on-the-wcd" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>The first 15 seconds of every FRC match are <strong>autonomous</strong>: the robot runs entirely on its own code, with no driver input. A robot that does something useful in auto starts every match ahead.</p>
+<p>In this lab you'll make the West Coast Drive drive a pattern by itself, and let the drive team pick which pattern from a menu on the dashboard. You'll use only <strong>time</strong> to decide how far to go, and you'll find out why that's not good enough. That sets up <a href="lab8-navx-gyro.html">Lab 8</a>, where the robot uses a gyro to know how far it has really turned.</p>
+<p><strong>Before you start:</strong> finish <a href="lab2-west-coast-drive.html">Lab 2</a>. You'll add to the same <strong>WestCoastDrive</strong> project. <a href="../project/11-autonomous.html">Lesson 11</a> covers autonomous in more depth.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html">Command Compositions</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/choosing-an-autonomous-program-from-smartdashboard.html">Choosing an Autonomous Program</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<div class="admonition danger">
+<p class="admonition-title">Autonomous safety</p>
+<p>In auto, <strong>nobody is steering</strong>. The robot drives the moment it's enabled.</p>
+<ul>
+<li>Clear a big space and keep everyone out of the robot's path.</li>
+<li>One person's only job is the disable key (<span class="keys"><kbd class="key-enter">Enter</kbd></span>) and the emergency stop (<span class="keys"><kbd class="key-space">Space</kbd></span>).</li>
+<li>Test each new routine <strong>on blocks first</strong>.</li>
+<li>Keep <code>MaxOutput</code> at 0.5 from Lab 2.</li>
+</ul>
+</div>
+<h3 id="how-autonomous-runs">How autonomous runs<a class="headerlink" href="#how-autonomous-runs" title="Permanent link">#</a></h3>
+<p>You don't have to write any of this, but you should know it's there. In <code>Robot.java</code>, the template already does:</p>
+<ol>
+<li>When auto starts, <code>autonomousInit()</code> asks <code>RobotContainer.getAutonomousCommand()</code> for a command and <strong>schedules</strong> it.</li>
+<li>The scheduler runs it every 20 ms until it ends.</li>
+<li>When teleop starts, <code>teleopInit()</code> <strong>cancels</strong> it, in case it's still running.</li>
+</ol>
+<p>So your whole job is to make <code>getAutonomousCommand()</code> return the right command. While an auto command is using the drivetrain, the joystick default command pauses, then comes back when auto ends.</p>
+<h3 id="step-1-a-command-that-drives-for-a-set-time">Step 1: A command that drives for a set time<a class="headerlink" href="#step-1-a-command-that-drives-for-a-set-time" title="Permanent link">#</a></h3>
+<p>Open <code>DriveSubsystem.java</code> and add:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Drives each side at a fixed speed for a set time, then stops. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveForSecondsCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">leftSpeed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">rightSpeed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">seconds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">tankDrive</span><span class="p">(</span><span class="n">leftSpeed</span><span class="p">,</span><span class="w"> </span><span class="n">rightSpeed</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">))</span><span class="w">  </span><span class="c1">// false = don't square</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">seconds</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" s"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tankDrive(left, right, false)</code></td>
+<td>The <code>false</code> turns off squaring, so 0.4 means 40%, not 16%</td>
+</tr>
+<tr>
+<td><code>withTimeout(seconds)</code></td>
+<td>Ends the command after that many seconds</td>
+</tr>
+<tr>
+<td><code>finallyDo(...)</code></td>
+<td>Runs when the command ends <strong>for any reason</strong> (finished, timed out, or canceled), so the motors always stop</td>
+</tr>
+</tbody>
+</table>
+<p>With this one command you can drive forward (both sides the same), backward (both negative), or spin in place (sides opposite). Remember the skid steer levers from Lab 2.</p>
+<h3 id="step-2-build-routines-from-pieces">Step 2: Build routines from pieces<a class="headerlink" href="#step-2-build-routines-from-pieces" title="Permanent link">#</a></h3>
+<p>Routines are just commands chained together. Add these methods to <code>RobotContainer.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Drive straight forward for 2 seconds. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveForwardAuto</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive Forward"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** One side of a square: drive forward, pause, spin left about 90 degrees, pause. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">squareSide</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">),</span><span class="w">    </span><span class="c1">// forward</span>
+<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">),</span><span class="w">    </span><span class="c1">// pause</span>
+<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">),</span><span class="w">   </span><span class="c1">// spin left (guess the time!)</span>
+<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">));</span><span class="w">   </span><span class="c1">// pause</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Try to drive a square and end where it started. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">squareAuto</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span><span class="n">squareSide</span><span class="p">(),</span><span class="w"> </span><span class="n">squareSide</span><span class="p">(),</span><span class="w"> </span><span class="n">squareSide</span><span class="p">(),</span><span class="w"> </span><span class="n">squareSide</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Square"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>Import <code>edu.wpi.first.wpilibj2.command.Commands</code>.</p>
+<p><code>Commands.sequence(a, b, c)</code> runs <code>a</code>, then <code>b</code>, then <code>c</code>.</p>
+<div class="admonition info">
+<p class="admonition-title">Why pause by driving at 0 instead of <code>Commands.waitSeconds</code>?</p>
+<p><code>DifferentialDrive</code> has a safety feature: if nothing sends it a speed for about a tenth of a second, it stops the motors and prints an "Output not updated often enough" warning. Driving at 0 for the pause keeps it fed, so the console stays quiet. Each <code>squareSide()</code> call builds a <strong>new</strong> set of commands, which matters: one command object can't be used twice in the same routine.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">The spin time is a guess</p>
+<p>Nobody knows how long a 90° spin takes. Start with 0.5 seconds and adjust it until one turn looks like 90°. That guessing is the point of this lab.</p>
+</div>
+<h3 id="step-3-let-the-drive-team-pick">Step 3: Let the drive team pick<a class="headerlink" href="#step-3-let-the-drive-team-pick" title="Permanent link">#</a></h3>
+<p>A <code>SendableChooser</code> puts a dropdown menu on the dashboard. Add a field to <code>RobotContainer</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SendableChooser</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SendableChooser</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+</code></pre></div>
+<p>In the constructor, after <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">setDefaultOption</span><span class="p">(</span><span class="s">"Do nothing"</span><span class="p">,</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">none</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">addOption</span><span class="p">(</span><span class="s">"Drive forward"</span><span class="p">,</span><span class="w"> </span><span class="n">driveForwardAuto</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">addOption</span><span class="p">(</span><span class="s">"Square"</span><span class="p">,</span><span class="w"> </span><span class="n">squareAuto</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">,</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="p">);</span>
+</code></pre></div>
+<p>And make <code>getAutonomousCommand()</code> return the choice:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">getSelected</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>Import <code>SendableChooser</code> and <code>SmartDashboard</code> if needed.</p>
+<div class="admonition tip">
+<p class="admonition-title">Why \"Do nothing\" is the default</p>
+<p>If the drive team forgets to pick, a robot that sits still is far better than one that runs a routine meant for a different starting spot and hits someone else's robot.</p>
+</div>
+<h3 id="step-4-run-it">Step 4: Run it<a class="headerlink" href="#step-4-run-it" title="Permanent link">#</a></h3>
+<ol>
+<li>Deploy. On the dashboard, find <strong>Auto</strong> and pick <strong>Drive forward</strong>.</li>
+<li>On blocks first: in the Driver Station, select <strong>Autonomous</strong>, say <strong>"Enabling!"</strong>, and enable. The wheels run for 2 seconds and stop.</li>
+<li>On the floor: put tape on the floor at the robot's front edge, and run it again. Mark where it stops.</li>
+<li>Run <strong>Square</strong> on blocks, then on the floor. Adjust the spin time in <code>squareSide()</code> until it looks close to a square.</li>
+</ol>
+<h3 id="step-5-how-repeatable-is-it">Step 5: How repeatable is it?<a class="headerlink" href="#step-5-how-repeatable-is-it" title="Permanent link">#</a></h3>
+<p>Run <strong>Square</strong> five times without changing anything. Each time, measure how far the robot ends up from where it started.</p>
+<table>
+<thead>
+<tr>
+<th>Run</th>
+<th>Distance from start</th>
+<th>Ended facing which way?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Then swap in a <strong>less charged battery</strong> and run it twice more.</p>
+<p><strong>What you'll see:</strong> The square doesn't close, and it's different every time. Turns that were 90° become 80° or 100°, and the errors add up corner by corner. A weaker battery makes every move shorter.</p>
+<p>The problem is the same one from Lab 6's timed attempt: the robot doesn't <strong>measure</strong> how far it turned. It only knows how long it tried. In Lab 8 you'll add a gyro so it does.</p>
+<h3 id="step-6-commit">Step 6: Commit<a class="headerlink" href="#step-6-commit" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 7: timed autonomous"</span>
+</code></pre></div>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run <strong>Drive forward</strong> and <strong>Square</strong> from the chooser</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Tune the spin time until a single turn is close to 90°</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Fill in the repeatability table, including the less charged battery</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <strong>Drive backward</strong> option to the chooser</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Write a "<strong>there and back</strong>" routine: forward 1.5 seconds, spin 180°, forward 1.5 seconds. Does it end where it started?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make the spin a gentle <strong>curve</strong> instead of turning in place (hint: both sides forward, one faster)</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What decides which command runs in autonomous?</summary>
+<p>Whatever <code>getAutonomousCommand()</code> returns. <code>Robot.java</code> schedules it when auto starts and cancels it when teleop starts.</p>
+</details>
+<details class="question">
+<summary>What does <code>Commands.sequence(a, b, c)</code> do?</summary>
+<p>Runs <code>a</code>, then <code>b</code> after <code>a</code> ends, then <code>c</code> after <code>b</code> ends.</p>
+</details>
+<details class="question">
+<summary>Why does <code>driveForSecondsCommand</code> use <code>finallyDo</code> to stop the motors?</summary>
+<p>So the motors stop however the command ends: timed out, finished, or canceled when teleop starts.</p>
+</details>
+<details class="question">
+<summary>Why should \"Do nothing\" be the default auto?</summary>
+<p>If nobody picks one, the robot stays still instead of running a routine meant for a different starting spot.</p>
+</details>
+<details class="question">
+<summary>Why doesn't the timed square end where it started?</summary>
+<p>Time isn't distance or angle. Battery charge, carpet, and wheel wear change how far each timed move goes, and the errors add up at every corner.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab6-encoder.html"><span>Previous</span>Lab 6: Count Turns with an Encoder</a><a class="pager-next" href="lab8-navx-gyro.html"><span>Next</span>Lab 8: Turn with a Gyro</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 4: Stop at a Limit Switch | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html" class="current" aria-current="page">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-4-stop-at-a-limit-switch">Lab 4: Stop at a Limit Switch<a class="headerlink" href="#lab-4-stop-at-a-limit-switch" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>So far the robot has only done what the driver told it. Now it starts <strong>sensing</strong> the world.</p>
+<p>A <strong>limit switch</strong> is the simplest sensor there is: pressed or not pressed. Robots use them everywhere to know when a mechanism has reached the end of its travel: an elevator at the bottom, an arm against its hard stop, a climber fully retracted. Running a motor into a hard stop without stopping can strip gears, snap belts, or burn out the motor.</p>
+<p>In this lab you'll read a limit switch, show it on the dashboard, and make the motor stop by itself the moment the switch is pressed.</p>
+<p><strong>Before you start:</strong> finish <a href="lab3-buttons-triggers.html">Lab 3</a>. You'll add to the same <strong>TestBed</strong> project. <a href="../robot-code/08-sensors.html">Lesson 8</a> covers sensors in more depth. Lesson <a href="../hardware/04d-sensors.html">4.3</a> explains how limit switches are wired, including NO vs. NC.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/digital-inputs-software.html">Digital Inputs – Software</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/limit-switch.html">Limit Switches</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="how-a-limit-switch-talks-to-the-roborio">How a limit switch talks to the roboRIO<a class="headerlink" href="#how-a-limit-switch-talks-to-the-roborio" title="Permanent link">#</a></h3>
+<p>A limit switch connects to one of the roboRIO's <strong>DIO</strong> (digital input/output) ports. Each DIO port has three pins: <strong>signal</strong>, <strong>5 V</strong>, and <strong>ground</strong>. A basic limit switch uses two of them: <strong>signal</strong> and <strong>ground</strong>.</p>
+<p>Inside the roboRIO, the signal pin is gently pulled up to "high" (<code>true</code>). When the switch closes, it connects signal to ground, which pulls it "low" (<code>false</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Switch</th>
+<th>Wired as "normally open" (NO)</th>
+<th>What <code>get()</code> returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Not pressed</td>
+<td>Circuit open</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td>Pressed</td>
+<td>Circuit closed to ground</td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Pressed reads <code>false</code></p>
+<p>This surprises everyone the first time. With the usual wiring, <code>get()</code> returns <strong><code>false</code></strong> when the switch is pressed. That's why the code below uses <code>!</code> (not). Always check on the dashboard instead of guessing.</p>
+</div>
+<p><img alt="A limit switch wired to a roboRIO DIO port" src="../assets/wpilib/limit-switch-to-roborio.svg" /></p>
+<p class="credit">A limit switch on a DIO port. Only signal and ground are used. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/digital-inputs-hardware.html">Digital Inputs - Hardware</a> (CC BY 4.0).</p>
+
+<p>The test bed's switches have both <strong>NO</strong> (normally open) and <strong>NC</strong> (normally closed) contacts. If yours is wired to NC, the logic flips: pressed reads <code>true</code>. The dashboard test in Step 3 tells you which you have.</p>
+<p>On the test bed, the switch isn't attached to a mechanism, so <strong>you</strong> will be the mechanism: pressing the switch by hand is like an arm reaching its hard stop.</p>
+<h3 id="step-1-constants">Step 1: Constants<a class="headerlink" href="#step-1-constants" title="Permanent link">#</a></h3>
+<p>Find which DIO port the switch is wired to (follow the wire to the roboRIO). Add a new class to <code>Constants.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">kSensorConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LimitSwitchDio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">   </span><span class="c1">// the DIO port your switch uses</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<h3 id="step-2-add-the-switch-to-the-subsystem">Step 2: Add the switch to the subsystem<a class="headerlink" href="#step-2-add-the-switch-to-the-subsystem" title="Permanent link">#</a></h3>
+<p>Open <code>SpinBrushlessMotorSubsystem.java</code>. Add the switch next to the motor:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DigitalInput</span><span class="w"> </span><span class="n">m_limitSwitch</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">DigitalInput</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">LimitSwitchDio</span><span class="p">);</span>
+</code></pre></div>
+<p>Import <code>edu.wpi.first.wpilibj.DigitalInput</code>. Then add a method that says what the switch <strong>means</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** True when the limit switch is pressed. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isLimitPressed</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="n">m_limitSwitch</span><span class="p">.</span><span class="na">get</span><span class="p">();</span><span class="w">   </span><span class="c1">// pressed pulls the signal low, so flip it</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Name it for what it means</p>
+<p><code>isLimitPressed()</code> is much clearer than <code>getSwitch()</code>. Everywhere else in your code, <code>if (isLimitPressed())</code> reads like English and hides the "pressed is false" wiring detail in one place.</p>
+</div>
+<p>Add it to <code>periodic()</code> so you can see it:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putBoolean</span><span class="p">(</span><span class="s">"Brushless/Limit Pressed"</span><span class="p">,</span><span class="w"> </span><span class="n">isLimitPressed</span><span class="p">());</span>
+</code></pre></div>
+<h3 id="step-3-check-it-on-the-dashboard">Step 3: Check it on the dashboard<a class="headerlink" href="#step-3-check-it-on-the-dashboard" title="Permanent link">#</a></h3>
+<p>Deploy (the robot can stay <strong>disabled</strong>). Open the dashboard and find <strong>Brushless/Limit Pressed</strong>.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Not touching the switch: shows <strong>false</strong></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Holding the switch down: shows <strong>true</strong></li>
+</ul>
+<p>If it's backward, your switch is wired NC. Remove the <code>!</code> in <code>isLimitPressed()</code> and deploy again. Getting this right now saves confusion later.</p>
+<h3 id="step-4-spin-until-the-switch-is-pressed">Step 4: Spin until the switch is pressed<a class="headerlink" href="#step-4-spin-until-the-switch-is-pressed" title="Permanent link">#</a></h3>
+<p>Add a command that runs the motor and <strong>stops by itself</strong> when the switch is hit:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Spins until the limit switch is pressed, then stops. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinUntilLimitCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">spinMotorCommand</span><span class="p">(</span><span class="n">speed</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">isLimitPressed</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin Until Limit"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p><code>.until(condition)</code> checks the condition every 20 ms. The moment it's <code>true</code>, the command ends, and <code>spinMotorCommand</code>'s end action stops the motor.</p>
+<p>Bind it in <code>RobotContainer</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// D-pad up: spin until the limit switch is pressed</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">povUp</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinUntilLimitCommand</span><span class="p">(</span>
+<span class="w">            </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorSpeed</span><span class="p">));</span>
+</code></pre></div>
+<p>It's <code>onTrue</code> because the command ends by itself. Tap once and let it go.</p>
+<p><strong>Test it:</strong></p>
+<ol>
+<li>Enable. Tap <strong>D-pad up</strong>. The motor spins.</li>
+<li>Press the limit switch by hand. The motor <strong>stops immediately</strong>.</li>
+<li>Tap D-pad up <strong>while holding the switch down</strong>. What happens? Why?</li>
+</ol>
+<h3 id="step-5-dont-even-start-if-youre-already-at-the-limit">Step 5: Don't even start if you're already at the limit<a class="headerlink" href="#step-5-dont-even-start-if-youre-already-at-the-limit" title="Permanent link">#</a></h3>
+<p>In step 3 of the test, the command started, saw the switch already pressed, and ended in the same loop. That works, but it's cleaner to say "don't start at all":</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinUntilLimitCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">spinMotorCommand</span><span class="p">(</span><span class="n">speed</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">isLimitPressed</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">unless</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">isLimitPressed</span><span class="p">)</span><span class="w">          </span><span class="c1">// don't start if already pressed</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin Until Limit"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<h3 id="step-6-a-trigger-made-from-a-sensor">Step 6: A trigger made from a sensor<a class="headerlink" href="#step-6-a-trigger-made-from-a-sensor" title="Permanent link">#</a></h3>
+<p>Buttons aren't the only triggers. <strong>Any true/false check</strong> can start a command. Add this in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Whenever the limit switch becomes pressed, print a message</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">Trigger</span><span class="p">(</span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">::</span><span class="n">isLimitPressed</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">onTrue</span><span class="p">(</span><span class="n">Commands</span><span class="p">.</span><span class="na">print</span><span class="p">(</span><span class="s">"Limit switch hit!"</span><span class="p">));</span>
+</code></pre></div>
+<p>Import <code>Trigger</code> and <code>Commands</code> if needed. Deploy, open RioLog, and press the switch. The message prints once <strong>each time</strong> the switch goes from not-pressed to pressed, not 50 times a second while you hold it. That's what <code>onTrue</code> means: it fires on the <strong>change</strong>.</p>
+<h3 id="step-7-commit">Step 7: Commit<a class="headerlink" href="#step-7-commit" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 4: limit switch"</span>
+</code></pre></div>
+<h3 id="when-it-doesnt-work">When it doesn't work<a class="headerlink" href="#when-it-doesnt-work" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dashboard always shows the same value</td>
+<td>Wrong DIO port in <code>Constants</code>, or the wire isn't on the signal pin</td>
+</tr>
+<tr>
+<td>Value is backward</td>
+<td>The switch is wired NC. Remove the <code>!</code>.</td>
+</tr>
+<tr>
+<td>Motor doesn't stop when the switch is pressed</td>
+<td><code>.until</code> is missing, or <code>isLimitPressed()</code> returns the wrong value</td>
+</tr>
+<tr>
+<td>"Limit switch hit!" prints over and over</td>
+<td>You used <code>whileTrue</code> instead of <code>onTrue</code>, or the switch is bouncing (see the last exercise)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Get <strong>Limit Pressed</strong> reading correctly on the dashboard</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Spin until the switch is pressed with D-pad up</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Hold the switch, then tap D-pad up. Explain what happens with and without <code>.unless</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Use the <strong>second</strong> limit switch on the test bed. Make D-pad down spin <strong>backward</strong> until it's pressed, like an elevator going down to its bottom switch.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make A (from Lab 1) also refuse to spin while the switch is pressed</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Switches can "bounce," flickering on and off for a few milliseconds when pressed. Add <code>.debounce(0.05)</code> to the <code>Trigger</code> from Step 6. What does it change?</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why does a pressed limit switch usually read <code>false</code>?</summary>
+<p>The roboRIO pulls the signal pin high when nothing is connected. Pressing a normally-open switch connects the signal to ground, which pulls it low.</p>
+</details>
+<details class="question">
+<summary>Why put the <code>!</code> inside <code>isLimitPressed()</code> instead of everywhere you check the switch?</summary>
+<p>So the wiring detail lives in one place. The rest of the code reads clearly, and if the wiring changes, you fix one line.</p>
+</details>
+<details class="question">
+<summary>What does <code>.until(this::isLimitPressed)</code> do?</summary>
+<p>It checks the switch every loop and ends the command the moment the switch is pressed. Ending the command runs its end action, which stops the motor.</p>
+</details>
+<details class="question">
+<summary>What's the difference between <code>.until(...)</code> and <code>.unless(...)</code>?</summary>
+<p><code>.until</code> ends a running command when the condition becomes true. <code>.unless</code> stops the command from starting at all if the condition is already true.</p>
+</details>
+<details class="question">
+<summary>Why does the print in Step 6 happen once instead of 50 times a second?</summary>
+<p><code>onTrue</code> fires when the trigger <strong>changes</strong> from false to true, not while it stays true.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab3-buttons-triggers.html"><span>Previous</span>Lab 3: Buttons and Triggers</a><a class="pager-next" href="lab5-knob-speed.html"><span>Next</span>Lab 5: Control Speed with a Knob</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

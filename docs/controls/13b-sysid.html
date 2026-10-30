@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>13.1 Characterizing with SysId | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section" open><summary>Controls</summary><ul><li><a href="12-pid.html">12. PID Feedback</a></li><li><a href="13-feedforward.html">13. Feedforward</a></li><li><a href="13b-sysid.html" class="current" aria-current="page">13.1 Characterizing with SysId</a></li><li><a href="14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="131-characterizing-with-sysid">13.1 Characterizing with SysId<a class="headerlink" href="#131-characterizing-with-sysid" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>In <a href="13-feedforward.html">Lesson 13</a> you guessed kG by slowly raising the voltage. That works for one term, but kS, kV, and kA are almost impossible to guess well. <strong>SysId</strong> (System Identification) measures them for you. It drives your mechanism through a few controlled tests, records voltage, position, and velocity, and fits the feedforward equation to that real data.</p>
+<p>Good SysId numbers mean feedforward does most of the work, and PID only has to clean up small errors.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/introduction.html">Introduction to System Identification</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/creating-routine.html">Creating an Identification Routine</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/running-routine.html">Running the Identification Routine</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/loading-data.html">Loading Data</a> and <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/viewing-diagnostics.html">Viewing Diagnostics</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="the-big-picture">The big picture<a class="headerlink" href="#the-big-picture" title="Permanent link">#</a></h3>
+<div class="mermaid">flowchart LR
+    A[1. Add a SysIdRoutine&lt;br/&gt;to your subsystem] --&gt; B[2. Run the 4 tests&lt;br/&gt;on the real robot]
+    B --&gt; C[3. Pull the log file&lt;br/&gt;off the roboRIO]
+    C --&gt; D[4. Load it in the&lt;br/&gt;SysId tool]
+    D --&gt; E[5. Copy kS, kV, kA, kG&lt;br/&gt;into Constants]</div>
+<div class="admonition warning">
+<p class="admonition-title">SysId needs a real robot</p>
+<p>Simulation already knows its own physics, so characterizing it tells you nothing new. Do Steps 1–2 in sim to make sure the code works, then run the real tests on the robot.</p>
+</div>
+<h3 id="the-four-tests">The four tests<a class="headerlink" href="#the-four-tests" title="Permanent link">#</a></h3>
+<p>SysId runs two kinds of tests, each in both directions:</p>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>What the motor does</th>
+<th>What it measures best</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Quasistatic</strong> forward / reverse</td>
+<td>Voltage ramps up <strong>slowly</strong> (default 1 V per second)</td>
+<td><strong>kS</strong> and <strong>kV</strong>: acceleration is near zero, so voltage is mostly fighting friction and speed</td>
+</tr>
+<tr>
+<td><strong>Dynamic</strong> forward / reverse</td>
+<td>A <strong>sudden</strong> constant voltage step (default 7 V)</td>
+<td><strong>kA</strong>: the mechanism accelerates hard, so the extra voltage goes into acceleration</td>
+</tr>
+</tbody>
+</table>
+<p>Running both directions matters because friction and gravity act differently going up vs. down. That's how SysId separates kS from kG.</p>
+<h3 id="step-1-add-a-sysidroutine-to-your-subsystem">Step 1: Add a SysIdRoutine to your subsystem<a class="headerlink" href="#step-1-add-a-sysidroutine-to-your-subsystem" title="Permanent link">#</a></h3>
+<p>This example characterizes an arm. The same pattern works for an elevator, flywheel, or drivetrain.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import static</span><span class="w"> </span><span class="nn">edu.wpi.first.units.Units.*</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.RobotController</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Arm</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="w"> </span><span class="n">motor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Encoder</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Encoder</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SysIdRoutine</span><span class="w"> </span><span class="n">sysId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SysIdRoutine</span><span class="p">(</span>
+<span class="w">        </span><span class="c1">// Test settings. Defaults are 1 V/s ramp, 7 V step, 10 s timeout.</span>
+<span class="w">        </span><span class="c1">// An arm needs a gentler step so it doesn't slam into its stops.</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">SysIdRoutine</span><span class="p">.</span><span class="na">Config</span><span class="p">(</span>
+<span class="w">            </span><span class="n">Volts</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="na">per</span><span class="p">(</span><span class="n">Second</span><span class="p">),</span><span class="w">   </span><span class="c1">// quasistatic ramp rate</span>
+<span class="w">            </span><span class="n">Volts</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="w">               </span><span class="c1">// dynamic step voltage</span>
+<span class="w">            </span><span class="n">Seconds</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w">              </span><span class="c1">// safety timeout per test</span>
+<span class="w">        </span><span class="p">),</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">SysIdRoutine</span><span class="p">.</span><span class="na">Mechanism</span><span class="p">(</span>
+<span class="w">            </span><span class="c1">// How SysId drives the motor:</span>
+<span class="w">            </span><span class="n">voltage</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">motor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">voltage</span><span class="p">.</span><span class="na">in</span><span class="p">(</span><span class="n">Volts</span><span class="p">)),</span>
+<span class="w">            </span><span class="c1">// What SysId records every loop:</span>
+<span class="w">            </span><span class="n">log</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">log</span><span class="p">.</span><span class="na">motor</span><span class="p">(</span><span class="s">"arm"</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="na">voltage</span><span class="p">(</span><span class="n">Volts</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">motor</span><span class="p">.</span><span class="na">get</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">RobotController</span><span class="p">.</span><span class="na">getBatteryVoltage</span><span class="p">()))</span>
+<span class="w">                </span><span class="p">.</span><span class="na">angularPosition</span><span class="p">(</span><span class="n">Radians</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">getAngleRadians</span><span class="p">()))</span>
+<span class="w">                </span><span class="p">.</span><span class="na">angularVelocity</span><span class="p">(</span><span class="n">RadiansPerSecond</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">getVelocityRadPerSec</span><span class="p">())),</span>
+<span class="w">            </span><span class="k">this</span>
+<span class="w">        </span><span class="p">)</span>
+<span class="w">    </span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">sysIdQuasistatic</span><span class="p">(</span><span class="n">SysIdRoutine</span><span class="p">.</span><span class="na">Direction</span><span class="w"> </span><span class="n">direction</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">sysId</span><span class="p">.</span><span class="na">quasistatic</span><span class="p">(</span><span class="n">direction</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">sysIdDynamic</span><span class="p">(</span><span class="n">SysIdRoutine</span><span class="p">.</span><span class="na">Direction</span><span class="w"> </span><span class="n">direction</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">sysId</span><span class="p">.</span><span class="na">dynamic</span><span class="p">(</span><span class="n">direction</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// getAngleRadians() and getVelocityRadPerSec() come from your encoder,</span>
+<span class="w">    </span><span class="c1">// with 0 radians = arm horizontal (see Lesson 13).</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Linear vs. angular</p>
+<p>For an <strong>elevator or drivetrain</strong>, log <code>.linearPosition(Meters.of(...))</code> and <code>.linearVelocity(MetersPerSecond.of(...))</code> instead. Use the real units your mechanism moves in. SysId's gains come out in those same units.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Get the units right <em>before</em> testing</p>
+<p>SysId gains are only as good as the position and velocity you log. Double-check your conversion factor from <a href="../robot-code/08-sensors.html">Lesson 8</a>. If the logged angle is wrong, every gain will be wrong, and you'll have to redo all four tests.</p>
+</div>
+<h3 id="step-2-bind-the-tests-and-run-them">Step 2: Bind the tests and run them<a class="headerlink" href="#step-2-bind-the-tests-and-run-them" title="Permanent link">#</a></h3>
+<p>In <code>RobotContainer.java</code>, put the tests on a <strong>separate controller</strong> (port 1) so a driver can't trigger them by accident:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="w"> </span><span class="n">sysIdController</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configureSysIdBindings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">sysIdController</span><span class="p">.</span><span class="na">a</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">arm</span><span class="p">.</span><span class="na">sysIdQuasistatic</span><span class="p">(</span><span class="n">SysIdRoutine</span><span class="p">.</span><span class="na">Direction</span><span class="p">.</span><span class="na">kForward</span><span class="p">));</span>
+<span class="w">    </span><span class="n">sysIdController</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">arm</span><span class="p">.</span><span class="na">sysIdQuasistatic</span><span class="p">(</span><span class="n">SysIdRoutine</span><span class="p">.</span><span class="na">Direction</span><span class="p">.</span><span class="na">kReverse</span><span class="p">));</span>
+<span class="w">    </span><span class="n">sysIdController</span><span class="p">.</span><span class="na">x</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">arm</span><span class="p">.</span><span class="na">sysIdDynamic</span><span class="p">(</span><span class="n">SysIdRoutine</span><span class="p">.</span><span class="na">Direction</span><span class="p">.</span><span class="na">kForward</span><span class="p">));</span>
+<span class="w">    </span><span class="n">sysIdController</span><span class="p">.</span><span class="na">y</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">arm</span><span class="p">.</span><span class="na">sysIdDynamic</span><span class="p">(</span><span class="n">SysIdRoutine</span><span class="p">.</span><span class="na">Direction</span><span class="p">.</span><span class="na">kReverse</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>whileTrue</code> is a safety feature: <strong>let go of the button and the motor stops.</strong></p>
+<p>Also make sure WPILib's data log is running, so the test data gets saved to a file. In <code>Robot.java</code>'s constructor or <code>robotInit()</code>:
+<div class="highlight"><pre><span></span><code><span class="n">DataLogManager</span><span class="p">.</span><span class="na">start</span><span class="p">();</span>
+</code></pre></div></p>
+<p><strong>Running the tests on the robot:</strong></p>
+<ol>
+<li>Use a <strong>fully charged battery</strong>. A tired battery gives noisy data.</li>
+<li>Clear space. For an arm, start somewhere in the middle of its travel. For a drivetrain, put it on the floor with lots of room (not on blocks, since the wheels need real load).</li>
+<li>Enable in <strong>Teleop</strong> (or Test mode).</li>
+<li>Hold <strong>A</strong> (quasistatic forward). Let go <strong>before</strong> the mechanism hits a hard stop.</li>
+<li>Move the mechanism back to the start if needed, then hold <strong>B</strong>, <strong>X</strong>, and <strong>Y</strong> the same way.</li>
+<li>Disable the robot.</li>
+</ol>
+<div class="admonition danger">
+<p class="admonition-title">Be ready to let go</p>
+<p>Dynamic tests jump straight to the step voltage. Hold the button with your thumb ready to lift, and keep everyone clear of the mechanism. For arms and elevators, consider adding <code>.until(() -&gt; atLimit())</code> to each test command as a backup.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Longer is better, until you hit the stop</p>
+<p>Each test should run long enough to reach a fairly steady speed. A quasistatic test that lasts half a second doesn't have enough data. If your mechanism's travel is short, lower the ramp rate or step voltage so the test lasts longer before you have to stop.</p>
+</div>
+<h3 id="step-3-get-the-log-file">Step 3: Get the log file<a class="headerlink" href="#step-3-get-the-log-file" title="Permanent link">#</a></h3>
+<p>WPILib logs are <code>.wpilog</code> files saved on the roboRIO (or a USB stick plugged into it).</p>
+<ol>
+<li>Connect to the robot.</li>
+<li>Open <strong>DataLogTool</strong> (installed with WPILib).</li>
+<li>Download the newest <code>.wpilog</code> file to your laptop.</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Using vendor logging instead</p>
+<p>CTRE's Phoenix 6 has its own <code>SignalLogger</code> that records <code>.hoot</code> files, and it can capture data faster and more precisely than WPILib's log. If your team uses it, follow <a href="https://v6.docs.ctr-electronics.com/">CTRE's SysId guide</a> and convert the <code>.hoot</code> file to <code>.wpilog</code> with Phoenix Tuner before Step 4. The analysis is identical.</p>
+</div>
+<h3 id="step-4-analyze-in-the-sysid-tool">Step 4: Analyze in the SysId tool<a class="headerlink" href="#step-4-analyze-in-the-sysid-tool" title="Permanent link">#</a></h3>
+<ol>
+<li>Open the <strong>SysId</strong> tool (in the WPILib tools folder, or <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Start Tool → SysId</strong>).</li>
+<li><strong>Open</strong> your <code>.wpilog</code> file.</li>
+<li>In the <strong>Data Selector</strong>:<ul>
+<li>Pick the test-state entry. It's named something like <code>sysid-test-state-arm</code>.</li>
+<li>Drag your logged <strong>position</strong>, <strong>velocity</strong>, and <strong>voltage</strong> entries into the matching slots.</li>
+<li>Set the units to match what you logged (radians for this arm).</li>
+<li>Click <strong>Load</strong>.</li>
+</ul>
+</li>
+<li>
+<p>In the <strong>Analyzer</strong>, set the <strong>mechanism type</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Choose</th>
+<th>Gains you get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Flywheel, roller, turret</td>
+<td><strong>Simple</strong></td>
+<td>kS, kV, kA</td>
+</tr>
+<tr>
+<td>Drivetrain</td>
+<td><strong>Simple</strong> (characterize left and right sides)</td>
+<td>kS, kV, kA</td>
+</tr>
+<tr>
+<td>Elevator</td>
+<td><strong>Elevator</strong></td>
+<td>kS, kV, kA, kG</td>
+</tr>
+<tr>
+<td>Arm</td>
+<td><strong>Arm</strong></td>
+<td>kS, kV, kA, kG</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>Read off the <strong>feedforward gains</strong>.</p>
+</li>
+</ol>
+<h3 id="step-5-check-the-data-before-trusting-it">Step 5: Check the data before trusting it<a class="headerlink" href="#step-5-check-the-data-before-trusting-it" title="Permanent link">#</a></h3>
+<p>SysId always produces numbers, even from bad data. Before using them, look at the <strong>Diagnostics</strong> plots:</p>
+<p><img alt="The SysId analysis window with the time-domain diagnostic plots highlighted" src="../assets/wpilib/time-domain-plots.png" /></p>
+<p class="credit">The SysId diagnostic plots (highlighted in red). From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/viewing-diagnostics.html">Viewing Diagnostics</a> (CC BY 4.0).</p>
+
+<ul>
+<li><strong>Fit quality:</strong> each plot should show the fitted line passing through the middle of the data points, not off to one side.</li>
+<li><strong>Velocity vs. time:</strong> the quasistatic plots should rise smoothly. Jagged plots or big gaps mean a noisy sensor or a test that was too short.</li>
+<li><strong>Sanity check the signs:</strong> kS, kV, and kA should all be <strong>positive</strong>. A negative gain almost always means a sensor is inverted relative to the motor, or the units are wrong.</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Common problems</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Usual cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Negative kV or kA</td>
+<td>Encoder direction doesn't match motor direction. Invert one of them.</td>
+</tr>
+<tr>
+<td>Huge kG on an arm</td>
+<td>Angle zero isn't horizontal</td>
+</tr>
+<tr>
+<td>Wildly noisy plots</td>
+<td>Test too short, dying battery, or a loose belt / chain</td>
+</tr>
+<tr>
+<td>Gains change a lot between runs</td>
+<td>Mechanism is binding or slipping. Fix the mechanical issue first.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="step-6-use-the-gains">Step 6: Use the gains<a class="headerlink" href="#step-6-use-the-gains" title="Permanent link">#</a></h3>
+<p>Copy the numbers into <code>Constants.java</code> and plug them into the feedforward from Lesson 13:</p>
+<p><div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ArmConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// From SysId, &lt;date&gt;, fresh battery</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.21</span><span class="p">;</span><span class="w">   </span><span class="c1">// volts</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kG</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.48</span><span class="p">;</span><span class="w">   </span><span class="c1">// volts</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.87</span><span class="p">;</span><span class="w">   </span><span class="c1">// volts per (rad/s)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.06</span><span class="p">;</span><span class="w">   </span><span class="c1">// volts per (rad/s²)</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ArmFeedforward</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArmFeedforward</span><span class="p">(</span>
+<span class="w">    </span><span class="n">ArmConstants</span><span class="p">.</span><span class="na">kS</span><span class="p">,</span><span class="w"> </span><span class="n">ArmConstants</span><span class="p">.</span><span class="na">kG</span><span class="p">,</span><span class="w"> </span><span class="n">ArmConstants</span><span class="p">.</span><span class="na">kV</span><span class="p">,</span><span class="w"> </span><span class="n">ArmConstants</span><span class="p">.</span><span class="na">kA</span><span class="p">);</span>
+</code></pre></div></p>
+<p>These example numbers are made up. Yours will be different.</p>
+<p>SysId's analyzer can also <strong>suggest PID gains</strong> for a velocity or position loop. Treat them as a starting point, then fine-tune with the recipe in <a href="12-pid.html">Lesson 12</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Re-run SysId when the mechanism changes</p>
+<p>New gear ratio, added weight, a different motor? The old gains no longer describe the mechanism. Re-characterize it.</p>
+</div>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <code>SysIdRoutine</code> to your arm (or drivetrain) and confirm the four commands run in <strong>simulation</strong> without errors</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> With a mentor, run all four tests on the real robot</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Load the log in SysId and get kS, kV, kA (and kG if it applies)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Check the diagnostics: are all gains positive? Does the fit look good?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Put the gains in your feedforward and compare tracking to your hand-tuned version from Lesson 13</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why does SysId run both quasistatic and dynamic tests?</summary>
+<p>Quasistatic tests have almost no acceleration, so they isolate kS and kV. Dynamic tests accelerate hard, which reveals kA.</p>
+</details>
+<details class="question">
+<summary>Why run each test in both directions?</summary>
+<p>Friction always opposes motion while gravity always pulls down. Comparing forward and reverse lets SysId separate kS from kG.</p>
+</details>
+<details class="question">
+<summary>SysId gives you a negative kV. What's probably wrong?</summary>
+<p>The sensor direction doesn't match the motor direction (or the logged units are wrong). Fix the inversion and re-run the tests.</p>
+</details>
+<details class="question">
+<summary>Why bind the tests with <code>whileTrue</code> on a separate controller?</summary>
+<p>Releasing the button stops the motor immediately, and a separate controller keeps a driver from triggering a test by accident.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="13-feedforward.html"><span>Previous</span>13. Feedforward</a><a class="pager-next" href="14-profiles.html"><span>Next</span>14. Motion Profiles</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

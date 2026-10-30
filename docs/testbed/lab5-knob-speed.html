@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 5: Control Speed with a Knob | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html" class="current" aria-current="page">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-5-control-speed-with-a-knob">Lab 5: Control Speed with a Knob<a class="headerlink" href="#lab-5-control-speed-with-a-knob" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>A limit switch only knows two things: pressed or not. Most sensors report a <strong>range</strong> of values instead: how far, how fast, what angle. These are <strong>analog</strong> sensors.</p>
+<p>The test bed's <strong>10-turn potentiometer</strong> ("pot") is a knob that reports how far it's been turned. In this lab you'll read it, turn its raw reading into something useful, and use it to set the motor's speed: turn the knob one way to spin forward, the other way to spin backward, and leave it in the middle to stop.</p>
+<p>Turning one range of numbers into another is something you'll do with almost every sensor, so this lab is about more than knobs.</p>
+<p><strong>Before you start:</strong> finish <a href="lab4-limit-switch.html">Lab 4</a>. You'll add to the same <strong>TestBed</strong> project. Lesson <a href="../hardware/04d-sensors.html">4.3</a> explains how a potentiometer works.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/analog-potentiometers-software.html">Analog Potentiometers – Software</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/analog-inputs-software.html">Analog Inputs – Software</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="how-a-potentiometer-works">How a potentiometer works<a class="headerlink" href="#how-a-potentiometer-works" title="Permanent link">#</a></h3>
+<p>A potentiometer has three wires. Two connect across a strip of resistive material (5 V at one end, ground at the other), and the third, the <strong>wiper</strong>, slides along the strip as you turn the knob.</p>
+<table>
+<thead>
+<tr>
+<th>Knob position</th>
+<th>Wiper voltage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Turned fully one way</td>
+<td>About 0 V</td>
+</tr>
+<tr>
+<td>Halfway</td>
+<td>About 2.5 V</td>
+</tr>
+<tr>
+<td>Turned fully the other way</td>
+<td>About 5 V</td>
+</tr>
+</tbody>
+</table>
+<p>It plugs into one of the roboRIO's <strong>Analog In</strong> ports (0 to 3), which measure that voltage. Ours is a <strong>10-turn</strong> pot: it takes ten full turns of the knob to go from one end to the other, which gives very fine control.</p>
+<div class="admonition warning">
+<p class="admonition-title">It has hard stops</p>
+<p>A multi-turn pot stops at each end. Don't force it past the end, and never connect one to a motor that could drive it past the stops.</p>
+</div>
+<p><img alt="A potentiometer wired to a roboRIO analog input, with its voltage divider circuit" src="../assets/wpilib/analog-potentiometer-to-roborio.svg" /></p>
+<p class="credit">A potentiometer on an Analog In port. Swap the two outer wires to reverse which end reads 0 V. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/analog-potentiometers-hardware.html">Analog Potentiometers - Hardware</a> (CC BY 4.0).</p>
+
+<h3 id="step-1-constants">Step 1: Constants<a class="headerlink" href="#step-1-constants" title="Permanent link">#</a></h3>
+<p>Find which Analog In port the pot is wired to, and add it to <code>kSensorConstants</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">kSensorConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LimitSwitchDio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">KnobAnalogPort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">    </span><span class="c1">// the Analog In port your pot uses</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">KnobTurns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10.0</span><span class="p">;</span><span class="w">   </span><span class="c1">// it's a 10-turn pot</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<h3 id="step-2-read-the-knob">Step 2: Read the knob<a class="headerlink" href="#step-2-read-the-knob" title="Permanent link">#</a></h3>
+<p>WPILib's <code>AnalogPotentiometer</code> turns the voltage into a number for you. Give it the port and the <strong>full range</strong> you want it to report. With a range of 10, it reports <strong>turns</strong>: about 0 at one end and about 10 at the other.</p>
+<p>Open <code>RobotContainer.java</code> and add the knob as a field, next to the controller:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">AnalogPotentiometer</span><span class="w"> </span><span class="n">m_knob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AnalogPotentiometer</span><span class="p">(</span>
+<span class="w">      </span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">KnobAnalogPort</span><span class="p">,</span>
+<span class="w">      </span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">KnobTurns</span><span class="p">,</span>
+<span class="w">      </span><span class="mf">0.0</span><span class="p">);</span><span class="w">   </span><span class="c1">// offset: added to every reading</span>
+</code></pre></div>
+<p>Import <code>edu.wpi.first.wpilibj.AnalogPotentiometer</code>.</p>
+<div class="admonition info">
+<p class="admonition-title">Why put the knob in RobotContainer?</p>
+<p>The knob is a <strong>control</strong>, like the Xbox controller, not part of the motor's mechanism. Controls live in <code>RobotContainer</code>; mechanisms live in subsystems.</p>
+</div>
+<p>Put the reading on the dashboard. <code>RobotContainer</code> doesn't have a <code>periodic()</code>, so add this line to the end of <code>robotPeriodic()</code> in <code>Robot.java</code>, after the scheduler runs:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_robotContainer</span><span class="p">.</span><span class="na">updateDashboard</span><span class="p">();</span>
+</code></pre></div>
+<p>And add the method to <code>RobotContainer</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Called every loop from Robot.robotPeriodic(). */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updateDashboard</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Knob/Turns"</span><span class="p">,</span><span class="w"> </span><span class="n">m_knob</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<h3 id="step-3-calibrate">Step 3: Calibrate<a class="headerlink" href="#step-3-calibrate" title="Permanent link">#</a></h3>
+<p>Real pots almost never read exactly 0 and exactly 10 at the ends. Deploy (disabled is fine) and watch <strong>Knob/Turns</strong>.</p>
+<ol>
+<li>Turn the knob all the way one direction. Write down the reading: <strong>min</strong> = ______</li>
+<li>Turn it all the way the other direction. <strong>max</strong> = ______</li>
+<li>Find the middle: <strong>center</strong> = (min + max) ÷ 2 = ______</li>
+</ol>
+<p>Add your numbers to <code>kSensorConstants</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">KnobMin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span><span class="w">     </span><span class="c1">// your measured values</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">KnobMax</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">9.9</span><span class="p">;</span>
+</code></pre></div>
+<p>If the reading goes <strong>down</strong> when you turn the knob clockwise, that's fine. You'll decide which way is "forward" in the next step.</p>
+<h3 id="step-4-map-the-knob-to-a-speed">Step 4: Map the knob to a speed<a class="headerlink" href="#step-4-map-the-knob-to-a-speed" title="Permanent link">#</a></h3>
+<p>We want the knob's range to become a motor speed:</p>
+<table>
+<thead>
+<tr>
+<th>Knob</th>
+<th>Speed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>min</td>
+<td>-1.0 (full backward)</td>
+</tr>
+<tr>
+<td>center</td>
+<td>0 (stopped)</td>
+</tr>
+<tr>
+<td>max</td>
+<td>+1.0 (full forward)</td>
+</tr>
+</tbody>
+</table>
+<p>That's a <strong>linear map</strong>: a straight line from one range onto another. Here's the math, step by step:</p>
+<div class="highlight"><pre><span></span><code>center    = (min + max) / 2
+halfRange = (max - min) / 2
+speed     = (turns - center) / halfRange
+</code></pre></div>
+<p><strong>Worked example</strong> with min = 0.1 and max = 9.9:</p>
+<ul>
+<li>center = 5.0, halfRange = 4.9</li>
+<li>Knob at 7.45 turns: speed = (7.45 − 5.0) ÷ 4.9 = <strong>0.5</strong></li>
+<li>Knob at 2.55 turns: speed = (2.55 − 5.0) ÷ 4.9 = <strong>−0.5</strong></li>
+</ul>
+<p>Add this method to <code>RobotContainer</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Turns the knob position into a motor speed from -1 to 1. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">knobToSpeed</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">min</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">KnobMin</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">max</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">KnobMax</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">center</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">min</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">max</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">halfRange</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">max</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">min</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">m_knob</span><span class="p">.</span><span class="na">get</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">center</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">halfRange</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">);</span><span class="w">      </span><span class="c1">// never go past full speed</span>
+<span class="w">    </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">);</span><span class="w">   </span><span class="c1">// a small dead zone in the middle</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">                            </span><span class="c1">// cap at 50% while learning</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>clamp</code></td>
+<td>If the knob reads a bit past your measured min or max, the speed still stays between -1 and 1</td>
+</tr>
+<tr>
+<td><code>applyDeadband</code></td>
+<td>It's hard to leave a knob exactly at center. The dead zone makes "close to center" mean stopped.</td>
+</tr>
+<tr>
+<td><code>* 0.5</code></td>
+<td>A safety cap while you test</td>
+</tr>
+</tbody>
+</table>
+<p>Add the speed to <code>updateDashboard()</code> so you can watch it:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Knob/Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">knobToSpeed</span><span class="p">());</span>
+</code></pre></div>
+<h3 id="step-5-let-the-knob-drive-the-motor">Step 5: Let the knob drive the motor<a class="headerlink" href="#step-5-let-the-knob-drive-the-motor" title="Permanent link">#</a></h3>
+<p>You already wrote <code>spinWithSupplierCommand</code> in Lab 3. It reads a speed every loop, which is exactly what the knob needs. Bind it in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// D-pad right: tap to let the knob control the motor, tap again to stop</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">povRight</span><span class="p">().</span><span class="na">toggleOnTrue</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinWithSupplierCommand</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">knobToSpeed</span><span class="p">));</span>
+</code></pre></div>
+<p><code>this::knobToSpeed</code> is a <strong>method reference</strong>: "call <code>knobToSpeed()</code> every time you need a value." (<a href="../foundations/03-java.html">Lesson 3</a>)</p>
+<p><strong>Test it:</strong></p>
+<ol>
+<li>Set the knob to the middle. Enable.</li>
+<li>Tap <strong>D-pad right</strong>. The motor shouldn't move.</li>
+<li>Slowly turn the knob one way. The motor speeds up. Watch <strong>Knob/Speed</strong> on the dashboard.</li>
+<li>Turn it back through the middle and the other way. The motor slows, stops, and reverses.</li>
+<li>Tap <strong>D-pad right</strong> again to hand control back.</li>
+</ol>
+<p>If the motor spins the "wrong" way for your taste, flip the sign: <code>return -speed * 0.5;</code></p>
+<h3 id="step-6-commit">Step 6: Commit<a class="headerlink" href="#step-6-commit" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 5: knob controls speed"</span>
+</code></pre></div>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Calibrate the knob and record min, max, and center</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Control the motor speed with the knob</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Graph <strong>Knob/Turns</strong> with the knob sitting still. Is the reading perfectly steady, or does it wiggle a tiny bit? That wiggle is <strong>noise</strong>, and every analog sensor has some.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change the dead zone from 0.05 to 0.15. How does the middle feel different?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make a second mapping where the knob only goes forward: min = stopped, max = full speed. Bind it to D-pad left.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Combine labs: make the knob-controlled motor stop when the limit switch from Lab 4 is pressed</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between a digital and an analog sensor?</summary>
+<p>A digital sensor reports only true or false. An analog sensor reports a range of values, like a voltage from 0 to 5 V.</p>
+</details>
+<details class="question">
+<summary>With min = 0.2 and max = 9.8, what speed does a knob reading of 7.4 give (before the 50% cap)?</summary>
+<p>Center = 5.0, halfRange = 4.8. Speed = (7.4 − 5.0) ÷ 4.8 = <strong>0.5</strong></p>
+</details>
+<details class="question">
+<summary>Why calibrate instead of assuming 0 and 10?</summary>
+<p>Real pots rarely reach their exact ends. Using the real min and max makes center truly mean stopped, and makes the full range of the knob reach full speed.</p>
+</details>
+<details class="question">
+<summary>Why do we clamp after mapping?</summary>
+<p>If the knob reads slightly past the measured min or max, the math would give a speed beyond ±1. Clamping keeps it in range.</p>
+</details>
+<details class="question">
+<summary>Why does the knob command use <code>this::knobToSpeed</code> instead of <code>knobToSpeed()</code>?</summary>
+<p><code>knobToSpeed()</code> would run once, when the robot starts, and hand over a single number. <code>this::knobToSpeed</code> hands over the method itself, so the command can call it every loop and follow the knob.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab4-limit-switch.html"><span>Previous</span>Lab 4: Stop at a Limit Switch</a><a class="pager-next" href="lab6-encoder.html"><span>Next</span>Lab 6: Count Turns with an Encoder</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

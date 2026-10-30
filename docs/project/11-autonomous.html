@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11. Autonomous | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section" open><summary>Drivetrain Project</summary><ul><li><a href="10-teleop.html">10. Teleop</a></li><li><a href="11-autonomous.html" class="current" aria-current="page">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="11-drivetrain-project-autonomous">11. Drivetrain Project: Autonomous<a class="headerlink" href="#11-drivetrain-project-autonomous" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>The first 15 seconds of every match have <strong>no driver input</strong>. The robot runs entirely on code. Autonomous points often decide close matches, and a reliable auto is one of the things alliance captains look for when picking partners.</p>
+<p>In this lesson you'll build autonomous routines step by step: first a simple timed drive, then driving by measured distance, then multi-step routines, and finally a dashboard menu so the drive team can pick a routine before each match.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html">Command Compositions</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/choosing-an-autonomous-program-from-smartdashboard.html">Choosing an Autonomous Program</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="how-autonomous-starts-and-stops">How autonomous starts and stops<a class="headerlink" href="#how-autonomous-starts-and-stops" title="Permanent link">#</a></h3>
+<p>In the Command Robot template, <code>Robot.java</code> already handles this:</p>
+<ol>
+<li>When autonomous begins, <code>autonomousInit()</code> calls <code>robotContainer.getAutonomousCommand()</code> and <strong>schedules</strong> whatever it returns.</li>
+<li>The scheduler runs that command every loop.</li>
+<li>When teleop begins, <code>teleopInit()</code> <strong>cancels</strong> it, in case it's still running.</li>
+</ol>
+<p>So your whole job is to make <code>getAutonomousCommand()</code> return the right command. That command is usually built from smaller commands you already have.</p>
+<h3 id="building-routines-from-small-commands">Building routines from small commands<a class="headerlink" href="#building-routines-from-small-commands" title="Permanent link">#</a></h3>
+<p><strong>Command compositions</strong> chain commands together like sentences:</p>
+<table>
+<thead>
+<tr>
+<th>Composition</th>
+<th>Meaning</th>
+<th>Ends when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a.andThen(b)</code></td>
+<td>Run <code>a</code>, then <code>b</code></td>
+<td><code>b</code> ends</td>
+</tr>
+<tr>
+<td><code>a.alongWith(b)</code></td>
+<td>Run both at the same time</td>
+<td><strong>both</strong> end</td>
+</tr>
+<tr>
+<td><code>a.raceWith(b)</code></td>
+<td>Run both at the same time</td>
+<td><strong>either</strong> ends (the other is canceled)</td>
+</tr>
+<tr>
+<td><code>a.deadlineFor(b)</code></td>
+<td>Run both at the same time</td>
+<td><code>a</code> ends (<code>b</code> is canceled)</td>
+</tr>
+<tr>
+<td><code>a.withTimeout(2.0)</code></td>
+<td>Run <code>a</code>, but give up after 2 seconds</td>
+<td><code>a</code> ends or time runs out</td>
+</tr>
+<tr>
+<td><code>a.until(condition)</code></td>
+<td>Run <code>a</code> until <code>condition</code> is true</td>
+<td><code>a</code> ends or the condition is true</td>
+</tr>
+</tbody>
+</table>
+<p>Compositions let several things happen at once, then wait for all of them before moving on:</p>
+<p><img alt="DriveToGoal, then SetWristPosition and RaiseElevator at the same time, then ScoreTube after both finish" src="../assets/wpilib/concurrent-commands.drawio.svg" /></p>
+<p class="credit">Moving the wrist and elevator in parallel, then scoring once both are done. From the WPILib docs source, <a href="https://github.com/wpilibsuite/frc-docs/blob/stable/source/docs/software/commandbased/diagrams/concurrent-commands.drawio.svg">concurrent-commands.drawio.svg</a> (CC BY 4.0).</p>
+
+<p>The <code>Commands</code> class has matching helpers for longer lists:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w">        </span><span class="c1">// a, then b, then c</span>
+<span class="n">Commands</span><span class="p">.</span><span class="na">parallel</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w">           </span><span class="c1">// all at once, until all end</span>
+<span class="n">Commands</span><span class="p">.</span><span class="na">race</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w">               </span><span class="c1">// all at once, until any ends</span>
+<span class="n">Commands</span><span class="p">.</span><span class="na">deadline</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w">        </span><span class="c1">// all at once, until the first one (a) ends</span>
+<span class="n">Commands</span><span class="p">.</span><span class="na">waitSeconds</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span><span class="w">         </span><span class="c1">// pause</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Parallel commands can't share a subsystem</p>
+<p><code>drivetrain.arcadeDrive(...).alongWith(drivetrain.driveDistance(...))</code> is an error: both require the drivetrain. Parallel commands must use different subsystems, like driving <strong>while</strong> running the intake.</p>
+</div>
+<h3 id="version-1-a-timed-auto">Version 1: a timed auto<a class="headerlink" href="#version-1-a-timed-auto" title="Permanent link">#</a></h3>
+<p>The simplest auto drives at a fixed speed for a fixed time. Add to <code>Drivetrain.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveForSeconds</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">seconds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">.</span><span class="na">arcadeDrive</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">))</span><span class="w">   </span><span class="c1">// false = don't square the input</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">seconds</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"s"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>.finallyDo(...)</code> runs when the command ends <strong>for any reason</strong>: finished, timed out, or canceled. Use it to make sure motors always stop.</p>
+<p>Then in <code>RobotContainer.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveForSeconds</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Run it in the Sim GUI: select <strong>Autonomous</strong>, then enable.</p>
+<div class="admonition warning">
+<p class="admonition-title">Timed autos are unreliable</p>
+<p>The same motor output moves the robot different distances depending on battery charge, wheel wear, carpet, and robot weight. A timed auto that's perfect on a fresh battery comes up short on a tired one. Use it to get started, then switch to distance.</p>
+</div>
+<h3 id="version-2-drive-by-distance">Version 2: drive by distance<a class="headerlink" href="#version-2-drive-by-distance" title="Permanent link">#</a></h3>
+<p>With encoders, the robot can drive until it has actually gone the right distance:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveDistance</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">meters</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">resetEncoders</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">.</span><span class="na">arcadeDrive</span><span class="p">(</span><span class="n">Math</span><span class="p">.</span><span class="na">copySign</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="n">meters</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">getDistanceMeters</span><span class="p">())</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">meters</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">meters</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" m"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Reading it line by line:</p>
+<ol>
+<li>Reset the encoders to 0, once.</li>
+<li>Then drive at <code>speed</code>, in the direction of <code>meters</code> (negative = backward).</li>
+<li>Stop as soon as the measured distance reaches the target.</li>
+<li>Always stop the motors at the end.</li>
+</ol>
+<p>This is much more consistent than a timer, but it still overshoots a little, because the robot is moving at full <code>speed</code> when it reaches the target and takes time to stop. In <a href="../controls/12-pid.html">Lesson 12</a> you'll replace the fixed speed with a <strong>PID controller</strong> that slows down smoothly as it arrives.</p>
+<div class="admonition tip">
+<p class="admonition-title">Add a safety timeout</p>
+<p>If an encoder is unplugged, the distance never increases and the robot drives forever. Add <code>.withTimeout(5.0)</code> to any distance command, so a broken sensor can't send the robot across the field.</p>
+</div>
+<h3 id="version-3-a-multi-step-routine">Version 3: a multi-step routine<a class="headerlink" href="#version-3-a-multi-step-routine" title="Permanent link">#</a></h3>
+<p>Real autos combine several actions. Here's "drive out, score, drive back," using the intake from <a href="../robot-code/07-command-based.html">Lesson 7</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">scoreAndBackUp</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span>
+<span class="w">        </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveDistance</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">).</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">4.0</span><span class="p">),</span><span class="w">   </span><span class="c1">// drive out</span>
+<span class="w">        </span><span class="n">intake</span><span class="p">.</span><span class="na">outtake</span><span class="p">().</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span><span class="w">                     </span><span class="c1">// score</span>
+<span class="w">        </span><span class="n">Commands</span><span class="p">.</span><span class="na">waitSeconds</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span><span class="w">                            </span><span class="c1">// let the piece clear</span>
+<span class="w">        </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveDistance</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">).</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span><span class="w">   </span><span class="c1">// back up</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Score and Back Up"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>And one that runs mechanisms at the same time, picking up a game piece while driving:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveAndIntake</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">deadline</span><span class="p">(</span>
+<span class="w">        </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveDistance</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">).</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">5.0</span><span class="p">),</span><span class="w">   </span><span class="c1">// the deadline</span>
+<span class="w">        </span><span class="n">intake</span><span class="p">.</span><span class="na">runIntake</span><span class="p">()</span><span class="w">                                     </span><span class="c1">// runs until driving ends</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive and Intake"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>deadline</code> ends when the drive finishes, and cancels the intake at the same moment.</p>
+<div class="admonition tip">
+<p class="admonition-title">Write autos as named methods</p>
+<p>Build each routine in its own method, like <code>scoreAndBackUp()</code>. Each call makes a <strong>fresh</strong> command object. Reusing one command object in two routines causes an error, because a command can only belong to one composition.</p>
+</div>
+<h3 id="let-the-drive-team-choose-sendablechooser">Let the drive team choose: SendableChooser<a class="headerlink" href="#let-the-drive-team-choose-sendablechooser" title="Permanent link">#</a></h3>
+<p>Different match strategies need different autos. A <code>SendableChooser</code> puts a dropdown menu on the dashboard:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SendableChooser</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SendableChooser</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="nf">RobotContainer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ...subsystems and default commands...</span>
+
+<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">setDefaultOption</span><span class="p">(</span><span class="s">"Do nothing"</span><span class="p">,</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">none</span><span class="p">());</span>
+<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">addOption</span><span class="p">(</span><span class="s">"Drive forward 2 m"</span><span class="p">,</span><span class="w"> </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveDistance</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">));</span>
+<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">addOption</span><span class="p">(</span><span class="s">"Score and back up"</span><span class="p">,</span><span class="w"> </span><span class="n">scoreAndBackUp</span><span class="p">());</span>
+<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">addOption</span><span class="p">(</span><span class="s">"Drive and intake"</span><span class="p">,</span><span class="w"> </span><span class="n">driveAndIntake</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">,</span><span class="w"> </span><span class="n">autoChooser</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">configureBindings</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">getSelected</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The drive team picks a routine on the dashboard before the match. Make <strong>"Do nothing"</strong> the default, so a robot whose drive team forgot to choose sits still instead of running a routine meant for a different starting spot.</p>
+<h3 id="testing-autos">Testing autos<a class="headerlink" href="#testing-autos" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>In simulation first.</strong> Watch the dashboard distance and command names. Does each step start and end when you expect?</li>
+<li><strong>On blocks.</strong> Wheels off the ground, check every step runs in order and the motors stop at the end.</li>
+<li><strong>On the floor</strong>, in open space, with a person ready to disable. Mark the starting position with tape so every test starts the same way.</li>
+<li>Test with a <strong>partly drained battery</strong> too. That's what you'll have in some matches.</li>
+</ol>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Have the West Coast Drive?</p>
+<p><a href="../testbed/lab7-timed-auto.html">Lab 7: Timed Autonomous</a> builds a timed auto with a chooser on the real robot.</p>
+</div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>driveForSeconds</code> and run it in simulation (select <strong>Autonomous</strong>, then enable)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>driveDistance</code> and confirm on the dashboard that it stops near the target distance</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build <code>scoreAndBackUp()</code> and watch each step on the scheduler dashboard</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <code>SendableChooser</code> with at least three options, with "Do nothing" as the default</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build a routine that uses <code>deadline</code> to run the intake while driving</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: write <code>turnDegrees(double degrees)</code> using the gyro from <a href="../robot-code/08-sensors.html">Lesson 8</a>, and use it to drive a square</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between <code>andThen</code> and <code>alongWith</code>?</summary>
+<p><code>andThen</code> runs commands <strong>in sequence</strong>. <code>alongWith</code> runs them <strong>at the same time</strong>, ending when both are done.</p>
+</details>
+<details class="question">
+<summary>What's the difference between <code>race</code> and <code>deadline</code>?</summary>
+<p>A <code>race</code> ends when <strong>any</strong> of its commands ends. A <code>deadline</code> ends when one <strong>specific</strong> command (the first one) ends.</p>
+</details>
+<details class="question">
+<summary>Why are timed autos unreliable?</summary>
+<p>The same motor output moves the robot different distances depending on battery charge, wheel wear, and carpet.</p>
+</details>
+<details class="question">
+<summary>Why add a timeout to a distance-based command?</summary>
+<p>If the encoder fails, the distance never reaches the target, and without a timeout the robot would drive forever.</p>
+</details>
+<details class="question">
+<summary>Why should 'Do nothing' be the default auto?</summary>
+<p>If the drive team forgets to pick, the robot stays still instead of running a routine meant for a different starting position, which could hit another robot or a field element.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="10-teleop.html"><span>Previous</span>10. Teleop</a><a class="pager-next" href="../controls/12-pid.html"><span>Next</span>12. PID Feedback</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

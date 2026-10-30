@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1. Git &amp; Version Control | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section" open><summary>Foundations</summary><ul><li><a href="00-setup.html">0. Setup</a></li><li><a href="01-git.html" class="current" aria-current="page">1. Git &amp; Version Control</a></li><li><a href="02-terminal.html">2. The Terminal</a></li><li><a href="03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="1-git-version-control">1. Git &amp; Version Control<a class="headerlink" href="#1-git-version-control" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Picture build season: five programmers, one robot project, a competition in two weeks. Without a system, someone copies an old version over a new one, a working autonomous gets lost, and nobody knows what changed when the robot suddenly stops driving straight.</p>
+<p><strong>Git</strong> fixes all of that. It:</p>
+<ul>
+<li>saves a snapshot every time you <strong>commit</strong>, so you can always go back</li>
+<li>shows exactly <strong>what changed</strong> between any two versions, and who changed it</li>
+<li>lets several people <strong>work at the same time</strong> without overwriting each other</li>
+</ul>
+<p>Every FRC team that's serious about software uses Git, usually with <strong>GitHub</strong> to share the code. This course website is stored in Git too.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/git-getting-started.html">Git Version Control Introduction (WPILib)</a></li>
+<li><a href="https://skills.github.com/">GitHub Skills</a>: short, free, interactive courses. Do "Introduction to GitHub."</li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="git-vs-github">Git vs. GitHub<a class="headerlink" href="#git-vs-github" title="Permanent link">#</a></h3>
+<p>These get mixed up constantly:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Git</th>
+<th>GitHub</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it is</td>
+<td>A program on your computer</td>
+<td>A website</td>
+</tr>
+<tr>
+<td>What it does</td>
+<td>Tracks changes to files in a folder</td>
+<td>Stores a shared copy of the project online</td>
+</tr>
+<tr>
+<td>Works offline?</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Analogy</td>
+<td>Your notebook, with every draft saved</td>
+<td>The team's shared binder</td>
+</tr>
+</tbody>
+</table>
+<p>You can use Git without GitHub, but teams use both: Git on each laptop, GitHub as the copy everyone syncs with.</p>
+<h3 id="the-words-you-need">The words you need<a class="headerlink" href="#the-words-you-need" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Repository (repo)</strong></td>
+<td>A project folder that Git tracks. It has a hidden <code>.git</code> folder holding all the history.</td>
+</tr>
+<tr>
+<td><strong>Commit</strong></td>
+<td>A saved snapshot of the project, with a message saying what changed</td>
+</tr>
+<tr>
+<td><strong>Staging</strong></td>
+<td>Choosing which changes go into the next commit (<code>git add</code>)</td>
+</tr>
+<tr>
+<td><strong>Branch</strong></td>
+<td>A separate line of work, so experiments don't break the working code</td>
+</tr>
+<tr>
+<td><strong>Remote</strong></td>
+<td>A copy of the repo somewhere else, usually GitHub. The default one is named <code>origin</code>.</td>
+</tr>
+<tr>
+<td><strong>Push</strong></td>
+<td>Upload your new commits to the remote</td>
+</tr>
+<tr>
+<td><strong>Pull</strong></td>
+<td>Download other people's new commits and merge them into yours</td>
+</tr>
+<tr>
+<td><strong>Clone</strong></td>
+<td>Download a full copy of a repo from GitHub for the first time</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-three-places-your-changes-live">The three places your changes live<a class="headerlink" href="#the-three-places-your-changes-live" title="Permanent link">#</a></h3>
+<p>This is the idea that makes Git click:</p>
+<div class="mermaid">flowchart LR
+    W["Working folder&lt;br/&gt;(files you edit)"] -- "git add" --&gt; S["Staging area&lt;br/&gt;(changes picked for&lt;br/&gt;the next commit)"]
+    S -- "git commit" --&gt; L["Local history&lt;br/&gt;(on your laptop)"]
+    L -- "git push" --&gt; R["GitHub&lt;br/&gt;(shared with team)"]
+    R -- "git pull" --&gt; W</div>
+<p>Editing a file changes only your working folder. Nothing is saved in Git until you <strong>add</strong> and <strong>commit</strong>, and nobody else sees it until you <strong>push</strong>.</p>
+<h3 id="one-time-setup">One-time setup<a class="headerlink" href="#one-time-setup" title="Permanent link">#</a></h3>
+<p>Tell Git who you are. Your name goes on every commit you make:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.name<span class="w"> </span><span class="s2">"Your Name"</span>
+git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>user.email<span class="w"> </span><span class="s2">"you@example.com"</span>
+</code></pre></div>
+<p>Use the same email as your GitHub account so GitHub links commits to you.</p>
+<h3 id="your-first-commit">Your first commit<a class="headerlink" href="#your-first-commit" title="Permanent link">#</a></h3>
+<p>Open a terminal in your <code>my-first-robot</code> folder. In VS Code: <strong>Terminal → New Terminal</strong>.</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>init<span class="w">                         </span><span class="c1"># start tracking this folder</span>
+git<span class="w"> </span>status<span class="w">                       </span><span class="c1"># see what Git notices</span>
+git<span class="w"> </span>add<span class="w"> </span>.<span class="w">                        </span><span class="c1"># stage every changed file</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Initial robot project"</span>
+git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w">                </span><span class="c1"># see your history</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">WPILib projects already have a <code>.gitignore</code></p>
+<p>The <code>build/</code> folder and other generated files are listed in <code>.gitignore</code>, so Git skips them. Never commit build output. It's huge and it changes on every build.</p>
+</div>
+<h3 id="reading-git-status">Reading <code>git status</code><a class="headerlink" href="#reading-git-status" title="Permanent link">#</a></h3>
+<p>You'll run this more than any other Git command. It tells you exactly where your changes are:</p>
+<div class="highlight"><pre><span></span><code>On branch main
+Changes to be committed:            ← staged; will go in the next commit
+        modified:   src/main/java/frc/robot/RobotContainer.java
+
+Changes not staged for commit:      ← edited but not staged yet
+        modified:   src/main/java/frc/robot/Constants.java
+
+Untracked files:                    ← new files Git isn't tracking yet
+        src/main/java/frc/robot/subsystems/Intake.java
+</code></pre></div>
+<h3 id="writing-good-commit-messages">Writing good commit messages<a class="headerlink" href="#writing-good-commit-messages" title="Permanent link">#</a></h3>
+<p>Future you, at 11 PM before a competition, will read these. Make them useful:</p>
+<table>
+<thead>
+<tr>
+<th>❌ Bad</th>
+<th>✅ Good</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stuff</code></td>
+<td><code>Add intake subsystem with run and stop commands</code></td>
+</tr>
+<tr>
+<td><code>fixed it</code></td>
+<td><code>Fix right drive motors spinning backward</code></td>
+</tr>
+<tr>
+<td><code>changes</code></td>
+<td><code>Lower arm kP to stop oscillation at 90 degrees</code></td>
+</tr>
+</tbody>
+</table>
+<p>A good message says <strong>what</strong> changed and, if it isn't obvious, <strong>why</strong>. Keep each commit to one idea. Small commits are easy to understand and easy to undo.</p>
+<h3 id="push-to-github">Push to GitHub<a class="headerlink" href="#push-to-github" title="Permanent link">#</a></h3>
+<ol>
+<li>Make a free account at <a href="https://github.com">github.com</a> if you don't have one.</li>
+<li>Click <strong>New repository</strong>, name it <code>my-first-robot</code>, and leave every box unchecked (no README, no <code>.gitignore</code>). You already have files.</li>
+<li>GitHub shows commands under <em>"…or push an existing repository from the command line."</em> They look like this:
+    <div class="highlight"><pre><span></span><code>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>origin<span class="w"> </span>https://github.com/YOUR-NAME/my-first-robot.git
+git<span class="w"> </span>branch<span class="w"> </span>-M<span class="w"> </span>main
+git<span class="w"> </span>push<span class="w"> </span>-u<span class="w"> </span>origin<span class="w"> </span>main
+</code></pre></div></li>
+<li>Refresh the GitHub page. Your code is there.</li>
+</ol>
+<p>The first push may open a browser window to sign in. That's normal.</p>
+<h3 id="getting-the-teams-code-clone">Getting the team's code: clone<a class="headerlink" href="#getting-the-teams-code-clone" title="Permanent link">#</a></h3>
+<p>To work on a repo that already exists, like the team's robot code, you <strong>clone</strong> it instead of using <code>git init</code>:</p>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Robojacks/REPO-NAME.git
+</code></pre></div>
+<p>That creates a folder with the full project and all its history, already connected to GitHub.</p>
+<h3 id="the-daily-loop">The daily loop<a class="headerlink" href="#the-daily-loop" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>pull<span class="w">                         </span><span class="c1"># 1. get everyone's latest work</span>
+<span class="c1"># ...edit code, build, test...</span>
+git<span class="w"> </span>status<span class="w">                       </span><span class="c1"># 2. see what you changed</span>
+git<span class="w"> </span>diff<span class="w">                         </span><span class="c1"># 3. read your own changes before saving them</span>
+git<span class="w"> </span>add<span class="w"> </span>.<span class="w">                        </span><span class="c1"># 4. stage</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Describe the change"</span>
+git<span class="w"> </span>push<span class="w">                         </span><span class="c1"># 5. share</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Pull before you start, every time</p>
+<p>If you start working on old code, your changes and a teammate's may collide. Pulling first avoids most conflicts.</p>
+</div>
+<h3 id="undoing-things">Undoing things<a class="headerlink" href="#undoing-things" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Undo edits to a file you haven't staged</td>
+<td><code>git restore FILE</code></td>
+</tr>
+<tr>
+<td>Unstage a file (keep the edits)</td>
+<td><code>git restore --staged FILE</code></td>
+</tr>
+<tr>
+<td>Fix the message of the commit you just made (before pushing)</td>
+<td><code>git commit --amend -m "Better message"</code></td>
+</tr>
+<tr>
+<td>Undo a commit that's already pushed</td>
+<td><code>git revert COMMIT_ID</code> (makes a new commit that reverses it)</td>
+</tr>
+<tr>
+<td>See an old version of a file</td>
+<td><code>git log --oneline FILE</code>, then <code>git show COMMIT_ID:path/to/FILE</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Don't rewrite shared history</p>
+<p>Commands like <code>git reset --hard</code> and <code>git push --force</code> can permanently delete teammates' work. Don't use them on the team repo unless a lead programmer is helping you.</p>
+</div>
+<h3 id="merge-conflicts">Merge conflicts<a class="headerlink" href="#merge-conflicts" title="Permanent link">#</a></h3>
+<p>When two people change the <strong>same lines</strong> of the same file, Git can't pick a winner, so it asks you. After a <code>git pull</code>, the file will contain markers like this:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span><span class="w"> </span><span class="n">HEAD</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.05</span><span class="p">;</span><span class="w">     </span><span class="c1">// your version</span>
+<span class="o">=======</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.08</span><span class="p">;</span><span class="w">     </span><span class="c1">// the version you pulled</span>
+<span class="o">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="w"> </span><span class="n">origin</span><span class="o">/</span><span class="n">main</span>
+</code></pre></div>
+<p>To fix it:</p>
+<ol>
+<li>Decide what the line should be. Sometimes it's one version, sometimes a mix. Ask whoever wrote the other one.</li>
+<li>Delete the marker lines (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>).</li>
+<li>Build to make sure it compiles.</li>
+<li><code>git add</code> the file and <code>git commit</code>.</li>
+</ol>
+<p>VS Code highlights conflicts and gives you <strong>Accept Current / Accept Incoming / Accept Both</strong> buttons above each one.</p>
+<h3 id="using-git-inside-vs-code">Using Git inside VS Code<a class="headerlink" href="#using-git-inside-vs-code" title="Permanent link">#</a></h3>
+<p>You don't have to type everything. The <strong>Source Control</strong> panel (the branch icon on the left side) lets you stage files with <strong>+</strong>, type a message, commit, and sync. It's the same Git underneath. Learn the commands first so you know what the buttons do.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set your <code>user.name</code> and <code>user.email</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make three commits to your project, each with a clear message</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Push them to GitHub and find them on the website</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change a line, run <code>git diff</code>, then <code>git restore</code> the file to throw the change away</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> With a partner: both clone the same repo, both change the <strong>same line</strong>, both push. Whoever pushes second resolves the conflict.</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between a commit and a push?</summary>
+<p>A commit saves a snapshot <strong>on your computer</strong>. A push uploads your commits <strong>to GitHub</strong> so others can see them.</p>
+</details>
+<details class="question">
+<summary>You edited a file but <code>git commit</code> says nothing changed. Why?</summary>
+<p>You didn't stage it. Run <code>git add</code> first. Commit only saves staged changes.</p>
+</details>
+<details class="question">
+<summary>Why should you <code>git pull</code> before starting work?</summary>
+<p>So you build on top of everyone else's latest changes instead of an old version. That avoids merge conflicts.</p>
+</details>
+<details class="question">
+<summary>What causes a merge conflict, and how do you fix one?</summary>
+<p>Two people changed the same lines. Edit the file to the correct final version, delete the conflict markers, build, then add and commit.</p>
+</details>
+<details class="question">
+<summary>Why isn't the <code>build/</code> folder in Git?</summary>
+<p>It's generated every build, it's large, and it's different on every computer. <code>.gitignore</code> tells Git to skip it.</p>
+</details>
+<p>We'll cover branches and pull requests in <a href="../workflow/15-team-process.html">Lesson 15</a>.</p>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="00-setup.html"><span>Previous</span>0. Setup</a><a class="pager-next" href="02-terminal.html"><span>Next</span>2. The Terminal</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

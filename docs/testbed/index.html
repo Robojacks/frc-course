@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html" class="current" aria-current="page">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="test-bed-labs">Test Bed Labs<a class="headerlink" href="#test-bed-labs" title="Permanent link">#</a></h1>
+<p>Labs are hands-on exercises on the team's <strong>test bed</strong>: a board with real robot electronics on it, so you can write code and watch it run on real hardware without needing the competition robot.</p>
+<p>The <strong>Lessons</strong> tab teaches the ideas. The <strong>Labs</strong> tab is where you try them on hardware.</p>
+<h2 id="the-labs">The labs<a class="headerlink" href="#the-labs" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Lab</th>
+<th>Runs on</th>
+<th>Do it after</th>
+<th>What you'll do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></td>
+<td>Test bed</td>
+<td><a href="../foundations/00-setup.html">Lesson 0</a></td>
+<td>Install the tools, create the <strong>TestBed</strong> project, deploy it, and see your code run</td>
+</tr>
+<tr>
+<td><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></td>
+<td>Test bed</td>
+<td>Lab 0 and a <a href="../foundations/03-java.html#learn-java-first">Java course</a></td>
+<td>Write your first subsystem and command, and spin a motor with a button</td>
+</tr>
+<tr>
+<td><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></td>
+<td>WCD</td>
+<td>Lab 1</td>
+<td>Program four CIMs with leaders, followers, and skid steer controls</td>
+</tr>
+<tr>
+<td><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></td>
+<td>Test bed</td>
+<td>Lab 2</td>
+<td><code>whileTrue</code>, <code>onTrue</code>, toggles, timeouts, a throttle, and default commands</td>
+</tr>
+<tr>
+<td><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></td>
+<td>Test bed</td>
+<td>Lab 3</td>
+<td>Read your first sensor and stop the motor automatically</td>
+</tr>
+<tr>
+<td><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></td>
+<td>Test bed</td>
+<td>Lab 4</td>
+<td>Read an analog sensor, calibrate it, and map it to a speed</td>
+</tr>
+<tr>
+<td><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></td>
+<td>Test bed</td>
+<td>Lab 5</td>
+<td>Read an encoder, then try to turn exactly 10 times with timing and bang-bang</td>
+</tr>
+<tr>
+<td><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></td>
+<td>WCD</td>
+<td>Lab 6</td>
+<td>Drive a pattern on its own, picked from a dashboard menu</td>
+</tr>
+<tr>
+<td><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></td>
+<td>WCD</td>
+<td>Lab 7</td>
+<td>Use the NavX2 to turn by angle instead of by time</td>
+</tr>
+<tr>
+<td><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></td>
+<td>Test bed</td>
+<td>Lab 8 and <a href="../controls/12-pid.html">Lesson 12</a></td>
+<td>Turn exactly 10 times with P, then D, then I</td>
+</tr>
+<tr>
+<td><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></td>
+<td>WCD</td>
+<td>Lab 9</td>
+<td>Move the elevator between presets and hold against gravity with PID</td>
+</tr>
+</tbody>
+</table>
+<p>Do them in order. Each lab adds <strong>one</strong> new idea. Labs on the test bed build up the <strong>TestBed</strong> project from Lab 0. Labs on the WCD build up the <strong>WestCoastDrive</strong> project from Lab 2. Commit your work to Git after each lab.</p>
+<h2 id="whats-on-the-test-bed">What's on the test bed<a class="headerlink" href="#whats-on-the-test-bed" title="Permanent link">#</a></h2>
+<p>New to any of this hardware? <a href="../hardware/04-electronics.html">Lesson 4</a> covers the electrical system, and Lessons <a href="../hardware/04b-motors.html">4.1</a> (motors), <a href="../hardware/04c-spark-max.html">4.2</a> (SPARK MAX), and <a href="../hardware/04d-sensors.html">4.3</a> (sensors) cover each part below.</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>roboRIO</strong></td>
+<td>The robot's computer. Your code runs here.</td>
+</tr>
+<tr>
+<td><strong>Power distribution</strong> with breakers</td>
+<td>Splits battery power to everything, with a breaker on each channel</td>
+</tr>
+<tr>
+<td><strong>Main breaker</strong> and <strong>battery</strong></td>
+<td>Power on and off, and the emergency off switch</td>
+</tr>
+<tr>
+<td><strong>Two <a href="../hardware/04c-spark-max.html">SPARK MAX</a> motor controllers</strong></td>
+<td>Drive the motors, connected to the roboRIO over CAN. The brushless motor's is CAN ID 8.</td>
+</tr>
+<tr>
+<td><strong><a href="../hardware/04b-motors.html">775pro</a> motor with a gearbox and wheel</strong></td>
+<td>The motor used in Labs 6 and 9</td>
+</tr>
+<tr>
+<td><strong><a href="../hardware/04b-motors.html">NEO</a> brushless motor</strong></td>
+<td>The motor used in Labs 1, 3, 4, and 5</td>
+</tr>
+<tr>
+<td><strong><a href="../hardware/04d-sensors.html">REV Through Bore Encoder</a></strong> (quadrature)</td>
+<td>Measures how far the wheel has turned (Labs 6 and 9)</td>
+</tr>
+<tr>
+<td><strong><a href="../hardware/04d-sensors.html">Limit switches</a></strong></td>
+<td>On/off sensors (Lab 4)</td>
+</tr>
+<tr>
+<td><strong><a href="../hardware/04d-sensors.html">10-turn potentiometer</a></strong></td>
+<td>A knob that reports its position as an analog voltage (Lab 5)</td>
+</tr>
+</tbody>
+</table>
+<p>The test bed has <strong>no radio</strong>. Connect your laptop to the roboRIO with an Ethernet or USB cable.</p>
+<h2 id="the-west-coast-drive">The West Coast Drive<a class="headerlink" href="#the-west-coast-drive" title="Permanent link">#</a></h2>
+<p>Labs 2, 7, 8, and 10 use the team's <strong>West Coast Drive</strong>, a six-wheel, skid steer drivetrain on its own robot frame, with an elevator on top.</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Motors</td>
+<td>4 <strong><a href="../hardware/04b-motors.html">CIM</a></strong> motors (brushed), 2 per side, each pair in one gearbox</td>
+</tr>
+<tr>
+<td>Motor controllers</td>
+<td>4 SPARK MAXes on CAN, in <strong>brushed</strong> mode</td>
+</tr>
+<tr>
+<td>Wheels</td>
+<td>3 per side, chained together, with the center wheels slightly lower</td>
+</tr>
+<tr>
+<td>Gyro</td>
+<td><strong><a href="../hardware/04d-sensors.html">NavX2</a></strong> on the roboRIO's MXP port (Lab 8)</td>
+</tr>
+<tr>
+<td>Elevator</td>
+<td>A <strong>NEO</strong> on a SPARK MAX in brushless mode, with a <strong>REV Through Bore Encoder</strong> on the roboRIO's DIO ports (Lab 10)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">WCD safety</p>
+<p>Test new drive code <strong>on blocks</strong> first, with the wheels off the ground. On the floor, use a big open space, keep people out of the robot's path, and start at low speed. Keep hands out of the elevator, and never reach under a raised carriage.</p>
+</div>
+<h2 id="test-bed-rules">Test bed rules<a class="headerlink" href="#test-bed-rules" title="Permanent link">#</a></h2>
+<div class="admonition danger">
+<p class="admonition-title">Safety</p>
+<ul>
+<li>Say <strong>"Enabling!"</strong> out loud before you enable, and wait until hands are clear.</li>
+<li>Keep fingers, hair, and loose sleeves away from the wheel.</li>
+<li>Never hold a motor still while it's pushing. The 775pro burns out if it stalls.</li>
+<li>In autonomous, nobody is steering. Clear the area before you enable.</li>
+<li>Know the Driver Station keys: <span class="keys"><kbd class="key-enter">Enter</kbd></span> disables, <span class="keys"><kbd class="key-space">Space</kbd></span> is the emergency stop.</li>
+<li>Turn off the main breaker before touching any wiring.</li>
+</ul>
+</div>
+<ul>
+<li>Use a <strong>charged</strong> battery, and put it back on the charger when you're done.</li>
+<li>Don't change the wiring without asking. Other people's labs depend on the CAN IDs and ports staying the same.</li>
+<li>If something on the board looks loose or damaged, stop and tell a mentor.</li>
+</ul>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><span></span><a class="pager-next" href="lab0-first-project.html"><span>Next</span>Lab 0: Set Up the TestBed Project</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

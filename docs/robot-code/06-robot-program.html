@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6. How a Robot Program Runs | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section" open><summary>Robot Code</summary><ul><li><a href="06-robot-program.html" class="current" aria-current="page">6. How a Robot Program Runs</a></li><li><a href="07-command-based.html">7. Command-Based Programming</a></li><li><a href="07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="6-how-a-robot-program-runs">6. How a Robot Program Runs<a class="headerlink" href="#6-how-a-robot-program-runs" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Robot code is not like a normal program that starts, runs top to bottom, and exits. A robot program starts once and then <strong>repeats the same code about 50 times a second</strong> until the robot is turned off. Every sensor read, motor command, and button check happens inside that repeating loop.</p>
+<p>Once you understand <strong>the loop</strong>, everything else in this course makes sense: why you never wait inside your code, why commands are built the way they are, and why "loop overrun" warnings matter.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/what-is-wpilib.html">What is WPILib?</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html">Creating a Robot Program</a>, especially the TimedRobot section</li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="what-happens-when-the-robot-turns-on">What happens when the robot turns on<a class="headerlink" href="#what-happens-when-the-robot-turns-on" title="Permanent link">#</a></h3>
+<ol>
+<li>The roboRIO boots and starts your program by calling <code>Main.main()</code>.</li>
+<li><code>main()</code> creates your <code>Robot</code> object. Its constructor (or <code>robotInit()</code>) runs <strong>once</strong>, and this is where <code>RobotContainer</code> creates all your subsystems and binds your buttons.</li>
+<li>The program enters the loop and stays there until power is cut.</li>
+</ol>
+<h3 id="robot-modes">Robot modes<a class="headerlink" href="#robot-modes" title="Permanent link">#</a></h3>
+<p>The Driver Station tells the robot which <strong>mode</strong> it's in. Each mode has its own pair of methods in <code>Robot.java</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>When</th>
+<th>Methods</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Disabled</strong></td>
+<td>Before and after a match, and any time the robot isn't enabled</td>
+<td><code>disabledInit()</code>, <code>disabledPeriodic()</code></td>
+</tr>
+<tr>
+<td><strong>Autonomous</strong></td>
+<td>The first 15 seconds of a match, no driver input</td>
+<td><code>autonomousInit()</code>, <code>autonomousPeriodic()</code></td>
+</tr>
+<tr>
+<td><strong>Teleop</strong></td>
+<td>The rest of the match, drivers in control</td>
+<td><code>teleopInit()</code>, <code>teleopPeriodic()</code></td>
+</tr>
+<tr>
+<td><strong>Test</strong></td>
+<td>Practice and tuning only, never in a match</td>
+<td><code>testInit()</code>, <code>testPeriodic()</code></td>
+</tr>
+<tr>
+<td><em>(every mode)</em></td>
+<td>Always</td>
+<td><code>robotPeriodic()</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>An <strong><code>Init()</code></strong> method runs <strong>once</strong>, when the robot enters that mode.</li>
+<li>A <strong><code>Periodic()</code></strong> method runs <strong>every loop</strong> while the robot is in that mode.</li>
+<li><code>robotPeriodic()</code> runs <strong>every loop in every mode</strong>, including disabled.</li>
+</ul>
+<h3 id="the-20-ms-loop">The 20 ms loop<a class="headerlink" href="#the-20-ms-loop" title="Permanent link">#</a></h3>
+<p><code>TimedRobot</code> calls your periodic methods every <strong>20 milliseconds</strong>, which is <strong>50 times per second</strong>:</p>
+<div class="mermaid">flowchart TD
+    I["Robot constructor / robotInit() — once at power-on"] --&gt; L
+    subgraph L ["Every 20 ms, forever"]
+        RP["robotPeriodic()"] --&gt; MP["the current mode's Periodic()&lt;br/&gt;teleopPeriodic(), autonomousPeriodic(), ..."]
+    end</div>
+<p>One loop, start to finish, typically looks like this:</p>
+<ol>
+<li>Read the joysticks and sensors.</li>
+<li>Decide what each mechanism should do.</li>
+<li>Set motor outputs.</li>
+<li>Return, and wait for the next 20 ms tick.</li>
+</ol>
+<p>Each loop is a <strong>snapshot</strong>: "Given what I see right now, what should every motor do right now?" Then 20 ms later, you answer the question again with fresh data.</p>
+<h3 id="a-full-match-step-by-step">A full match, step by step<a class="headerlink" href="#a-full-match-step-by-step" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Time</th>
+<th>What the Driver Station does</th>
+<th>What runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Before the match</td>
+<td>Robot is disabled</td>
+<td><code>disabledInit()</code> once, then <code>disabledPeriodic()</code> every 20 ms</td>
+</tr>
+<tr>
+<td>0:00</td>
+<td>Field starts autonomous</td>
+<td><code>autonomousInit()</code> once, then <code>autonomousPeriodic()</code> every 20 ms</td>
+</tr>
+<tr>
+<td>0:15</td>
+<td>Autonomous ends, brief disable</td>
+<td><code>disabledInit()</code>, <code>disabledPeriodic()</code></td>
+</tr>
+<tr>
+<td>0:18</td>
+<td>Teleop starts</td>
+<td><code>teleopInit()</code> once, then <code>teleopPeriodic()</code> every 20 ms</td>
+</tr>
+<tr>
+<td>2:33</td>
+<td>Match ends</td>
+<td><code>disabledInit()</code>, <code>disabledPeriodic()</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>robotPeriodic()</code> runs in every row.</p>
+<h3 id="the-golden-rule">The golden rule<a class="headerlink" href="#the-golden-rule" title="Permanent link">#</a></h3>
+<div class="admonition danger">
+<p class="admonition-title">Never block the loop</p>
+<p>Your code has 20 ms to finish each loop. Do a little work, then <strong>return</strong>. Next loop, do a little more.</p>
+<p>No <code>Thread.sleep()</code>. No <code>while</code> loops that wait for something. No slow work like reading a big file.</p>
+</div>
+<p>Here's why. Suppose you want to run a motor for 2 seconds:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ BAD: freezes the robot for 2 seconds</span>
+<span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span>
+<span class="n">Thread</span><span class="p">.</span><span class="na">sleep</span><span class="p">(</span><span class="mi">2000</span><span class="p">);</span>
+<span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+</code></pre></div>
+<p>During those 2 seconds, the loop is stuck. Nothing else runs: the drivetrain ignores the joysticks, other mechanisms freeze, and the robot can't even respond to being disabled. The roboRIO's <strong>motor safety</strong> feature may also shut off motors because they stopped getting updates.</p>
+<p>The right way spreads the work across many loops. Each loop checks how much time has passed:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ✅ GOOD: checked once per loop, finishes in microseconds</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Timer</span><span class="w"> </span><span class="n">timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Timer</span><span class="p">();</span>
+
+<span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">autonomousInit</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">timer</span><span class="p">.</span><span class="na">restart</span><span class="p">();</span><span class="w">        </span><span class="c1">// start timing when auto begins</span>
+<span class="p">}</span>
+
+<span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">autonomousPeriodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">timer</span><span class="p">.</span><span class="na">get</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">2.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mf">0.5</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Over 2 seconds, <code>autonomousPeriodic()</code> runs 100 times. Each time it asks "has it been 2 seconds yet?" and sets the motor accordingly. Every other part of the robot keeps running the whole time.</p>
+<p>The same goes for waiting on a sensor:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// ❌ BAD: waits forever if the switch never closes</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">limitSwitch</span><span class="p">.</span><span class="na">get</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mf">0.3</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// ✅ GOOD: one check per loop</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">limitSwitch</span><span class="p">.</span><span class="na">get</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mf">0.3</span><span class="p">);</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">This is why command-based programming exists</p>
+<p>Writing every mechanism as timers and if statements inside <code>teleopPeriodic()</code> gets messy fast. Commands (<a href="07-command-based.html">Lesson 7</a>) are a cleaner way to write "do this a little each loop until it's done." Under the hood, they follow exactly this rule.</p>
+</div>
+<h3 id="loop-overruns">Loop overruns<a class="headerlink" href="#loop-overruns" title="Permanent link">#</a></h3>
+<p>If your code takes longer than 20 ms, the console prints a warning:</p>
+<div class="highlight"><pre><span></span><code>Warning: Loop time of 0.02s overrun
+    teleopPeriodic(): 0.045s
+    robotPeriodic(): 0.001s
+</code></pre></div>
+<p>That means the next loop started late. An occasional overrun isn't a disaster, but frequent ones make the robot sluggish and unpredictable. The warning shows which method took the time, so you know where to look.</p>
+<p>Common causes: <code>Thread.sleep()</code>, waiting loops, printing too much with <code>System.out.println</code> every loop, or slow work like file reads.</p>
+<h3 id="where-your-code-goes-in-the-command-robot-template">Where your code goes in the Command Robot template<a class="headerlink" href="#where-your-code-goes-in-the-command-robot-template" title="Permanent link">#</a></h3>
+<p>In the template you created in Lesson 0, <code>Robot.java</code> is short, and you'll rarely edit it:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Robot</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">TimedRobot</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="n">autonomousCommand</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">RobotContainer</span><span class="w"> </span><span class="n">robotContainer</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">Robot</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">robotContainer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RobotContainer</span><span class="p">();</span><span class="w">   </span><span class="c1">// builds subsystems, binds buttons</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">robotPeriodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">run</span><span class="p">();</span><span class="w">    </span><span class="c1">// runs all commands, every loop</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">autonomousInit</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">autonomousCommand</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">robotContainer</span><span class="p">.</span><span class="na">getAutonomousCommand</span><span class="p">();</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">autonomousCommand</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">autonomousCommand</span><span class="p">.</span><span class="na">schedule</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">teleopInit</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">autonomousCommand</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">autonomousCommand</span><span class="p">.</span><span class="na">cancel</span><span class="p">();</span><span class="w">          </span><span class="c1">// stop auto when teleop starts</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The important line is <code>CommandScheduler.getInstance().run()</code> in <code>robotPeriodic()</code>. Every loop, the <strong>command scheduler</strong> runs your commands, checks your buttons, and calls your subsystems' <code>periodic()</code> methods. You'll write subsystems and commands; the scheduler decides when they run. <a href="07b-scheduler.html">Lesson 7.1</a> covers it in detail.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Open your project's <code>Robot.java</code> and find each mode's <code>Init()</code> and <code>Periodic()</code> methods</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a counter field. Increase it in <code>robotPeriodic()</code> and print it every 50th loop (<code>if (count % 50 == 0)</code>). Run in simulation. Does it print about once per second?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a print to <code>teleopInit()</code> and <code>disabledInit()</code>. Switch modes in the Sim GUI and watch when each prints.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Put <code>Thread.sleep(100);</code> in <code>teleopPeriodic()</code> (you'll need to wrap it in <code>try { } catch (InterruptedException e) { }</code>). Enable teleop and read the loop overrun warnings. Then remove it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Use a <code>Timer</code> to print "Two seconds!" exactly once, two seconds after teleop starts</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>How many times per second does <code>teleopPeriodic()</code> run?</summary>
+<p>About 50, once every 20 ms.</p>
+</details>
+<details class="question">
+<summary>What's the difference between <code>teleopInit()</code> and <code>teleopPeriodic()</code>?</summary>
+<p><code>teleopInit()</code> runs once when teleop starts. <code>teleopPeriodic()</code> runs every loop for the rest of teleop.</p>
+</details>
+<details class="question">
+<summary>Which method runs in every mode, including disabled?</summary>
+<p><code>robotPeriodic()</code></p>
+</details>
+<details class="question">
+<summary>Why does <code>Thread.sleep()</code> cause a <em>loop overrun</em> warning?</summary>
+<p>The loop has 20 ms to finish. Sleeping blocks it, so the next loop starts late and the whole robot stops responding until it's done.</p>
+</details>
+<details class="question">
+<summary>How do you run a motor for 2 seconds without blocking?</summary>
+<p>Start a <code>Timer</code> when the action begins, then check <code>timer.get()</code> every loop and stop the motor once it passes 2 seconds.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../hardware/05-pneumatics.html"><span>Previous</span>5. Pneumatics</a><a class="pager-next" href="07-command-based.html"><span>Next</span>7. Command-Based Programming</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4.3 Sensors | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section" open><summary>Hardware</summary><ul><li><a href="04-electronics.html">4. Electronics</a></li><li><a href="04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="04d-sensors.html" class="current" aria-current="page">4.3 Sensors</a></li><li><a href="05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="43-sensors-switches-knobs-encoders-and-gyros">4.3 Sensors: Switches, Knobs, Encoders, and Gyros<a class="headerlink" href="#43-sensors-switches-knobs-encoders-and-gyros" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Motors let the robot act. Sensors let it <strong>know</strong> what's happening. The labs use four kinds of sensor, each wired a different way and answering a different question:</p>
+<table>
+<thead>
+<tr>
+<th>Sensor</th>
+<th>Answers</th>
+<th>Wired to</th>
+<th>Labs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Limit switch</strong></td>
+<td>"Am I at the end?"</td>
+<td>roboRIO <strong>DIO</strong></td>
+<td>4</td>
+</tr>
+<tr>
+<td><strong>10-turn potentiometer</strong></td>
+<td>"Where is the knob?"</td>
+<td>roboRIO <strong>Analog In</strong></td>
+<td>5</td>
+</tr>
+<tr>
+<td><strong>REV Through Bore Encoder</strong></td>
+<td>"How far has this shaft turned, and how fast?"</td>
+<td>roboRIO <strong>DIO</strong> (two ports)</td>
+<td>6, 9, 10</td>
+</tr>
+<tr>
+<td><strong>NavX2</strong></td>
+<td>"Which way is the robot facing?"</td>
+<td>roboRIO <strong>MXP</strong> port</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<p>This lesson covers the hardware side: what each sensor is, how it's wired, and what can go wrong. The labs cover the code. <a href="../robot-code/08-sensors.html">Lesson 8</a> covers sensors and units in general.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/digital-inputs-hardware.html">Digital Inputs – Hardware (WPILib)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/analog-inputs-hardware.html">Analog Inputs – Hardware (WPILib)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/encoders-hardware.html">Encoders – Hardware (WPILib)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/gyros-hardware.html">Gyroscopes – Hardware (WPILib)</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="the-roborios-sensor-ports">The roboRIO's sensor ports<a class="headerlink" href="#the-roborios-sensor-ports" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>How many</th>
+<th>Signal</th>
+<th>Our sensors</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DIO</strong> (Digital I/O)</td>
+<td>10 (0–9)</td>
+<td>On or off, read very fast</td>
+<td>Limit switches, encoder channels A and B</td>
+</tr>
+<tr>
+<td><strong>Analog In</strong></td>
+<td>4 (0–3)</td>
+<td>A voltage from 0 to 5 V</td>
+<td>Potentiometer</td>
+</tr>
+<tr>
+<td><strong>MXP</strong></td>
+<td>1 wide connector</td>
+<td>Many signals, including SPI</td>
+<td>NavX2</td>
+</tr>
+</tbody>
+</table>
+<p>Every DIO and Analog In port has three pins: <strong>ground</strong>, <strong>5 V power</strong>, and <strong>signal</strong>. Sensors that need power use all three. A plain switch uses just signal and ground.</p>
+<div class="admonition warning">
+<p class="admonition-title">Plug the right way around</p>
+<p>Most sensor plugs fit either way. Check the pin labels on the roboRIO (they're printed next to each row) and match ground, power, and signal. A backward plug usually just doesn't work, but it can damage some sensors.</p>
+</div>
+<h3 id="limit-switches">Limit switches<a class="headerlink" href="#limit-switches" title="Permanent link">#</a></h3>
+<p>The test bed's limit switches are industrial plunger switches. Pushing the plunger flips a set of contacts inside.</p>
+<table>
+<thead>
+<tr>
+<th>Contact</th>
+<th>When not pressed</th>
+<th>When pressed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NO</strong> (normally open)</td>
+<td>Open: no connection</td>
+<td>Closed: connected</td>
+</tr>
+<tr>
+<td><strong>NC</strong> (normally closed)</td>
+<td>Closed: connected</td>
+<td>Open: no connection</td>
+</tr>
+</tbody>
+</table>
+<p>The switch connects between a DIO <strong>signal</strong> pin and <strong>ground</strong>:</p>
+<p><img alt="A limit switch wired to a roboRIO DIO port" src="../assets/wpilib/limit-switch-to-roborio.svg" /></p>
+<p class="credit">A limit switch wired to a DIO port: signal and ground only. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/digital-inputs-hardware.html">Digital Inputs - Hardware</a> (CC BY 4.0).</p>
+
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: Why a switch reads high when open</p>
+<p>All DIO ports have built-in <strong>pull-up resistors</strong> between the power pins and the signal pins. These make sure that when the signal pin is "floating" (not connected to anything), it reads <strong>high</strong>.</p>
+<p>A simple switch doesn't need power, so it has just two wires, between <strong>signal</strong> and <strong>ground</strong>. When the switch is open, the signal pin floats and the pull-up makes it read high. When the switch closes, it connects the signal straight to ground, so it reads low.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/digital-inputs-hardware.html">Digital Inputs - Hardware</a>, CC BY 4.0.</em></p>
+</div>
+<p>So with NO contacts:</p>
+<table>
+<thead>
+<tr>
+<th>Switch</th>
+<th>Signal</th>
+<th><code>get()</code> returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Not pressed</td>
+<td>Pulled up</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td>Pressed</td>
+<td>Connected to ground</td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>That's why <a href="../testbed/lab4-limit-switch.html">Lab 4</a> uses <code>!m_limitSwitch.get()</code> to mean "pressed."</p>
+<div class="admonition tip">
+<p class="admonition-title">NC is safer for real mechanisms</p>
+<p>With <strong>NC</strong> wiring, a broken or unplugged wire reads the same as "pressed," so the robot stops instead of driving past the end. With NO wiring, a broken wire looks like "never pressed" and the motor keeps going. Many teams wire safety limits NC for this reason.</p>
+</div>
+<h3 id="potentiometers">Potentiometers<a class="headerlink" href="#potentiometers" title="Permanent link">#</a></h3>
+<p>A potentiometer ("pot") is a variable resistor with three pins: two ends of a resistive strip, and a <strong>wiper</strong> that slides along it as the shaft turns.</p>
+<div class="highlight"><pre><span></span><code>5 V ──┬─────────────────┐
+      │  resistive strip │
+GND ──┴────────▲────────┘
+               │
+            wiper ──→ Analog In signal
+</code></pre></div>
+<p>The wiper's voltage goes from about 0 V at one end to about 5 V at the other. The test bed's is a <strong>10-turn</strong> pot: ten full turns from end to end, which gives very fine resolution.</p>
+<p><img alt="A potentiometer wired to a roboRIO analog input, with its voltage divider circuit" src="../assets/wpilib/analog-potentiometer-to-roborio.svg" /></p>
+<p class="credit">A potentiometer on an Analog In port (left) is a voltage divider (right). From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/analog-potentiometers-hardware.html">Analog Potentiometers - Hardware</a> (CC BY 4.0).</p>
+
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: Which end reads 0 V?</p>
+<p>The middle pin of a potentiometer is the <strong>signal</strong>. The two outer pins can each be <strong>either</strong> power or ground. As the shaft turns, the two resistances R1 and R2 change, but their sum stays the same, so the signal voltage changes evenly as you turn.</p>
+<p>Because the circuit is symmetric, you choose which end of the travel reads 0 V. To reverse the direction, <strong>wire it backwards</strong>: swap the two outer pins.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/analog-potentiometers-hardware.html">Analog Potentiometers - Hardware</a>, CC BY 4.0.</em></p>
+</div>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Potentiometer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Measures</td>
+<td>Absolute position, within its range</td>
+</tr>
+<tr>
+<td>After power-on</td>
+<td>Knows its real position right away</td>
+</tr>
+<tr>
+<td>Range</td>
+<td>Limited: has <strong>hard stops</strong> at each end</td>
+</tr>
+<tr>
+<td>Weaknesses</td>
+<td>A little noisy; can wear out with lots of use</td>
+</tr>
+</tbody>
+</table>
+<p>Potentiometers are cheap and simple, so teams use them to measure arm angles and as driver knobs, like in <a href="../testbed/lab5-knob-speed.html">Lab 5</a>.</p>
+<h3 id="the-rev-through-bore-encoder">The REV Through Bore Encoder<a class="headerlink" href="#the-rev-through-bore-encoder" title="Permanent link">#</a></h3>
+<p>The Through Bore Encoder mounts <strong>around</strong> a 1/2" hex shaft (the shaft passes through its center), and measures the shaft's rotation with a magnet and sensor.</p>
+<p>It has two outputs:</p>
+<table>
+<thead>
+<tr>
+<th>Output</th>
+<th>Signal</th>
+<th>What it gives you</th>
+<th>We use it?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Quadrature</strong> (A and B)</td>
+<td>Two square waves</td>
+<td>How far the shaft has turned, any number of turns, plus speed. 2048 cycles (8192 counts) per revolution.</td>
+<td><strong>Yes</strong>, on two DIO ports</td>
+</tr>
+<tr>
+<td><strong>Absolute</strong></td>
+<td>One pulse whose width shows the angle</td>
+<td>The shaft's angle within <strong>one</strong> turn, even right after power-on</td>
+<td>Not yet</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Quadrature, explained.</strong> Channels A and B each switch on and off as the shaft turns, a quarter-cycle apart. One full cycle steps through four states, and the <strong>order</strong> of the states tells the roboRIO the direction:</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Turning forward (A, B)</th>
+<th>Turning backward (A, B)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>off, off</td>
+<td>off, off</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>on</strong>, off</td>
+<td>off, <strong>on</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>on, <strong>on</strong></td>
+<td><strong>on</strong>, on</td>
+</tr>
+<tr>
+<td>4</td>
+<td>off, on</td>
+<td>on, off</td>
+</tr>
+</tbody>
+</table>
+<p>Turning forward, <strong>A</strong> switches first. Turning backward, <strong>B</strong> switches first. Every one of those switches is one <strong>count</strong>, so one cycle is 4 counts.</p>
+<p><img alt="Quadrature signals: channel A leads for one direction, channel B leads for the other" src="../assets/wpilib/encoding-direction.png" /></p>
+<p class="credit">The direction comes from which channel (A or B) changes first. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/encoders-software.html">Encoders - Software</a> (CC BY 4.0).</p>
+
+<p>The roboRIO counts these in hardware (its FPGA chip), so it never misses a count, even though your code only runs every 20 ms.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Quadrature encoder</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Measures</td>
+<td>How far, and how fast, from where it started</td>
+</tr>
+<tr>
+<td>After power-on</td>
+<td>Reads <strong>0</strong>, wherever the shaft is</td>
+</tr>
+<tr>
+<td>Range</td>
+<td>Unlimited turns</td>
+</tr>
+<tr>
+<td>So you must...</td>
+<td>Start the mechanism in a known spot, like the elevator at the bottom (<a href="../testbed/lab10-elevator.html">Lab 10</a>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Wiring:</strong> the encoder's cable carries power, ground, A, B, and the absolute signal. Channels A and B go to the signal pins of <strong>two</strong> DIO ports (like 0 and 1), with power and ground from one of them. REV sells cables and breakouts for this.</p>
+<div class="admonition warning">
+<p class="admonition-title">Cycles, not counts</p>
+<p>WPILib's <code>Encoder</code> class calls one full quadrature <strong>cycle</strong> a "pulse." The Through Bore is <strong>2048</strong> cycles per revolution. Using 8192 (the count with 4x decoding) makes every distance 4 times too small.</p>
+</div>
+<h3 id="the-navx2-mxp-gyro">The NavX2-MXP gyro<a class="headerlink" href="#the-navx2-mxp-gyro" title="Permanent link">#</a></h3>
+<p>The NavX2 is a small board with its own processor and three kinds of sensors: gyros (rotation), accelerometers (acceleration), and a magnetometer (compass). It combines them to report the robot's orientation.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>NavX2-MXP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mounts</td>
+<td>Plugs straight into the roboRIO's <strong>MXP</strong> port, on top of the roboRIO</td>
+</tr>
+<tr>
+<td>Talks over</td>
+<td>SPI, through the MXP port (USB also works)</td>
+</tr>
+<tr>
+<td>Most useful value</td>
+<td><strong>Yaw</strong>: which way the robot is facing (<a href="../testbed/lab8-navx-gyro.html">Lab 8</a>)</td>
+</tr>
+<tr>
+<td>At power-on</td>
+<td>Calibrates for a few seconds. The robot <strong>must sit still</strong>.</td>
+</tr>
+<tr>
+<td>Weakness</td>
+<td>Slowly <strong>drifts</strong>: the heading creeps a little over time</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Yaw, pitch, and roll axes on a robot drivetrain" src="../assets/wpilib/drive-yaw-pitch-roll.svg" /></p>
+<p class="credit">Yaw is turning left and right; pitch and roll are tipping. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/gyros-hardware.html">Gyroscopes - Hardware</a> (CC BY 4.0).</p>
+
+<div class="admonition info">
+<p class="admonition-title">Mounting matters</p>
+<p>The NavX measures rotation around the axis pointing up through the board. If the roboRIO is mounted flat, that's the robot's yaw. If it's mounted on its side, the NavX has to be told which way is up, or the headings will be wrong. Keep it flat, and firmly attached, so it moves exactly with the robot.</p>
+</div>
+<h3 id="which-sensor-for-which-job">Which sensor for which job?<a class="headerlink" href="#which-sensor-for-which-job" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>Best sensor</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stop an elevator at the bottom</td>
+<td>Limit switch</td>
+<td>Simple, reliable, and can re-zero an encoder</td>
+</tr>
+<tr>
+<td>Know how high the elevator is</td>
+<td>Encoder</td>
+<td>Precise over the whole range of travel</td>
+</tr>
+<tr>
+<td>Measure an arm angle</td>
+<td>Potentiometer or absolute encoder</td>
+<td>Knows the angle right after power-on</td>
+</tr>
+<tr>
+<td>Drive a set distance</td>
+<td>Encoder on the drivetrain</td>
+<td>Counts wheel rotations</td>
+</tr>
+<tr>
+<td>Turn to an angle</td>
+<td>Gyro</td>
+<td>Measures the robot's rotation directly</td>
+</tr>
+<tr>
+<td>Driver adjusts a value</td>
+<td>Potentiometer</td>
+<td>A knob is easy for people to use</td>
+</tr>
+</tbody>
+</table>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find each sensor on the test bed and WCD, and follow its wire to the roboRIO. Write down the port number for each.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> On a limit switch, find the NO and NC terminals. Which one is wired on the test bed?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find the Through Bore Encoder's two quadrature wires and which DIO ports they go to</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find the NavX2 on the WCD's roboRIO. Is it mounted flat?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Fill in a wiring table for your team: every sensor, its port, and which lab uses it. Post it near the test bed.</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between DIO and Analog In ports?</summary>
+<p>DIO reads on or off. Analog In reads a voltage from 0 to 5 V, so it can measure a range of values.</p>
+</details>
+<details class="question">
+<summary>With NO wiring, what does a limit switch read when pressed? Why?</summary>
+<p><code>false</code>. Pressing connects the signal pin to ground, which pulls it low.</p>
+</details>
+<details class="question">
+<summary>Why might a team wire a safety limit switch NC instead of NO?</summary>
+<p>With NC, a broken wire looks the same as "pressed," so the mechanism stops. With NO, a broken wire looks like "never pressed," and the motor keeps going.</p>
+</details>
+<details class="question">
+<summary>Why does a quadrature encoder need two channels?</summary>
+<p>The order the two channels change tells the roboRIO which direction the shaft is turning.</p>
+</details>
+<details class="question">
+<summary>What's the difference between a potentiometer and a quadrature encoder after the robot turns on?</summary>
+<p>The potentiometer knows its real position immediately. The quadrature encoder reads 0 wherever the shaft is, so the mechanism has to start in a known position.</p>
+</details>
+<details class="question">
+<summary>Why must the robot sit still when the NavX2 powers on?</summary>
+<p>It calibrates itself during the first few seconds. Moving during calibration makes the heading drift for the rest of the session.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="04c-spark-max.html"><span>Previous</span>4.2 The SPARK MAX</a><a class="pager-next" href="05-pneumatics.html"><span>Next</span>5. Pneumatics</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

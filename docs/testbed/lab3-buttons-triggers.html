@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 3: Buttons and Triggers | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html" class="current" aria-current="page">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-3-buttons-and-triggers">Lab 3: Buttons and Triggers<a class="headerlink" href="#lab-3-buttons-and-triggers" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>In Lab 1 you made one button spin a motor while you held it. Real robots need more than that: tap a button to start something, tap another to stop it, flip a mode on and off, run something for exactly two seconds, or use a trigger as a gas pedal.</p>
+<p>All of that comes down to <strong>how a command is started and how it ends</strong>. In this lab you'll wire up five different kinds of button on the same motor and watch exactly how each one behaves. Once you've felt the difference, you'll never mix up <code>whileTrue</code> and <code>onTrue</code> again.</p>
+<p><strong>Before you start:</strong> finish <a href="lab1-spin-motor.html">Lab 1</a>. You'll add to the same <strong>TestBed</strong> project and the same <code>SpinBrushlessMotorSubsystem</code>. <a href="../robot-code/07b-scheduler.html">Lesson 7.1</a> explains what's happening underneath.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/binding-commands-to-triggers.html">Binding Commands to Triggers</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html">Command Decorators</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="two-questions-every-command-answers">Two questions every command answers<a class="headerlink" href="#two-questions-every-command-answers" title="Permanent link">#</a></h3>
+<p>Every command you bind to a button has to answer two questions:</p>
+<ol>
+<li><strong>When does it start?</strong> That's decided by the <strong>binding</strong>: <code>whileTrue</code>, <code>onTrue</code>, <code>toggleOnTrue</code>, and so on.</li>
+<li><strong>When does it end?</strong> That's decided by the binding <strong>and</strong> by the command itself: does it finish on its own, or run until something stops it?</li>
+</ol>
+<p>Get either one wrong and the motor won't stop when you expect, or won't start at all.</p>
+<h3 id="step-1-add-more-commands-to-the-subsystem">Step 1: Add more commands to the subsystem<a class="headerlink" href="#step-1-add-more-commands-to-the-subsystem" title="Permanent link">#</a></h3>
+<p>Open <code>SpinBrushlessMotorSubsystem.java</code>. You already have <code>spinMotorCommand</code>. Add these three below it:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Stops the motor once, then ends immediately. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">stopCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Stop"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Spins at a speed for a set number of seconds, then stops on its own. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinForSecondsCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">seconds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">spinMotorCommand</span><span class="p">(</span><span class="n">speed</span><span class="p">).</span><span class="na">withTimeout</span><span class="p">(</span><span class="n">seconds</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">seconds</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" s"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Spins at whatever speed the supplier gives, read fresh every 20 ms. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinWithSupplierCommand</span><span class="p">(</span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runEnd</span><span class="p">(</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="n">speed</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">()),</span><span class="w">   </span><span class="c1">// every loop: read the value, set the motor</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">                     </span><span class="c1">// when it ends: stop</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Throttle"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>Add this import at the top:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Ends on its own?</th>
+<th>How it ends</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spinMotorCommand</code></td>
+<td><strong>No</strong></td>
+<td>Only when something cancels it. Then it stops the motor.</td>
+</tr>
+<tr>
+<td><code>stopCommand</code></td>
+<td><strong>Yes, instantly</strong></td>
+<td>Sets the speed to 0 once and finishes</td>
+</tr>
+<tr>
+<td><code>spinForSecondsCommand</code></td>
+<td><strong>Yes</strong></td>
+<td>After the time runs out. <code>withTimeout</code> cancels it, which stops the motor.</td>
+</tr>
+<tr>
+<td><code>spinWithSupplierCommand</code></td>
+<td><strong>No</strong></td>
+<td>When canceled. Then it stops the motor.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-2-bind-five-buttons">Step 2: Bind five buttons<a class="headerlink" href="#step-2-bind-five-buttons" title="Permanent link">#</a></h3>
+<p>Open <code>RobotContainer.java</code>. Keep Lab 1's <strong>A</strong> binding and add the rest in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configureBindings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// A: spin WHILE held (Lab 1)</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">a</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinMotorCommand</span><span class="p">(</span>
+<span class="w">            </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorSpeed</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// B: tap to START spinning. Nothing in this binding stops it!</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinMotorCommand</span><span class="p">(</span>
+<span class="w">            </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorSpeed</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// X: tap to STOP</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">x</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">stopCommand</span><span class="p">());</span>
+
+<span class="w">    </span><span class="c1">// Y: tap once to start, tap again to stop</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">y</span><span class="p">().</span><span class="na">toggleOnTrue</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinMotorCommand</span><span class="p">(</span>
+<span class="w">            </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorSpeed</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// Right bumper: tap to spin for exactly 2 seconds</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">rightBumper</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinForSecondsCommand</span><span class="p">(</span>
+<span class="w">            </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorSpeed</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// Right trigger: squeeze like a gas pedal. Harder = faster.</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">rightTrigger</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinWithSupplierCommand</span><span class="p">(</span>
+<span class="w">            </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_controller</span><span class="p">.</span><span class="na">getRightTriggerAxis</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.6</span><span class="p">));</span><span class="w">   </span><span class="c1">// capped at 60%</span>
+
+<span class="w">    </span><span class="c1">// Show which commands are running, live</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>Add the imports <code>CommandScheduler</code> and <code>SmartDashboard</code> if VS Code underlines them (click the lightbulb).</p>
+<div class="admonition info">
+<p class="admonition-title"><code>rightTrigger()</code> vs. <code>getRightTriggerAxis()</code></p>
+<p><code>rightTrigger()</code> is a <strong>button</strong>: it becomes true once you squeeze past halfway. <code>getRightTriggerAxis()</code> is a <strong>number</strong> from 0 to 1 that tells how far you're squeezing. The binding uses the button to start the command, and the command reads the number every loop.</p>
+</div>
+<h3 id="step-3-test-each-button-and-fill-in-the-table">Step 3: Test each button and fill in the table<a class="headerlink" href="#step-3-test-each-button-and-fill-in-the-table" title="Permanent link">#</a></h3>
+<p>Deploy, open the dashboard, find the <strong>Scheduler</strong> widget, and enable. Test <strong>one button at a time</strong>. For each, write down what you observe:</p>
+<table>
+<thead>
+<tr>
+<th>Button</th>
+<th>Binding</th>
+<th>What starts it?</th>
+<th>What stops it?</th>
+<th>Your notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td><code>whileTrue</code></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>B</td>
+<td><code>onTrue</code></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>X</td>
+<td><code>onTrue</code> (stop)</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Y</td>
+<td><code>toggleOnTrue</code></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Right bumper</td>
+<td><code>onTrue</code> + timeout</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Right trigger</td>
+<td><code>whileTrue</code> + supplier</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Watch the <strong>Scheduler</strong> widget while you test. You'll see each command's name appear when it starts and disappear when it ends.</p>
+<h3 id="step-4-the-b-button-puzzle">Step 4: The B button puzzle<a class="headerlink" href="#step-4-the-b-button-puzzle" title="Permanent link">#</a></h3>
+<p>Tap <strong>B</strong>. The motor spins and keeps spinning after you let go. Now try each of these and explain what happens:</p>
+<ol>
+<li>Tap <strong>B</strong>, then tap <strong>X</strong>.</li>
+<li>Tap <strong>B</strong>, then hold <strong>A</strong> and let go.</li>
+<li>Tap <strong>B</strong>, then tap the <strong>right bumper</strong> and wait.</li>
+</ol>
+<p>In every case the motor stops, but for the same reason: <strong>only one command can use a subsystem at a time</strong>. All of these commands belong to <code>SpinBrushlessMotorSubsystem</code>, so starting any of them <strong>interrupts</strong> whatever was running. The interrupted command's end action runs, and the new command takes over.</p>
+<div class="admonition warning">
+<p class="admonition-title">The classic beginner bug</p>
+<p><code>onTrue</code> with a command that never ends means "start this and never stop it." That's fine when another button stops it (like B and X here), but it's a bug when you meant "while held." If a motor won't stop when you let go, check whether it's bound with <code>onTrue</code>.</p>
+</div>
+<h3 id="step-5-a-default-command">Step 5: A default command<a class="headerlink" href="#step-5-a-default-command" title="Permanent link">#</a></h3>
+<p>Right now, when no command is running, the SPARK MAX just keeps doing whatever it was last told. A <strong>default command</strong> runs whenever nothing else is using the subsystem, so you can make "stopped" the resting state.</p>
+<p>In <code>RobotContainer</code>'s constructor, before <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">setDefaultCommand</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+<span class="w">            </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Idle"</span><span class="p">));</span>
+</code></pre></div>
+<p>Deploy and watch the Scheduler widget. <strong>Idle</strong> shows whenever no button command is running. Press any button: Idle disappears, the button's command runs, and when it ends, Idle comes right back.</p>
+<div class="admonition question">
+<p class="admonition-title">Think about it</p>
+<p>The default command uses <code>run</code>, not <code>runOnce</code>. Why? (Hint: what would happen if the default command finished instantly? See <a href="../robot-code/07b-scheduler.html">Lesson 7.1</a>.)</p>
+</div>
+<h3 id="step-6-commit">Step 6: Commit<a class="headerlink" href="#step-6-commit" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 3: button bindings"</span>
+</code></pre></div>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Fill in the whole table in Step 3</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Do the three B puzzles in Step 4 and explain each one in a sentence</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change the right bumper's time from 2.0 to 0.5 seconds</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <strong>left bumper</strong> binding with <code>onFalse</code>: the motor spins for 1 second when you <strong>release</strong> the bumper</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make the right trigger spin the motor <strong>backward</strong> instead (hint: one minus sign)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Bind the <strong>left trigger</strong> so it only works while <strong>A</strong> is also held, using <code>m_controller.leftTrigger().and(m_controller.a())</code>. What happens when you press only one of them?</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between <code>whileTrue</code> and <code>onTrue</code>?</summary>
+<p><code>whileTrue</code> starts the command when the button is pressed and cancels it when released. <code>onTrue</code> starts it when pressed and then lets it run until it ends on its own or something interrupts it.</p>
+</details>
+<details class="question">
+<summary>Why does tapping X stop the motor that B started?</summary>
+<p>Both commands use the same subsystem, and only one command can use a subsystem at a time. Starting X's command interrupts B's command, which runs its end action and stops the motor.</p>
+</details>
+<details class="question">
+<summary>How does <code>withTimeout(2.0)</code> make a never-ending command end?</summary>
+<p>It cancels the command after 2 seconds. Canceling runs the command's end action, which stops the motor.</p>
+</details>
+<details class="question">
+<summary>Why does the throttle command use a <code>DoubleSupplier</code> instead of a plain number?</summary>
+<p>So it reads the trigger every loop. A plain number would be read once when the robot starts, and the speed would never change.</p>
+</details>
+<details class="question">
+<summary>What does a default command do?</summary>
+<p>It runs whenever no other command is using that subsystem, so the subsystem always has a known resting behavior.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab2-west-coast-drive.html"><span>Previous</span>Lab 2: Drive a West Coast Drive</a><a class="pager-next" href="lab4-limit-switch.html"><span>Next</span>Lab 4: Stop at a Limit Switch</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 8: Turn with a Gyro | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html" class="current" aria-current="page">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-8-turn-with-a-gyro-navx2">Lab 8: Turn with a Gyro (NavX2)<a class="headerlink" href="#lab-8-turn-with-a-gyro-navx2" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>In <a href="lab7-timed-auto.html">Lab 7</a>, the timed square never closed. Every "90° turn" was really just "spin for half a second," and the robot had no idea how far it had actually turned.</p>
+<p>A <strong>gyro</strong> fixes that. It measures how far the robot has <strong>rotated</strong>, so instead of "spin for 0.5 seconds" you can say "spin until you've turned 90°." In this lab you'll add the team's <strong>NavX2</strong> to the West Coast Drive, read the robot's heading, and use it to make turns that land where you meant.</p>
+<p><strong>Before you start:</strong> finish <a href="lab7-timed-auto.html">Lab 7</a> and keep its repeatability table. You'll add to the same <strong>WestCoastDrive</strong> project. <a href="../robot-code/08-sensors.html">Lesson 8</a> covers gyros. Lesson <a href="../hardware/04d-sensors.html">4.3</a> covers the NavX2's hardware and mounting.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/gyros-software.html">Gyroscopes – Software</a></li>
+<li><a href="https://www.studica.com/nav2-mxp-robotics-navigation-sensor">NavX2-MXP (Studica)</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="what-a-gyro-measures">What a gyro measures<a class="headerlink" href="#what-a-gyro-measures" title="Permanent link">#</a></h3>
+<p>The NavX2 measures rotation around three axes. For driving, the one that matters is <strong>yaw</strong>: how far the robot has turned left or right, seen from above. That's the robot's <strong>heading</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Robot turns</th>
+<th>Heading (WPILib convention)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Left (counterclockwise from above)</td>
+<td>Goes <strong>up</strong></td>
+</tr>
+<tr>
+<td>Right (clockwise from above)</td>
+<td>Goes <strong>down</strong></td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Yaw, pitch, and roll axes on a robot drivetrain" src="../assets/wpilib/drive-yaw-pitch-roll.svg" /></p>
+<p class="credit">Yaw is the robot turning left or right. That's the heading. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/hardware/sensors/gyros-hardware.html">Gyroscopes - Hardware</a> (CC BY 4.0).</p>
+
+<p>The heading keeps counting past 360°. Spin left twice and it reads about 720°.</p>
+<div class="admonition warning">
+<p class="admonition-title">Two sign conventions</p>
+<p>The NavX's own <code>getAngle()</code> and <code>getYaw()</code> count <strong>clockwise</strong> as positive. WPILib counts <strong>counterclockwise</strong> as positive. To avoid mixing them up, this lab only uses <code>getRotation2d()</code>, which already follows WPILib's convention.</p>
+</div>
+<h3 id="the-hardware">The hardware<a class="headerlink" href="#the-hardware" title="Permanent link">#</a></h3>
+<p>The NavX2 plugs into the roboRIO's <strong>MXP</strong> port (the wide connector in the middle). It talks to the roboRIO over SPI through that port.</p>
+<div class="admonition info">
+<p class="admonition-title">If your NavX is connected differently</p>
+<p>Over USB, use <code>NavXComType.kUSB1</code> instead of <code>kMXP_SPI</code> in Step 3. Everything else stays the same.</p>
+</div>
+<h3 id="step-1-calibration">Step 1: Calibration<a class="headerlink" href="#step-1-calibration" title="Permanent link">#</a></h3>
+<p>When the robot powers on, the NavX spends a few seconds <strong>calibrating</strong>: measuring itself while sitting perfectly still. If the robot moves during that time, the heading will drift for the rest of the session.</p>
+<div class="admonition danger">
+<p class="admonition-title">Keep it still at power-on</p>
+<p>Turn on the robot and <strong>don't touch it</strong> for about 10 seconds. You'll add a dashboard light in Step 4 that shows when calibration is done.</p>
+</div>
+<h3 id="step-2-install-the-navx-library">Step 2: Install the NavX library<a class="headerlink" href="#step-2-install-the-navx-library" title="Permanent link">#</a></h3>
+<p>The NavX library comes from Studica, the company that makes it.</p>
+<ol>
+<li>Open <strong>WPILib → Vendor Dependencies</strong> in the VS Code sidebar.</li>
+<li>Find <strong>Studica</strong> (the NavX library) and click <strong>Install</strong>.</li>
+<li>If it isn't in the list, use <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Manage Vendor Libraries → Install new library (online)</strong> and paste the vendordep URL from Studica's NavX documentation.</li>
+<li>Check that a Studica <code>.json</code> file appears in <code>vendordeps/</code>.</li>
+</ol>
+<h3 id="step-3-add-the-gyro-to-the-drive-subsystem">Step 3: Add the gyro to the drive subsystem<a class="headerlink" href="#step-3-add-the-gyro-to-the-drive-subsystem" title="Permanent link">#</a></h3>
+<p>Open <code>DriveSubsystem.java</code>. Add the imports:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">com.studica.frc.AHRS</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.studica.frc.AHRS.NavXComType</span><span class="p">;</span>
+</code></pre></div>
+<p>Add the gyro as a field:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// NavX2 on the roboRIO's MXP port, talking over SPI</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">AHRS</span><span class="w"> </span><span class="n">m_gyro</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AHRS</span><span class="p">(</span><span class="n">NavXComType</span><span class="p">.</span><span class="na">kMXP_SPI</span><span class="p">);</span>
+</code></pre></div>
+<p>Add methods to read and reset the heading:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Robot heading in degrees. Turning left (counterclockwise) makes it go up. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">().</span><span class="na">getDegrees</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Makes the current direction the new 0°. Works while disabled. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">zeroHeadingCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">::</span><span class="n">reset</span><span class="p">).</span><span class="na">ignoringDisable</span><span class="p">(</span><span class="kc">true</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Zero Heading"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<h3 id="step-4-show-it-on-the-dashboard">Step 4: Show it on the dashboard<a class="headerlink" href="#step-4-show-it-on-the-dashboard" title="Permanent link">#</a></h3>
+<p>Add to <code>periodic()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Gyro/Heading (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putBoolean</span><span class="p">(</span><span class="s">"Gyro/Connected"</span><span class="p">,</span><span class="w"> </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">isConnected</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putBoolean</span><span class="p">(</span><span class="s">"Gyro/Calibrating"</span><span class="p">,</span><span class="w"> </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">isCalibrating</span><span class="p">());</span>
+</code></pre></div>
+<p>And bind a button to zero the heading, in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">back</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">zeroHeadingCommand</span><span class="p">());</span>
+</code></pre></div>
+<h3 id="step-5-check-the-gyro-by-hand">Step 5: Check the gyro by hand<a class="headerlink" href="#step-5-check-the-gyro-by-hand" title="Permanent link">#</a></h3>
+<p>Deploy. Leave the robot <strong>disabled</strong>. Wait until <strong>Calibrating</strong> shows false and <strong>Connected</strong> shows true.</p>
+<ol>
+<li>Press <strong>Back</strong> to zero the heading. It reads about 0.</li>
+<li>Push the robot by hand so it turns <strong>left</strong> about a quarter turn. The heading should read about <strong>+90</strong>.</li>
+<li>Turn it back. The heading returns to about 0.</li>
+<li>Turn it <strong>right</strong> a quarter turn. About <strong>−90</strong>.</li>
+<li>Leave it completely still for a minute and watch the heading. Does it change at all? That slow creep is <strong>drift</strong>, and every gyro has a little.</li>
+</ol>
+<p>If <strong>Connected</strong> is false, check the NavX is fully seated on the MXP port and that the library is installed.</p>
+<h3 id="step-6-turn-by-the-gyro-bang-bang">Step 6: Turn by the gyro (bang-bang)<a class="headerlink" href="#step-6-turn-by-the-gyro-bang-bang" title="Permanent link">#</a></h3>
+<p>Now replace "spin for 0.5 seconds" with "spin until the heading changes by 90°." Add to <code>DriveSubsystem</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Spins in place until the heading has changed by the given degrees.</span>
+<span class="cm">   * Positive = turn left, negative = turn right.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">turnDegreesCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">degrees</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">signum</span><span class="p">(</span><span class="n">degrees</span><span class="p">);</span><span class="w">   </span><span class="c1">// +1 for left, -1 for right</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">degrees</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">tankDrive</span><span class="p">(</span><span class="o">-</span><span class="n">direction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="o">?</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="w">     </span><span class="c1">// turning left: wait until we pass the target</span>
+<span class="w">            </span><span class="p">:</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="p">)</span><span class="w">    </span><span class="c1">// turning right: wait until we pass it going down</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span><span class="w">                             </span><span class="c1">// safety: give up if the gyro never gets there</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Turn "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">degrees</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" deg"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>Reading it:</p>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>runOnce(() -&gt; m_turnTarget = getHeadingDegrees() + degrees)</code></td>
+<td>Remembers where to stop: 90° from <strong>wherever the robot is now</strong></td>
+</tr>
+<tr>
+<td><code>tankDrive(-direction * speed, direction * speed, false)</code></td>
+<td>Spins in place. For a left turn, left side back and right side forward.</td>
+</tr>
+<tr>
+<td><code>.until(...)</code></td>
+<td>Stops the moment the heading reaches the target</td>
+</tr>
+<tr>
+<td><code>.withTimeout(3.0)</code></td>
+<td>If the gyro is unplugged, the heading never changes. This stops the robot anyway.</td>
+</tr>
+</tbody>
+</table>
+<p>Add the debug values to <code>periodic()</code> so you can watch it:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Gyro/Turn Target (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Gyro/Turn Error (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">());</span>
+</code></pre></div>
+<p>Bind it to test, in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">x</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">turnDegreesCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">));</span><span class="w">    </span><span class="c1">// turn left 90°</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">turnDegreesCommand</span><span class="p">(</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">));</span><span class="w">   </span><span class="c1">// turn right 90°</span>
+</code></pre></div>
+<p><strong>On the floor</strong>, in open space: press X, let the robot turn, and read <strong>Heading</strong> after it stops. Try speeds of 0.3, 0.5, and 0.7.</p>
+<table>
+<thead>
+<tr>
+<th>Speed</th>
+<th>Target</th>
+<th>Where it stopped</th>
+<th>Overshoot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.3</td>
+<td>90</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>90</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>0.7</td>
+<td>90</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>What you'll see:</strong> It always turns <strong>at least</strong> 90°, so it's far better than timing. But it <strong>overshoots</strong>, more at higher speeds. When the gyro says "90!", the robot is still spinning and takes time to stop. It's the same bang-bang overshoot you saw on the wheel in <a href="lab6-encoder.html">Lab 6</a>.</p>
+<h3 id="step-7-slow-down-near-the-end">Step 7: Slow down near the end<a class="headerlink" href="#step-7-slow-down-near-the-end" title="Permanent link">#</a></h3>
+<p>One simple fix: turn fast for most of the way, then slow for the last part. This command picks its speed <strong>every loop</strong> from how far it still has to turn:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Fast until 20 degrees from the target, then slow. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">twoSpeedTurnCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">degrees</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">signum</span><span class="p">(</span><span class="n">degrees</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">degrees</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">double</span><span class="w"> </span><span class="n">remaining</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">m_turnTarget</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">());</span>
+<span class="w">            </span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">remaining</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">20.0</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mf">0.6</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0.25</span><span class="p">;</span><span class="w">   </span><span class="c1">// fast far away, slow up close</span>
+<span class="w">            </span><span class="n">m_drive</span><span class="p">.</span><span class="na">tankDrive</span><span class="p">(</span><span class="o">-</span><span class="n">direction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="o">?</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">m_turnTarget</span>
+<span class="w">            </span><span class="p">:</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Two-Speed Turn "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">degrees</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>The target is set <strong>once</strong>, at the start, so the whole turn aims at the same spot. Only the speed changes along the way.</p>
+<p>Bind it to Y:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">y</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">twoSpeedTurnCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">));</span>
+</code></pre></div>
+<p>Compare its overshoot with the one-speed turn from Step 6.</p>
+<div class="admonition question">
+<p class="admonition-title">Think about it</p>
+<p>Two speeds work better than one. What about ten speeds, each a bit slower as the robot gets closer? Or a speed that shrinks <strong>smoothly</strong> with the distance left to turn? That idea has a name: it's the <strong>P</strong> in PID, and it's coming in <a href="lab9-pid-wheel.html">Lab 9</a>.</p>
+</div>
+<h3 id="step-8-a-square-that-closes">Step 8: A square that closes<a class="headerlink" href="#step-8-a-square-that-closes" title="Permanent link">#</a></h3>
+<p>Go back to <code>RobotContainer</code>'s <code>squareSide()</code> from Lab 7, and swap the timed spin for a gyro turn:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">squareSide</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">),</span><span class="w">   </span><span class="c1">// forward (still timed)</span>
+<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">),</span><span class="w">   </span><span class="c1">// pause</span>
+<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">twoSpeedTurnCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">),</span><span class="w">                 </span><span class="c1">// turn left by the gyro</span>
+<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">));</span><span class="w">  </span><span class="c1">// pause</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>Import <code>Commands</code> if needed. Run <strong>Square</strong> five times and fill in the same table as Lab 7. Compare the two tables.</p>
+<h3 id="step-9-commit">Step 9: Commit<a class="headerlink" href="#step-9-commit" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 8: NavX gyro turns"</span>
+</code></pre></div>
+<h3 id="when-it-doesnt-work">When it doesn't work<a class="headerlink" href="#when-it-doesnt-work" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Build error: cannot find symbol <code>AHRS</code></td>
+<td>The Studica library isn't installed (Step 2)</td>
+</tr>
+<tr>
+<td><strong>Connected</strong> is false</td>
+<td>NavX not fully seated on the MXP port, or the wrong <code>NavXComType</code></td>
+</tr>
+<tr>
+<td>Heading slowly creeps while sitting still</td>
+<td>Normal drift, but a lot of it means the robot moved during calibration. Restart the robot and keep it still.</td>
+</tr>
+<tr>
+<td>Heading goes <strong>down</strong> when turning left</td>
+<td>You used <code>getAngle()</code> or <code>getYaw()</code> instead of <code>getRotation2d()</code></td>
+</tr>
+<tr>
+<td>Robot spins forever, then stops after 3 seconds</td>
+<td>It turned the opposite way from the target: check the signs in <code>tankDrive</code> for the turn</td>
+</tr>
+</tbody>
+</table>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Check the heading by hand: +90 left, −90 right</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Measure drift: how much does the heading change in one minute sitting still?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Fill in the speed vs. overshoot table for one-speed turns</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Compare one-speed and two-speed turns</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run the gyro square and compare with your Lab 7 table</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Turn 360° and see if the robot ends facing the same way</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: write <code>turnToHeadingCommand(double heading)</code> that turns to an <strong>absolute</strong> heading (like "face 0°") instead of "turn by" an amount</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What does a gyro measure?</summary>
+<p>How much the robot has rotated. Yaw, the rotation seen from above, is the robot's heading.</p>
+</details>
+<details class="question">
+<summary>Why must the robot stay still when it powers on?</summary>
+<p>The NavX calibrates during the first few seconds. If the robot moves, the calibration is off and the heading drifts all session.</p>
+</details>
+<details class="question">
+<summary>Why use <code>getRotation2d()</code> instead of <code>getAngle()</code>?</summary>
+<p><code>getRotation2d()</code> counts counterclockwise as positive, matching WPILib. The NavX's own <code>getAngle()</code> counts clockwise as positive, which flips every sign.</p>
+</details>
+<details class="question">
+<summary>Why does <code>turnDegreesCommand</code> store a target instead of just using 90?</summary>
+<p>The robot might not be at 0° when the turn starts. Storing "current heading + 90" makes it turn 90° from wherever it is.</p>
+</details>
+<details class="question">
+<summary>Why does the gyro turn still overshoot?</summary>
+<p>It's bang-bang: full speed until the heading reaches the target, then stop. The robot is still spinning at that moment and takes time to stop.</p>
+</details>
+<details class="question">
+<summary>Why does the two-speed turn overshoot less?</summary>
+<p>It's going slower when it reaches the target, so it carries less momentum and stops sooner.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab7-timed-auto.html"><span>Previous</span>Lab 7: Timed Autonomous</a><a class="pager-next" href="lab9-pid-wheel.html"><span>Next</span>Lab 9: PID on the Wheel</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4.2 The SPARK MAX | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section" open><summary>Hardware</summary><ul><li><a href="04-electronics.html">4. Electronics</a></li><li><a href="04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="04c-spark-max.html" class="current" aria-current="page">4.2 The SPARK MAX</a></li><li><a href="04d-sensors.html">4.3 Sensors</a></li><li><a href="05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="42-the-spark-max-motor-controller">4.2 The SPARK MAX Motor Controller<a class="headerlink" href="#42-the-spark-max-motor-controller" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Every motor in the labs runs through a <strong>SPARK MAX</strong>: 7 of them across the test bed and West Coast Drive. When a motor doesn't move, or moves the wrong way, or two motors fight each other, the answer is almost always in how its SPARK MAX is wired or set up.</p>
+<p>This lesson covers what a SPARK MAX does, how it connects to the roboRIO, and how to check and set it up with the <strong>REV Hardware Client</strong> before you ever write code.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.revrobotics.com/brushless/spark-max/gs/basic-config">SPARK MAX Basic Configuration (REV)</a></li>
+<li><a href="https://docs.revrobotics.com/brushless/spark-max/encoders">Using Encoders with the SPARK MAX (REV)</a></li>
+<li><a href="https://docs.revrobotics.com/revlib">REVLib documentation</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="what-a-motor-controller-does">What a motor controller does<a class="headerlink" href="#what-a-motor-controller-does" title="Permanent link">#</a></h3>
+<p>The roboRIO can't power a motor directly. Its outputs are tiny signals. A <strong>motor controller</strong> sits between the battery power and the motor, and turns a small signal ("run at 50% forward") into the big, fast-switching current the motor actually needs.</p>
+<div class="mermaid">flowchart LR
+    PDP[Power distribution&lt;br/&gt;40 A breaker] -- 12 V power --&gt; SM[SPARK MAX]
+    RIO[roboRIO] --&gt;|"CAN: run at 50%"| SM
+    SM -- motor power --&gt; M[Motor]
+    M -. NEO sensor cable .-&gt; SM</div>
+<p>A SPARK MAX can drive <strong>brushed</strong> motors (CIM, 775pro) and <strong>brushless</strong> NEOs (<a href="04b-motors.html">Lesson 4.1</a>).</p>
+<h3 id="the-connections-on-a-spark-max">The connections on a SPARK MAX<a class="headerlink" href="#the-connections-on-a-spark-max" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Connection</th>
+<th>What plugs in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Power input</strong> (red and black)</td>
+<td>12 V from the power distribution, through a breaker</td>
+</tr>
+<tr>
+<td><strong>Motor output</strong></td>
+<td>The motor's power wires: 2 for brushed, 3 for a NEO</td>
+</tr>
+<tr>
+<td><strong>Encoder port</strong></td>
+<td>A NEO's sensor cable, or an encoder for a brushed motor</td>
+</tr>
+<tr>
+<td><strong>CAN</strong> (yellow and green)</td>
+<td>The CAN bus to the roboRIO and other devices</td>
+</tr>
+<tr>
+<td><strong>PWM</strong></td>
+<td>An alternative to CAN for simple speed control (we use CAN)</td>
+</tr>
+<tr>
+<td><strong>USB-C</strong></td>
+<td>Your laptop, for setup with the REV Hardware Client</td>
+</tr>
+<tr>
+<td><strong>Data port</strong> (on top)</td>
+<td>Limit switches and extra encoders (advanced)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="can-ids">CAN IDs<a class="headerlink" href="#can-ids" title="Permanent link">#</a></h3>
+<p>All 7 SPARK MAXes share the same CAN bus (<a href="04-electronics.html">Lesson 4</a>), so each one needs a <strong>unique CAN ID</strong>. That number is how your code picks which controller to talk to:</p>
+<div class="highlight"><pre><span></span><code><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushless</span><span class="p">);</span><span class="w">   </span><span class="c1">// "the SPARK MAX with CAN ID 8"</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Robot</th>
+<th>Controller</th>
+<th>CAN ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Test bed</td>
+<td>NEO</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Test bed</td>
+<td>775pro wheel</td>
+<td>(check yours)</td>
+</tr>
+<tr>
+<td>WCD</td>
+<td>Left leader, left follower, right leader, right follower</td>
+<td>1, 2, 3, 4 (check yours)</td>
+</tr>
+<tr>
+<td>WCD</td>
+<td>Elevator NEO</td>
+<td>(check yours)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Duplicate IDs</p>
+<p>If two SPARK MAXes on the same robot share an ID, motors twitch, don't respond, or the wrong one moves. Fill in the real IDs above for your robots and keep the list posted.</p>
+</div>
+<h3 id="setting-up-with-the-rev-hardware-client">Setting up with the REV Hardware Client<a class="headerlink" href="#setting-up-with-the-rev-hardware-client" title="Permanent link">#</a></h3>
+<p>Before writing code, connect each SPARK MAX to your laptop with <strong>USB-C</strong> and open the <strong>REV Hardware Client</strong> (installed in <a href="../testbed/lab0-first-project.html">Lab 0</a>). With it you can:</p>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>See the CAN ID</strong>, and change it</td>
+<td>Make sure it matches your code</td>
+</tr>
+<tr>
+<td><strong>Update firmware</strong></td>
+<td>Firmware should match your REVLib version. Ask a mentor before updating.</td>
+</tr>
+<tr>
+<td><strong>Check the motor type</strong> (brushed or brushless)</td>
+<td>Must match the motor actually attached</td>
+</tr>
+<tr>
+<td><strong>Spin the motor</strong> right from the laptop</td>
+<td>Proves the controller and motor work, with no robot code involved</td>
+</tr>
+<tr>
+<td><strong>See faults and live values</strong></td>
+<td>Current, temperature, and any errors</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Debug in layers</p>
+<p>If a motor won't move from your code, try spinning it from the REV Hardware Client. If it spins there, the hardware is fine and the problem is in your code (CAN ID, motor type, or command). If it doesn't spin there either, it's wiring or hardware.</p>
+</div>
+<h3 id="the-status-light">The status light<a class="headerlink" href="#the-status-light" title="Permanent link">#</a></h3>
+<p>The SPARK MAX's LED changes color and blink pattern to show its state: whether it's getting a signal, whether it's in brake or coast mode, which direction it's driving, and any faults. The full color table is in REV's SPARK MAX documentation. Learn the few you see most on your robots, especially the ones for "no signal" and "fault."</p>
+<h3 id="settings-your-code-sends">Settings your code sends<a class="headerlink" href="#settings-your-code-sends" title="Permanent link">#</a></h3>
+<p>Every lab configures its SPARK MAXes the same way, with a <code>SparkMaxConfig</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Code</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Motor type</td>
+<td><code>new SparkMax(id, MotorType.kBrushed)</code> or <code>kBrushless</code></td>
+<td>Brushed or brushless driving. Must match the motor.</td>
+</tr>
+<tr>
+<td>Current limit</td>
+<td><code>config.smartCurrentLimit(40)</code></td>
+<td>Caps current to protect the motor, breaker, and battery</td>
+</tr>
+<tr>
+<td>Idle mode</td>
+<td><code>config.idleMode(IdleMode.kBrake)</code></td>
+<td><strong>Brake:</strong> resists turning when stopped. <strong>Coast:</strong> spins freely.</td>
+</tr>
+<tr>
+<td>Inversion</td>
+<td><code>config.inverted(true)</code></td>
+<td>Flips which way is "forward"</td>
+</tr>
+<tr>
+<td>Follower</td>
+<td><code>config.follow(leaderCanId)</code></td>
+<td>Copies another SPARK MAX's output (<a href="../testbed/lab2-west-coast-drive.html">Lab 2</a>)</td>
+</tr>
+</tbody>
+</table>
+<p>The settings are sent once, when the robot code starts:</p>
+<div class="highlight"><pre><span></span><code><span class="n">m_motor</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kResetSafeParameters</code></td>
+<td>Start from known defaults, then apply your settings, so leftovers from someone else's code can't sneak in</td>
+</tr>
+<tr>
+<td><code>kPersistParameters</code></td>
+<td>Save the settings in the SPARK MAX, so they survive if it loses power for a moment, like during a brownout</td>
+</tr>
+</tbody>
+</table>
+<h3 id="brake-vs-coast">Brake vs. coast<a class="headerlink" href="#brake-vs-coast" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Brake</th>
+<th>Coast</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>When output is 0</td>
+<td>Shorts the motor's coils, so it <strong>resists</strong> turning</td>
+<td>Lets the motor spin freely</td>
+</tr>
+<tr>
+<td>Feels like</td>
+<td>Stops quickly</td>
+<td>Rolls to a stop</td>
+</tr>
+<tr>
+<td>Good for</td>
+<td>Elevators (slows falling), precise stops, drivetrains for most drivers</td>
+<td>Shooter flywheels (no sudden stop), pushing a robot by hand</td>
+</tr>
+</tbody>
+</table>
+<h3 id="leaders-and-followers">Leaders and followers<a class="headerlink" href="#leaders-and-followers" title="Permanent link">#</a></h3>
+<p>When two motors drive the same gearbox, like the WCD's CIMs, one SPARK MAX is the <strong>leader</strong> and the other is its <strong>follower</strong>. Your code commands only the leader, and the follower copies it automatically over CAN. The two motors in one gearbox must always push the same way, or they fight each other, overheat, and trip breakers (<a href="../testbed/lab2-west-coast-drive.html">Lab 2</a>).</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Connect each test bed SPARK MAX to the REV Hardware Client. Write down its CAN ID and motor type.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Do the same for all 5 SPARK MAXes on the WCD, and fill in the CAN ID table above</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Spin the test bed NEO from the REV Hardware Client, with no robot code</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Trace one SPARK MAX's power wires back to its breaker, and its CAN wires to the next device on the bus</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Look up the status light table in REV's docs. What does the light show when a SPARK MAX has no signal?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Spin the NEO in Lab 1 with brake mode, then coast mode. Describe the difference when it stops.</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why can't the roboRIO power a motor directly?</summary>
+<p>Its outputs are small signals. A motor controller turns that signal into the large current the motor needs.</p>
+</details>
+<details class="question">
+<summary>What does a CAN ID do?</summary>
+<p>It identifies one device on the shared CAN bus, so your code can talk to the right SPARK MAX.</p>
+</details>
+<details class="question">
+<summary>A motor won't move from your code, but spins fine from the REV Hardware Client. Where's the problem?</summary>
+<p>In the code: most likely a wrong CAN ID, wrong motor type, or a command that isn't running.</p>
+</details>
+<details class="question">
+<summary>Why use <code>kPersistParameters</code>?</summary>
+<p>So the SPARK MAX keeps its settings, like the current limit, if it loses power for a moment and restarts during a match.</p>
+</details>
+<details class="question">
+<summary>Why does the elevator use brake mode?</summary>
+<p>In brake mode the motor resists turning when it isn't powered, which slows the carriage if it starts to fall.</p>
+</details>
+<details class="question">
+<summary>What happens if a follower in the same gearbox pushes the opposite way from its leader?</summary>
+<p>The two motors fight each other. They heat up, draw a lot of current, and can trip breakers or damage the gearbox.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="04b-motors.html"><span>Previous</span>4.1 Motors: NEO, CIM, and 775pro</a><a class="pager-next" href="04d-sensors.html"><span>Next</span>4.3 Sensors</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

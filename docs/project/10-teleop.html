@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10. Teleop | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section" open><summary>Drivetrain Project</summary><ul><li><a href="10-teleop.html" class="current" aria-current="page">10. Teleop</a></li><li><a href="11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="10-drivetrain-project-teleop">10. Drivetrain Project: Teleop<a class="headerlink" href="#10-drivetrain-project-teleop" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>This is where everything so far comes together. Over the next two lessons you'll build a complete drivetrain in simulation:</p>
+<ul>
+<li>a <code>Drivetrain</code> subsystem with motors and encoders</li>
+<li>driver controls with deadband, curved response, and slow mode</li>
+<li>autonomous routines, first timed and then by distance (Lesson 11)</li>
+</ul>
+<p>The drivetrain is the most important mechanism on the robot. If the robot can't drive well, nothing else matters.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html">Using the WPILib Drive Classes</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/joystick.html">Joysticks</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/using-motor-controllers.html">Using Motor Controllers in Code</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="drivetrain-types">Drivetrain types<a class="headerlink" href="#drivetrain-types" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>How it moves</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tank / differential</strong></td>
+<td>Left and right sides, like a tank. Turns by driving the sides at different speeds.</td>
+<td>Simple, strong, cheap. Can't move sideways. This lesson uses it.</td>
+</tr>
+<tr>
+<td><strong>Swerve</strong></td>
+<td>Each wheel steers and drives independently</td>
+<td>Moves in any direction while turning. Most competitive teams use it now, but it's much more complex. See <a href="../reference/next-steps.html">Where to Go Next</a>.</td>
+</tr>
+<tr>
+<td><strong>Mecanum</strong></td>
+<td>Special rollers on each wheel allow sideways motion</td>
+<td>Easier than swerve, but easy to push around</td>
+</tr>
+</tbody>
+</table>
+<p>Learn tank drive first. The ideas (subsystem structure, joystick processing, default commands) carry straight over to swerve.</p>
+<h3 id="arcade-vs-tank-controls">Arcade vs. tank controls<a class="headerlink" href="#arcade-vs-tank-controls" title="Permanent link">#</a></h3>
+<p>There are two common ways to drive a differential drivetrain with a controller:</p>
+<table>
+<thead>
+<tr>
+<th>Style</th>
+<th>Controls</th>
+<th>Feels like</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Arcade</strong></td>
+<td>One stick forward/back, the other stick (or the same one) turns</td>
+<td>A video game. Most drivers prefer it.</td>
+</tr>
+<tr>
+<td><strong>Tank</strong></td>
+<td>Left stick drives the left side, right stick drives the right side</td>
+<td>Steering a tank. Precise, but takes practice.</td>
+</tr>
+</tbody>
+</table>
+<p>This lesson uses arcade. Try both and ask your drivers what they like.</p>
+<h3 id="step-1-constants">Step 1: Constants<a class="headerlink" href="#step-1-constants" title="Permanent link">#</a></h3>
+<p>Put every port and number in <code>Constants.java</code> first:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Constants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DriveConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LEFT_MOTOR_PORT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">RIGHT_MOTOR_PORT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="o">[]</span><span class="w"> </span><span class="n">LEFT_ENCODER_PORTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="o">[]</span><span class="w"> </span><span class="n">RIGHT_ENCODER_PORTS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
+
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">WHEEL_DIAMETER_METERS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1524</span><span class="p">;</span><span class="w">  </span><span class="c1">// 6 in</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ENCODER_PULSES_PER_REV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">METERS_PER_PULSE</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">WHEEL_DIAMETER_METERS</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">ENCODER_PULSES_PER_REV</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OIConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">DRIVER_PORT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">DEADBAND</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.08</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">SLOW_MODE_SCALE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.4</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This example puts the encoders on the wheel shafts, so there's no gear ratio in the conversion.</p>
+<h3 id="step-2-the-drivetrain-subsystem">Step 2: The Drivetrain subsystem<a class="headerlink" href="#step-2-the-drivetrain-subsystem" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.Encoder</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.drive.DifferentialDrive</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.SmartDashboard</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants.DriveConstants</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Drivetrain</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="p">(</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">LEFT_MOTOR_PORT</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="w"> </span><span class="n">right</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="p">(</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">RIGHT_MOTOR_PORT</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DifferentialDrive</span><span class="w"> </span><span class="n">drive</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDrive</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Encoder</span><span class="w"> </span><span class="n">leftEncoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Encoder</span><span class="p">(</span>
+<span class="w">        </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">LEFT_ENCODER_PORTS</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">LEFT_ENCODER_PORTS</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Encoder</span><span class="w"> </span><span class="n">rightEncoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Encoder</span><span class="p">(</span>
+<span class="w">        </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">RIGHT_ENCODER_PORTS</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">RIGHT_ENCODER_PORTS</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">Drivetrain</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// The two sides face opposite directions, so one must be inverted</span>
+<span class="w">        </span><span class="c1">// for "forward" to mean forward on both.</span>
+<span class="w">        </span><span class="n">right</span><span class="p">.</span><span class="na">setInverted</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">leftEncoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">METERS_PER_PULSE</span><span class="p">);</span>
+<span class="w">        </span><span class="n">rightEncoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">METERS_PER_PULSE</span><span class="p">);</span>
+<span class="w">        </span><span class="n">rightEncoder</span><span class="p">.</span><span class="na">setReverseDirection</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Average distance driven by both sides, in meters. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getDistanceMeters</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">leftEncoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rightEncoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">())</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">resetEncoders</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">leftEncoder</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span>
+<span class="w">        </span><span class="n">rightEncoder</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Arcade drive: one value for forward/back, one for turning. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">arcadeDrive</span><span class="p">(</span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">forward</span><span class="p">,</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">rotation</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">.</span><span class="na">arcadeDrive</span><span class="p">(</span><span class="n">forward</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="n">rotation</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">()))</span>
+<span class="w">            </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Arcade Drive"</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Left (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">leftEncoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">());</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Right (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">rightEncoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">());</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Left Output"</span><span class="p">,</span><span class="w"> </span><span class="n">left</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Right Output"</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition question">
+<p class="admonition-title">Why <code>DoubleSupplier</code> instead of <code>double</code>?</p>
+<p>A <code>double</code> would be read <strong>once</strong>, when the command is created at robot startup, and the robot would drive at that one value forever. A <code>DoubleSupplier</code> is a lambda that reads the joystick <strong>every loop</strong>. This is the lambda idea from <a href="../foundations/03-java.html">Lesson 3</a> paying off.</p>
+</div>
+<h3 id="what-differentialdrive-does-for-you">What <code>DifferentialDrive</code> does for you<a class="headerlink" href="#what-differentialdrive-does-for-you" title="Permanent link">#</a></h3>
+<p><code>arcadeDrive(forward, rotation)</code> turns two inputs into left and right motor outputs. Roughly:</p>
+<div class="highlight"><pre><span></span><code>left  = forward − rotation
+right = forward + rotation
+</code></pre></div>
+<p>A positive rotation is counterclockwise (turning left), so it slows the left side and speeds up the right.</p>
+<p>…then scales them so neither goes past ±1. It also includes <strong>motor safety</strong>: if your code stops calling it (because something blocked the loop), it stops the motors after a short timeout instead of driving off at the last speed.</p>
+<p>By default, <code>arcadeDrive</code> also <strong>squares the inputs</strong>, which gives finer control at low speed. More on that below.</p>
+<h3 id="step-3-make-it-the-default-command">Step 3: Make it the default command<a class="headerlink" href="#step-3-make-it-the-default-command" title="Permanent link">#</a></h3>
+<p>In <code>RobotContainer.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Drivetrain</span><span class="w"> </span><span class="n">drivetrain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Drivetrain</span><span class="p">();</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="w"> </span><span class="n">driver</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="p">(</span><span class="n">OIConstants</span><span class="p">.</span><span class="na">DRIVER_PORT</span><span class="p">);</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="nf">RobotContainer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">setDefaultCommand</span><span class="p">(</span>
+<span class="w">        </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">arcadeDrive</span><span class="p">(</span>
+<span class="w">            </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">driver</span><span class="p">.</span><span class="na">getLeftY</span><span class="p">(),</span><span class="w">    </span><span class="c1">// forward is negative Y on Xbox sticks</span>
+<span class="w">            </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">driver</span><span class="p">.</span><span class="na">getRightX</span><span class="p">()</span><span class="w">    </span><span class="c1">// positive rotation = counterclockwise = left</span>
+<span class="w">        </span><span class="p">)</span>
+<span class="w">    </span><span class="p">);</span>
+<span class="w">    </span><span class="n">configureBindings</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>A <strong>default command</strong> runs whenever nothing else is using the subsystem, so the robot always responds to the sticks. When an autonomous command or an "auto-align" button takes over the drivetrain, the default command pauses, then comes back when that command ends. (<a href="../robot-code/07b-scheduler.html">Lesson 7.1</a> explains how.)</p>
+<div class="admonition info">
+<p class="admonition-title">Why the minus signs?</p>
+<p>Xbox controllers report pushing a stick <strong>forward</strong> as <strong>negative</strong> Y, and pushing it <strong>right</strong> as positive X. WPILib's convention is forward-positive and counterclockwise (left)-positive. Negating both makes forward drive forward and left turn left.</p>
+</div>
+<h3 id="step-4-clean-up-the-joystick-input">Step 4: Clean up the joystick input<a class="headerlink" href="#step-4-clean-up-the-joystick-input" title="Permanent link">#</a></h3>
+<p>Raw joystick values have two problems drivers notice right away.</p>
+<p><strong>Problem 1: stick drift.</strong> A stick resting in the middle rarely reads exactly 0. It reads something like 0.03, and the robot creeps. The fix is a <strong>deadband</strong>: treat anything close to 0 as 0.</p>
+<div class="highlight"><pre><span></span><code><span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="mf">0.03</span><span class="p">,</span><span class="w"> </span><span class="mf">0.08</span><span class="p">);</span><span class="w">   </span><span class="c1">// 0.0  (inside the deadband)</span>
+<span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="mf">0.50</span><span class="p">,</span><span class="w"> </span><span class="mf">0.08</span><span class="p">);</span><span class="w">   </span><span class="c1">// about 0.46 (rescaled so it still reaches 1.0)</span>
+</code></pre></div>
+<p><strong>Problem 2: too twitchy at low speed.</strong> With a straight-line response, small stick movements produce big speed changes, which makes lining up hard. <strong>Squaring</strong> the input (keeping its sign) gives fine control near the middle and full speed at the edge:</p>
+<table>
+<thead>
+<tr>
+<th>Stick</th>
+<th>Linear output</th>
+<th>Squared output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.2</td>
+<td>0.20</td>
+<td>0.04</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>0.50</td>
+<td>0.25</td>
+</tr>
+<tr>
+<td>0.8</td>
+<td>0.80</td>
+<td>0.64</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+</tbody>
+</table>
+<p><code>DifferentialDrive.arcadeDrive</code> squares inputs by default, so with it you only need the deadband. If you process inputs yourself, square them with <code>Math.copySign(x * x, x)</code>.</p>
+<p>Put the processing in one helper so both axes get the same treatment:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">processAxis</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">raw</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span><span class="w"> </span><span class="n">OIConstants</span><span class="p">.</span><span class="na">DEADBAND</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">drivetrain</span><span class="p">.</span><span class="na">setDefaultCommand</span><span class="p">(</span>
+<span class="w">    </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">arcadeDrive</span><span class="p">(</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">processAxis</span><span class="p">(</span><span class="n">driver</span><span class="p">.</span><span class="na">getLeftY</span><span class="p">()),</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">processAxis</span><span class="p">(</span><span class="n">driver</span><span class="p">.</span><span class="na">getRightX</span><span class="p">())</span>
+<span class="w">    </span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre></div>
+<h3 id="step-5-slow-mode">Step 5: Slow mode<a class="headerlink" href="#step-5-slow-mode" title="Permanent link">#</a></h3>
+<p>Drivers want precise control when lining up to score. A common pattern: hold a button to scale everything down.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">speedScale</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">driver</span><span class="p">.</span><span class="na">rightBumper</span><span class="p">().</span><span class="na">getAsBoolean</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">OIConstants</span><span class="p">.</span><span class="na">SLOW_MODE_SCALE</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">drivetrain</span><span class="p">.</span><span class="na">setDefaultCommand</span><span class="p">(</span>
+<span class="w">    </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">arcadeDrive</span><span class="p">(</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">processAxis</span><span class="p">(</span><span class="n">driver</span><span class="p">.</span><span class="na">getLeftY</span><span class="p">())</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speedScale</span><span class="p">(),</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">processAxis</span><span class="p">(</span><span class="n">driver</span><span class="p">.</span><span class="na">getRightX</span><span class="p">())</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speedScale</span><span class="p">()</span>
+<span class="w">    </span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre></div>
+<p>Because the suppliers run every loop, slow mode switches on and off the instant the bumper changes. No extra command needed.</p>
+<h3 id="step-6-simulate-it">Step 6: Simulate it<a class="headerlink" href="#step-6-simulate-it" title="Permanent link">#</a></h3>
+<p>Out of the box, the encoders won't move in simulation. To see the robot drive on a field, add a <code>DifferentialDrivetrainSim</code> and <code>Field2d</code>. The WPILib <strong>SimpleDifferentialDriveSimulation</strong> example has a full working version to copy. For now, check in the Sim GUI that:</p>
+<ul>
+<li>pushing the left stick forward moves both <strong>PWM</strong> outputs (the right one may show the opposite sign because it's inverted, which is correct: it's the same physical direction)</li>
+<li>pushing the right stick right makes left go up and right go down</li>
+<li>releasing the sticks returns both to exactly 0</li>
+</ul>
+<h3 id="testing-on-a-real-robot">Testing on a real robot<a class="headerlink" href="#testing-on-a-real-robot" title="Permanent link">#</a></h3>
+<div class="admonition danger">
+<p class="admonition-title">Put it on blocks first</p>
+<p>The first time new drive code runs, put the robot <strong>on blocks</strong> so the wheels are off the ground. Check that:</p>
+<ol>
+<li>Forward on the stick spins every wheel forward.</li>
+<li>Turning left spins the left side backward and the right side forward.</li>
+<li>Letting go stops everything.</li>
+</ol>
+<p>Only then put it on the floor, in open space, at low speed.</p>
+</div>
+<p>If one side spins backward, fix the motor <strong>inversion</strong>, not the joystick sign.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Have the West Coast Drive?</p>
+<p><a href="../testbed/lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a> builds this same drivetrain on a real robot with SPARK MAXes.</p>
+</div>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build the <code>Drivetrain</code> subsystem and make <code>arcadeDrive</code> its default command</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Drive in Sim GUI with a controller or keyboard, and check the outputs against the list in Step 6</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add the deadband. Release the sticks and confirm the outputs are exactly 0.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add slow mode on the right bumper</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <code>tankDrive</code> command and a <code>toggleOnTrue</code> button that switches between arcade and tank. Ask a driver which they prefer.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: open the <strong>SimpleDifferentialDriveSimulation</strong> example and drive the simulated robot around a field</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why is one side's motor inverted?</summary>
+<p>The motors on each side face opposite directions. Without inverting one, "forward" on both sides would spin the robot in place.</p>
+</details>
+<details class="question">
+<summary>Why negate <code>getLeftY()</code>?</summary>
+<p>Xbox controllers report pushing the stick forward as <strong>negative</strong> Y, and WPILib expects forward to be positive.</p>
+</details>
+<details class="question">
+<summary>What does a deadband fix?</summary>
+<p>Sticks rarely read exactly 0 at rest. The deadband treats small values as 0, so the robot doesn't creep.</p>
+</details>
+<details class="question">
+<summary>Why does squaring the input help drivers?</summary>
+<p>It makes small stick movements produce even smaller outputs, giving fine control at low speed while still reaching full speed at full stick.</p>
+</details>
+<details class="question">
+<summary>Why does <code>arcadeDrive</code> take <code>DoubleSupplier</code>s instead of <code>double</code>s?</summary>
+<p>A <code>double</code> is read once when the command is created. A supplier is called every loop, so the robot follows the joystick as it moves.</p>
+</details>
+<details class="question">
+<summary>What happens to the default drive command when an autonomous command uses the drivetrain?</summary>
+<p>It's interrupted while the autonomous command runs, then restarted automatically when that command ends.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../robot-code/09-debugging.html"><span>Previous</span>9. Testing, Debugging &amp; Simulation</a><a class="pager-next" href="11-autonomous.html"><span>Next</span>11. Autonomous</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

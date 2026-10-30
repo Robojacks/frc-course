@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3. Java Reference | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section" open><summary>Foundations</summary><ul><li><a href="00-setup.html">0. Setup</a></li><li><a href="01-git.html">1. Git &amp; Version Control</a></li><li><a href="02-terminal.html">2. The Terminal</a></li><li><a href="03-java.html" class="current" aria-current="page">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="3-java-reference">3. Java Reference<a class="headerlink" href="#3-java-reference" title="Permanent link">#</a></h1>
+<h2 id="how-to-use-this-page">How to use this page<a class="headerlink" href="#how-to-use-this-page" title="Permanent link">#</a></h2>
+<p>You learn Java <strong>before</strong> this course, from an interactive Java course (<a href="#learn-java-first">see below</a>). This page doesn't replace that. It's a <strong>reference</strong>: the Java that robot code actually uses, in one place, with notes on how each idea shows up on the robot.</p>
+<p>Come back here whenever robot code uses something you've forgotten, or something your Java course didn't cover. Three topics matter a lot in FRC and are often skipped or rushed in beginner courses, so read them even if you finished a course:</p>
+<ul>
+<li><a href="#static"><code>static</code> and <code>final</code></a>, used for <code>Constants</code></li>
+<li><a href="#inheritance-extends">Inheritance: <code>extends</code> and <code>@Override</code></a>, used by every subsystem</li>
+<li><a href="#lambdas-and-method-references">Lambdas and method references</a>, used by every command and button binding</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Robot connection boxes</p>
+<p>Look for the <strong>Robot connection</strong> boxes. They show where each Java idea appears in robot code.</p>
+</div>
+<h2 id="learn-java-first">Learn Java first<a class="headerlink" href="#learn-java-first" title="Permanent link">#</a></h2>
+<p>Before <a href="../testbed/lab1-spin-motor.html">Lab 1</a>, work through one of these interactive Java courses. Both run in your browser, so there's nothing to install.</p>
+<table>
+<thead>
+<tr>
+<th>Course</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://coddy.tech/landing/java">Coddy: Learn Java</a></td>
+<td>Short interactive lessons, free</td>
+</tr>
+<tr>
+<td><a href="https://www.codecademy.com/learn/learn-java">Codecademy: Learn Java</a></td>
+<td>Interactive lessons with projects</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Finish at least these topics.</strong> Robot code uses every one of them:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Variables and types (<code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Math and comparison operators</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>if</code> / <code>else</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Loops (<code>for</code>, <code>while</code>)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Methods: parameters and return values</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Classes and objects: fields, methods, <code>new</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Constructors</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>public</code> and <code>private</code></li>
+</ul>
+<p>Inheritance, interfaces, and lambdas are a bonus if your course covers them. If it doesn't, this page does.</p>
+<div class="admonition tip">
+<p class="admonition-title">Already know Java from a class?</p>
+<p>Skip the outside course. Skim this page, read the three FRC topics above, and do the <a href="#check-your-java">check-your-Java exercises</a> at the bottom.</p>
+</div>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://dev.java/learn/">dev.java Learn</a>: the official Java tutorials, if you want to go deeper on any topic</li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/java-units.html">Java Units Library (WPILib)</a>: skim now, come back in Lesson 8</li>
+</ul>
+<h2 id="java-for-robot-code">Java for robot code<a class="headerlink" href="#java-for-robot-code" title="Permanent link">#</a></h2>
+<h3 id="where-to-practice">Where to practice<a class="headerlink" href="#where-to-practice" title="Permanent link">#</a></h3>
+<p>You can run plain Java without a robot. For the small examples, use the online <a href="https://dev.java/playground/">Java Playground</a> so you don't have to set anything up. For the classes later in the lesson, create them in your robot project.</p>
+<p>Every Java program starts in a <code>main</code> method:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Practice</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Hello, RoboJacks!"</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>System.out.println(...)</code> prints a line of text. You'll use it to check your work throughout this lesson.</p>
+<h3 id="statements-semicolons-and-comments">Statements, semicolons, and comments<a class="headerlink" href="#statements-semicolons-and-comments" title="Permanent link">#</a></h3>
+<ul>
+<li>Java runs <strong>statements</strong> in order, top to bottom. Most statements end with <code>;</code>.</li>
+<li>Curly braces <code>{ }</code> group statements into a <strong>block</strong>.</li>
+<li>Comments are notes for humans. Java ignores them.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="c1">// A one-line comment</span>
+<span class="cm">/* A comment that can</span>
+<span class="cm">   span several lines */</span>
+<span class="cm">/** A Javadoc comment: describes the method or class below it. */</span>
+</code></pre></div>
+<h3 id="variables-and-types">Variables and types<a class="headerlink" href="#variables-and-types" title="Permanent link">#</a></h3>
+<p>A <strong>variable</strong> is a named box that holds a value. Every variable has a <strong>type</strong> that says what kind of value fits in the box.</p>
+<div class="highlight"><pre><span></span><code><span class="kt">int</span><span class="w"> </span><span class="n">ballsScored</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">          </span><span class="c1">// whole numbers</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">motorSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.75</span><span class="p">;</span><span class="w">     </span><span class="c1">// decimals: most robot math uses double</span>
+<span class="kt">boolean</span><span class="w"> </span><span class="n">hasGamePiece</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// true or false</span>
+<span class="n">String</span><span class="w"> </span><span class="n">robotName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"Jack"</span><span class="p">;</span><span class="w">    </span><span class="c1">// text, in double quotes</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Holds</th>
+<th>Robot example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>int</code></td>
+<td>Whole numbers</td>
+<td>CAN ID, PWM port, game pieces scored</td>
+</tr>
+<tr>
+<td><code>double</code></td>
+<td>Decimal numbers</td>
+<td>Motor output, encoder position, voltage</td>
+</tr>
+<tr>
+<td><code>boolean</code></td>
+<td><code>true</code> / <code>false</code></td>
+<td>Limit switch pressed, has game piece</td>
+</tr>
+<tr>
+<td><code>String</code></td>
+<td>Text</td>
+<td>Dashboard labels, command names</td>
+</tr>
+</tbody>
+</table>
+<p>Once declared, you can change a variable's value but not its type:</p>
+<div class="highlight"><pre><span></span><code><span class="n">motorSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">       </span><span class="c1">// ✅ fine</span>
+<span class="n">motorSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">"fast"</span><span class="p">;</span><span class="w">    </span><span class="c1">// ❌ error: a String doesn't fit in a double</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Robot connection</p>
+<p>Motor outputs are <code>double</code> values from <code>-1.0</code> (full reverse) to <code>1.0</code> (full forward). <code>0.0</code> is stopped.</p>
+</div>
+<h3 id="constants-with-final">Constants with <code>final</code><a class="headerlink" href="#constants-with-final" title="Permanent link">#</a></h3>
+<p><code>final</code> means the value can never change after it's set. Use it for things like ports and gear ratios:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">INTAKE_MOTOR_PORT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="n">INTAKE_MOTOR_PORT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w">  </span><span class="c1">// ❌ error: it's final</span>
+</code></pre></div>
+<p>By convention, constants are named in <code>ALL_CAPS</code>. They live in <code>Constants.java</code> in robot projects.</p>
+<h3 id="math">Math<a class="headerlink" href="#math" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kt">double</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">     </span><span class="c1">// 13</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">     </span><span class="c1">// 7</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">     </span><span class="c1">// 30</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w">   </span><span class="c1">// 2.5</span>
+<span class="kt">int</span><span class="w">    </span><span class="n">e</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w">     </span><span class="c1">// 2   ← integer division throws away the decimal!</span>
+<span class="kt">int</span><span class="w">    </span><span class="n">f</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w">     </span><span class="c1">// 2   ← remainder ("mod")</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Integer division</p>
+<p><code>1 / 2</code> is <code>0</code> in Java, because both numbers are <code>int</code>s. Write <code>1.0 / 2</code> to get <code>0.5</code>. This bug shows up in gear-ratio math all the time.</p>
+</div>
+<p>The <code>Math</code> class has the functions you'll need:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="p">);</span><span class="w">          </span><span class="c1">// 0.4    absolute value</span>
+<span class="n">Math</span><span class="p">.</span><span class="na">max</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">);</span><span class="w">      </span><span class="c1">// 0.9</span>
+<span class="n">Math</span><span class="p">.</span><span class="na">min</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">);</span><span class="w">      </span><span class="c1">// 0.2</span>
+<span class="n">Math</span><span class="p">.</span><span class="na">sqrt</span><span class="p">(</span><span class="mi">16</span><span class="p">);</span><span class="w">           </span><span class="c1">// 4.0</span>
+<span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="p">;</span><span class="w">                 </span><span class="c1">// 3.14159...</span>
+<span class="n">Math</span><span class="p">.</span><span class="na">toRadians</span><span class="p">(</span><span class="mi">90</span><span class="p">);</span><span class="w">      </span><span class="c1">// 1.5707...</span>
+<span class="n">Math</span><span class="p">.</span><span class="na">cos</span><span class="p">(</span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="p">);</span><span class="w">       </span><span class="c1">// -1.0   (trig functions use radians)</span>
+</code></pre></div>
+<h3 id="comparisons-and-logic">Comparisons and logic<a class="headerlink" href="#comparisons-and-logic" title="Permanent link">#</a></h3>
+<p>These produce a <code>boolean</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>==</code></td>
+<td>equal</td>
+<td><code>count == 3</code></td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>not equal</td>
+<td><code>count != 0</code></td>
+</tr>
+<tr>
+<td><code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></td>
+<td>comparisons</td>
+<td><code>speed &gt; 0.5</code></td>
+</tr>
+<tr>
+<td><code>&amp;&amp;</code></td>
+<td>and</td>
+<td><code>hasPiece &amp;&amp; armIsUp</code></td>
+</tr>
+<tr>
+<td><code>&#124;&#124;</code></td>
+<td>or</td>
+<td><code>leftPressed &#124;&#124; rightPressed</code></td>
+</tr>
+<tr>
+<td><code>!</code></td>
+<td>not</td>
+<td><code>!hasPiece</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title"><code>=</code> vs <code>==</code></p>
+<p><code>=</code> <strong>sets</strong> a value. <code>==</code> <strong>compares</strong>. <code>if (x = 3)</code> is an error in Java; you meant <code>if (x == 3)</code>.</p>
+</div>
+<h3 id="if-statements">If statements<a class="headerlink" href="#if-statements" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">hasGamePiece</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">motorSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">          </span><span class="c1">// stop, we're full</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">sensorSeesPiece</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">motorSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.3</span><span class="p">;</span><span class="w">          </span><span class="c1">// slow down, almost there</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">motorSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.75</span><span class="p">;</span><span class="w">         </span><span class="c1">// full speed</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Java checks each condition in order and runs only the <strong>first</strong> block whose condition is true.</p>
+<h3 id="loops">Loops<a class="headerlink" href="#loops" title="Permanent link">#</a></h3>
+<p>Loops repeat code.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// for: when you know how many times</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Swerve module "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// while: repeat while something is true</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">count</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">count</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">count</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition danger">
+<p class="admonition-title">Loops are different on a robot</p>
+<p>You'll rarely write a <code>while</code> loop that <strong>waits</strong> for something on a robot. The robot <strong>already runs your code in a loop</strong> every 20 ms. A loop that waits, like <code>while (!limitSwitch.get()) {}</code>, freezes the whole robot: no driving, no other mechanisms, and it may never stop. <a href="../robot-code/06-robot-program.html">Lesson 6</a> explains the right way. <code>for</code> loops over a fixed list, like the four swerve modules, are fine.</p>
+</div>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">#</a></h3>
+<p>A <strong>method</strong> is a named, reusable chunk of code. It can take <strong>parameters</strong> (inputs) and <strong>return</strong> a value (output).</p>
+<div class="highlight"><pre><span></span><code><span class="c1">//  return type   name   parameters</span>
+<span class="w">    </span><span class="kt">double</span><span class="w">        </span><span class="nf">clamp</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">max</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">max</span><span class="p">(</span><span class="n">min</span><span class="p">,</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">min</span><span class="p">(</span><span class="n">max</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+</code></pre></div>
+<p><code>clamp(1.5, -1, 1)</code> returns <code>1.0</code>. <code>clamp(-0.3, -1, 1)</code> returns <code>-0.3</code>.</p>
+<p>A method that returns nothing uses <code>void</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kt">void</span><span class="w"> </span><span class="nf">printSpeed</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Speed: "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">speed</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Name methods with verbs</p>
+<p><code>getAngle()</code>, <code>setTarget()</code>, <code>isAtSpeed()</code>, <code>runIntake()</code>. Methods that return a <code>boolean</code> usually start with <code>is</code> or <code>has</code>.</p>
+</div>
+<h3 id="classes-and-objects-the-big-one">Classes and objects (the big one)<a class="headerlink" href="#classes-and-objects-the-big-one" title="Permanent link">#</a></h3>
+<p>A <strong>class</strong> is a blueprint. An <strong>object</strong> is a thing built from the blueprint. A class bundles <strong>data</strong> (fields) with the <strong>actions</strong> that use that data (methods).</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Intake</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Fields: data each Intake object remembers</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">piecesCollected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Methods: things an Intake can do</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.75</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stop</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">speed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">collectPiece</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">piecesCollected</span><span class="o">++</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getSpeed</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">speed</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Use it by building an object with <code>new</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Intake</span><span class="w"> </span><span class="n">intake</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Intake</span><span class="p">();</span><span class="w">          </span><span class="c1">// build one from the blueprint</span>
+<span class="n">intake</span><span class="p">.</span><span class="na">run</span><span class="p">();</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">intake</span><span class="p">.</span><span class="na">getSpeed</span><span class="p">());</span><span class="w"> </span><span class="c1">// 0.75</span>
+<span class="n">intake</span><span class="p">.</span><span class="na">stop</span><span class="p">();</span>
+<span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="n">intake</span><span class="p">.</span><span class="na">getSpeed</span><span class="p">());</span><span class="w"> </span><span class="c1">// 0.0</span>
+</code></pre></div>
+<p>You can build many objects from one class, and each keeps its own fields:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Intake</span><span class="w"> </span><span class="n">front</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Intake</span><span class="p">();</span>
+<span class="n">Intake</span><span class="w"> </span><span class="n">back</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Intake</span><span class="p">();</span>
+<span class="n">front</span><span class="p">.</span><span class="na">run</span><span class="p">();</span>
+<span class="c1">// front.getSpeed() is 0.75, back.getSpeed() is still 0.0</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Robot connection</p>
+<p>Every mechanism on the robot (drivetrain, intake, arm) becomes a class called a <strong>subsystem</strong>. The motor objects you create, like <code>new PWMSparkMax(0)</code>, are objects built from WPILib's classes.</p>
+</div>
+<h3 id="constructors">Constructors<a class="headerlink" href="#constructors" title="Permanent link">#</a></h3>
+<p>A <strong>constructor</strong> runs once, when the object is built with <code>new</code>. It sets up the starting state. It has the same name as the class and no return type:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Shooter</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">maxRpm</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">Shooter</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">maxRpm</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">   </span><span class="c1">// constructor</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="na">maxRpm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">maxRpm</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">Shooter</span><span class="w"> </span><span class="n">shooter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Shooter</span><span class="p">(</span><span class="mi">5000</span><span class="p">);</span>
+</code></pre></div>
+<p><code>this.maxRpm</code> means "this object's field," which tells it apart from the parameter <code>maxRpm</code> with the same name.</p>
+<h3 id="public-and-private"><code>public</code> and <code>private</code><a class="headerlink" href="#public-and-private" title="Permanent link">#</a></h3>
+<ul>
+<li><code>private</code> fields and methods can only be used <strong>inside</strong> the class.</li>
+<li><code>public</code> ones can be used from <strong>anywhere</strong>.</li>
+</ul>
+<p>Make fields <code>private</code> and give other code methods to use instead. That way, the class controls its own data. For example, a <code>setSpeed()</code> method can refuse values above 1.0, but a public field can't protect itself.</p>
+<h3 id="static"><code>static</code><a class="headerlink" href="#static" title="Permanent link">#</a></h3>
+<p>Most fields belong to <strong>each object</strong>. A <code>static</code> field or method belongs to the <strong>class itself</strong>, shared by everything:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Constants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">INTAKE_MOTOR_PORT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">port</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Constants</span><span class="p">.</span><span class="na">INTAKE_MOTOR_PORT</span><span class="p">;</span><span class="w">   </span><span class="c1">// no object needed</span>
+</code></pre></div>
+<p><code>Math.max(...)</code> is a static method, which is why you never write <code>new Math()</code>.</p>
+<h3 id="inheritance-extends">Inheritance: <code>extends</code><a class="headerlink" href="#inheritance-extends" title="Permanent link">#</a></h3>
+<p>A class can <strong>extend</strong> another class to get all its fields and methods, then add its own:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Intake</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Intake gets everything SubsystemBase has, plus whatever we add here</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>WPILib uses this everywhere: your subsystems extend <code>SubsystemBase</code>, and your robot extends <code>TimedRobot</code>.</p>
+<p><strong><code>@Override</code></strong> marks a method that replaces one from the parent class:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// replaces SubsystemBase's empty periodic() with ours</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>If you misspell the name, <code>@Override</code> makes the compiler warn you instead of silently creating a new method that never runs.</p>
+<h3 id="interfaces">Interfaces<a class="headerlink" href="#interfaces" title="Permanent link">#</a></h3>
+<p>An <strong>interface</strong> is a promise: "any class that implements me has these methods." You'll mostly <em>use</em> interfaces rather than write them. For example, many WPILib methods take a <code>BooleanSupplier</code>, which is any code that can answer true or false.</p>
+<h3 id="imports-and-packages">Imports and packages<a class="headerlink" href="#imports-and-packages" title="Permanent link">#</a></h3>
+<p>Classes live in <strong>packages</strong>, which are like folders. To use a class from another package, <strong>import</strong> it at the top of the file:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span><span class="w">       </span><span class="c1">// the package this file is in</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax</span><span class="p">;</span>
+</code></pre></div>
+<p>VS Code adds most imports for you. Click a red-underlined class name and use the lightbulb.</p>
+<h3 id="null">Null<a class="headerlink" href="#null" title="Permanent link">#</a></h3>
+<p>A variable for an object can hold <code>null</code>, meaning "no object." Calling a method on <code>null</code> crashes with a <strong>NullPointerException</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Intake</span><span class="w"> </span><span class="n">intake</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="n">intake</span><span class="p">.</span><span class="na">run</span><span class="p">();</span><span class="w">   </span><span class="c1">// 💥 NullPointerException</span>
+</code></pre></div>
+<p>On a robot this usually means you forgot to create something with <code>new</code>, or used it before its constructor ran. The crash message names the file and line.</p>
+<h3 id="lambdas-and-method-references">Lambdas and method references<a class="headerlink" href="#lambdas-and-method-references" title="Permanent link">#</a></h3>
+<p>WPILib uses these <em>everywhere</em>, so learn the syntax now. A <strong>lambda</strong> is a small piece of code you can pass around and run <strong>later</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Runnable</span><span class="w"> </span><span class="n">sayHi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">System</span><span class="p">.</span><span class="na">out</span><span class="p">.</span><span class="na">println</span><span class="p">(</span><span class="s">"Hi!"</span><span class="p">);</span>
+<span class="n">sayHi</span><span class="p">.</span><span class="na">run</span><span class="p">();</span><span class="w">   </span><span class="c1">// prints "Hi!" now</span>
+</code></pre></div>
+<p>The shape is <code>(parameters) -&gt; what to do</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">intake</span><span class="p">.</span><span class="na">run</span><span class="p">()</span><span class="w">               </span><span class="c1">// no inputs</span>
+<span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">controller</span><span class="p">.</span><span class="na">getLeftY</span><span class="p">()</span><span class="w">      </span><span class="c1">// returns a value</span>
+<span class="n">x</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w">                       </span><span class="c1">// one input</span>
+</code></pre></div>
+<p>A <strong>method reference</strong> is a shortcut for a lambda that just calls one method:</p>
+<div class="highlight"><pre><span></span><code><span class="nl">intake</span><span class="p">::</span><span class="n">run</span><span class="w">              </span><span class="c1">// same as () -&gt; intake.run()</span>
+<span class="nl">intake</span><span class="p">::</span><span class="n">hasGamePiece</span><span class="w">     </span><span class="c1">// same as () -&gt; intake.hasGamePiece()</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Robot connection: why lambdas matter</p>
+<p>In <code>driver.a().whileTrue(intake.runIntake())</code>, the scheduler needs to run your code <strong>every loop</strong> while the button is held. You can't hand it the result of running the code once; you hand it the <strong>code itself</strong>. That's what lambdas are. <a href="../robot-code/07-command-based.html">Lesson 7</a> builds on this.</p>
+</div>
+<h3 id="reading-a-stack-trace">Reading a stack trace<a class="headerlink" href="#reading-a-stack-trace" title="Permanent link">#</a></h3>
+<p>When the robot code crashes, it prints a <strong>stack trace</strong>:</p>
+<div class="highlight"><pre><span></span><code>java.lang.NullPointerException: Cannot invoke "Intake.run()" because "this.intake" is null
+    at frc.robot.RobotContainer.configureBindings(RobotContainer.java:42)
+    at frc.robot.RobotContainer.&lt;init&gt;(RobotContainer.java:25)
+    at frc.robot.Robot.robotInit(Robot.java:18)
+</code></pre></div>
+<p>Read the first line for <strong>what</strong> went wrong, then find the first <code>at frc.robot...</code> line for <strong>where</strong>: <code>RobotContainer.java</code>, line 42.</p>
+<h2 id="check-your-java">Check your Java<a class="headerlink" href="#check-your-java" title="Permanent link">#</a></h2>
+<p>If you can do all of these without looking anything up, you're ready for the labs.</p>
+<p><strong>Part 1: Warm-up.</strong> In a <code>main</code> method:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Compute how many meters a 4-inch wheel travels in one rotation (circumference = π × diameter; 1 inch = 0.0254 m) and print it</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Print <code>1 / 2</code> and <code>1.0 / 2</code>. Explain the difference.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Write <code>clamp(value, min, max)</code> and test it with three values</li>
+</ul>
+<p><strong>Part 2: The Shooter class.</strong> Write a <code>Shooter</code> class with:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> a <code>private double targetRpm</code> field</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> a constructor that takes a <code>double maxRpm</code> and stores it in a <code>private final</code> field</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>setTarget(double rpm)</code>, which refuses (ignores) any value above <code>maxRpm</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>getTarget()</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <code>isAtSpeed(double currentRpm)</code>, which returns <code>true</code> if within 50 RPM of the target</li>
+</ul>
+<p>Test it from <code>main()</code>, or come back after <a href="../workflow/16-unit-testing.html">Lesson 16</a> and write a unit test.</p>
+<p><strong>Part 3: Lambdas.</strong></p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make a <code>Runnable</code> that prints your name, and run it three times with a <code>for</code> loop</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make a <code>BooleanSupplier</code> lambda that calls your shooter's <code>isAtSpeed(...)</code> and print the result</li>
+</ul>
+<h2 id="quick-quiz">Quick quiz<a class="headerlink" href="#quick-quiz" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between a class and an object?</summary>
+<p>A class is the blueprint (<code>Intake</code>). An object is one actual thing built from it (<code>new Intake()</code>). You can build many objects from one class, and each keeps its own data.</p>
+</details>
+<details class="question">
+<summary>What does <code>10 / 4</code> equal in Java, and why?</summary>
+<p><code>2</code>. Both are <code>int</code>s, so Java does integer division and drops the decimal. Use <code>10.0 / 4</code> to get <code>2.5</code>.</p>
+</details>
+<details class="question">
+<summary>Why mark fields <code>private</code>?</summary>
+<p>So other code can't change them directly. It has to go through your methods, which can check that values are valid.</p>
+</details>
+<details class="question">
+<summary>What does a constructor do, and when does it run?</summary>
+<p>It sets up a new object's starting state. It runs once, when the object is created with <code>new</code>.</p>
+</details>
+<details class="question">
+<summary>What does <code>extends SubsystemBase</code> give your class?</summary>
+<p>Everything <code>SubsystemBase</code> already has: registration with the scheduler, a <code>periodic()</code> method you can override, and command factory methods like <code>run()</code> and <code>runOnce()</code>.</p>
+</details>
+<details class="question">
+<summary>What does <code>() -&gt; intake.run()</code> mean?</summary>
+<p>A chunk of code that <strong>will</strong> call <code>intake.run()</code> when something runs it later. It doesn't run yet.</p>
+</details>
+<details class="question">
+<summary>Your robot crashes with a NullPointerException. Where do you look first?</summary>
+<p>The first line of the stack trace says what was null. The first <code>at frc.robot...</code> line gives the file and line number in your code.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="02-terminal.html"><span>Previous</span>2. The Terminal</a><a class="pager-next" href="../hardware/04-electronics.html"><span>Next</span>4. Electronics</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

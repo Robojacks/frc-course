@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2. The Terminal | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section" open><summary>Foundations</summary><ul><li><a href="00-setup.html">0. Setup</a></li><li><a href="01-git.html">1. Git &amp; Version Control</a></li><li><a href="02-terminal.html" class="current" aria-current="page">2. The Terminal</a></li><li><a href="03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="2-the-terminal">2. The Terminal<a class="headerlink" href="#2-the-terminal" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>The <strong>terminal</strong> (also called the command line, shell, or console) is a text window where you type commands instead of clicking buttons. It can look old-fashioned, but FRC programmers use it constantly:</p>
+<ul>
+<li><strong>Git</strong> is a terminal program. The VS Code buttons just run terminal commands for you.</li>
+<li><strong>Building and deploying</strong> with Gradle works from the terminal, and the terminal shows errors more clearly than the buttons do.</li>
+<li>At competition, when the VS Code buttons misbehave and the queue is calling your team, typing <code>./gradlew deploy</code> is the fastest way to get code on the robot.</li>
+</ul>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/gradlew-tasks.html">Introduction to GradleRIO</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/deploying-robot-code.html">Building and Deploying Robot Code</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="opening-a-terminal">Opening a terminal<a class="headerlink" href="#opening-a-terminal" title="Permanent link">#</a></h3>
+<p>The easiest way is inside VS Code: <strong>Terminal → New Terminal</strong>, or <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-grave">`</kbd></span> (the key left of 1). It opens at the bottom of the window, already inside your project folder.</p>
+<p>Which terminal you get depends on your computer:</p>
+<table>
+<thead>
+<tr>
+<th>Computer</th>
+<th>Default terminal</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Windows</td>
+<td>PowerShell</td>
+<td>Most commands below work. Use <code>gradlew.bat</code> instead of <code>./gradlew</code> if <code>./gradlew</code> fails.</td>
+</tr>
+<tr>
+<td>Mac</td>
+<td>zsh</td>
+<td>Everything below works as written</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>bash</td>
+<td>Everything below works as written</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reading-the-prompt">Reading the prompt<a class="headerlink" href="#reading-the-prompt" title="Permanent link">#</a></h3>
+<p>Before the blinking cursor, the terminal shows a <strong>prompt</strong>. It tells you where you are:</p>
+<div class="highlight"><pre><span></span><code>PS C:\Users\kedrick\robotics\my-first-robot&gt;        ← Windows PowerShell
+kedrick@laptop my-first-robot %                      ← Mac
+</code></pre></div>
+<p>The folder you're "in" is the <strong>current directory</strong>. Commands act on files there unless you say otherwise.</p>
+<h3 id="moving-around">Moving around<a class="headerlink" href="#moving-around" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pwd</code></td>
+<td>Print the folder you're in</td>
+<td><code>pwd</code></td>
+</tr>
+<tr>
+<td><code>ls</code></td>
+<td>List files and folders here</td>
+<td><code>ls</code></td>
+</tr>
+<tr>
+<td><code>cd FOLDER</code></td>
+<td>Move into a folder</td>
+<td><code>cd src</code></td>
+</tr>
+<tr>
+<td><code>cd ..</code></td>
+<td>Go up one level</td>
+<td><code>cd ..</code></td>
+</tr>
+<tr>
+<td><code>cd ~</code></td>
+<td>Go to your home folder</td>
+<td><code>cd ~</code></td>
+</tr>
+<tr>
+<td><code>mkdir NAME</code></td>
+<td>Make a new folder</td>
+<td><code>mkdir robotics</code></td>
+</tr>
+<tr>
+<td><code>code .</code></td>
+<td>Open the current folder in VS Code</td>
+<td><code>code .</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Two habits that save you time</p>
+<p><strong>Tab completion:</strong> type the first few letters of a file or folder, then press <span class="keys"><kbd class="key-tab">Tab</kbd></span>, and the terminal finishes the name. Press it twice to see options.</p>
+<p><strong>History:</strong> press <span class="keys"><kbd class="key-arrow-up">Up</kbd></span> to bring back the last command. Keep pressing to go further back.</p>
+</div>
+<h3 id="paths">Paths<a class="headerlink" href="#paths" title="Permanent link">#</a></h3>
+<p>A <strong>path</strong> is the address of a file.</p>
+<ul>
+<li>A <strong>relative path</strong> starts from where you are: <code>src/main/java</code></li>
+<li>An <strong>absolute path</strong> starts from the top of the drive: <code>C:\Users\kedrick\robotics</code> or <code>/Users/kedrick/robotics</code></li>
+<li><code>.</code> means "this folder" and <code>..</code> means "the folder above"</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Spaces in names</p>
+<p>A folder called <code>My Robot</code> must be typed in quotes: <code>cd "My Robot"</code>. Name your project folders without spaces to avoid this.</p>
+</div>
+<h3 id="gradle-building-from-the-terminal">Gradle: building from the terminal<a class="headerlink" href="#gradle-building-from-the-terminal" title="Permanent link">#</a></h3>
+<p>Every WPILib project includes a <strong>Gradle wrapper</strong>, <code>gradlew</code>, in the project's top folder. Run these from that folder:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>./gradlew build</code></td>
+<td>Compile the code and run the unit tests (Lesson 16)</td>
+</tr>
+<tr>
+<td><code>./gradlew deploy</code></td>
+<td>Build, then copy the code to the roboRIO and restart it</td>
+</tr>
+<tr>
+<td><code>./gradlew simulateJava</code></td>
+<td>Build and start the simulator</td>
+</tr>
+<tr>
+<td><code>./gradlew test</code></td>
+<td>Run only the unit tests</td>
+</tr>
+<tr>
+<td><code>./gradlew clean</code></td>
+<td>Delete old build output. Try this when a build acts strangely.</td>
+</tr>
+</tbody>
+</table>
+<p>On Windows, if <code>./gradlew</code> gives an error, use <code>.\gradlew.bat build</code> or <code>gradlew build</code>.</p>
+<div class="admonition info">
+<p class="admonition-title">Deploying needs a connection to the robot</p>
+<p>Your laptop must be connected to the robot's network (Wi-Fi or USB/Ethernet) for <code>deploy</code> to find the roboRIO. With team number 4674 set, Gradle finds it automatically.</p>
+</div>
+<h3 id="reading-a-build-error">Reading a build error<a class="headerlink" href="#reading-a-build-error" title="Permanent link">#</a></h3>
+<p>A failed build prints a lot. Here's what to look for:</p>
+<div class="highlight"><pre><span></span><code>&gt; Task :compileJava FAILED
+/home/kedrick/my-first-robot/src/main/java/frc/robot/subsystems/Intake.java:14: error: ';' expected
+        motor.set(0.75)
+                       ^
+1 error
+
+FAILURE: Build failed with an exception.
+...
+BUILD FAILED in 3s
+</code></pre></div>
+<ol>
+<li><strong>Scroll up to the first line that says <code>error:</code>.</strong> The bottom is just a summary.</li>
+<li>It names the <strong>file</strong> (<code>Intake.java</code>) and <strong>line</strong> (<code>14</code>).</li>
+<li>It says <strong>what's wrong</strong> (<code>';' expected</code>).</li>
+<li>The <code>^</code> points at the exact spot.</li>
+</ol>
+<p>Fix the <strong>first</strong> error and build again. One mistake often causes a pile of later errors that disappear once the first is fixed.</p>
+<h3 id="common-errors-and-what-they-mean">Common errors and what they mean<a class="headerlink" href="#common-errors-and-what-they-mean" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Error message</th>
+<th>Usual meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>';' expected</code></td>
+<td>Missing semicolon at the end of a line</td>
+</tr>
+<tr>
+<td><code>cannot find symbol</code></td>
+<td>A typo in a name, or a missing <code>import</code></td>
+</tr>
+<tr>
+<td><code>incompatible types</code></td>
+<td>Passing the wrong type, like a <code>double</code> where a <code>Command</code> is expected</td>
+</tr>
+<tr>
+<td><code>class X is public, should be declared in a file named X.java</code></td>
+<td>The class name and file name don't match</td>
+</tr>
+<tr>
+<td><code>Could not find roboRIO</code></td>
+<td>The laptop isn't connected to the robot, or the team number is wrong</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Let VS Code help</p>
+<p>Red squiggly lines show many errors before you build. Hover over one to see the message, and use the lightbulb icon to add a missing <code>import</code>.</p>
+</div>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Open a terminal in VS Code and run <code>pwd</code> and <code>ls</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Use <code>cd</code> to walk into <code>src/main/java/frc/robot</code>, then <code>cd ..</code> back out to the project folder</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run <code>./gradlew build</code> and get <code>BUILD SUCCESSFUL</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Delete a <code>;</code> in <code>RobotContainer.java</code>, build, and find the file and line number in the error. Put the <code>;</code> back.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run <code>./gradlew simulateJava</code> to start the simulator from the terminal</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>How do you get to the folder above the one you're in?</summary>
+<p><code>cd ..</code></p>
+</details>
+<details class="question">
+<summary>What's the difference between a relative and an absolute path?</summary>
+<p>A relative path starts from your current folder (<code>src/main</code>). An absolute path starts from the top of the drive (<code>C:\Users\...</code> or <code>/Users/...</code>) and works from anywhere.</p>
+</details>
+<details class="question">
+<summary>Where in the output is the real cause of a build failure?</summary>
+<p>At the <strong>first</strong> <code>error:</code> line, which names the file and line number. The lines at the bottom are just a summary.</p>
+</details>
+<details class="question">
+<summary>What does <code>./gradlew deploy</code> do?</summary>
+<p>It builds the code, copies it to the roboRIO over the robot's network, and restarts the robot program.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="01-git.html"><span>Previous</span>1. Git &amp; Version Control</a><a class="pager-next" href="03-java.html"><span>Next</span>3. Java Reference</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

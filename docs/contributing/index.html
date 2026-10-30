@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to Contribute | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section" open><summary>Contributing</summary><ul><li><a href="index.html" class="current" aria-current="page">How to Contribute</a></li><li><a href="lesson-template.html">Lesson Template</a></li><li><a href="yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="how-to-contribute">How to Contribute<a class="headerlink" href="#how-to-contribute" title="Permanent link">#</a></h1>
+<p>This site is plain HTML. Lessons are written in Markdown in the <code>src/</code> folder, and a small Python script, <code>build.py</code>, turns them into the HTML pages in <code>docs/</code>. GitHub Pages serves <code>docs/</code> directly, so there's no server and nothing to deploy by hand.</p>
+<h2 id="quick-edits">Quick edits<a class="headerlink" href="#quick-edits" title="Permanent link">#</a></h2>
+<ol>
+<li>Edit the lesson's Markdown file in <code>src/</code>.</li>
+<li>Run <code>python build.py</code>.</li>
+<li>Commit <strong>both</strong> the <code>src/</code> change and the rebuilt <code>docs/</code> files, and open a pull request.</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Don't edit files in <code>docs/</code> directly</p>
+<p><code>build.py</code> regenerates everything in <code>docs/</code> from <code>src/</code>, so hand edits there get overwritten the next time anyone builds.</p>
+</div>
+<h2 id="working-locally">Working locally<a class="headerlink" href="#working-locally" title="Permanent link">#</a></h2>
+<p><div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/YOUR-USERNAME/frc-course.git
+<span class="nb">cd</span><span class="w"> </span>frc-course
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+python<span class="w"> </span>build.py
+</code></pre></div>
+Then open <code>docs/index.html</code> in your browser. Rebuild and refresh after each change.</p>
+<h2 id="adding-a-lesson">Adding a lesson<a class="headerlink" href="#adding-a-lesson" title="Permanent link">#</a></h2>
+<ol>
+<li>Copy the <a href="lesson-template.html">lesson template</a> into the right folder under <code>src/</code>.</li>
+<li>Add it to the <code>NAV</code> list near the top of <code>build.py</code>. That list controls the sidebar and the Previous / Next buttons.</li>
+<li>Run <code>python build.py</code> and click through the new page.</li>
+<li>Open a pull request (<a href="../workflow/15-team-process.html">Lesson 15</a> explains how).</li>
+</ol>
+<h2 id="changing-the-look">Changing the look<a class="headerlink" href="#changing-the-look" title="Permanent link">#</a></h2>
+<p>Every color and font is set in the first block of <code>assets/style.css</code>. Change those values and rebuild. The rest of the stylesheet reads from them.</p>
+<h2 id="style-rules">Style rules<a class="headerlink" href="#style-rules" title="Permanent link">#</a></h2>
+<ul>
+<li>Write for a freshman who just joined the team.</li>
+<li><strong>Link to WPILib for reference material.</strong> Our job is the tutorial, not rewriting their docs.</li>
+<li>Every lesson has the five sections: <em>Why it matters, Read this, Walkthrough, Try it, Check yourself.</em></li>
+<li>Code examples should run in simulation without vendor libraries when possible.</li>
+</ul>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../reference/credits.html"><span>Previous</span>Credits</a><a class="pager-next" href="lesson-template.html"><span>Next</span>Lesson Template</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

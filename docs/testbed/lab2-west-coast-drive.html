@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 2: Drive a West Coast Drive | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html" class="current" aria-current="page">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-2-drive-a-west-coast-drive">Lab 2: Drive a West Coast Drive<a class="headerlink" href="#lab-2-drive-a-west-coast-drive" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>In Lab 1 you spun one motor. Now you'll drive a whole robot.</p>
+<p>The drivetrain is the most important mechanism on any robot: if it can't drive well, nothing else matters. In this lab you'll program the team's <strong>West Coast Drive (WCD)</strong> so a driver can move it around with an Xbox controller. Along the way you'll learn three ideas every drivetrain uses:</p>
+<ul>
+<li><strong>Leaders and followers:</strong> several motors acting as one</li>
+<li><strong>Inversion:</strong> why one side of the robot has to run "backward"</li>
+<li><strong>Skid steer driving:</strong> each joystick runs one side of the robot, just like the two levers on a skid steer loader</li>
+</ul>
+<p><strong>Before you start:</strong> finish <a href="lab1-spin-motor.html">Lab 1</a>. <a href="../project/10-teleop.html">Lesson 10</a> explains the drive code in more depth; read it before or after.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html">Using the WPILib Drive Classes</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/joystick.html">Joysticks</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="whats-a-west-coast-drive">What's a West Coast Drive?<a class="headerlink" href="#whats-a-west-coast-drive" title="Permanent link">#</a></h3>
+<p>A WCD steers like a <strong>skid steer loader</strong>: the left wheels all move together, the right wheels all move together, and there's no steering. To turn, one side drives faster than the other, and the wheels <strong>skid</strong> sideways across the floor. That's where the name <em>skid steer</em> comes from.</p>
+<div class="mermaid">flowchart LR
+    subgraph L ["Left side"]
+        LG[Gearbox&lt;br/&gt;2 CIMs] --&gt; LW[3 wheels,&lt;br/&gt;chained together]
+    end
+    subgraph R ["Right side"]
+        RG[Gearbox&lt;br/&gt;2 CIMs] --&gt; RW[3 wheels,&lt;br/&gt;chained together]
+    end</div>
+<ul>
+<li>Each side has one <strong>gearbox</strong> with two <strong>CIM</strong> motors. Both CIMs turn the same gear, so they must always push in the same direction.</li>
+<li>The middle wheels sit slightly lower ("dropped center"), so the robot rocks onto fewer wheels and turns more easily.</li>
+</ul>
+<h3 id="the-hardware">The hardware<a class="headerlink" href="#the-hardware" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Motors</td>
+<td>4 <strong>CIM</strong> motors, 2 per side. CIMs are <strong>brushed</strong> motors.</td>
+</tr>
+<tr>
+<td>Motor controllers</td>
+<td>4 SPARK MAXes, one per CIM, on CAN</td>
+</tr>
+<tr>
+<td>CAN IDs</td>
+<td>Left leader <strong>1</strong>, left follower <strong>2</strong>, right leader <strong>3</strong>, right follower <strong>4</strong> (check yours, Step 1)</td>
+</tr>
+<tr>
+<td>Breakers</td>
+<td>40 A, one per motor</td>
+</tr>
+<tr>
+<td>Controller</td>
+<td>An Xbox controller on the Driver Station laptop</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">CIMs are brushed motors</p>
+<p>Every SPARK MAX in this lab must be set up as <code>MotorType.kBrushed</code>. The wrong motor type can damage the motor and the controller. This is the opposite of Lab 1's NEO, so read that line twice.</p>
+</div>
+<h3 id="new-project">New project<a class="headerlink" href="#new-project" title="Permanent link">#</a></h3>
+<p>The WCD is its own robot with its own roboRIO, so it gets its own project. Repeat <a href="lab0-first-project.html">Lab 0</a>, Parts 2 to 4, but name the project <strong>WestCoastDrive</strong>. Remember to install <strong>REVLib</strong>.</p>
+<h3 id="step-1-check-the-spark-maxes">Step 1: Check the SPARK MAXes<a class="headerlink" href="#step-1-check-the-spark-maxes" title="Permanent link">#</a></h3>
+<ol>
+<li>Connect each SPARK MAX to your laptop over USB-C and open the <strong>REV Hardware Client</strong>.</li>
+<li>Write down each one's <strong>CAN ID</strong> and which motor it drives (left front, left back, and so on). Put tape labels on the controllers.</li>
+<li>Pick one controller on each side as the <strong>leader</strong>. The other is its <strong>follower</strong>.</li>
+<li>Check that no two SPARK MAXes share an ID. A duplicate makes motors twitch or not respond (<a href="../hardware/04-electronics.html">Lesson 4</a>).</li>
+</ol>
+<h3 id="step-2-constants">Step 2: Constants<a class="headerlink" href="#step-2-constants" title="Permanent link">#</a></h3>
+<p>Open <code>Constants.java</code> and add a class for the drivetrain. Use the CAN IDs you wrote down.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Constants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OperatorConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kControllerPort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kDeadband</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.08</span><span class="p">;</span><span class="w">   </span><span class="c1">// ignore tiny stick movements</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">kDriveConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LeftLeaderCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LeftFollowerCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">RightLeaderCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">RightFollowerCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">CurrentLimit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">40</span><span class="p">;</span><span class="w">     </span><span class="c1">// amps, matches the 40 A breakers</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MaxOutput</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">    </span><span class="c1">// top speed, 0 to 1. Start slow!</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>MaxOutput</code> caps the robot at 50% speed. Raise it only after the robot drives correctly.</p>
+<h3 id="step-3-leaders-and-followers">Step 3: Leaders and followers<a class="headerlink" href="#step-3-leaders-and-followers" title="Permanent link">#</a></h3>
+<p>Each side has two motors in one gearbox. Instead of sending every command to both, you send commands to the <strong>leader</strong>, and tell the <strong>follower</strong> to copy it.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Leader</th>
+<th>Follower</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Your code tells it</td>
+<td>The speed to run</td>
+<td>Just "follow the leader"</td>
+</tr>
+<tr>
+<td>What it does</td>
+<td>Runs at that speed</td>
+<td>Matches the leader's output automatically</td>
+</tr>
+</tbody>
+</table>
+<p>Following happens on the SPARK MAXes themselves, so the code only ever talks to two motors: left leader and right leader.</p>
+<h3 id="step-4-why-one-side-is-inverted">Step 4: Why one side is inverted<a class="headerlink" href="#step-4-why-one-side-is-inverted" title="Permanent link">#</a></h3>
+<p>The left and right gearboxes face <strong>opposite directions</strong>. If you send "forward" to both sides, the left wheels roll forward and the right wheels roll backward, and the robot spins in place.</p>
+<p>The fix is to <strong>invert</strong> one side's leader, so "forward" means forward on both. We'll invert the right side. If your robot drives backward or spins when you push forward, you'll invert the other side instead (Step 8).</p>
+<h3 id="step-5-the-drive-subsystem">Step 5: The drive subsystem<a class="headerlink" href="#step-5-the-drive-subsystem" title="Permanent link">#</a></h3>
+<p>Create <code>subsystems/DriveSubsystem.java</code> (right-click <code>subsystems</code> → <strong>Create a new class/command</strong> → <strong>Subsystem (New)</strong>). Replace its contents:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.PersistMode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.ResetMode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.SparkLowLevel.MotorType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.SparkMax</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.config.SparkBaseConfig.IdleMode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.config.SparkMaxConfig</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.RobotController</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.drive.DifferentialDrive</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.SmartDashboard</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants.kDriveConstants</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DriveSubsystem</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Four SPARK MAXes, all BRUSHED, because CIMs are brushed motors.</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SparkMax</span><span class="w"> </span><span class="n">m_leftLeader</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">LeftLeaderCanId</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushed</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SparkMax</span><span class="w"> </span><span class="n">m_leftFollower</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">LeftFollowerCanId</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushed</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SparkMax</span><span class="w"> </span><span class="n">m_rightLeader</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">RightLeaderCanId</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushed</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SparkMax</span><span class="w"> </span><span class="n">m_rightFollower</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">RightFollowerCanId</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushed</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// DifferentialDrive is WPILib's class for any drivetrain with a left side and a right side.</span>
+<span class="w">  </span><span class="c1">// We only hand it the two leaders. The followers copy them.</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DifferentialDrive</span><span class="w"> </span><span class="n">m_drive</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDrive</span><span class="p">(</span><span class="n">m_leftLeader</span><span class="p">::</span><span class="n">set</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightLeader</span><span class="p">::</span><span class="n">set</span><span class="p">);</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">DriveSubsystem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Left leader: normal direction</span>
+<span class="w">    </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">leftLeaderConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">baseConfig</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Left follower: copy the left leader</span>
+<span class="w">    </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">leftFollowerConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">baseConfig</span><span class="p">();</span>
+<span class="w">    </span><span class="n">leftFollowerConfig</span><span class="p">.</span><span class="na">follow</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">LeftLeaderCanId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Right leader: inverted, because the right gearbox faces the other way</span>
+<span class="w">    </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">rightLeaderConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">baseConfig</span><span class="p">();</span>
+<span class="w">    </span><span class="n">rightLeaderConfig</span><span class="p">.</span><span class="na">inverted</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Right follower: copy the right leader</span>
+<span class="w">    </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">rightFollowerConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">baseConfig</span><span class="p">();</span>
+<span class="w">    </span><span class="n">rightFollowerConfig</span><span class="p">.</span><span class="na">follow</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">RightLeaderCanId</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">m_leftLeader</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">leftLeaderConfig</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_leftFollower</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">leftFollowerConfig</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_rightLeader</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">rightLeaderConfig</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_rightFollower</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">rightFollowerConfig</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Cap the top speed while we're learning. Raise this in Constants later.</span>
+<span class="w">    </span><span class="n">m_drive</span><span class="p">.</span><span class="na">setMaxOutput</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">MaxOutput</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Settings every drive motor shares. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="nf">baseConfig</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMaxConfig</span><span class="p">();</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">smartCurrentLimit</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">CurrentLimit</span><span class="p">);</span><span class="w">  </span><span class="c1">// protects motors and breakers</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">idleMode</span><span class="p">(</span><span class="n">IdleMode</span><span class="p">.</span><span class="na">kBrake</span><span class="p">);</span><span class="w">                        </span><span class="c1">// stop quickly when sticks are released</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">config</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Differential drive with two sticks: one value for the left side, one for the right.</span>
+<span class="cm">   * Suppliers are read every loop, so the robot follows the sticks as they move.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">differentialDriveCommand</span><span class="p">(</span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">leftSpeed</span><span class="p">,</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">rightSpeed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">tankDrive</span><span class="p">(</span><span class="n">leftSpeed</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="n">rightSpeed</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">()))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Differential Drive"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="nd">@Override</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Left Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_leftLeader</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Right Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightLeader</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Left Leader Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_leftLeader</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Left Follower Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_leftFollower</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Right Leader Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightLeader</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Right Follower Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightFollower</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Drive/Battery (V)"</span><span class="p">,</span><span class="w"> </span><span class="n">RobotController</span><span class="p">.</span><span class="na">getBatteryVoltage</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Things to notice:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MotorType.kBrushed</code></td>
+<td>CIMs are brushed. In Lab 1, the NEO was <code>kBrushless</code>.</td>
+</tr>
+<tr>
+<td><code>follow(LeftLeaderCanId)</code></td>
+<td>"Copy whatever the left leader does."</td>
+</tr>
+<tr>
+<td><code>inverted(true)</code> on the right leader</td>
+<td>Flips the right side so forward means forward. The right follower copies the leader, so it flips too.</td>
+</tr>
+<tr>
+<td><code>new DifferentialDrive(m_leftLeader::set, m_rightLeader::set)</code></td>
+<td>Gives WPILib's drive class a way to set each side. It only needs the leaders.</td>
+</tr>
+<tr>
+<td><code>m_drive.tankDrive(left, right)</code></td>
+<td>Sends one speed to the left side and one to the right. Each value goes from -1 (full backward) to 1 (full forward).</td>
+</tr>
+<tr>
+<td><code>setMaxOutput(0.5)</code></td>
+<td>Caps every output at 50% while you're learning</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-6-skid-steer-controls">Step 6: Skid steer controls<a class="headerlink" href="#step-6-skid-steer-controls" title="Permanent link">#</a></h3>
+<p>If you've ever run a skid steer loader, you already know how to drive this robot. A skid steer has two levers: the left lever runs the left wheels and the right lever runs the right wheels. Push both forward to go straight, push one further to turn, and push them opposite ways to spin in place.</p>
+<p>The Xbox controller's two sticks are the two levers. In code, WPILib calls this kind of drivetrain a <strong>differential drive</strong>, and this control style <strong>tank drive</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Stick</th>
+<th>Controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Left stick</strong>, up and down</td>
+<td>Left side wheels</td>
+</tr>
+<tr>
+<td><strong>Right stick</strong>, up and down</td>
+<td>Right side wheels</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>To do this</th>
+<th>Push the sticks (like skid steer levers)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Drive straight forward</td>
+<td>Both forward, the same amount</td>
+</tr>
+<tr>
+<td>Turn gently right</td>
+<td>Left stick a little more than the right</td>
+</tr>
+<tr>
+<td>Spin in place to the right (a skid steer's "counter-rotate")</td>
+<td>Left stick forward, right stick back</td>
+</tr>
+<tr>
+<td>Stop</td>
+<td>Let go of both</td>
+</tr>
+</tbody>
+</table>
+<p><code>m_drive.tankDrive(left, right)</code> sends those two values straight to the two sides. It also <strong>squares</strong> them by default, which gives finer control at low speed: half stick gives about a quarter of full speed (<a href="../project/10-teleop.html">Lesson 10</a>).</p>
+<p>Open <code>RobotContainer.java</code>. Add the imports and create the subsystem:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.MathUtil</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.subsystems.DriveSubsystem</span><span class="p">;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DriveSubsystem</span><span class="w"> </span><span class="n">m_driveSubsystem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DriveSubsystem</span><span class="p">();</span>
+</code></pre></div>
+<p>Then set the drive's <strong>default command</strong> in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configureBindings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Left stick drives the left side, right stick drives the right side,</span>
+<span class="w">  </span><span class="c1">// whenever no other command is using the drivetrain</span>
+<span class="w">  </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">setDefaultCommand</span><span class="p">(</span>
+<span class="w">      </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">differentialDriveCommand</span><span class="p">(</span>
+<span class="w">          </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="n">m_controller</span><span class="p">.</span><span class="na">getLeftY</span><span class="p">(),</span><span class="w"> </span><span class="n">OperatorConstants</span><span class="p">.</span><span class="na">kDeadband</span><span class="p">),</span>
+<span class="w">          </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="n">m_controller</span><span class="p">.</span><span class="na">getRightY</span><span class="p">(),</span><span class="w"> </span><span class="n">OperatorConstants</span><span class="p">.</span><span class="na">kDeadband</span><span class="p">)));</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setDefaultCommand</code></td>
+<td>The drive command runs all the time, unless another command takes over the drivetrain</td>
+</tr>
+<tr>
+<td><code>() -&gt; ...</code></td>
+<td>A lambda: read the stick <strong>every loop</strong>, not just once (<a href="../foundations/03-java.html">Lesson 3</a>)</td>
+</tr>
+<tr>
+<td><code>getLeftY()</code> and <code>getRightY()</code></td>
+<td>The up-and-down axis of each stick</td>
+</tr>
+<tr>
+<td>The minus signs</td>
+<td>Xbox sticks report pushing <strong>forward as negative</strong>. WPILib wants forward to be positive.</td>
+</tr>
+<tr>
+<td><code>applyDeadband</code></td>
+<td>A stick resting in the middle rarely reads exactly 0. Without a deadband, the robot creeps.</td>
+</tr>
+</tbody>
+</table>
+<p>Delete or comment out the template's example subsystem and its auto in <code>getAutonomousCommand()</code> if you like; for now, make it return <code>null</code> so autonomous does nothing:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w">   </span><span class="c1">// no autonomous yet</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="step-7-first-drive-on-blocks">Step 7: First drive, on blocks<a class="headerlink" href="#step-7-first-drive-on-blocks" title="Permanent link">#</a></h3>
+<div class="admonition danger">
+<p class="admonition-title">Wheels off the ground first</p>
+<p>The first time new drive code runs, <strong>put the robot on blocks</strong> so all six wheels are off the ground. A drivetrain with a wrong sign can lurch or spin the moment it's enabled.</p>
+<p>Everyone stands clear. One person drives, one person watches the wheels, and the driver keeps a finger near <span class="keys"><kbd class="key-enter">Enter</kbd></span> (disable).</p>
+</div>
+<ol>
+<li><strong>Build</strong> and <strong>Deploy</strong>.</li>
+<li>Plug in the Xbox controller and check it's in slot <strong>0</strong> on the Driver Station USB tab.</li>
+<li>Say <strong>"Enabling!"</strong> and enable <strong>TeleOperated</strong>.</li>
+<li>Gently push <strong>one stick at a time</strong>, then both together.</li>
+</ol>
+<p>Check every row:</p>
+<table>
+<thead>
+<tr>
+<th>You do</th>
+<th>Should happen</th>
+<th>If not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nothing (sticks centered)</td>
+<td>All wheels still</td>
+<td>Raise <code>kDeadband</code> a little</td>
+</tr>
+<tr>
+<td>Left stick forward</td>
+<td><strong>Only the left</strong> three wheels roll forward</td>
+<td>See Step 8</td>
+</tr>
+<tr>
+<td>Right stick forward</td>
+<td><strong>Only the right</strong> three wheels roll forward</td>
+<td>See Step 8</td>
+</tr>
+<tr>
+<td>Both sticks forward</td>
+<td><strong>All six wheels</strong> roll forward</td>
+<td>See Step 8</td>
+</tr>
+<tr>
+<td>Both sticks back</td>
+<td>All six wheels roll backward</td>
+<td>See Step 8</td>
+</tr>
+<tr>
+<td>Left forward, right back</td>
+<td>Left wheels forward, right wheels backward</td>
+<td>See Step 8</td>
+</tr>
+<tr>
+<td>Let go</td>
+<td>Everything stops</td>
+<td>Check the default command is set</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Listen to the gearboxes</p>
+<p>If a gearbox <strong>grinds, buzzes, or hums without the wheels turning</strong>, or a breaker trips right away, <strong>disable immediately</strong>. It usually means a leader and follower are pushing against each other in the same gearbox. Check that the follower is set to <code>follow</code> the correct leader's CAN ID, and look at the dashboard: a follower drawing current while its side barely moves is the giveaway.</p>
+</div>
+<h3 id="step-8-fixing-directions">Step 8: Fixing directions<a class="headerlink" href="#step-8-fixing-directions" title="Permanent link">#</a></h3>
+<p>Change <strong>one thing at a time</strong>, deploy, and test again on blocks.</p>
+<table>
+<thead>
+<tr>
+<th>What you see</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One side rolls <strong>backward</strong> when its stick goes forward</td>
+<td>That side's direction is flipped. If it's the right side, remove <code>inverted(true)</code> from the right leader. If it's the left, add <code>inverted(true)</code> to the left leader.</td>
+</tr>
+<tr>
+<td><strong>Both</strong> sides roll backward when both sticks go forward</td>
+<td>Move <code>inverted(true)</code> from the right leader to the left leader, or check both minus signs</td>
+</tr>
+<tr>
+<td>The <strong>left stick moves the right wheels</strong></td>
+<td>The left and right CAN IDs are swapped in <code>Constants</code>. Swap them back.</td>
+</tr>
+<tr>
+<td>One side doesn't move at all</td>
+<td>That side's leader CAN ID is wrong, or its breaker is tripped</td>
+</tr>
+<tr>
+<td>A gearbox grinds or a breaker trips</td>
+<td>Leader and follower are fighting. Check the <code>follow</code> CAN IDs.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-9-drive-on-the-floor">Step 9: Drive on the floor<a class="headerlink" href="#step-9-drive-on-the-floor" title="Permanent link">#</a></h3>
+<p>Once every row in Step 7 passes on blocks:</p>
+<ol>
+<li>Put the robot on the floor in a big open space, with nobody in front of it.</li>
+<li>Keep <code>MaxOutput</code> at 0.5.</li>
+<li>Drive slowly: forward, backward, gentle turns, then a figure eight.</li>
+<li>Watch the dashboard while you drive. Look at the <strong>current</strong> on each side when you start moving and when you turn in place.</li>
+</ol>
+<p>Spinning in place usually pulls the most current, because the wheels have to skid sideways across the carpet, the same reason a skid steer tears up a lawn when it turns. Watch the <strong>battery voltage</strong> drop while you do it. That's where brownouts come from (<a href="../hardware/04-electronics.html">Lesson 4</a>).</p>
+<h3 id="step-10-commit">Step 10: Commit<a class="headerlink" href="#step-10-commit" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 2: differential drive on the WCD"</span>
+</code></pre></div>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Get every row in the Step 7 table to pass on blocks</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Drive a figure eight on the floor at 50% max output</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <strong>slow mode</strong>: while the right bumper is held, multiply both stick values by 0.4. (Hint: <code>m_controller.rightBumper().getAsBoolean()</code> inside the lambdas.)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Drive a straight line across the room. Is it hard to push both sticks exactly the same? What could the code do to help?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change <code>IdleMode.kBrake</code> to <code>IdleMode.kCoast</code> for all motors. How does stopping feel different? Which would a driver want?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Raise <code>MaxOutput</code> to 0.75 and watch the battery voltage while turning in place</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: some WCDs have <strong>3 CIMs per side</strong>. What would you add to support a third motor on each side?</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why are the CIMs set to <code>kBrushed</code> when Lab 1's motor was <code>kBrushless</code>?</summary>
+<p>CIMs are brushed motors and NEOs are brushless. The SPARK MAX drives them completely differently, and the setting must match the motor.</p>
+</details>
+<details class="question">
+<summary>What does a follower do, and why do we use them?</summary>
+<p>It copies its leader's output. Both motors in a gearbox must always push together, so the code only commands the leader and the follower matches it automatically.</p>
+</details>
+<details class="question">
+<summary>Why is one side of the drivetrain inverted?</summary>
+<p>The two gearboxes face opposite directions. Without inverting one side, "forward" on both would spin the robot in place.</p>
+</details>
+<details class="question">
+<summary>How does a skid steer (or this robot) turn without steering wheels?</summary>
+<p>It runs the left and right sides at different speeds, and the wheels skid sideways. The faster side swings around the slower one. Running them in opposite directions spins the robot in place.</p>
+</details>
+<details class="question">
+<summary>What does <code>tankDrive(left, right)</code> do with the two stick values?</summary>
+<p>It sends the left value to the left side and the right value to the right side, after squaring them for finer control at low speed.</p>
+</details>
+<details class="question">
+<summary>Why do we negate <code>getLeftY()</code> and <code>getRightY()</code>?</summary>
+<p>Xbox controllers report pushing a stick forward as a <strong>negative</strong> number, and WPILib expects forward to be positive.</p>
+</details>
+<details class="question">
+<summary>Why do the stick values go in lambdas (<code>() -&gt; ...</code>)?</summary>
+<p>So they're read every loop. A plain number would be read once at startup, and the robot would never respond to the sticks again.</p>
+</details>
+<details class="question">
+<summary>A gearbox buzzes and gets hot, but the wheels barely turn. What's wrong, and what do you do?</summary>
+<p>Disable immediately. The two motors in that gearbox are pushing against each other, usually because a follower is following the wrong leader or is set to the opposite direction.</p>
+</details>
+<details class="question">
+<summary>Why put the robot on blocks for the first test?</summary>
+<p>If a direction or sign is wrong, the robot could lurch or spin into someone. On blocks, you can see every wheel's direction safely.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab1-spin-motor.html"><span>Previous</span>Lab 1: Spin a Brushless Motor</a><a class="pager-next" href="lab3-buttons-triggers.html"><span>Next</span>Lab 3: Buttons and Triggers</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

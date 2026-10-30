@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12. PID Feedback | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<link rel="stylesheet" href="../assets/wpilib/pid-tune.css">
+<script src="../assets/wpilib/pid-tune.js"></script>
+<script src="../assets/wpilib/pid-tune-fixes.js"></script>
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section" open><summary>Controls</summary><ul><li><a href="12-pid.html" class="current" aria-current="page">12. PID Feedback</a></li><li><a href="13-feedforward.html">13. Feedforward</a></li><li><a href="13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="12-pid-feedback">12. PID Feedback<a class="headerlink" href="#12-pid-feedback" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>"Set the motor to 0.3 and hope" doesn't work. Battery voltage changes during a match, mechanisms wear, game pieces add weight, and carpet adds friction. A fixed motor output gets a different result every time.</p>
+<p><strong>Feedback control</strong> measures where the mechanism actually is, compares it to where you want it, and corrects automatically, 50 times a second. <strong>PID</strong> is the most common feedback controller in FRC, and in robotics generally. Once you understand it, you can make arms hold their angle, flywheels hold their speed, and drivetrains stop exactly where you tell them.</p>
+<h2 id="read-this-then-come-back">Read this, then come back<a class="headerlink" href="#read-this-then-come-back" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/control-system-basics.html">Introduction to Control Theory</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/pidcontroller.html">PID Control in WPILib</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html">Tuning a Flywheel Velocity Controller</a> and <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html">Tuning a Vertical Arm Position Controller</a></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Use the interactive simulators</p>
+<p>The WPILib tuning pages above include simulators right in the browser, for a flywheel, turret, and arm. Move the sliders and watch what happens. They're the fastest way to build intuition, and you'll use them in the exercises.</p>
+</div>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="open-loop-vs-closed-loop">Open loop vs. closed loop<a class="headerlink" href="#open-loop-vs-closed-loop" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Open loop:</strong> "Run the motor at 30%." The code never checks the result.</li>
+<li><strong>Closed loop:</strong> "Get the arm to 90°." Measure, compare, correct, repeat every 20 ms.</li>
+</ul>
+<div class="mermaid">flowchart LR
+    S[Setpoint&lt;br/&gt;where you want to be] --&gt; E((error))
+    E --&gt; C[PID controller] --&gt; M[Motor] --&gt; Mech[Mechanism]
+    Mech --&gt; Sen[Sensor]
+    Sen -- measurement&lt;br/&gt;where you are --&gt; E</div>
+<p>The loop is <strong>closed</strong> because the sensor's measurement feeds back into the next decision.</p>
+<p>The WPILib docs draw it like this, using the standard control-theory names:</p>
+<p><img alt="Closed-loop block diagram with reference r(t), error e(t), control input u(t), and output y(t)" src="../assets/wpilib/control-system-basics-feedbackplant.png" /></p>
+<p class="credit">A closed loop. The **plant** is the mechanism being controlled. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/control-system-basics.html">Control System Basics</a> (CC BY 4.0).</p>
+
+<table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Name in the docs</th>
+<th>In this course</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>r(t)</td>
+<td>reference, setpoint</td>
+<td>setpoint (where you want to be)</td>
+</tr>
+<tr>
+<td>e(t)</td>
+<td>error</td>
+<td>error</td>
+</tr>
+<tr>
+<td>u(t)</td>
+<td>control input, control effort</td>
+<td>output (what you send the motor)</td>
+</tr>
+<tr>
+<td>y(t)</td>
+<td>output, process variable</td>
+<td>measurement (where you are)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Two names for the same thing</p>
+<p>The docs call the motor command the <strong>control input</strong> and the measured value the <strong>output</strong>. This course says <strong>output</strong> for the motor command and <strong>measurement</strong> for the sensor value. Same ideas, different words.</p>
+</div>
+<h3 id="the-vocabulary">The vocabulary<a class="headerlink" href="#the-vocabulary" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Arm example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Setpoint</strong> (reference)</td>
+<td>Where you want to be</td>
+<td>90°</td>
+</tr>
+<tr>
+<td><strong>Measurement</strong> (process variable)</td>
+<td>Where you are, from a sensor</td>
+<td>60°</td>
+</tr>
+<tr>
+<td><strong>Error</strong></td>
+<td>Setpoint − measurement</td>
+<td>30°</td>
+</tr>
+<tr>
+<td><strong>Output</strong> (control effort)</td>
+<td>What you send to the motor</td>
+<td>0.4, or 4.8 V</td>
+</tr>
+<tr>
+<td><strong>Gain</strong></td>
+<td>A tuning number that scales one part of the output</td>
+<td>kP = 0.02</td>
+</tr>
+</tbody>
+</table>
+<h3 id="error-is-everything">Error is everything<a class="headerlink" href="#error-is-everything" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>error = setpoint − measurement
+</code></pre></div>
+<ul>
+<li>Positive error: you're short of the target, so push forward.</li>
+<li>Negative error: you're past it, so push back.</li>
+<li>Zero error: you're there.</li>
+</ul>
+<p>The controller's whole job is to drive the error to zero and keep it there.</p>
+<h3 id="build-pid-one-letter-at-a-time">Build PID one letter at a time<a class="headerlink" href="#build-pid-one-letter-at-a-time" title="Permanent link">#</a></h3>
+<h4 id="p-proportional-push-harder-the-farther-away-you-are">P: Proportional. <em>"Push harder the farther away you are."</em><a class="headerlink" href="#p-proportional-push-harder-the-farther-away-you-are" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>output = kP × error
+</code></pre></div>
+<p>With kP = 0.02 and the arm 30° short, the output is 0.02 × 30 = <strong>0.6</strong>. At 5° short, it's 0.1. As the arm approaches the target, the push gets gentler.</p>
+<table>
+<thead>
+<tr>
+<th>kP</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Too small</td>
+<td>Slow and sluggish. May stop short, because the push gets too weak to overcome friction.</td>
+</tr>
+<tr>
+<td>About right</td>
+<td>Moves quickly and settles close to the target</td>
+</tr>
+<tr>
+<td>Too big</td>
+<td>Overshoots, swings back, overshoots again: <strong>oscillation</strong></td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Block diagram of a P controller" src="../assets/wpilib/introduction-to-pid-p-controller.png" /></p>
+<p class="credit">A P controller: the output is K<sub>p</sub> times the error. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a> (CC BY 4.0).</p>
+
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: P is a software spring</p>
+<p>Proportional gains act like <strong>software-defined springs</strong> that pull the system toward the setpoint. A spring pushes harder the more you stretch it. P pushes harder the farther the mechanism is from the setpoint, in exactly the same way.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a>, CC BY 4.0.</em></p>
+</div>
+<p>P alone has a classic flaw: <strong>steady-state error</strong>. Near the target, the error is small, so the output is small, and a small output may not beat friction or gravity. The mechanism stops a little short and stays there.</p>
+<h4 id="d-derivative-slow-down-as-you-approach">D: Derivative. <em>"Slow down as you approach."</em><a class="headerlink" href="#d-derivative-slow-down-as-you-approach" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>output += kD × (how fast the error is changing)
+</code></pre></div>
+<p>The derivative is the <strong>rate of change</strong> of the error. When the mechanism is rushing toward the target, the error is shrinking fast, and D pushes <strong>against</strong> that motion. It acts like a shock absorber.</p>
+<p><img alt="Block diagram of a PD controller" src="../assets/wpilib/introduction-to-pid-d-controller.png" /></p>
+<p class="credit">A PD controller adds a second term based on how fast the error is changing. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a> (CC BY 4.0).</p>
+
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: D is a software damper</p>
+<p>When the setpoint isn't moving, the D term slows the system down whenever it's moving. It acts like a <strong>software-defined damper</strong>, like the door closers that stop a door from slamming. Their pushback grows the faster the door moves.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a>, CC BY 4.0.</em></p>
+</div>
+<ul>
+<li>With D, you can use a higher kP for a faster response without as much overshoot.</li>
+<li>Too much D makes the mechanism sluggish, and because it reacts to change, it <strong>amplifies sensor noise</strong> into jittery output.</li>
+</ul>
+<h4 id="i-integral-fix-the-leftover-error">I: Integral. <em>"Fix the leftover error."</em><a class="headerlink" href="#i-integral-fix-the-leftover-error" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>output += kI × (error added up over time)
+</code></pre></div>
+<p>The integral keeps a running total of the error. If the mechanism sits a little short of the target for a while, that total grows until the output is big enough to finish the job. That's how I removes steady-state error.</p>
+<p><img alt="A flywheel with P control settling below its setpoint, with the gap shaded" src="../assets/wpilib/introduction-to-pid-pi-controller-steadystate.png" /></p>
+<p class="credit">Steady-state error: P control alone leaves a gap below the setpoint. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a> (CC BY 4.0).</p>
+
+<p><img alt="Two graphs: PI control removing steady-state error, and too much integral gain causing overshoot" src="../assets/wpilib/introduction-to-pid-pi-controller-overshoot.png" /></p>
+<p class="credit">Left: adding I removes the gap. Right: too much I causes overshoot. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a> (CC BY 4.0).</p>
+
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: What WPILib says about I</p>
+<p>Integral gain is <strong>generally not recommended</strong> for FRC use. It's almost always better to use a <strong>feedforward</strong> controller to eliminate steady-state error. If you do use integral gain, it's crucial to protect against <strong>integral windup</strong>.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a>, CC BY 4.0.</em></p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Use I sparingly: integral windup</p>
+<p>If the mechanism is stuck (against a hard stop, or held by a person, or still far from the target), the integral keeps growing the whole time. When the mechanism is finally free, that huge stored value sends it flying past the target. This is <strong>integral windup</strong>.</p>
+<p>Most FRC mechanisms don't need I at all once you add <strong>feedforward</strong> (<a href="13-feedforward.html">Lesson 13</a>), which handles gravity and friction directly. If you do use I, limit it with <code>setIZone()</code> and <code>setIntegratorRange()</code>.</p>
+</div>
+<h4 id="all-three-together">All three together<a class="headerlink" href="#all-three-together" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>output = kP × error  +  kI × ∫error  +  kD × d(error)/dt
+         (present)       (past)          (future trend)
+</code></pre></div>
+<h3 id="watching-the-response">Watching the response<a class="headerlink" href="#watching-the-response" title="Permanent link">#</a></h3>
+<p>When you tune, plot the setpoint and measurement together on a graph.</p>
+<p><img alt="Graph of underdamped, overdamped, and critically damped responses to a step in setpoint" src="../assets/wpilib/introduction-to-pid-damped-controller.png" /></p>
+<p class="credit">The three response types. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a> (CC BY 4.0).</p>
+
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: Response types</p>
+<ul>
+<li>An <strong>underdamped</strong> response oscillates around the setpoint before settling.</li>
+<li>An <strong>overdamped</strong> response is slow to rise and doesn't overshoot.</li>
+<li>A <strong>critically damped</strong> response has the fastest rise time <strong>without</strong> overshooting.</li>
+</ul>
+<p><strong>Rise time</strong> is how long the system takes to first reach the setpoint. <strong>Settling time</strong> is how long it takes to settle there.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a>, CC BY 4.0.</em></p>
+</div>
+<p>These shapes tell you what to change:</p>
+<table>
+<thead>
+<tr>
+<th>What you see</th>
+<th>Name</th>
+<th>Usual fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rises slowly, stops short</td>
+<td>Sluggish</td>
+<td>Raise kP</td>
+</tr>
+<tr>
+<td>Shoots past, swings back once, settles</td>
+<td>Overshoot</td>
+<td>Raise kD, or lower kP a little</td>
+</tr>
+<tr>
+<td>Keeps swinging back and forth</td>
+<td>Oscillation</td>
+<td>Lower kP, raise kD</td>
+</tr>
+<tr>
+<td>Settles a little off the target</td>
+<td>Steady-state error</td>
+<td>Add feedforward (Lesson 13), or a small kI</td>
+</tr>
+<tr>
+<td>Output buzzes or jitters</td>
+<td>Noise</td>
+<td>Lower kD</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-pidcontroller-class">The PIDController class<a class="headerlink" href="#the-pidcontroller-class" title="Permanent link">#</a></h3>
+<p>WPILib does the math for you:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.controller.PIDController</span><span class="p">;</span>
+
+<span class="n">PIDController</span><span class="w"> </span><span class="n">pid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span><span class="n">kP</span><span class="p">,</span><span class="w"> </span><span class="n">kI</span><span class="p">,</span><span class="w"> </span><span class="n">kD</span><span class="p">);</span>
+
+<span class="c1">// Every loop:</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span><span class="w"> </span><span class="n">setpoint</span><span class="p">);</span>
+</code></pre></div>
+<p>Useful extras:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setTolerance(position)</code></td>
+<td>How close counts as "there"</td>
+</tr>
+<tr>
+<td><code>setTolerance(position, velocity)</code></td>
+<td>…and how slow it must be moving</td>
+</tr>
+<tr>
+<td><code>atSetpoint()</code></td>
+<td><code>true</code> when within tolerance</td>
+</tr>
+<tr>
+<td><code>enableContinuousInput(-180, 180)</code></td>
+<td>For things that wrap around, like a turret or swerve module, so it takes the short way around</td>
+</tr>
+<tr>
+<td><code>reset()</code></td>
+<td>Clears the stored integral and previous error. Call it when starting a new move.</td>
+</tr>
+<tr>
+<td><code>setIZone(range)</code></td>
+<td>Only build up the integral when the error is within this range</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">The controller assumes a 20 ms loop</p>
+<p><code>PIDController</code> assumes <code>calculate()</code> is called every 20 ms. Call it <strong>exactly once per loop</strong>, from a command's <code>execute()</code> or a <code>run()</code> factory. Calling it twice per loop, or only sometimes, breaks the D and I terms.</p>
+</div>
+<h3 id="code-it-an-arm-that-goes-to-an-angle">Code it: an arm that goes to an angle<a class="headerlink" href="#code-it-an-arm-that-goes-to-an-angle" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.MathUtil</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.controller.PIDController</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.Encoder</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.SmartDashboard</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Arm</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="w"> </span><span class="n">motor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PWMSparkMax</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Encoder</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Encoder</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PIDController</span><span class="w"> </span><span class="n">pid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.002</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="nf">Arm</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">encoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span><span class="n">ArmConstants</span><span class="p">.</span><span class="na">DEGREES_PER_PULSE</span><span class="p">);</span>
+<span class="w">        </span><span class="n">pid</span><span class="p">.</span><span class="na">setTolerance</span><span class="p">(</span><span class="mf">2.0</span><span class="p">);</span><span class="w">   </span><span class="c1">// within 2° counts as "there"</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getAngleDegrees</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">encoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Moves to the angle and ends once it's there. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">goTo</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">degrees</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="n">pid</span><span class="p">::</span><span class="n">reset</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="kt">double</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getAngleDegrees</span><span class="p">(),</span><span class="w"> </span><span class="n">degrees</span><span class="p">);</span>
+<span class="w">                </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span><span class="n">output</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">));</span><span class="w">   </span><span class="c1">// limit power while tuning</span>
+<span class="w">            </span><span class="p">}))</span>
+<span class="w">            </span><span class="p">.</span><span class="na">until</span><span class="p">(</span><span class="n">pid</span><span class="p">::</span><span class="n">atSetpoint</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Arm to "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">degrees</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** Moves to the angle and keeps holding it until interrupted. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">hold</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">degrees</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="n">pid</span><span class="p">::</span><span class="n">reset</span><span class="p">)</span>
+<span class="w">            </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">motor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getAngleDegrees</span><span class="p">(),</span><span class="w"> </span><span class="n">degrees</span><span class="p">))))</span>
+<span class="w">            </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Hold "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">degrees</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Arm/Angle"</span><span class="p">,</span><span class="w"> </span><span class="n">getAngleDegrees</span><span class="p">());</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Arm/Setpoint"</span><span class="p">,</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="na">getSetpoint</span><span class="p">());</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Arm/Error"</span><span class="p">,</span><span class="w"> </span><span class="n">pid</span><span class="p">.</span><span class="na">getError</span><span class="p">());</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Arm/Output"</span><span class="p">,</span><span class="w"> </span><span class="n">motor</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title"><code>goTo</code> stops pushing when it ends</p>
+<p>When <code>goTo</code> ends, nothing is holding the arm up, and gravity pulls it down. For arms and elevators, use a <code>hold</code>-style command (or a default command that holds the last position) instead of one that ends.</p>
+</div>
+<h3 id="units-of-the-gains">Units of the gains<a class="headerlink" href="#units-of-the-gains" title="Permanent link">#</a></h3>
+<p>The gains depend on your units. With degrees in and motor percent out, kP = 0.02 means "2% output per degree of error." Measure in radians instead and the same behavior needs kP ≈ 1.15. <strong>If you change units, you must retune.</strong> That's one more reason to pick units once and keep them (<a href="../robot-code/08-sensors.html">Lesson 8</a>).</p>
+<h3 id="a-tuning-recipe">A tuning recipe<a class="headerlink" href="#a-tuning-recipe" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Check the sensor first.</strong> Move the mechanism by hand. Does the measurement go up when the motor would push it positive? If the sensor and motor disagree on direction, PID will push the wrong way and run away.</li>
+<li>Set kI = 0 and kD = 0.</li>
+<li>Start with a small kP. Raise it (doubling works well) until the mechanism <strong>oscillates</strong> around the target.</li>
+<li>Back kP off by about half.</li>
+<li>Raise <strong>kD</strong> in small steps until the overshoot is gone, or it starts to jitter.</li>
+<li>If it still settles short, add <strong>feedforward</strong> (Lesson 13) before reaching for kI.</li>
+<li>Write down the gains that work, and put them in <code>Constants.java</code>.</li>
+</ol>
+<div class="admonition danger">
+<p class="admonition-title">Safety</p>
+<p>Tune with the robot on blocks or with a low output limit, like the <code>clamp(..., -0.5, 0.5)</code> above, and keep a hand near the disable key. A badly tuned arm can slam into its hard stops hard enough to break something.</p>
+</div>
+<h3 id="tuning-live-from-the-dashboard">Tuning live from the dashboard<a class="headerlink" href="#tuning-live-from-the-dashboard" title="Permanent link">#</a></h3>
+<p>Rebuilding and redeploying for every gain change is slow. <code>PIDController</code> can be put on the dashboard so you can edit gains while the robot runs:</p>
+<div class="highlight"><pre><span></span><code><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Arm/PID"</span><span class="p">,</span><span class="w"> </span><span class="n">pid</span><span class="p">);</span>
+</code></pre></div>
+<p>Change kP, kI, and kD in Glass or Elastic and watch the response immediately. When you're happy, <strong>copy the numbers into <code>Constants.java</code></strong>. Dashboard edits are lost when the robot restarts.</p>
+<h3 id="on-controller-pid">On-controller PID<a class="headerlink" href="#on-controller-pid" title="Permanent link">#</a></h3>
+<p>Modern motor controllers (TalonFX, SPARK MAX, SPARK Flex) can run PID <strong>on the controller itself</strong>, at 1000 Hz instead of 50 Hz, using the motor's built-in encoder. Many teams use this for flywheels and arms. The ideas and tuning process are the same; only where the math runs is different. Learn it with WPILib's <code>PIDController</code> first, then read your vendor's docs.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Have the test bed?</p>
+<p>Do <a href="../testbed/lab9-pid-wheel.html">Lab 9: PID on the Wheel</a>, then <a href="../testbed/lab10-elevator.html">Lab 10: Elevator Position Control</a>. They're this whole lesson on real hardware.</p>
+</div>
+<h3 id="tune-a-turret-right-here">Tune a turret, right here<a class="headerlink" href="#tune-a-turret-right-here" title="Permanent link">#</a></h3>
+<p>This is WPILib's turret simulator, running <strong>PID only</strong>. Click a spot around the turret to set a new angle, or click and drag the pointer to make the setpoint move smoothly.</p>
+<div class="viz-div" id="lesson_turret_container">
+<div>
+<div class="col" id="lesson_turret_plotVals"></div>
+<div class="col" id="lesson_turret_plotVolts"></div>
+</div>
+<div class="flex-grid">
+<div class="col" id="lesson_turret_viz"></div>
+<div id="lesson_turret_ctrls"></div>
+</div>
+<script>new TurretPIDF("lesson_turret", "feedback");</script>
+</div>
+
+<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html">Tuning a Turret Position Controller</a> (CC BY 4.0).</p>
+
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set kP, kI, kD, and kV to zero. Raise <strong>kP</strong> until the turret moves sharply to each new angle. If it oscillates too much, lower kP until it stops.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Raise <strong>kD</strong> to reduce the "lag" when you drag the setpoint smoothly. If it starts to oscillate, lower kD.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Turn on <strong>System Noise</strong>. Does your tuning still work?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Try the <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html">arm tuning simulator</a> with <strong>PID only</strong>. Notice how hard it is to hold the arm level, and how it sags at some angles. Write down your best kP and kD. You'll compare in the next lesson.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In the <strong>ArmSimulation</strong> example project, replace its controller with your <code>goTo</code> and <code>hold</code> commands, bind them to two buttons, and tune them with the dashboard</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Graph <code>Arm/Angle</code> and <code>Arm/Setpoint</code> together in Glass or AdvantageScope while you tune</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>In your own words, what do P, I, and D each do?</summary>
+<p>P pushes in proportion to how far off you are. D resists fast changes to reduce overshoot. I accumulates small leftover error over time and pushes harder the longer it lasts.</p>
+</details>
+<details class="question">
+<summary>The arm is 20° short and kP = 0.03. What's the P term's output?</summary>
+<p>0.03 × 20 = <strong>0.6</strong> (60% output).</p>
+</details>
+<details class="question">
+<summary>Why is a very high kP bad?</summary>
+<p>The mechanism overshoots, swings back, and overshoots again: it oscillates and may never settle.</p>
+</details>
+<details class="question">
+<summary>Why does P alone often stop a little short of the target?</summary>
+<p>Near the target, the error is tiny, so the output is tiny, and it can't overcome friction or gravity. That leftover is steady-state error.</p>
+</details>
+<details class="question">
+<summary>What is integral windup, and how do you avoid it?</summary>
+<p>The integral keeps growing while the mechanism is stuck or far away, then causes a big overshoot once it's free. Avoid it by using feedforward instead of I, or by limiting the integral with <code>setIZone()</code>.</p>
+</details>
+<details class="question">
+<summary>PID makes your arm run away faster and faster instead of stopping. What's the most likely cause?</summary>
+<p>The sensor direction doesn't match the motor direction, so every correction pushes the arm further from the target. Fix the inversion.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../project/11-autonomous.html"><span>Previous</span>11. Autonomous</a><a class="pager-next" href="13-feedforward.html"><span>Next</span>13. Feedforward</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4.1 Motors: NEO, CIM, and 775pro | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section" open><summary>Hardware</summary><ul><li><a href="04-electronics.html">4. Electronics</a></li><li><a href="04b-motors.html" class="current" aria-current="page">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="04d-sensors.html">4.3 Sensors</a></li><li><a href="05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="41-motors-neo-cim-and-775pro">4.1 Motors: NEO, CIM, and 775pro<a class="headerlink" href="#41-motors-neo-cim-and-775pro" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>The labs use three different motors, and they are <strong>not</strong> interchangeable. Each one has to be set up differently in code, protected differently, and used for different jobs. Telling a SPARK MAX the wrong motor type, or stalling the wrong motor, can destroy hardware in seconds.</p>
+<p>This lesson covers the motors on the team's test bed and West Coast Drive:</p>
+<table>
+<thead>
+<tr>
+<th>Motor</th>
+<th>Where it's used</th>
+<th>Labs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NEO</strong></td>
+<td>Test bed motor, WCD elevator</td>
+<td>1, 3, 4, 5, 10</td>
+</tr>
+<tr>
+<td><strong>CIM</strong></td>
+<td>WCD drivetrain (4 of them)</td>
+<td>2, 7, 8</td>
+</tr>
+<tr>
+<td><strong>775pro</strong></td>
+<td>Test bed wheel</td>
+<td>6, 9</td>
+</tr>
+</tbody>
+</table>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.revrobotics.com/brushless/neo/v1.1">NEO V1.1 (REV)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/using-motor-controllers.html">Using Motor Controllers in Code (WPILib)</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="brushed-vs-brushless">Brushed vs. brushless<a class="headerlink" href="#brushed-vs-brushless" title="Permanent link">#</a></h3>
+<p>Every electric motor spins by switching which coils get current as the shaft turns. The difference is <strong>what does the switching</strong>.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Brushed</th>
+<th>Brushless</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who switches the coils</td>
+<td>Little carbon <strong>brushes</strong> rubbing on the spinning shaft</td>
+<td>The <strong>motor controller</strong>, using a sensor that tells it where the shaft is</td>
+</tr>
+<tr>
+<td>Wires</td>
+<td>2 power wires</td>
+<td>3 power wires + a sensor cable</td>
+</tr>
+<tr>
+<td>Wear</td>
+<td>Brushes wear out over time</td>
+<td>Nothing rubs, so very little wear</td>
+</tr>
+<tr>
+<td>Built-in encoder</td>
+<td>No</td>
+<td>Yes (the controller needs it to switch the coils)</td>
+</tr>
+<tr>
+<td>Our motors</td>
+<td><strong>CIM</strong>, <strong>775pro</strong></td>
+<td><strong>NEO</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Brushed or brushless must match in code</p>
+<p>A SPARK MAX drives the two kinds completely differently. In code, CIMs and 775pros are <code>MotorType.kBrushed</code>, and NEOs are <code>MotorType.kBrushless</code>. Getting it wrong can damage the motor and the controller. Lab 1 (NEO) and Lab 2 (CIMs) are opposites on purpose.</p>
+</div>
+<h3 id="reading-a-motors-specs">Reading a motor's specs<a class="headerlink" href="#reading-a-motors-specs" title="Permanent link">#</a></h3>
+<p>Four numbers tell you most of what you need to know about a motor:</p>
+<table>
+<thead>
+<tr>
+<th>Spec</th>
+<th>What it means</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Free speed</strong></td>
+<td>How fast it spins with nothing attached, at 12 V</td>
+<td>The top speed you could ever get (before gearing)</td>
+</tr>
+<tr>
+<td><strong>Free current</strong></td>
+<td>Current it draws spinning with no load</td>
+<td>Small. A motor doing no work barely draws anything.</td>
+</tr>
+<tr>
+<td><strong>Stall torque</strong></td>
+<td>Twisting force when held completely still</td>
+<td>How hard it can push</td>
+</tr>
+<tr>
+<td><strong>Stall current</strong></td>
+<td>Current it draws when held completely still</td>
+<td>The <strong>worst case</strong> for heat, breakers, and brownouts</td>
+</tr>
+</tbody>
+</table>
+<p>A motor's current goes up as it's loaded down. Spinning freely, it draws almost nothing. Held still (<strong>stalled</strong>), it draws the most it ever will, turning all that power into heat.</p>
+<h3 id="our-three-motors">Our three motors<a class="headerlink" href="#our-three-motors" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Spec</th>
+<th>NEO</th>
+<th>CIM</th>
+<th>775pro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Type</td>
+<td>Brushless</td>
+<td>Brushed</td>
+<td>Brushed</td>
+</tr>
+<tr>
+<td>Free speed</td>
+<td>5,676 RPM</td>
+<td>5,310 RPM</td>
+<td>18,730 RPM</td>
+</tr>
+<tr>
+<td>Free current</td>
+<td>1.8 A</td>
+<td>2.7 A</td>
+<td>0.7 A</td>
+</tr>
+<tr>
+<td>Stall torque</td>
+<td>2.6 N·m</td>
+<td>2.42 N·m</td>
+<td>0.71 N·m</td>
+</tr>
+<tr>
+<td>Stall current</td>
+<td>105 A</td>
+<td>133 A</td>
+<td>134 A</td>
+</tr>
+<tr>
+<td>Built-in encoder</td>
+<td>Yes, 42 counts per revolution</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Size</td>
+<td>Compact</td>
+<td>Large and heavy</td>
+<td>Small and light</td>
+</tr>
+</tbody>
+</table>
+<p>Compare them:</p>
+<ul>
+<li>The <strong>NEO</strong> and <strong>CIM</strong> have similar speed and torque. The NEO is lighter, has a built-in encoder, and doesn't wear out brushes. That's why many teams replaced CIMs with NEOs.</li>
+<li>The <strong>775pro</strong> spins more than <strong>3 times faster</strong> but has less than a third of the torque. It almost always needs a big gear reduction, like the gearbox on the test bed's wheel.</li>
+<li>All three pull <strong>over 100 A</strong> when stalled. That's why every lab sets a current limit.</li>
+</ul>
+<div class="admonition example">
+<p class="admonition-title">Why gearboxes?</p>
+<p>A 775pro at 18,730 RPM is spinning over 300 times a second, far too fast to drive a wheel or lift anything directly. A gearbox trades speed for torque. A 100:1 gearbox gives about 187 RPM at the output, with up to 100 times the torque (minus losses to friction). Gear ratios multiply: a 10:1 stage followed by a 5:1 stage is 50:1 total.</p>
+</div>
+<h3 id="stalls-and-heat">Stalls and heat<a class="headerlink" href="#stalls-and-heat" title="Permanent link">#</a></h3>
+<p>A stalled motor turns almost all of its power into heat. How fast that heat does damage depends on the motor:</p>
+<table>
+<thead>
+<tr>
+<th>Motor</th>
+<th>Stall behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>775pro</strong></td>
+<td>Small, light, and spins fast, so it heats up <strong>very quickly</strong> when stalled. It can be damaged in seconds. Never hold the test bed wheel still while the motor is pushing.</td>
+</tr>
+<tr>
+<td><strong>CIM</strong></td>
+<td>Big and heavy, so it takes longer to heat up. But four CIMs pushing against a wall can still trip breakers and brown out the robot.</td>
+</tr>
+<tr>
+<td><strong>NEO</strong></td>
+<td>REV says to read their stall-testing documentation and <strong>always set a Smart Current Limit</strong> before using one.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Current limits</strong> (<code>smartCurrentLimit</code> in every lab) are the main protection. They cap how much current the SPARK MAX lets the motor draw, so a stall heats the motor more slowly and doesn't trip the 40 A breakers.</p>
+<h3 id="wiring">Wiring<a class="headerlink" href="#wiring" title="Permanent link">#</a></h3>
+<div class="admonition danger">
+<p class="admonition-title">Never wire a motor straight to the battery</p>
+<p>Every motor connects to a <strong>motor controller</strong>, never directly to the battery or power distribution. REV specifically warns against connecting a NEO to the battery.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>Motor</th>
+<th>Connects to the SPARK MAX with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CIM, 775pro</td>
+<td>2 power wires (red and black)</td>
+</tr>
+<tr>
+<td>NEO</td>
+<td>3 power wires (red, black, and white) <strong>plus the sensor cable</strong> into the encoder port. A NEO won't spin without its sensor cable.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="inversion">Inversion<a class="headerlink" href="#inversion" title="Permanent link">#</a></h3>
+<p>Every motor spins one way for positive voltage. Which way is "forward" for the mechanism depends on how it's mounted. If a mechanism moves backward, you fix it <strong>in code</strong> with <code>config.inverted(true)</code>, not by swapping wires. That keeps the wiring the same on every motor, so nobody gets confused later.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> On the test bed and WCD, find every motor. Say which type each is, and which SPARK MAX controls it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find the NEO's sensor cable and the CIMs' two power wires</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Using the table, figure out roughly how fast the test bed wheel would spin with a 100:1 gearbox on the 775pro</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find the current limit in each lab's code. Why are the drivetrain and the NEO set to 40 A?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In <a href="../testbed/lab1-spin-motor.html">Lab 1</a>, watch the NEO's current on the dashboard when it starts. Compare it to the free current in the table.</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between a brushed and a brushless motor?</summary>
+<p>In a brushed motor, carbon brushes inside the motor switch the coils. In a brushless motor, the motor controller does the switching, using a sensor in the motor to know where the shaft is.</p>
+</details>
+<details class="question">
+<summary>Which motors in our labs are brushed, and which are brushless?</summary>
+<p>CIMs and the 775pro are brushed. NEOs are brushless.</p>
+</details>
+<details class="question">
+<summary>Why does every lab set a current limit?</summary>
+<p>A stalled motor draws over 100 A. The limit keeps motors from overheating, keeps breakers from tripping, and prevents brownouts.</p>
+</details>
+<details class="question">
+<summary>Why does the 775pro need a big gearbox?</summary>
+<p>It spins over 18,000 RPM with little torque. A gearbox trades that speed for the torque needed to actually move something.</p>
+</details>
+<details class="question">
+<summary>Why is a stalled 775pro more dangerous than a stalled CIM?</summary>
+<p>Both draw about the same stall current, but the 775pro is much smaller and lighter, so it heats up much faster.</p>
+</details>
+<details class="question">
+<summary>A NEO won't spin, but the SPARK MAX shows it's being commanded. What's one likely cause?</summary>
+<p>The NEO's sensor cable isn't plugged in. A brushless motor can't run without it.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="04-electronics.html"><span>Previous</span>4. Electronics</a><a class="pager-next" href="04c-spark-max.html"><span>Next</span>4.2 The SPARK MAX</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

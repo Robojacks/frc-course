@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 1: Spin a Brushless Motor | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html" class="current" aria-current="page">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-1-spin-a-brushless-motor">Lab 1: Spin a Brushless Motor<a class="headerlink" href="#lab-1-spin-a-brushless-motor" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>This is the moment every new programmer waits for: you press a button, and something you wrote makes a real motor spin.</p>
+<p>In this lab you'll write your first <strong>subsystem</strong> and your first <strong>command</strong>, bind it to a controller button, and spin the test bed's brushless motor. It's the same pattern every mechanism on a real robot uses, from intakes to shooters, so you'll use it again and again.</p>
+<p><strong>Before you start:</strong> finish <a href="lab0-first-project.html">Lab 0</a>. You'll add to the same <strong>TestBed</strong> project. <a href="../robot-code/07-command-based.html">Lesson 7</a> explains subsystems and commands in depth; you can do this lab first and read it after. New to the NEO or the SPARK MAX? Read Lessons <a href="../hardware/04b-motors.html">4.1</a> and <a href="../hardware/04c-spark-max.html">4.2</a>. You should also have finished an interactive Java course through classes and objects (<a href="../foundations/03-java.html#learn-java-first">see the checklist</a>); keep the <a href="../foundations/03-java.html">Java Reference</a> open while you work.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/subsystems.html">Subsystems</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/binding-commands-to-triggers.html">Binding Commands to Triggers</a></li>
+<li><a href="https://docs.revrobotics.com/revlib/spark/max-vs-flex">REVLib: SPARK MAX vs. SPARK Flex</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="the-hardware">The hardware<a class="headerlink" href="#the-hardware" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Motor</td>
+<td>A <strong>brushless</strong> motor (like a REV NEO)</td>
+</tr>
+<tr>
+<td>Motor controller</td>
+<td>SPARK MAX, CAN ID <strong>8</strong>, connected to the roboRIO over CAN</td>
+</tr>
+<tr>
+<td>Controller</td>
+<td>An Xbox controller plugged into the Driver Station laptop</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Brushless means brushless</p>
+<p>In code, a brushless motor like a NEO must be set up as <code>MotorType.kBrushless</code>. Running a brushless motor in brushed mode can damage the motor and the SPARK MAX. Double-check this line every time.</p>
+</div>
+<h3 id="step-1-check-the-spark-max">Step 1: Check the SPARK MAX<a class="headerlink" href="#step-1-check-the-spark-max" title="Permanent link">#</a></h3>
+<p>Before writing code, make sure the hardware is what the code will expect.</p>
+<ol>
+<li>Power the test bed and connect the SPARK MAX to your laptop with a <strong>USB-C</strong> cable.</li>
+<li>Open the <strong>REV Hardware Client</strong>. The SPARK MAX should appear.</li>
+<li>Check that its <strong>CAN ID is 8</strong>. If the code and the controller disagree on the ID, nothing spins and there's no error.</li>
+<li>If the Hardware Client says a <strong>firmware update</strong> is available, ask a mentor before updating.</li>
+</ol>
+<h3 id="step-2-constants">Step 2: Constants<a class="headerlink" href="#step-2-constants" title="Permanent link">#</a></h3>
+<p>Never put numbers like CAN IDs and speeds directly in your code. Put them in <code>Constants.java</code>, so there's one place to change them.</p>
+<p>Open <code>Constants.java</code> and add a new class inside <code>Constants</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Constants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OperatorConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kControllerPort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">kBrushlessConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">BrushlessMotorCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w">         </span><span class="c1">// must match the REV Hardware Client</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">BrushlessMotorSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">    </span><span class="c1">// 50% power</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">BrushlessMotorCurrentLimit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">40</span><span class="p">;</span><span class="w"> </span><span class="c1">// amps</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Why a current limit of 40 amps?</p>
+<p>The test bed's power distribution has <strong>40 A breakers</strong>. A limit above 40 A can trip the breaker if the motor gets stuck. If your motor is a small <strong>NEO 550</strong>, use about <strong>20 A</strong> instead, because it can overheat quickly at 40.</p>
+</div>
+<h3 id="step-3-create-the-subsystem">Step 3: Create the subsystem<a class="headerlink" href="#step-3-create-the-subsystem" title="Permanent link">#</a></h3>
+<p>A <strong>subsystem</strong> is a class that owns a piece of hardware and offers actions for it. Ours owns one motor.</p>
+<ol>
+<li>In VS Code, right-click the <code>subsystems</code> folder.</li>
+<li>Choose <strong>Create a new class/command</strong>, then <strong>Subsystem (New)</strong>.</li>
+<li>Name it <code>SpinBrushlessMotorSubsystem</code>.</li>
+</ol>
+<p>Replace what's in the file with this. Read every comment.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.PersistMode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.ResetMode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.SparkLowLevel.MotorType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.SparkMax</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.config.SparkBaseConfig.IdleMode</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.config.SparkMaxConfig</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.SmartDashboard</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">SpinBrushlessMotorSubsystem</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Create the motor controller: CAN ID 8, brushless motor.</span>
+<span class="w">  </span><span class="c1">// private final = only this class can use it, and it can't be swapped for another.</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SparkMax</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span>
+<span class="w">      </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorCanId</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushless</span><span class="p">);</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">SpinBrushlessMotorSubsystem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Collect the settings we want in a config object</span>
+<span class="w">    </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">brushlessMotorConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMaxConfig</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Limit how much current the motor can pull, to protect the motor and the breaker</span>
+<span class="w">    </span><span class="n">brushlessMotorConfig</span><span class="p">.</span><span class="na">smartCurrentLimit</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorCurrentLimit</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Brake mode: when we stop, the motor actively stops instead of coasting</span>
+<span class="w">    </span><span class="n">brushlessMotorConfig</span><span class="p">.</span><span class="na">idleMode</span><span class="p">(</span><span class="n">IdleMode</span><span class="p">.</span><span class="na">kBrake</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Send the settings to the SPARK MAX.</span>
+<span class="w">    </span><span class="c1">// kResetSafeParameters: start from known defaults, then apply ours.</span>
+<span class="w">    </span><span class="c1">// kPersistParameters: save them, so they survive if the SPARK MAX loses power mid-match.</span>
+<span class="w">    </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span>
+<span class="w">        </span><span class="n">brushlessMotorConfig</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sets the motor's power, from -1.0 (full reverse) to 1.0 (full forward). */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setMotorSpeed</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">speed</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * A command that spins the motor at a speed while it runs,</span>
+<span class="cm">   * and stops the motor when it ends.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinMotorCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">startEnd</span><span class="p">(</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="n">speed</span><span class="p">),</span><span class="w">   </span><span class="c1">// runs once, when the command starts</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">      </span><span class="c1">// runs once, when the command ends</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin Brushless"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="nd">@Override</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Runs every 20 ms. Send live values to the dashboard so you can see what the motor is doing.</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Brushless/Velocity (RPM)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getEncoder</span><span class="p">().</span><span class="na">getVelocity</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Brushless/Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Brushless/Applied Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Three ideas in this file are worth slowing down for:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>new SparkMax(8, MotorType.kBrushless)</code></td>
+<td>"Talk to the SPARK MAX at CAN ID 8, which drives a brushless motor."</td>
+</tr>
+<tr>
+<td><code>SparkMaxConfig</code> and <code>configure(...)</code></td>
+<td>Settings like current limit and brake mode are collected first, then sent to the controller all at once.</td>
+</tr>
+<tr>
+<td><code>startEnd(start, end)</code></td>
+<td>Builds a <strong>command</strong>: run <code>start</code> when it begins, run <code>end</code> when it stops. Because it comes from the subsystem, the command automatically "owns" the motor while it runs.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Where does <code>startEnd</code> come from?</p>
+<p>Your class <code>extends SubsystemBase</code>, so it gets WPILib's command-building methods for free: <code>startEnd</code>, <code>run</code>, <code>runOnce</code>, and more (<a href="../robot-code/07-command-based.html">Lesson 7</a>).</p>
+</div>
+<h3 id="step-4-bind-it-to-a-button">Step 4: Bind it to a button<a class="headerlink" href="#step-4-bind-it-to-a-button" title="Permanent link">#</a></h3>
+<p>Open <code>RobotContainer.java</code>. Make three changes.</p>
+<p><strong>1. Import the subsystem</strong> at the top, with the other imports:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.subsystems.SpinBrushlessMotorSubsystem</span><span class="p">;</span>
+</code></pre></div>
+<p><strong>2. Create the subsystem</strong>, next to the example one:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ExampleSubsystem</span><span class="w"> </span><span class="n">m_exampleSubsystem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ExampleSubsystem</span><span class="p">();</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SpinBrushlessMotorSubsystem</span><span class="w"> </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">SpinBrushlessMotorSubsystem</span><span class="p">();</span>
+</code></pre></div>
+<p><strong>3. Bind the A button</strong> in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configureBindings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Spin the brushless motor while A is held</span>
+<span class="w">  </span><span class="n">m_controller</span><span class="p">.</span><span class="na">a</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span>
+<span class="w">      </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinMotorCommand</span><span class="p">(</span>
+<span class="w">          </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorSpeed</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Read it out loud: <em>"While A is held, spin the brushless motor at the speed from Constants."</em></p>
+<p><code>whileTrue</code> starts the command when you press A and <strong>cancels</strong> it when you let go. Canceling runs the command's end action, <code>setMotorSpeed(0.0)</code>, which stops the motor.</p>
+<h3 id="step-5-build-deploy-and-spin">Step 5: Build, deploy, and spin<a class="headerlink" href="#step-5-build-deploy-and-spin" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Build</strong> (<span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Build Robot Code</strong>) and fix any errors.</li>
+<li>Power the test bed, connect, and <strong>Deploy</strong>.</li>
+<li>Plug the Xbox controller into the Driver Station laptop. On the Driver Station's <strong>USB</strong> tab (the icon that looks like a USB plug), make sure it's in slot <strong>0</strong> and the bar moves when you press buttons.</li>
+<li>Clear the area, say <strong>"Enabling!"</strong>, and enable <strong>TeleOperated</strong>.</li>
+<li><strong>Hold A.</strong> The motor spins.</li>
+<li><strong>Let go.</strong> The motor stops.</li>
+</ol>
+<p>🎉 That's your code moving real hardware.</p>
+<h3 id="step-6-watch-it-on-the-dashboard">Step 6: Watch it on the dashboard<a class="headerlink" href="#step-6-watch-it-on-the-dashboard" title="Permanent link">#</a></h3>
+<p>Open <strong>Glass</strong> or <strong>Elastic</strong> (from the WPILib tools), connect to team 4674, and find the <strong>Brushless</strong> values. Hold A and watch:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>What you'll see</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Velocity (RPM)</td>
+<td>Climbs quickly, then levels off at a steady speed</td>
+</tr>
+<tr>
+<td>Current (A)</td>
+<td>Jumps up as the motor starts, then drops once it's at speed</td>
+</tr>
+<tr>
+<td>Applied Output</td>
+<td>0.5 while A is held, 0 when released</td>
+</tr>
+</tbody>
+</table>
+<p>That jump in current at startup is why current limits matter: starting a motor takes much more current than keeping it spinning.</p>
+<h3 id="step-7-commit">Step 7: Commit<a class="headerlink" href="#step-7-commit" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 1: spin brushless motor on A"</span>
+</code></pre></div>
+<h3 id="when-it-doesnt-work">When it doesn't work<a class="headerlink" href="#when-it-doesnt-work" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nothing happens when you hold A</td>
+<td>Robot not enabled, or the controller isn't in slot 0 on the Driver Station USB tab</td>
+</tr>
+<tr>
+<td>Still nothing, and the console mentions CAN or SPARK MAX errors</td>
+<td>The CAN ID in <code>Constants</code> doesn't match the REV Hardware Client, or a CAN wire is loose</td>
+</tr>
+<tr>
+<td>Motor keeps spinning after you let go</td>
+<td>The command doesn't stop the motor when it ends. Check that you used <code>startEnd</code> with <code>setMotorSpeed(0.0)</code> as the end action.</td>
+</tr>
+<tr>
+<td>Motor spins the wrong way</td>
+<td>Add <code>brushlessMotorConfig.inverted(true);</code> in the constructor</td>
+</tr>
+<tr>
+<td>Build error: cannot find symbol <code>SparkMax</code></td>
+<td>REVLib isn't installed. Go back to Lab 0, Part 4.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Spin the motor with A, and stop it by letting go</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change <code>BrushlessMotorSpeed</code> to 0.25, then 0.75. Deploy each time and watch the RPM on the dashboard.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <strong>B</strong> button that spins the motor <strong>backward</strong> at the same speed (hint: a negative speed)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add an <strong>X</strong> button that spins it at full speed, 1.0. Watch the current. How high does it jump at the start?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change <code>IdleMode.kBrake</code> to <code>IdleMode.kCoast</code>. How is stopping different? Change it back.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Break it on purpose:</strong> change <code>spinMotorCommand</code> to use <code>runOnce(() -&gt; setMotorSpeed(speed))</code> instead of <code>startEnd</code>. Hold A, then let go. What happens, and why? (Disable the robot to stop it.) Then change it back.</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What does <code>MotorType.kBrushless</code> tell the SPARK MAX, and why does it matter?</summary>
+<p>That it's driving a brushless motor like a NEO. Brushed and brushless motors are driven completely differently, and the wrong setting can damage the hardware.</p>
+</details>
+<details class="question">
+<summary>Why are the CAN ID, speed, and current limit in <code>Constants</code> instead of in the subsystem?</summary>
+<p>So there's one place to find and change them, and the code says what each number means.</p>
+</details>
+<details class="question">
+<summary>What does <code>startEnd</code> do?</summary>
+<p>It builds a command that runs one action when it starts (spin the motor) and another when it ends (stop the motor).</p>
+</details>
+<details class="question">
+<summary>Why does the motor stop when you let go of A?</summary>
+<p><code>whileTrue</code> cancels the command when the button is released, and canceling runs the command's end action, which sets the speed to 0.</p>
+</details>
+<details class="question">
+<summary>In the 'break it on purpose' exercise, why did the motor keep spinning?</summary>
+<p><code>runOnce</code> sets the speed once and then <strong>finishes immediately</strong>. When you release A, there's nothing left to cancel, so nothing sets the speed back to 0. The SPARK MAX keeps doing what it was last told until the robot is disabled.</p>
+</details>
+<details class="question">
+<summary>Why does the current jump when the motor starts?</summary>
+<p>A motor that isn't moving yet pulls much more current than one that's already spinning. The current limit keeps that jump from tripping the breaker or browning out the robot.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab0-first-project.html"><span>Previous</span>Lab 0: Set Up the TestBed Project</a><a class="pager-next" href="lab2-west-coast-drive.html"><span>Next</span>Lab 2: Drive a West Coast Drive</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

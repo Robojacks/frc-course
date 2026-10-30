@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>16. Unit Testing &amp; CI | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section" open><summary>Team Workflow</summary><ul><li><a href="15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="16-unit-testing.html" class="current" aria-current="page">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="16-unit-testing-ci">16. Unit Testing &amp; CI<a class="headerlink" href="#16-unit-testing-ci" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>A <strong>unit test</strong> is code that checks your code automatically. Instead of deploying to the robot to discover your conversion math is wrong, a test catches it in seconds, on your laptop, without a robot.</p>
+<p><strong>CI</strong> (continuous integration) runs your tests automatically every time someone opens a pull request. If anything is broken, GitHub shows a red ❌ and the PR can't merge. Broken code never reaches <code>main</code>, and nobody has to remember to run the tests.</p>
+<p>Tests are an investment: a few minutes writing one saves hours of robot time later, and it keeps checking the code every time anyone changes it, all season.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/unit-testing.html">Unit Testing (WPILib)</a></li>
+<li><a href="https://junit.org/junit5/docs/current/user-guide/">JUnit 5 User Guide</a>: the "Writing Tests" section</li>
+<li><a href="https://docs.github.com/en/actions/writing-workflows/quickstart">GitHub Actions quickstart</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="whats-worth-testing">What's worth testing?<a class="headerlink" href="#whats-worth-testing" title="Permanent link">#</a></h3>
+<p>Start with logic that doesn't need hardware. These are fast, reliable, and catch real bugs:</p>
+<table>
+<thead>
+<tr>
+<th>Test this</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit conversions</td>
+<td>Does <code>METERS_PER_MOTOR_ROTATION</code> give the right distance for 10 rotations?</td>
+</tr>
+<tr>
+<td>Conditions</td>
+<td>Does <code>isAtSpeed()</code> return <code>true</code> at 3040 RPM with a 3000 target?</td>
+</tr>
+<tr>
+<td>Limits and safety</td>
+<td>Does <code>setTarget()</code> refuse a value above the max?</td>
+</tr>
+<tr>
+<td>Input processing</td>
+<td>Does the deadband turn 0.03 into 0?</td>
+</tr>
+<tr>
+<td>State machines</td>
+<td>Intake has piece → stop → index → ready to shoot</td>
+</tr>
+</tbody>
+</table>
+<p>Things that are hard to unit test, like "does the robot drive straight," are better checked in simulation (<a href="../robot-code/09-debugging.html">Lesson 9</a>) and on the robot.</p>
+<div class="admonition tip">
+<p class="admonition-title">Design for testing</p>
+<p>Logic that's pulled out into plain methods, with inputs and outputs, is easy to test. Logic buried inside a command's <code>execute()</code> that reads hardware directly is not. When you write a calculation, put it in a method you can call from a test.</p>
+</div>
+<h3 id="how-a-test-is-structured">How a test is structured<a class="headerlink" href="#how-a-test-is-structured" title="Permanent link">#</a></h3>
+<p>Every test follows the same three steps, often called <strong>Arrange, Act, Assert</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@Test</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">isAtSpeedWhenClose</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Shooter</span><span class="w"> </span><span class="n">shooter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Shooter</span><span class="p">(</span><span class="mi">5000</span><span class="p">);</span><span class="w">   </span><span class="c1">// Arrange: set up what you need</span>
+<span class="w">    </span><span class="n">shooter</span><span class="p">.</span><span class="na">setTarget</span><span class="p">(</span><span class="mi">3000</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kt">boolean</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shooter</span><span class="p">.</span><span class="na">isAtSpeed</span><span class="p">(</span><span class="mi">3040</span><span class="p">);</span><span class="w">  </span><span class="c1">// Act: do the thing being tested</span>
+
+<span class="w">    </span><span class="n">assertTrue</span><span class="p">(</span><span class="n">result</span><span class="p">);</span><span class="w">                    </span><span class="c1">// Assert: check the result</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>One test checks <strong>one behavior</strong>. Name it for what it checks, so a failing test's name tells you what broke.</p>
+<h3 id="your-first-test">Your first test<a class="headerlink" href="#your-first-test" title="Permanent link">#</a></h3>
+<p>WPILib projects already include JUnit 5. Tests go in <code>src/test/java</code>, mirroring the <code>src/main/java</code> folders. Create <code>src/test/java/frc/robot/ShooterTest.java</code> to test the <code>Shooter</code> class from <a href="../foundations/03-java.html">Lesson 3</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot</span><span class="p">;</span>
+
+<span class="kn">import static</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.Assertions.*</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.BeforeEach</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.junit.jupiter.api.Test</span><span class="p">;</span>
+
+<span class="kd">class</span> <span class="nc">ShooterTest</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">Shooter</span><span class="w"> </span><span class="n">shooter</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nd">@BeforeEach</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">setUp</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">shooter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Shooter</span><span class="p">(</span><span class="mi">5000</span><span class="p">);</span><span class="w">   </span><span class="c1">// runs before every test, so each starts fresh</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Test</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">isAtSpeedWhenClose</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">shooter</span><span class="p">.</span><span class="na">setTarget</span><span class="p">(</span><span class="mi">3000</span><span class="p">);</span>
+<span class="w">        </span><span class="n">assertTrue</span><span class="p">(</span><span class="n">shooter</span><span class="p">.</span><span class="na">isAtSpeed</span><span class="p">(</span><span class="mi">3040</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Test</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">notAtSpeedWhenFar</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">shooter</span><span class="p">.</span><span class="na">setTarget</span><span class="p">(</span><span class="mi">3000</span><span class="p">);</span>
+<span class="w">        </span><span class="n">assertFalse</span><span class="p">(</span><span class="n">shooter</span><span class="p">.</span><span class="na">isAtSpeed</span><span class="p">(</span><span class="mi">2800</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nd">@Test</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="nf">refusesTargetAboveMax</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">shooter</span><span class="p">.</span><span class="na">setTarget</span><span class="p">(</span><span class="mi">6000</span><span class="p">);</span>
+<span class="w">        </span><span class="n">assertEquals</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">shooter</span><span class="p">.</span><span class="na">getTarget</span><span class="p">(),</span><span class="w"> </span><span class="mf">1e-9</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Run it:</p>
+<div class="highlight"><pre><span></span><code>./gradlew<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+<p>Or click the ▷ icon next to a test in VS Code to run just that one.</p>
+<h3 id="the-assertions-youll-use">The assertions you'll use<a class="headerlink" href="#the-assertions-youll-use" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Assertion</th>
+<th>Passes when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>assertTrue(x)</code></td>
+<td><code>x</code> is true</td>
+</tr>
+<tr>
+<td><code>assertFalse(x)</code></td>
+<td><code>x</code> is false</td>
+</tr>
+<tr>
+<td><code>assertEquals(expected, actual)</code></td>
+<td>They're equal (ints, strings, objects)</td>
+</tr>
+<tr>
+<td><code>assertEquals(expected, actual, delta)</code></td>
+<td>Two <code>double</code>s are within <code>delta</code> of each other</td>
+</tr>
+<tr>
+<td><code>assertThrows(Exception.class, () -&gt; ...)</code></td>
+<td>The code throws that exception</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Always use a delta for doubles</p>
+<p>Decimal math isn't exact on computers: <code>0.1 + 0.2</code> is <code>0.30000000000000004</code>. <code>assertEquals(0.3, 0.1 + 0.2)</code> fails. Write <code>assertEquals(0.3, 0.1 + 0.2, 1e-9)</code> instead.</p>
+</div>
+<h3 id="testing-a-conversion">Testing a conversion<a class="headerlink" href="#testing-a-conversion" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@Test</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">tenRotationsIsAboutFourTenthsOfAMeter</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">meters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">METERS_PER_MOTOR_ROTATION</span><span class="p">;</span>
+<span class="w">    </span><span class="n">assertEquals</span><span class="p">(</span><span class="mf">0.399</span><span class="p">,</span><span class="w"> </span><span class="n">meters</span><span class="p">,</span><span class="w"> </span><span class="mf">0.001</span><span class="p">);</span><span class="w">   </span><span class="c1">// 4-inch wheel, 8:1 gearing</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Work out the expected answer <strong>by hand</strong> first. A test that just copies the code's formula will happily agree with a wrong formula.</p>
+<h3 id="reading-a-failing-test">Reading a failing test<a class="headerlink" href="#reading-a-failing-test" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>ShooterTest &gt; refusesTargetAboveMax() FAILED
+    org.opentest4j.AssertionFailedError: expected: &lt;0.0&gt; but was: &lt;6000.0&gt;
+        at frc.robot.ShooterTest.refusesTargetAboveMax(ShooterTest.java:31)
+</code></pre></div>
+<p>The test name says <strong>what</strong> broke, the message says <strong>expected vs. actual</strong>, and the line number points to the assertion. Here, <code>setTarget()</code> isn't refusing values above the max.</p>
+<h3 id="testing-code-that-uses-wpilib-hardware-classes">Testing code that uses WPILib hardware classes<a class="headerlink" href="#testing-code-that-uses-wpilib-hardware-classes" title="Permanent link">#</a></h3>
+<p>Some WPILib classes need the hardware layer started before they work in a test. Initialize it once at the start of the test class:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@BeforeEach</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">setUp</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">assert</span><span class="w"> </span><span class="n">HAL</span><span class="p">.</span><span class="na">initialize</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">   </span><span class="c1">// start WPILib's hardware layer in test mode</span>
+<span class="w">    </span><span class="n">intake</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Intake</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="nd">@AfterEach</span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">tearDown</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">intake</span><span class="p">.</span><span class="na">close</span><span class="p">();</span><span class="w">   </span><span class="c1">// free the simulated ports for the next test</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Then you can use simulation classes like <code>PWMSim</code> or <code>DIOSim</code> to fake sensor inputs and check motor outputs. The WPILib unit testing page above has a complete example.</p>
+<h3 id="test-driven-fixes">Test-driven fixes<a class="headerlink" href="#test-driven-fixes" title="Permanent link">#</a></h3>
+<p>When you find a bug, try this order:</p>
+<ol>
+<li>Write a test that <strong>fails</strong> because of the bug.</li>
+<li>Fix the code.</li>
+<li>Watch the test <strong>pass</strong>.</li>
+</ol>
+<p>Now that bug can never come back without the test catching it.</p>
+<h3 id="set-up-ci-with-github-actions">Set up CI with GitHub Actions<a class="headerlink" href="#set-up-ci-with-github-actions" title="Permanent link">#</a></h3>
+<p>GitHub Actions runs commands on GitHub's computers whenever something happens in your repo. Create <code>.github/workflows/build.yml</code> in your <strong>robot</strong> repo:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Build</span>
+
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">main</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">pull_request</span><span class="p">:</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">build</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-java@v4</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">distribution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">temurin</span>
+<span class="w">          </span><span class="nt">java-version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">17</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chmod +x gradlew</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./gradlew build</span>
+</code></pre></div>
+<p>Reading it:</p>
+<ul>
+<li><strong><code>on:</code></strong> run on every push to <code>main</code> and every pull request</li>
+<li><strong><code>checkout</code></strong> download the code</li>
+<li><strong><code>setup-java</code></strong> install the right Java version</li>
+<li><strong><code>./gradlew build</code></strong> compile and run every test, exactly like on your laptop</li>
+</ul>
+<p>Now every PR shows ✅ or ❌, and you can click through to the full log to see which test failed.</p>
+<div class="admonition note">
+<p class="admonition-title">Match the Java version</p>
+<p>Use the JDK version your season's WPILib installer ships with. Check the WPILib release notes each year, and update <code>java-version</code> to match.</p>
+</div>
+<h3 id="branch-protection">Branch protection<a class="headerlink" href="#branch-protection" title="Permanent link">#</a></h3>
+<p>CI only helps if a red ❌ actually stops a merge. In the repo's <strong>Settings → Branches</strong>, add a rule for <code>main</code>:</p>
+<ul>
+<li><strong>Require a pull request before merging</strong></li>
+<li><strong>Require approvals:</strong> 1</li>
+<li><strong>Require status checks to pass:</strong> select the <strong>build</strong> job</li>
+</ul>
+<p>Now nobody, including you, can merge broken code by accident.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Write three tests for your <code>Shooter</code> class and run <code>./gradlew test</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Break the logic on purpose and read the failing test's message. Then fix it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Write a test for a conversion constant, working out the expected answer by hand</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add the CI workflow to your practice repo and open a PR to see it run</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Turn on branch protection for <code>main</code>, then try to merge a PR with a failing test</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What are the three steps of a unit test?</summary>
+<p>Arrange (set up), Act (do the thing being tested), Assert (check the result).</p>
+</details>
+<details class="question">
+<summary>Why does <code>assertEquals(0.3, 0.1 + 0.2)</code> fail, and how do you fix it?</summary>
+<p>Decimal math on computers isn't exact, so the result is 0.30000000000000004. Pass a small delta: <code>assertEquals(0.3, 0.1 + 0.2, 1e-9)</code>.</p>
+</details>
+<details class="question">
+<summary>Why work out a test's expected value by hand?</summary>
+<p>If you copy the code's formula into the test, a wrong formula passes its own test.</p>
+</details>
+<details class="question">
+<summary>What does CI add on top of running tests yourself?</summary>
+<p>It runs them automatically on every PR, so nobody can forget, and with branch protection, broken code can't merge.</p>
+</details>
+<details class="question">
+<summary>You found a bug. What should you do before fixing it?</summary>
+<p>Write a test that fails because of it. Then fix the code and watch the test pass, so the bug can't come back unnoticed.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="15-team-process.html"><span>Previous</span>15. Branches, PRs &amp; Code Review</a><a class="pager-next" href="../reference/next-steps.html"><span>Next</span>Where to Go Next</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

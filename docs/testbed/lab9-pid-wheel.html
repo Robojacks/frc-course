@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 9: PID on the Wheel | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<link rel="stylesheet" href="../assets/wpilib/pid-tune.css">
+<script src="../assets/wpilib/pid-tune.js"></script>
+<script src="../assets/wpilib/pid-tune-fixes.js"></script>
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html" class="current" aria-current="page">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-9-turn-the-wheel-exactly-10-times-with-pid">Lab 9: Turn the Wheel Exactly 10 Times with PID<a class="headerlink" href="#lab-9-turn-the-wheel-exactly-10-times-with-pid" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>In <a href="lab6-encoder.html">Lab 6</a> you tried to turn the wheel exactly 10 times. Timing missed by a different amount every run. Bang-bang was consistent, but always overshot, because the wheel was still moving fast when it reached 10.</p>
+<p>What you needed was to <strong>slow down as you get close</strong>, and to <strong>correct</strong> if you miss. That's <strong>feedback control</strong>, and <strong>PID</strong> is how almost every robot does it. In this lab you'll add PID to the same <code>WheelSubsystem</code> one letter at a time, and watch each letter fix the previous attempt's problem.</p>
+<p>It's the same problem as driving exactly 2 meters in auto, raising an elevator to a scoring height, or spinning a turret to a target. Get this right on the test bed and you're ready for the elevator in <a href="lab10-elevator.html">Lab 10</a>.</p>
+<p><strong>Before you start:</strong> finish <a href="lab6-encoder.html">Lab 6</a> and keep its scorecard. Read <a href="../controls/12-pid.html">Lesson 12</a> (PID) first.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/pidcontroller.html">PID Control in WPILib</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<div class="admonition danger">
+<p class="admonition-title">Safety</p>
+<p>Same rules as Lab 6: keep clear of the wheel, never stall the 775pro, and keep someone ready to disable. A badly tuned PID can swing the wheel back and forth hard.</p>
+</div>
+<h3 id="the-scorecard">The scorecard<a class="headerlink" href="#the-scorecard" title="Permanent link">#</a></h3>
+<p>Add three rows to your Lab 6 scorecard:</p>
+<table>
+<thead>
+<tr>
+<th>Attempt</th>
+<th>Run 1</th>
+<th>Run 2</th>
+<th>Run 3</th>
+<th>Worst error</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3. P only</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>4. P + D</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>5. P + I + D</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-1-add-the-pid-gains">Step 1: Add the PID gains<a class="headerlink" href="#step-1-add-the-pid-gains" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Add these inside kWheelConstants</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w">              </span><span class="c1">// volts per rotation of error</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">              </span><span class="c1">// volts per (rotation × second) of error</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">              </span><span class="c1">// volts per (rotation per second)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">IZone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">          </span><span class="c1">// only build up I within 0.5 rotations</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ToleranceRot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.02</span><span class="p">;</span><span class="w">  </span><span class="c1">// 0.02 rotations ≈ 7°</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ToleranceRps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span><span class="w">   </span><span class="c1">// "nearly stopped"</span>
+</code></pre></div>
+<h3 id="step-2-add-a-pid-controller-to-the-subsystem">Step 2: Add a PID controller to the subsystem<a class="headerlink" href="#step-2-add-a-pid-controller-to-the-subsystem" title="Permanent link">#</a></h3>
+<p>Open <code>WheelSubsystem.java</code>. Add the imports:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.MathUtil</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.controller.PIDController</span><span class="p">;</span>
+</code></pre></div>
+<p>Add the controller as a field, next to the encoder:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PIDController</span><span class="w"> </span><span class="n">m_pid</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">P</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">I</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">D</span><span class="p">);</span>
+</code></pre></div>
+<p>And at the end of the constructor:</p>
+<div class="highlight"><pre><span></span><code><span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setTolerance</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">ToleranceRot</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">ToleranceRps</span><span class="p">);</span>
+<span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setIZone</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">IZone</span><span class="p">);</span><span class="w">       </span><span class="c1">// limits integral windup (Attempt 5)</span>
+<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Wheel/PID"</span><span class="p">,</span><span class="w"> </span><span class="n">m_pid</span><span class="p">);</span><span class="w">  </span><span class="c1">// tune P, I, and D live from the dashboard</span>
+</code></pre></div>
+<p><code>SmartDashboard.putData("Wheel/PID", m_pid)</code> puts the gains on the dashboard, where you can <strong>edit them while the robot runs</strong>. No redeploying between tries.</p>
+<h3 id="warm-up-in-the-simulator">Warm up in the simulator<a class="headerlink" href="#warm-up-in-the-simulator" title="Permanent link">#</a></h3>
+<p>Before touching the real wheel, try the same idea in WPILib's turret simulator below. A turret is a lot like the test bed wheel: a motor turning something to an exact angle, with no gravity. It's running <strong>PID only</strong>.</p>
+<p>Click a spot around the circle to set a new angle.</p>
+<div class="viz-div" id="lab9_turret_container">
+<div>
+<div class="col" id="lab9_turret_plotVals"></div>
+<div class="col" id="lab9_turret_plotVolts"></div>
+</div>
+<div class="flex-grid">
+<div class="col" id="lab9_turret_viz"></div>
+<div id="lab9_turret_ctrls"></div>
+</div>
+<script>new TurretPIDF("lab9_turret", "feedback");</script>
+</div>
+
+<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html">Tuning a Turret Position Controller</a> (CC BY 4.0).</p>
+
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> With kP, kI, and kD at 0, click a new angle. Nothing happens. Why?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Raise <strong>kP</strong> until the turret moves sharply to each new angle. If it oscillates, lower it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Raise <strong>kD</strong> until the overshoot settles down.</li>
+</ul>
+<p>Now do the same thing on the real wheel.</p>
+<h3 id="attempt-3-p-only-slow-down-as-you-get-close">Attempt 3: P only (slow down as you get close)<a class="headerlink" href="#attempt-3-p-only-slow-down-as-you-get-close" title="Permanent link">#</a></h3>
+<p><strong>The idea:</strong> "Push in proportion to how far away you are." Far away: push hard. Almost there: push gently. That's the <strong>P</strong> in PID.</p>
+<div class="highlight"><pre><span></span><code>volts = kP × error
+</code></pre></div>
+<p>With kP = 1.0, at 10 rotations away that's 10 V (clamped to 6 V). At 1 rotation away, 1 V. At 0.1 away, 0.1 V.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">turnPid</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">rotations</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">setTargetFromHere</span><span class="p">(</span><span class="n">rotations</span><span class="p">);</span>
+<span class="w">            </span><span class="n">m_pid</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span><span class="w">                       </span><span class="c1">// clear old history</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getRotations</span><span class="p">(),</span><span class="w"> </span><span class="n">m_target</span><span class="p">);</span>
+<span class="w">            </span><span class="n">setVolts</span><span class="p">(</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span><span class="n">volts</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">));</span>
+<span class="w">        </span><span class="p">}))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(</span><span class="n">m_pid</span><span class="p">::</span><span class="n">atSetpoint</span><span class="p">)</span><span class="w">                </span><span class="c1">// within tolerance AND nearly stopped</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span><span class="w">                        </span><span class="c1">// give up if it never gets there</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">stop</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Attempts 3-5: PID"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Bind it on the wheel controller:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_wheelController</span><span class="p">.</span><span class="na">x</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_wheel</span><span class="p">.</span><span class="na">turnPid</span><span class="p">(</span><span class="mi">10</span><span class="p">));</span><span class="w">   </span><span class="c1">// Attempts 3 to 5</span>
+</code></pre></div>
+<ol>
+<li>Make sure <strong>kI and kD are 0</strong> on the dashboard (<code>Wheel/PID</code>).</li>
+<li>Run <code>turnPid(10)</code> three times with kP = 1.0. Record the results.</li>
+<li>Try kP = 0.3, then 3, then 10. For each, graph <strong>Position</strong> and <strong>Target</strong> together in Glass or AdvantageScope.</li>
+</ol>
+<p><strong>What you'll see:</strong></p>
+<table>
+<thead>
+<tr>
+<th>kP</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Too low</td>
+<td>Slow, and stops <strong>short</strong> of 10. Near the target the voltage gets so small it can't overcome the gearbox's friction, so the wheel stalls a little early. That leftover is <strong>steady-state error</strong>.</td>
+</tr>
+<tr>
+<td>About right</td>
+<td>Fast, and stops close to 10</td>
+</tr>
+<tr>
+<td>Too high</td>
+<td>Shoots past 10, swings back, maybe oscillates</td>
+</tr>
+</tbody>
+</table>
+<p>Unlike bang-bang, if the wheel overshoots, P <strong>pushes it back</strong>. It corrects itself in both directions.</p>
+<div class="admonition info">
+<p class="admonition-title">Why a timeout?</p>
+<p>If kP is too low, the wheel may stall just short of the tolerance and <code>atSetpoint()</code> never becomes true. The timeout ends the command anyway, so the motor doesn't sit there pushing forever.</p>
+</div>
+<h3 id="attempt-4-p-d-stop-the-overshoot">Attempt 4: P + D (stop the overshoot)<a class="headerlink" href="#attempt-4-p-d-stop-the-overshoot" title="Permanent link">#</a></h3>
+<p><strong>The idea:</strong> "Slow down when you're approaching fast." <strong>D</strong> looks at how fast the error is shrinking and pushes against that motion, like a shock absorber.</p>
+<p>No new code: the same <code>turnPid</code> command uses whatever gains are in the controller.</p>
+<ol>
+<li>Set kP high enough that it overshoots a little.</li>
+<li>Raise <strong>kD</strong> in small steps (try 0.02, 0.05, 0.1) until the overshoot disappears.</li>
+<li>If the output starts to buzz or jitter, kD is too high. Back it off.</li>
+<li>Run three times with your best gains and record the results.</li>
+</ol>
+<p><strong>What you'll see:</strong> With good P and D, the wheel moves quickly and slows smoothly without overshooting. It may still stop a hair short of 10, for the same friction reason as Attempt 3.</p>
+<h3 id="attempt-5-p-i-d-fix-the-leftover-error">Attempt 5: P + I + D (fix the leftover error)<a class="headerlink" href="#attempt-5-p-i-d-fix-the-leftover-error" title="Permanent link">#</a></h3>
+<p><strong>The idea:</strong> "If you've been a little short for a while, push a little harder." <strong>I</strong> adds up the error over time. While the wheel sits just short of 10, that total keeps growing, so the push keeps growing until it's enough to beat friction and finish the move.</p>
+<p>Still no new code. Keep your P and D from Attempt 4.</p>
+<ol>
+<li>Set <strong>kI</strong> small, like 0.1, and run <code>turnPid(10)</code>. Watch <strong>Error</strong> on the dashboard: after the wheel slows down, the last little bit should creep to 0.</li>
+<li>Raise kI (try 0.3, then 0.5) until the leftover error goes away quickly.</li>
+<li>Too much kI makes the wheel overshoot and slowly swing back and forth. Back it off.</li>
+<li>Run three times with your best gains and record the results.</li>
+<li>Copy all three gains into <code>Constants.java</code> (dashboard edits are lost on reboot).</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Integral windup, and why there's an IZone</p>
+<p>If I added up error the whole way from 0 to 10, it would build up a huge total during the move and fling the wheel past the target. That's <strong>integral windup</strong>.</p>
+<p><code>setIZone(0.5)</code> in the constructor fixes it: the integral only builds up when the wheel is within 0.5 rotations of the target, and resets to zero outside that. Try setting the IZone to 20 on the dashboard and watch what happens to the overshoot.</p>
+</div>
+<p><strong>What you'll see:</strong> With P, I, and D tuned, the wheel moves quickly, slows smoothly, and finishes within the tolerance of 10, run after run, even with the cloth on it.</p>
+<h3 id="what-you-just-learned">What you just learned<a class="headerlink" href="#what-you-just-learned" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Attempt</th>
+<th>Uses the sensor?</th>
+<th>Slows down near the target?</th>
+<th>Corrects mistakes?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Timed (Lab 6)</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>2. Bang-bang (Lab 6)</td>
+<td>Only to decide when to stop</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>3. P only</td>
+<td>Every loop</td>
+<td>Yes</td>
+<td>Yes, but may stop short</td>
+</tr>
+<tr>
+<td>4. P + D</td>
+<td>Every loop</td>
+<td>Yes, smoothly</td>
+<td>Yes, but may stop a hair short</td>
+</tr>
+<tr>
+<td>5. P + I + D</td>
+<td>Every loop</td>
+<td>Yes, smoothly</td>
+<td>Yes, all the way to the target</td>
+</tr>
+</tbody>
+</table>
+<p>Each term fixes the previous attempt's problem: <strong>P</strong> gets you close, <strong>D</strong> stops the overshoot, and <strong>I</strong> cleans up whatever is left.</p>
+<h3 id="commit">Commit<a class="headerlink" href="#commit" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 9: PID on the wheel"</span>
+</code></pre></div>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Complete the scorecard: Attempts 3 to 5, three runs each</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Graph Position and Target for Attempts 2 through 5, and screenshot each</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Hold the cloth against the wheel during Attempts 4 and 5. Which one still reaches 10?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Press X three times in a row, waiting for each to finish. Does the wheel end at 10, 20, and 30? Compare with bang-bang in Lab 6.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>turnPid(-10)</code> on another button and make sure it comes back to where it started</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: use the test bed's 10-turn knob from <a href="lab5-knob-speed.html">Lab 5</a> to set the target, so the wheel follows the knob turn for turn</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>With kP = 2.0, the wheel is 0.5 rotations from the target. What voltage does P command?</summary>
+<p>2.0 × 0.5 = <strong>1.0 V</strong></p>
+</details>
+<details class="question">
+<summary>Why does a low kP stop short of 10?</summary>
+<p>Near the target, the error is tiny, so the voltage is tiny, and it's not enough to overcome friction in the gearbox. The wheel stalls a little early.</p>
+</details>
+<details class="question">
+<summary>What does adding kD do, and what happens if it's too high?</summary>
+<p>D pushes against fast motion, so the wheel slows down before reaching the target instead of overshooting. Too much D makes the output buzz, because it reacts to small noisy changes in the encoder.</p>
+</details>
+<details class="question">
+<summary>The wheel stops 0.05 rotations short every time. Which term fixes it, and how?</summary>
+<p><strong>I.</strong> While the wheel sits short, the integral keeps adding up the error, so the output grows until it beats friction and the wheel finishes the move.</p>
+</details>
+<details class="question">
+<summary>What is integral windup, and what does <code>setIZone</code> do about it?</summary>
+<p>Windup is the integral building up a huge total during a long move, then flinging the mechanism past the target. <code>setIZone</code> only lets the integral build up when the error is small, near the target.</p>
+</details>
+<details class="question">
+<summary>Why does <code>turnPid</code> have a timeout?</summary>
+<p>If the wheel stalls just outside the tolerance, <code>atSetpoint()</code> never becomes true. The timeout ends the command so the motor doesn't keep pushing forever.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab8-navx-gyro.html"><span>Previous</span>Lab 8: Turn with a Gyro</a><a class="pager-next" href="lab10-elevator.html"><span>Next</span>Lab 10: Elevator Position Control</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

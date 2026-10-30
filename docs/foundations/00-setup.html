@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0. Setup | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section" open><summary>Foundations</summary><ul><li><a href="00-setup.html" class="current" aria-current="page">0. Setup</a></li><li><a href="01-git.html">1. Git &amp; Version Control</a></li><li><a href="02-terminal.html">2. The Terminal</a></li><li><a href="03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="0-setup">0. Setup<a class="headerlink" href="#0-setup" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<div class="admonition info">
+<p class="admonition-title">Learn Java first</p>
+<p>Before the robot lessons, complete an interactive Java course. See <a href="03-java.html#learn-java-first">Lesson 3: Java Reference</a> for which course and which topics.</p>
+</div>
+<p>You can't learn to drive without a car. Before writing robot code, you need a working development environment, and the good news is it can <strong>simulate a robot on your laptop</strong>. You don't need a robot, a roboRIO, or even a controller to do most of this course.</p>
+<p>By the end of this lesson you'll have:</p>
+<ul>
+<li>WPILib's tools installed</li>
+<li>a robot project created from the official template</li>
+<li>that project running in the simulator</li>
+</ul>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/introduction.html">Zero to Robot: Introduction</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html">WPILib Installation Guide</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html">Creating a Robot Program</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="what-youre-installing-and-why">What you're installing, and why<a class="headerlink" href="#what-youre-installing-and-why" title="Permanent link">#</a></h3>
+<p>The WPILib installer bundles everything an FRC programmer needs. It's worth knowing what each piece is, because you'll hear the names constantly:</p>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>What it is</th>
+<th>When you use it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WPILib VS Code</strong></td>
+<td>A copy of the VS Code editor with the WPILib extension built in</td>
+<td>Writing, building, and deploying code</td>
+</tr>
+<tr>
+<td><strong>Java JDK</strong></td>
+<td>The Java compiler and runtime, the exact version WPILib expects</td>
+<td>Every build. You never open it directly.</td>
+</tr>
+<tr>
+<td><strong>GradleRIO</strong></td>
+<td>The build tool that compiles your code and sends it to the robot</td>
+<td>Every build and deploy</td>
+</tr>
+<tr>
+<td><strong>Simulation GUI</strong></td>
+<td>A window that fakes the Driver Station and robot hardware</td>
+<td>Testing code without a robot</td>
+</tr>
+<tr>
+<td><strong>Glass, AdvantageScope, SysId, DataLogTool, and more</strong></td>
+<td>Dashboards and analysis tools</td>
+<td>Debugging, tuning, and later lessons</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Why a separate VS Code?</p>
+<p>WPILib's copy is pinned to versions that are tested together. If you already use VS Code for other things, keep both. Open the one with the WPILib logo for robot code.</p>
+</div>
+<h3 id="step-1-install-wpilib">Step 1: Install WPILib<a class="headerlink" href="#step-1-install-wpilib" title="Permanent link">#</a></h3>
+<ol>
+<li>Go to the <a href="https://github.com/wpilibsuite/allwpilib/releases">WPILib releases page</a> and download the installer for <strong>this season</strong> for your operating system. The installation guide above has direct links.</li>
+<li>Run it. On Windows, the file is an <code>.iso</code>: double-click to mount it, then run <code>WPILibInstaller.exe</code>.</li>
+<li>Choose <strong>Everything</strong> and <strong>Install for this user</strong>.</li>
+<li>When it asks about VS Code, choose <strong>Download for this computer only</strong>.</li>
+<li>Wait. It's a large download (a few gigabytes).</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Use the same season version as the team</p>
+<p>WPILib releases a new version every January. A project made with one year's tools won't build with another year's without upgrading. Ask a returning programmer which version the team's robot code uses.</p>
+</div>
+<h3 id="step-2-install-git">Step 2: Install Git<a class="headerlink" href="#step-2-install-git" title="Permanent link">#</a></h3>
+<p>Download and install Git from <a href="https://git-scm.com/downloads">git-scm.com</a>. The default options are fine. You'll use it in <a href="01-git.html">Lesson 1</a>.</p>
+<h3 id="step-3-create-your-first-project">Step 3: Create your first project<a class="headerlink" href="#step-3-create-your-first-project" title="Permanent link">#</a></h3>
+<ol>
+<li>Open <strong>WPILib VS Code</strong> (look for the WPILib logo).</li>
+<li>Press <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> to open the <strong>command palette</strong>. You'll use this constantly. It's how you run every WPILib action.</li>
+<li>Type <code>WPILib: Create a new project</code> and press <span class="keys"><kbd class="key-enter">Enter</kbd></span>.</li>
+<li>Fill in the form:<ul>
+<li><strong>Project type:</strong> Template</li>
+<li><strong>Language:</strong> Java</li>
+<li><strong>Project base:</strong> Command Robot</li>
+<li><strong>Base folder:</strong> somewhere you'll find again, like a <code>robotics</code> folder in Documents</li>
+<li><strong>Project name:</strong> <code>my-first-robot</code></li>
+<li><strong>Team number:</strong> 4674</li>
+</ul>
+</li>
+<li>Click <strong>Generate Project</strong>, then choose to open it in the current window.</li>
+</ol>
+<p><img alt="The WPILib New Project Creator, filled in" src="../assets/wpilib/new-project-creator-configured.png" /></p>
+<p class="credit">The New Project Creator, filled in. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html">Creating a Robot Program</a> (CC BY 4.0).</p>
+
+<div class="admonition note">
+<p class="admonition-title">Mac and Linux</p>
+<p>Use <span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> on Mac. Everything else is the same.</p>
+</div>
+<h3 id="step-4-look-around-the-project">Step 4: Look around the project<a class="headerlink" href="#step-4-look-around-the-project" title="Permanent link">#</a></h3>
+<p>Expand the folders on the left. You don't need to understand all of this yet, but know where things are:</p>
+<div class="highlight"><pre><span></span><code>my-first-robot/
+├── build.gradle              ← build settings (rarely edited)
+├── gradlew, gradlew.bat      ← the build tool launcher (Lesson 2)
+├── vendordeps/               ← vendor libraries like CTRE and REV
+└── src/main/java/frc/robot/
+    ├── Main.java             ← starts the program. Never edit.
+    ├── Robot.java            ← the robot's main loop (Lesson 6)
+    ├── RobotContainer.java   ← creates subsystems, binds buttons (Lesson 7)
+    ├── Constants.java        ← numbers like ports and gear ratios (Lesson 8)
+    ├── commands/             ← command classes
+    └── subsystems/           ← subsystem classes
+</code></pre></div>
+<h3 id="step-5-run-it-in-simulation">Step 5: Run it in simulation<a class="headerlink" href="#step-5-run-it-in-simulation" title="Permanent link">#</a></h3>
+<ol>
+<li>Press <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> and run <strong>WPILib: Simulate Robot Code</strong>.</li>
+<li>The first build takes a minute or two while Gradle downloads what it needs. Later builds are much faster.</li>
+<li>When asked, check <strong>Sim GUI</strong> and click OK.</li>
+<li>A window opens. In the <strong>Robot State</strong> box, click <strong>Teleoperated</strong>.</li>
+</ol>
+<p>That's it. Your robot code is running, just on fake hardware.</p>
+<h3 id="a-tour-of-the-sim-gui">A tour of the Sim GUI<a class="headerlink" href="#a-tour-of-the-sim-gui" title="Permanent link">#</a></h3>
+<p><img alt="The Simulation GUI with each panel numbered" src="../assets/wpilib/sim-gui-with-labels.png" /></p>
+<p class="credit">The Sim GUI, with each panel numbered. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/simulation-gui.html">Simulation Specific User Interface Elements</a> (CC BY 4.0).</p>
+
+<ol>
+<li><strong>Robot State:</strong> the robot's current mode. Click a label to change modes, just like the real Driver Station.</li>
+<li><strong>Timing:</strong> the robot's timers. You can pause and step time here.</li>
+<li><strong>System Joysticks:</strong> the controllers and keyboards your computer can see.</li>
+<li><strong>FMS:</strong> pretends to be the competition field system.</li>
+<li><strong>NetworkTables:</strong> the values your code publishes to the dashboard.</li>
+<li><strong>Joysticks:</strong> the joysticks your robot code actually reads. Drag a device here from System Joysticks.</li>
+<li><strong>Other Devices:</strong> devices that don't fit the other panels, like some gyros.</li>
+</ol>
+<p>More panels, like PWM outputs and DIO, can be opened from the <strong>Hardware</strong> menu.</p>
+<h3 id="using-a-controller-or-the-keyboard">Using a controller or the keyboard<a class="headerlink" href="#using-a-controller-or-the-keyboard" title="Permanent link">#</a></h3>
+<p>Drag a controller (or <strong>Keyboard 0</strong>) from <strong>System Joysticks</strong> into slot <strong>0</strong> of <strong>Joysticks</strong>. Your code's <code>CommandXboxController(0)</code> reads whatever is in slot 0.</p>
+<p><img alt="Dragging a controller from System Joysticks to Joysticks" src="../assets/wpilib/sim-gui-dragging-joysticks.png" /></p>
+<p class="credit">Drag a device from System Joysticks into a Joysticks slot. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/simulation-gui.html">Simulation Specific User Interface Elements</a> (CC BY 4.0).</p>
+
+<div class="admonition tip">
+<p class="admonition-title">No controller? Use the keyboard</p>
+<p>Drag <strong>Keyboard 0</strong> into slot 0. To choose which keys control which axis, open <strong>DS → Keyboard 0 Settings</strong> in the Sim GUI's menu bar. The WPILib docs show a setup that makes the keyboard act like an Xbox controller's two sticks (axes 1 and 4):</p>
+<p><img alt="Keyboard 0 settings set up like an Xbox controller" src="../assets/wpilib/xboxkeyboard.png" /></p>
+<p><p class="credit">Keyboard settings that act like an Xbox controller. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/simulation-gui.html">Simulation Specific User Interface Elements</a> (CC BY 4.0).</p></p>
+</div>
+<h3 id="when-it-doesnt-work">When it doesn't work<a class="headerlink" href="#when-it-doesnt-work" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Command palette doesn't show WPILib commands</td>
+<td>You opened regular VS Code, or the folder isn't a WPILib project. Open the WPILib VS Code and <strong>File → Open Folder</strong> the project.</td>
+</tr>
+<tr>
+<td>Build fails on the first run with a download error</td>
+<td>You're offline or behind a school firewall. Try another network.</td>
+</tr>
+<tr>
+<td>"Unsupported class file version" or a JDK error</td>
+<td>The project and the installed WPILib are different seasons. Reinstall the matching year.</td>
+</tr>
+<tr>
+<td>Sim GUI never appears</td>
+<td>Check the terminal panel at the bottom of VS Code for the first red error line.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Install WPILib and Git</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Create <code>my-first-robot</code> from the Command Robot template</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run it in simulation and switch to Teleoperated</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Drag a keyboard or controller into Joystick 0</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Take a screenshot and post it in the team channel</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Next: real hardware</p>
+<p>Once simulation works, do <a href="../testbed/lab0-first-project.html">Lab 0</a> to install the rest of the tools and deploy a project to the test bed.</p>
+</div>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Where is <code>Robot.java</code> in your project?</summary>
+<p><code>src/main/java/frc/robot/Robot.java</code></p>
+</details>
+<details class="question">
+<summary>What's the difference between <em>Simulate Robot Code</em> and <em>Deploy Robot Code</em>?</summary>
+<p><strong>Simulate</strong> builds your code and runs it on your laptop with fake hardware. <strong>Deploy</strong> builds it and copies it to the roboRIO on a real robot, where it controls real motors.</p>
+</details>
+<details class="question">
+<summary>What's the command palette, and how do you open it?</summary>
+<p>It's VS Code's search box for actions. Open it with <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> (<span class="keys"><kbd class="key-command">Cmd</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> on Mac). Every WPILib action starts there.</p>
+</details>
+<details class="question">
+<summary>Why does everyone on the team need the same WPILib version?</summary>
+<p>Each season's tools only build projects made for that season. Different versions mean the code won't build on someone's laptop.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../index.html"><span>Previous</span>Home</a><a class="pager-next" href="01-git.html"><span>Next</span>1. Git &amp; Version Control</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,252 @@
+/* =====================================================================
+   RoboJacks 4674 course theme
+   ---------------------------------------------------------------------
+   To match robojacks4674.org exactly, change only the values in this
+   first block. Everything else on the site reads from these variables.
+   ===================================================================== */
+:root {
+  /* Colors taken from the RoboJacks logo */
+  --brand: #33499b;          /* logo blue: links, accents, headings rule */
+  --brand-dark: #24357a;     /* hover / pressed */
+  --silver: #c7c7c6;         /* logo silver: axe head and lettering */
+  --wood: #944e10;           /* logo axe handle, used sparingly */
+  --plaid-dark: #1e2026;     /* header and footer background */
+  --plaid-light: #b3202a;    /* red squares in the buffalo-plaid band */
+  --header-text: #ffffff;
+
+  --font-body: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-heading: "Montserrat", var(--font-body);
+  --font-code: ui-monospace, "Cascadia Code", Consolas, monospace;
+
+  --bg: #ffffff;
+  --surface: #f4f5f8;
+  --border: #dcdee5;
+  --text: #1e1e1e;
+  --text-muted: #5b5b5b;
+
+  --note: #33499b;
+  --tip: #2e8b57;
+  --warning: #b86e00;
+  --danger: #c0262d;
+  --question: #6d4fb8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand: #8fa2ec;
+    --brand-dark: #b4c1f5;
+    --note: #8fa2ec;
+    --bg: #131417;
+    --surface: #1d1f24;
+    --border: #33363d;
+    --text: #ececec;
+    --text-muted: #a8a8a8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+    --brand: #8fa2ec;
+    --brand-dark: #b4c1f5;
+    --note: #8fa2ec;
+    --bg: #131417;
+    --surface: #1d1f24;
+    --border: #33363d;
+    --text: #ececec;
+    --text-muted: #a8a8a8;
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.65 var(--font-body);
+}
+a { color: var(--brand); }
+a:hover { color: var(--brand-dark); }
+img { max-width: 100%; }
+
+.skip-link {
+  position: absolute; left: -999px; top: 0;
+  background: var(--brand); color: #fff; padding: 8px 12px; z-index: 10;
+}
+.skip-link:focus { left: 8px; }
+
+/* ---------- Plaid band (lumberjack buffalo check) ---------- */
+.plaid {
+  height: 28px;
+  background-color: var(--plaid-light);
+  background-image:
+    linear-gradient(90deg, rgba(0,0,0,.55) 50%, transparent 50%),
+    linear-gradient(rgba(0,0,0,.55) 50%, transparent 50%);
+  background-size: 28px 28px;
+}
+.plaid-thin { height: 12px; background-size: 12px 12px; }
+
+/* ---------- Header ---------- */
+.site-header { background: var(--plaid-dark); color: var(--header-text); }
+.header-inner {
+  max-width: 1200px; margin: 0 auto; padding: 18px 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.brand { color: var(--header-text); text-decoration: none; display: flex; align-items: center; gap: 14px; }
+.brand-logo { height: 76px; width: auto; flex: none; }
+.brand-text { display: flex; flex-direction: column; }
+.brand:hover { color: var(--header-text); }
+.brand-title {
+  font: 800 1.9rem/1.1 var(--font-heading);
+  letter-spacing: .02em; text-transform: uppercase; color: var(--silver);
+}
+.brand-subtitle { font-size: .95rem; opacity: .85; }
+.header-link {
+  color: var(--header-text); text-decoration: none; font-weight: 600;
+  border: 2px solid var(--header-text); border-radius: 4px; padding: 6px 14px;
+  white-space: nowrap;
+}
+.header-link:hover { background: var(--header-text); color: var(--plaid-dark); }
+
+/* ---------- Tabs (Lessons / Labs) ---------- */
+.tabs { background: var(--plaid-dark); border-top: 1px solid rgba(255,255,255,.12); }
+.tabs-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding-block: 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; gap: 10px;
+}
+.tab {
+  flex: 0 1 180px; text-align: center;
+  color: var(--header-text); text-decoration: none; padding: 10px 18px;
+  font: 800 1rem var(--font-heading); letter-spacing: .06em; text-transform: uppercase;
+  border: 2px solid rgba(255,255,255,.55); border-radius: 6px;
+}
+.tab:hover { background: rgba(255,255,255,.12); color: var(--header-text); }
+.tab.current { background: var(--plaid-light); border-color: var(--plaid-light); color: #fff; }
+.tab:focus-visible { outline: 3px solid var(--header-text); outline-offset: 2px; }
+@media (max-width: 860px) { .tab { flex: 1 1 0; } }
+
+/* Big call-to-action button used on the home page */
+.cta {
+  display: inline-block; margin: .4em 0 1em; padding: 14px 22px;
+  background: var(--plaid-light); color: #fff; text-decoration: none; border-radius: 6px;
+  font: 800 1.05rem var(--font-heading); letter-spacing: .04em; text-transform: uppercase;
+}
+.cta:hover { background: var(--plaid-dark); color: #fff; }
+
+/* ---------- Layout ---------- */
+.layout {
+  max-width: 1200px; margin: 0 auto; padding: 24px 20px 48px;
+  display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 40px;
+}
+.sidebar { position: sticky; top: 16px; align-self: start; max-height: calc(100vh - 32px); overflow-y: auto; }
+.sidebar-toggle > summary { display: none; }
+.nav-section { margin-bottom: 6px; }
+.nav-section > summary {
+  cursor: pointer; font: 700 .8rem var(--font-heading);
+  text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted);
+  padding: 6px 0;
+}
+.nav-section ul { list-style: none; margin: 0 0 8px; padding: 0; }
+.nav-section a {
+  display: block; padding: 5px 10px; border-left: 3px solid transparent;
+  color: var(--text); text-decoration: none; font-size: .95rem;
+}
+.nav-section a:hover { color: var(--brand); border-left-color: var(--border); }
+.nav-section a.current { color: var(--brand); border-left-color: var(--brand); font-weight: 600; background: var(--surface); }
+
+/* ---------- Content ---------- */
+.content { min-width: 0; }
+.content h1, .content h2, .content h3, .content h4 { font-family: var(--font-heading); line-height: 1.25; }
+.content h1 { font-size: 2.2rem; margin: 0 0 .6em; padding-bottom: .3em; border-bottom: 4px solid var(--brand); }
+.content h2 { font-size: 1.5rem; margin-top: 2em; }
+.content h3 { font-size: 1.2rem; margin-top: 1.6em; }
+.headerlink { margin-left: .4em; color: var(--border); text-decoration: none; opacity: 0; }
+h1:hover .headerlink, h2:hover .headerlink, h3:hover .headerlink, h4:hover .headerlink { opacity: 1; }
+
+code { font-family: var(--font-code); font-size: .9em; background: var(--surface); padding: .1em .35em; border-radius: 3px; }
+.highlight { border-radius: 6px; margin: 1em 0; border: 1px solid var(--border); overflow-x: auto; }
+.highlight pre { margin: 0; padding: 14px 16px; line-height: 1.5; }
+.highlight code { background: none; padding: 0; font-size: .88rem; }
+:not(pre) > code { overflow-wrap: break-word; }
+p > code, li > code { word-break: break-word; }
+
+table { border-collapse: collapse; width: 100%; margin: 1em 0; display: block; overflow-x: auto; }
+th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--surface); font-family: var(--font-heading); }
+
+kbd {
+  font-family: var(--font-code); font-size: .85em; padding: .1em .45em;
+  border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; background: var(--surface);
+}
+
+/* Task lists */
+.task-list { list-style: none; padding-left: 0; }
+.task-list-item input { margin-right: .5em; accent-color: var(--brand); }
+.task-list-control { display: inline-flex; align-items: center; }
+.task-list-indicator { display: none; }
+
+/* Mermaid diagrams */
+div.mermaid { margin: 1.4em 0; text-align: center; overflow-x: auto; }
+
+/* ---------- Callouts (admonitions + collapsible questions) ---------- */
+.admonition, details.question, details.note, details.tip, details.warning {
+  border-left: 4px solid var(--c, var(--note)); background: var(--surface);
+  border-radius: 0 6px 6px 0; padding: 4px 16px 10px; margin: 1.2em 0;
+}
+.admonition-title, details > summary { font-weight: 700; color: var(--c, var(--note)); margin: 8px 0 4px; }
+details:not(.nav-section):not(.sidebar-toggle) > summary { cursor: pointer; }
+.admonition > :last-child, details > :last-child { margin-bottom: 4px; }
+.tip, .success { --c: var(--tip); }
+.warning, .caution { --c: var(--warning); }
+.danger, .error { --c: var(--danger); }
+.question { --c: var(--question); }
+.info, .note { --c: var(--note); }
+.example { --c: var(--brand); }
+
+/* ---------- Figures (mostly from the WPILib docs) ---------- */
+.content p > img {
+  display: block; margin: 1.2em auto .3em; max-width: 100%; height: auto;
+  background: #fff; padding: 8px; border: 1px solid var(--border); border-radius: 6px;
+}
+.content .credit { text-align: center; font-size: .82rem; color: var(--text-muted); margin-top: 0; }
+.wpilib { --c: var(--brand); }
+
+/* WPILib PID simulators */
+.viz-div { border-color: var(--border) !important; border-radius: 6px; background: #fff; color: #1e1e1e; color-scheme: light; overflow-x: auto; margin: 1em 0 !important; }
+.viz-div table { display: table; width: auto; }
+.viz-div td { border: none; padding: 2px 6px; }
+
+/* ---------- Prev / next ---------- */
+.pager { display: flex; justify-content: space-between; gap: 16px; margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); }
+.pager a {
+  flex: 1; max-width: 48%; text-decoration: none; padding: 12px 16px;
+  border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-weight: 600;
+}
+.pager a:hover { border-color: var(--brand); color: var(--brand); }
+.pager span { display: block; font-size: .8rem; font-weight: 400; color: var(--text-muted); }
+.pager-next { text-align: right; margin-left: auto; }
+
+/* ---------- Footer ---------- */
+.site-footer { background: var(--plaid-dark); color: #ddd; }
+.footer-inner {
+  max-width: 1200px; margin: 0 auto; padding: 16px 20px;
+  display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; font-size: .9rem;
+}
+.footer-inner span:first-child { font-family: var(--font-heading); font-weight: 800; text-transform: uppercase; color: #fff; }
+.site-footer a { color: #fff; }
+
+/* ---------- Phones ---------- */
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; gap: 16px; padding-top: 12px; }
+  .sidebar { position: static; max-height: none; }
+  .sidebar-toggle { border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; }
+  .sidebar-toggle > summary { display: block; cursor: pointer; font-weight: 700; padding: 6px 0; }
+  .brand-title { font-size: 1.3rem; }
+  .brand-logo { height: 56px; }
+  .header-inner { padding: 12px 16px; }
+  .header-link { display: none; }
+  .content h1 { font-size: 1.7rem; }
+}

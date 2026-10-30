@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4. Electronics | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section" open><summary>Hardware</summary><ul><li><a href="04-electronics.html" class="current" aria-current="page">4. Electronics</a></li><li><a href="04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="04d-sensors.html">4.3 Sensors</a></li><li><a href="05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="4-electronics">4. Electronics<a class="headerlink" href="#4-electronics" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Half of all "code bugs" at competition are actually electrical problems: a loose wire, a tripped breaker, a dying battery, a duplicated CAN ID. A programmer who can tell the difference saves the team hours of chasing a bug that isn't in the code. Programmers who understand the wiring debug faster and get trusted more.</p>
+<p>You won't be wiring the robot yourself in this lesson. The goal is to understand what each part does, how power and data flow, and what the electrical system means for your code.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-1/intro-to-frc-robot-wiring.html">Intro to FRC Robot Wiring</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/wiring-best-practices.html">Wiring Best Practices</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/can-wiring-basics.html">CAN Wiring Basics</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/roborio-info/roborio-brownouts.html">roboRIO Brownout and Understanding Current Draw</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="the-three-ideas-you-need">The three ideas you need<a class="headerlink" href="#the-three-ideas-you-need" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Symbol</th>
+<th>Unit</th>
+<th>Water-pipe analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Voltage</td>
+<td>V</td>
+<td>Volts (V)</td>
+<td>Water <strong>pressure</strong>: how hard it pushes</td>
+</tr>
+<tr>
+<td>Current</td>
+<td>I</td>
+<td>Amps (A)</td>
+<td>How much water <strong>flows</strong> per second</td>
+</tr>
+<tr>
+<td>Resistance</td>
+<td>R</td>
+<td>Ohms (Ω)</td>
+<td>How <strong>narrow</strong> the pipe is</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ohm's Law</strong> connects them:</p>
+<div class="highlight"><pre><span></span><code>V = I × R
+</code></pre></div>
+<p>With the same pressure (voltage), a narrower pipe (more resistance) lets less water (current) through.</p>
+<p><strong>Power</strong> is how fast energy is used:</p>
+<div class="highlight"><pre><span></span><code>P = V × I
+</code></pre></div>
+<p>A motor pulling 40 A at 12 V uses about 480 W, about the same as a small microwave.</p>
+<div class="admonition example">
+<p class="admonition-title">Why thin wires get hot</p>
+<p>A wire has a little resistance. Push a lot of current through a thin wire and some power turns into heat (P = I² × R). That's why big motors use thick wire, and why the rules specify minimum wire sizes for each breaker.</p>
+</div>
+<h3 id="whats-on-an-frc-robot">What's on an FRC robot<a class="headerlink" href="#whats-on-an-frc-robot" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+<th>What programmers should know</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Battery</strong></td>
+<td>12 V lead-acid battery, the only power source</td>
+<td>Its voltage drops under load and as it drains. Check it before every match.</td>
+</tr>
+<tr>
+<td><strong>Main breaker</strong></td>
+<td>120 A switch and circuit breaker</td>
+<td>Turns the whole robot on and off. Also the emergency off switch.</td>
+</tr>
+<tr>
+<td><strong>Power Distribution</strong> (PDH or PDP)</td>
+<td>Splits power into many channels, each with its own breaker</td>
+<td>Can report current per channel to your code</td>
+</tr>
+<tr>
+<td><strong>Breakers / fuses</strong></td>
+<td>Cut power to one channel if it draws too much</td>
+<td>A tripped breaker looks like "the motor stopped working"</td>
+</tr>
+<tr>
+<td><strong>roboRIO</strong></td>
+<td>The robot's computer. Runs your code.</td>
+<td>Has PWM, DIO, analog, and CAN ports</td>
+</tr>
+<tr>
+<td><strong>Radio</strong></td>
+<td>Wi-Fi link to the Driver Station</td>
+<td>No radio = no robot control</td>
+</tr>
+<tr>
+<td><strong>Motor controllers</strong></td>
+<td>Turn small signals from the roboRIO into big motor power</td>
+<td>TalonFX, SPARK MAX/Flex, and others. Each has a CAN ID.</td>
+</tr>
+<tr>
+<td><strong>Motors</strong></td>
+<td>Turn electrical power into motion</td>
+<td>Kraken, Falcon, NEO, and others. Many have built-in encoders.</td>
+</tr>
+<tr>
+<td><strong>Sensors</strong></td>
+<td>Measure the world</td>
+<td>Encoders, gyros, limit switches, cameras</td>
+</tr>
+<tr>
+<td><strong>Robot Signal Light (RSL)</strong></td>
+<td>Orange light. Solid = disabled, blinking = enabled</td>
+<td>Check it before walking near the robot</td>
+</tr>
+</tbody>
+</table>
+<h3 id="follow-the-power">Follow the power<a class="headerlink" href="#follow-the-power" title="Permanent link">#</a></h3>
+<div class="mermaid">flowchart LR
+    B[Battery 12 V] --&gt; M[Main Breaker 120 A]
+    M --&gt; P[Power Distribution&lt;br/&gt;PDH / PDP]
+    P --&gt;|40 A breakers| MC[Motor Controllers] --&gt; Mo[Motors]
+    P --&gt;|10–20 A| R[roboRIO, Radio]
+    P --&gt;|low current| S[Sensors, LEDs]</div>
+<p>Power always flows from the battery, through the main breaker, into the power distribution, and then out to each device through its own breaker.</p>
+<h3 id="follow-the-data">Follow the data<a class="headerlink" href="#follow-the-data" title="Permanent link">#</a></h3>
+<p>Power and data travel on different wires:</p>
+<div class="mermaid">flowchart LR
+    DS[Driver Station laptop] &lt;-- Wi-Fi --&gt; Radio
+    Radio &lt;-- Ethernet --&gt; RIO[roboRIO&lt;br/&gt;runs your code]
+    RIO &lt;-- CAN bus --&gt; MC[Motor controllers,&lt;br/&gt;PDH, Pneumatic Hub, gyro]
+    RIO -- PWM --&gt; PWMDev[PWM devices]
+    RIO -- DIO / Analog --&gt; Sens[Switches, sensors]</div>
+<p>Your code runs on the roboRIO. Joystick data arrives from the Driver Station over Wi-Fi, and your code sends commands out to motor controllers, mostly over <strong>CAN</strong>.</p>
+<h3 id="the-roborios-ports">The roboRIO's ports<a class="headerlink" href="#the-roborios-ports" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Signal</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CAN</strong></td>
+<td>Digital messages on a shared bus</td>
+<td>Most motor controllers, PDH, Pneumatic Hub, many sensors</td>
+</tr>
+<tr>
+<td><strong>PWM</strong> (0–9)</td>
+<td>A pulse that sets a speed</td>
+<td>Older or simpler motor controllers, servos</td>
+</tr>
+<tr>
+<td><strong>DIO</strong> (0–9)</td>
+<td>On/off digital in or out</td>
+<td>Limit switches, beam breaks, some encoders</td>
+</tr>
+<tr>
+<td><strong>Analog In</strong> (0–3)</td>
+<td>A voltage from 0 to 5 V</td>
+<td>Potentiometers, analog distance sensors</td>
+</tr>
+<tr>
+<td><strong>I2C, SPI, USB</strong></td>
+<td>Data buses</td>
+<td>Some gyros, color sensors, cameras</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Port numbers in code must match the wiring</p>
+<p><code>new PWMSparkMax(2)</code> means "the controller plugged into PWM port 2." <code>new DigitalInput(0)</code> means DIO port 0. If the wire is in port 3 and the code says 2, nothing happens and no error appears.</p>
+</div>
+<h3 id="batteries-and-brownouts">Batteries and brownouts<a class="headerlink" href="#batteries-and-brownouts" title="Permanent link">#</a></h3>
+<p>A fresh battery reads about 12.5–13 V with nothing running. The voltage <strong>sags</strong> while motors pull current, and drops further as the battery drains through a match.</p>
+<p>If the voltage drops too low, the roboRIO protects itself by <strong>disabling outputs</strong> to motors. That's a <strong>brownout</strong>. It happens in stages:</p>
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: roboRIO brownout stages</p>
+<table>
+<thead>
+<tr>
+<th>Battery voltage</th>
+<th>Stage</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Below <strong>6.8 V</strong></td>
+<td>1: 6 V output drop</td>
+<td>The 6 V power on the PWM pins starts to drop</td>
+</tr>
+<tr>
+<td>Below <strong>6.3 V</strong></td>
+<td>2: Output disable</td>
+<td><strong>Motors are disabled</strong>: PWM outputs turn off, CAN motor controllers get a disable command, pneumatics turn off, and the 5 V and 3.3 V sensor power rails turn off. The roboRIO's power light turns amber and the Driver Station shows "Voltage Brownout." This lasts until the voltage climbs back above <strong>7.5 V</strong>.</td>
+</tr>
+<tr>
+<td>Below about <strong>4.5 V</strong></td>
+<td>3: Blackout</td>
+<td>The roboRIO may shut off completely, then reboot when the voltage recovers</td>
+</tr>
+</tbody>
+</table>
+<p>Stage 2 also cuts power to sensors plugged into the DIO and analog ports, so sensors can glitch during a brownout too.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/software/roborio-info/roborio-brownouts.html">roboRIO Brownout and Understanding Current Draw</a>, CC BY 4.0.</em></p>
+</div>
+<p>A full reboot in stage 3 costs you a big chunk of the match while the roboRIO and radio start back up.</p>
+<p>What causes brownouts:</p>
+<ul>
+<li>many motors starting at full power at the same time</li>
+<li>motors that are stalled (pushing against something but not moving), which pull huge current</li>
+<li>an old or partly charged battery</li>
+<li>loose battery connections</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Programmer takeaway: current limits</p>
+<p>Motor controllers let you set a <strong>current limit</strong> in code, a cap on how many amps the motor can pull. A current limit trades a little peak performance for a robot that doesn't brown out or trip breakers mid-match. Your team's code almost certainly sets these. Find them.</p>
+</div>
+<p>You can see brownouts after a match in the Driver Station log viewer, along with battery voltage over time.</p>
+<h3 id="can-bus">CAN bus<a class="headerlink" href="#can-bus" title="Permanent link">#</a></h3>
+<p>Most motor controllers talk to the roboRIO over <strong>CAN</strong>, a two-wire daisy chain (yellow and green). Every device is wired one after the other in a chain that starts at the roboRIO and ends at a <strong>terminator</strong>.</p>
+<p><img alt="CAN wiring daisy-chained from device to device" src="../assets/wpilib/daisychain.png" /></p>
+<p class="credit">CAN wiring runs from device to device in one chain. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/can-wiring-basics.html">CAN Wiring Basics</a> (CC BY 4.0).</p>
+
+<div class="admonition wpilib">
+<p class="admonition-title">From the WPILib docs: CAN wiring and termination</p>
+<p>CAN is generally wired with <strong>yellow</strong> and <strong>green</strong> wire, with yellow as CAN-High and green as CAN-Low. Many devices use the same colors to show how the wires plug in.</p>
+<p>A CAN network must be <strong>terminated</strong> with a 120 Ω resistor at each end. The roboRIO and the power distribution panel (PDP) have these built in, so the recommended layout starts the chain at the <strong>roboRIO</strong>, ends it at the <strong>PDP</strong>, and puts every other CAN device in between. The PDP ships with its termination jumper <strong>on</strong>; leave it that way.</p>
+<p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/can-wiring-basics.html">CAN Wiring Basics</a>, CC BY 4.0.</em></p>
+</div>
+<ul>
+<li>Every device needs a <strong>unique CAN ID</strong> for its device type.</li>
+<li>The ID you set in the vendor tool (Phoenix Tuner for CTRE, REV Hardware Client for REV) must match the ID in your code.</li>
+<li>If the chain breaks in the middle, every device <strong>after</strong> the break goes silent.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Common CAN mistakes</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Motors twitch, or the wrong one moves</td>
+<td>Two devices with the same CAN ID</td>
+</tr>
+<tr>
+<td>A whole group of devices stops responding</td>
+<td>Broken connection in the chain before them</td>
+</tr>
+<tr>
+<td>One device missing in Phoenix Tuner or REV Hardware Client</td>
+<td>Its CAN wires are loose or its ID was never set</td>
+</tr>
+<tr>
+<td>"CAN frame not received" errors in the console</td>
+<td>The device the code expects isn't on the bus at that ID</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Keep a <strong>CAN ID map</strong>, a list of every device, its ID, and what it does, somewhere the whole team can see it.</p>
+<h3 id="safety-basics">Safety basics<a class="headerlink" href="#safety-basics" title="Permanent link">#</a></h3>
+<ul>
+<li>The robot is <strong>always</strong> potentially live once the battery is plugged in. Turn off the main breaker before touching wiring.</li>
+<li>Never connect a battery backward. It can destroy electronics instantly.</li>
+<li>Say <strong>"Enabling!"</strong> out loud before enabling the robot, and wait until people are clear.</li>
+<li>Know where the main breaker is, so you can reach it in an emergency.</li>
+</ul>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Next: the parts on our robots</p>
+<p>Lessons <a href="04b-motors.html">4.1</a> (motors), <a href="04c-spark-max.html">4.2</a> (the SPARK MAX), and <a href="04d-sensors.html">4.3</a> (sensors) cover the exact hardware on the test bed and West Coast Drive.</p>
+</div>
+<p>With a mentor, on a real robot:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find each part in the table above: battery, main breaker, power distribution, roboRIO, radio, motor controllers, RSL</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Trace one motor from the battery to the motor, naming every part the power passes through</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find that motor's breaker and CAN ID</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Open Phoenix Tuner or REV Hardware Client and list every device on the CAN bus</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find where the team's code sets a current limit</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>A motor pulls 60 A at 12 V. How much power is that?</summary>
+<p><code>P = 12 × 60 = 720 W</code></p>
+</details>
+<details class="question">
+<summary>What is a brownout, and how can code help prevent one?</summary>
+<p>The battery voltage drops so low that the roboRIO disables motor outputs. Current limits in code reduce how much current motors can pull, which keeps the voltage up.</p>
+</details>
+<details class="question">
+<summary>Why does every CAN device need a unique ID?</summary>
+<p>The roboRIO addresses devices by ID. Duplicates mean commands go to the wrong device or conflict.</p>
+</details>
+<details class="question">
+<summary>Half the motors stop responding at once, all after a certain point in the CAN chain. What's the likely cause?</summary>
+<p>A broken or loose CAN connection just before the first device that stopped. Everything after a break loses communication.</p>
+</details>
+<details class="question">
+<summary>Your code says <code>new PWMSparkMax(2)</code>, but the motor doesn't move. Name two non-code things to check.</summary>
+<p>That the PWM cable is actually in port 2 (and plugged in the right way around), and that the motor controller has power: its breaker isn't tripped and its status light is on.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../foundations/03-java.html"><span>Previous</span>3. Java Reference</a><a class="pager-next" href="04b-motors.html"><span>Next</span>4.1 Motors: NEO, CIM, and 775pro</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

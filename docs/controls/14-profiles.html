@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>14. Motion Profiles | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section" open><summary>Controls</summary><ul><li><a href="12-pid.html">12. PID Feedback</a></li><li><a href="13-feedforward.html">13. Feedforward</a></li><li><a href="13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="14-profiles.html" class="current" aria-current="page">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="14-motion-profiles">14. Motion Profiles<a class="headerlink" href="#14-motion-profiles" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>When you tell an arm to go from 0° to 90° with plain PID, the error jumps from 0 to 90° instantly. The controller responds with a huge output, the arm launches toward the target as fast as it can, overshoots, and stresses the gearbox, the belts, and anything it's holding. You're effectively asking for <strong>infinite acceleration</strong>.</p>
+<p>A <strong>motion profile</strong> plans a smooth path instead: speed up gently, cruise, slow down gently, and arrive. Every 20 ms the profile hands the controller a small, reachable step instead of the far-away final target. The result is faster, smoother, more repeatable motion, and much easier tuning.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/trapezoidal-profiles.html">Trapezoidal Motion Profiles</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/profiled-pidcontroller.html">Combining Motion Profiling and PID (ProfiledPIDController)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html">Tuning a Vertical Elevator with Motion Profiling</a>, with an interactive simulator</li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="goal-vs-setpoint">Goal vs. setpoint<a class="headerlink" href="#goal-vs-setpoint" title="Permanent link">#</a></h3>
+<p>This distinction is the key to the whole lesson:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Goal</th>
+<th>Setpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it is</td>
+<td>Where you ultimately want to end up</td>
+<td>Where the profile says you should be <strong>right now</strong></td>
+</tr>
+<tr>
+<td>Changes</td>
+<td>When you choose a new target</td>
+<td>Every 20 ms</td>
+</tr>
+<tr>
+<td>Example</td>
+<td>90°</td>
+<td>37.2°, moving at 85°/s</td>
+</tr>
+</tbody>
+</table>
+<p>Without a profile, the setpoint <strong>is</strong> the goal. With a profile, the setpoint moves smoothly toward the goal, and the controller only ever chases the setpoint.</p>
+<h3 id="the-trapezoid">The trapezoid<a class="headerlink" href="#the-trapezoid" title="Permanent link">#</a></h3>
+<p>A trapezoidal profile has three phases. Plotted as velocity over time, it makes a trapezoid:</p>
+<div class="highlight"><pre><span></span><code>velocity
+   ▲        ________________
+   │       /                \
+   │      /     cruise       \
+   │     /                    \
+   │    / accelerate  decelerate\
+   └───────────────────────────────► time
+</code></pre></div>
+<ol>
+<li><strong>Accelerate</strong> at the maximum acceleration until reaching the maximum velocity.</li>
+<li><strong>Cruise</strong> at the maximum velocity.</li>
+<li><strong>Decelerate</strong> at the maximum acceleration so you stop exactly at the goal.</li>
+</ol>
+<p>You choose two numbers, the <strong>constraints</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>What it limits</th>
+<th>Too high</th>
+<th>Too low</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Max velocity</strong></td>
+<td>Top speed</td>
+<td>The motor can't keep up, so the mechanism falls behind the profile</td>
+<td>Slow moves</td>
+</tr>
+<tr>
+<td><strong>Max acceleration</strong></td>
+<td>How fast speed changes</td>
+<td>Jerky starts and stops, the motor can't keep up</td>
+<td>Sluggish starts</td>
+</tr>
+</tbody>
+</table>
+<p>For short moves, the mechanism never reaches max velocity. It accelerates, then immediately decelerates, and the trapezoid becomes a <strong>triangle</strong>.</p>
+<h3 id="a-worked-example">A worked example<a class="headerlink" href="#a-worked-example" title="Permanent link">#</a></h3>
+<p>An arm moves 90° with max velocity 180°/s and max acceleration 360°/s².</p>
+<ul>
+<li><strong>Accelerating</strong> from 0 to 180°/s at 360°/s² takes 180 ÷ 360 = <strong>0.5 s</strong> and covers ½ × 360 × 0.5² = <strong>45°</strong>.</li>
+<li><strong>Decelerating</strong> takes the same: <strong>0.5 s</strong> and <strong>45°</strong>.</li>
+<li>That's already 90°, so there's <strong>no cruise</strong>: the profile is a triangle.</li>
+</ul>
+<p>Total move time: <strong>1.0 s</strong>. Halfway through (0.5 s) the arm should be at 45°, moving at 180°/s. Every 20 ms in between, the profile gives an exact position and velocity.</p>
+<h3 id="why-this-works-so-well-with-feedforward">Why this works so well with feedforward<a class="headerlink" href="#why-this-works-so-well-with-feedforward" title="Permanent link">#</a></h3>
+<p>The profile gives you not just a position at every moment, but also a <strong>velocity</strong> (and acceleration). That's exactly what feedforward from <a href="13-feedforward.html">Lesson 13</a> needs:</p>
+<ul>
+<li><code>kV × velocity</code> supplies the voltage to keep up with the planned speed.</li>
+<li><code>kA × acceleration</code> supplies the extra voltage to speed up and slow down on schedule.</li>
+<li><code>kG·cos(θ)</code> holds the arm up along the way.</li>
+</ul>
+<p>So feedforward does almost all the work of following the profile, and PID only corrects small differences. This is the same structure top teams use:</p>
+<div class="mermaid">flowchart LR
+    G[Goal] --&gt; P[Profile] --&gt;|setpoint position + velocity| FF[Feedforward]
+    P --&gt;|setpoint position| PID
+    S[Sensor] --&gt; PID
+    FF --&gt; Sum((+))
+    PID --&gt; Sum --&gt; V[setVoltage]</div>
+<p><strong>Profile → feedforward (prediction) → PID (correction).</strong></p>
+<h3 id="option-1-profiledpidcontroller">Option 1: ProfiledPIDController<a class="headerlink" href="#option-1-profiledpidcontroller" title="Permanent link">#</a></h3>
+<p><code>ProfiledPIDController</code> combines a trapezoidal profile and a PID controller in one object:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.controller.ArmFeedforward</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.controller.ProfiledPIDController</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.trajectory.TrapezoidProfile</span><span class="p">;</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ProfiledPIDController</span><span class="w"> </span><span class="n">controller</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ProfiledPIDController</span><span class="p">(</span>
+<span class="w">    </span><span class="n">kP</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">kD</span><span class="p">,</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">Constraints</span><span class="p">(</span><span class="n">MAX_VEL_RAD_PER_S</span><span class="p">,</span><span class="w"> </span><span class="n">MAX_ACCEL_RAD_PER_S2</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ArmFeedforward</span><span class="w"> </span><span class="n">ff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArmFeedforward</span><span class="p">(</span><span class="n">kS</span><span class="p">,</span><span class="w"> </span><span class="n">kG</span><span class="p">,</span><span class="w"> </span><span class="n">kV</span><span class="p">,</span><span class="w"> </span><span class="n">kA</span><span class="p">);</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">goTo</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">targetRadians</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// PID on the profile's current setpoint, which moves toward the goal</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">pidVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">controller</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getAngleRadians</span><span class="p">(),</span><span class="w"> </span><span class="n">targetRadians</span><span class="p">);</span>
+<span class="w">        </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">State</span><span class="w"> </span><span class="n">setpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">controller</span><span class="p">.</span><span class="na">getSetpoint</span><span class="p">();</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">ffVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ff</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">setpoint</span><span class="p">.</span><span class="na">position</span><span class="p">,</span><span class="w"> </span><span class="n">setpoint</span><span class="p">.</span><span class="na">velocity</span><span class="p">);</span>
+<span class="w">        </span><span class="n">motor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">pidVolts</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">ffVolts</span><span class="p">);</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="w">    </span><span class="p">.</span><span class="na">beforeStarting</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">controller</span><span class="p">.</span><span class="na">reset</span><span class="p">(</span><span class="n">getAngleRadians</span><span class="p">(),</span><span class="w"> </span><span class="n">getVelocityRadPerSec</span><span class="p">()))</span>
+<span class="w">    </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Arm to "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">targetRadians</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>controller.calculate(measurement, goal)</code></td>
+<td>Advances the profile 20 ms toward the goal, then runs PID against the new setpoint</td>
+</tr>
+<tr>
+<td><code>controller.getSetpoint()</code></td>
+<td>Where the profile says to be <strong>right now</strong>: <code>.position</code> and <code>.velocity</code></td>
+</tr>
+<tr>
+<td><code>ff.calculate(setpoint.position, setpoint.velocity)</code></td>
+<td>Feedforward for that exact point on the path</td>
+</tr>
+<tr>
+<td><code>controller.reset(position, velocity)</code></td>
+<td>Starts the profile from where the arm <strong>actually</strong> is</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Always reset before a new move</p>
+<p>If you don't call <code>reset()</code> with the current position, the profile starts from wherever it last ended, possibly far from where the arm is now. The first loop then sees a huge error and the arm lurches. <code>.beforeStarting(...)</code> makes sure it happens every time the command starts.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">This command doesn't end</p>
+<p><code>goTo</code> keeps running after it arrives, so the arm keeps holding the goal against gravity. To make it end, add <code>.until(controller::atGoal)</code>, but then something else must hold the arm.</p>
+</div>
+<h3 id="option-2-trapezoidprofile-on-its-own">Option 2: TrapezoidProfile on its own<a class="headerlink" href="#option-2-trapezoidprofile-on-its-own" title="Permanent link">#</a></h3>
+<p>Sometimes you want the profile without WPILib's PID, for example to feed setpoints to a motor controller's onboard PID. Use <code>TrapezoidProfile</code> directly:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="w"> </span><span class="n">profile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">(</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">Constraints</span><span class="p">(</span><span class="n">MAX_VEL</span><span class="p">,</span><span class="w"> </span><span class="n">MAX_ACCEL</span><span class="p">));</span>
+<span class="kd">private</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">State</span><span class="w"> </span><span class="n">setpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">State</span><span class="p">();</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">goTo</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">goalPosition</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">State</span><span class="w"> </span><span class="n">goal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">State</span><span class="p">(</span><span class="n">goalPosition</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">State</span><span class="p">(</span><span class="n">getPosition</span><span class="p">(),</span><span class="w"> </span><span class="n">getVelocity</span><span class="p">()))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">setpoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">profile</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="mf">0.020</span><span class="p">,</span><span class="w"> </span><span class="n">setpoint</span><span class="p">,</span><span class="w"> </span><span class="n">goal</span><span class="p">);</span><span class="w">   </span><span class="c1">// advance 20 ms</span>
+<span class="w">            </span><span class="c1">// send setpoint.position and setpoint.velocity to your controller</span>
+<span class="w">        </span><span class="p">}));</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="choosing-constraints">Choosing constraints<a class="headerlink" href="#choosing-constraints" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Find what the mechanism can actually do.</strong> A rough maximum velocity is about 80% of free speed at the mechanism (motor free speed ÷ gear ratio). Leave headroom so the motor can catch up when it falls behind.</li>
+<li><strong>Start slow.</strong> Use about half that velocity and a modest acceleration, so the first tests are gentle.</li>
+<li><strong>Raise them</strong> until moves are as fast as you need, or until the mechanism starts lagging behind the profile.</li>
+<li><strong>Watch for lag.</strong> Graph the setpoint and the measured position together. If the measurement falls further and further behind during a move, your constraints are more than the motor can deliver.</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Graph three things while tuning</p>
+<p>The <strong>goal</strong>, the <strong>setpoint</strong>, and the <strong>measured position</strong>. The setpoint should glide toward the goal, and the measurement should follow the setpoint closely. Big gaps between the setpoint and measurement mean feedforward or PID needs work; a setpoint that jumps means the profile isn't being reset.</p>
+</div>
+<h3 id="elevators-work-the-same-way">Elevators work the same way<a class="headerlink" href="#elevators-work-the-same-way" title="Permanent link">#</a></h3>
+<p>Swap <code>ArmFeedforward</code> for <code>ElevatorFeedforward</code>, and use meters and meters per second instead of radians. Everything else is identical.</p>
+<h3 id="on-controller-profiles">On-controller profiles<a class="headerlink" href="#on-controller-profiles" title="Permanent link">#</a></h3>
+<p>Modern motor controllers can run profiles <strong>on the controller itself</strong> at much faster rates:</p>
+<ul>
+<li>CTRE TalonFX: <strong>Motion Magic</strong></li>
+<li>REV SPARK MAX / Flex: <strong>MAXMotion</strong></li>
+</ul>
+<p>You give them the constraints and feedforward gains once, then just send a goal. They're excellent and widely used. Learn the WPILib version first so you understand what they're doing and can tune them.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> By hand: an elevator moves 1.2 m with max velocity 1.5 m/s and max acceleration 3 m/s². Is the profile a trapezoid or a triangle? How long does the move take?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Open the <strong>ArmSimulation</strong> example project</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Replace its controller with a <code>ProfiledPIDController</code> plus <code>ArmFeedforward</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Bind two buttons to two angles and tune it to move smoothly between them</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Graph the goal, setpoint, and measured angle together in Glass or AdvantageScope</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Remove the <code>.beforeStarting(...)</code> reset and see what happens on the first move. Then put it back.</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between the goal and the setpoint?</summary>
+<p>The goal is where you finally want to be. The setpoint is where the profile says to be right now, and it moves toward the goal every loop.</p>
+</details>
+<details class="question">
+<summary>Why does a motion profile reduce overshoot?</summary>
+<p>The setpoint moves gradually and slows down near the goal, so the controller never sees a huge sudden error.</p>
+</details>
+<details class="question">
+<summary>When does a trapezoidal profile become a triangle?</summary>
+<p>When the move is too short to reach max velocity before it has to start slowing down.</p>
+</details>
+<details class="question">
+<summary>Why feed the profile's setpoint velocity into feedforward instead of the final goal?</summary>
+<p>Feedforward needs to know how fast the mechanism <em>should</em> be moving right now, and that's the profile's current setpoint. At the goal, the velocity is 0.</p>
+</details>
+<details class="question">
+<summary>Why must you call <code>reset()</code> before each move?</summary>
+<p>So the profile starts from the mechanism's actual position. Otherwise the first setpoint can be far from reality and the mechanism lurches.</p>
+</details>
+<details class="question">
+<summary>The measured position falls further behind the setpoint during every move. What should you change?</summary>
+<p>Lower the max velocity or acceleration, because the motor can't keep up, or improve the feedforward gains (kV and kA).</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="13b-sysid.html"><span>Previous</span>13.1 Characterizing with SysId</a><a class="pager-next" href="../workflow/15-team-process.html"><span>Next</span>15. Branches, PRs &amp; Code Review</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>
