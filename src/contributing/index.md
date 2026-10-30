@@ -2,20 +2,24 @@
 
 This site is plain HTML. Lessons are written in Markdown in the `src/` folder, and a small Python script, `build.py`, turns them into the HTML pages in `docs/`. GitHub Pages serves `docs/` directly, so there's no server and nothing to deploy by hand.
 
+A second script, `build_gitbook.py`, makes the GitBook version of the same lessons in `book/`. GitBook reads it straight from the repo.
+
 ## Quick edits
 1. Edit the lesson's Markdown file in `src/`.
-2. Run `python build.py`.
-3. Commit **both** the `src/` change and the rebuilt `docs/` files, and open a pull request.
+2. Run `python build.py` and `python build_gitbook.py --site-url https://robojacks.github.io/frc-course`.
+3. Commit the `src/` change **and** the rebuilt `docs/` and `book/` files, and open a pull request.
 
-!!! warning "Don't edit files in `docs/` directly"
-    `build.py` regenerates everything in `docs/` from `src/`, so hand edits there get overwritten the next time anyone builds.
+!!! warning "Don't edit `docs/`, `book/`, or pages in GitBook directly"
+    The build scripts regenerate everything in `docs/` and `book/` from `src/`, so hand edits there (including edits made in GitBook's editor) get overwritten the next time anyone builds.
 
 ## Working locally
 ```bash
-git clone https://github.com/YOUR-USERNAME/frc-course.git
+git clone https://github.com/Robojacks/frc-course.git
 cd frc-course
 pip install -r requirements.txt
+npm install -g @mermaid-js/mermaid-cli   # once, for the GitBook diagrams
 python build.py
+python build_gitbook.py --site-url https://robojacks.github.io/frc-course
 ```
 Then open `docs/index.html` in your browser. Rebuild and refresh after each change.
 
