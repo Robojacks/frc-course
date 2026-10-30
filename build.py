@@ -198,6 +198,15 @@ PAGE = """<!doctype html>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="{root}assets/style.css">
 <link rel="stylesheet" href="{root}assets/code.css">
+<script>
+// Apply the saved light/dark choice before the page draws, so it never flashes the wrong theme.
+try {{
+  var savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || savedTheme === "light") {{
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }}
+}} catch (e) {{}}
+</script>
 {extra_head}
 </head>
 <body id="top">
@@ -212,7 +221,14 @@ PAGE = """<!doctype html>
         <span class="brand-subtitle">{site_subtitle}</span>
       </span>
     </a>
-    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+    <div class="header-actions">
+      <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <span class="theme-track"><span class="theme-knob"></span></span>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
   </div>
   <nav class="tabs" aria-label="Sections"><div class="tabs-inner">{tabs}</div></nav>
 </header>
@@ -242,6 +258,32 @@ PAGE = """<!doctype html>
 if (window.matchMedia("(max-width: 860px)").matches) {{
   document.querySelector(".sidebar-toggle").removeAttribute("open");
 }}
+
+// Light/dark switch. With no saved choice, the site follows the device's setting.
+(function () {{
+  var root = document.documentElement;
+  var toggle = document.querySelector(".theme-toggle");
+  var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() {{
+    var chosen = root.getAttribute("data-theme");
+    return chosen ? chosen === "dark" : systemDark.matches;
+  }}
+  function show() {{
+    toggle.setAttribute("aria-checked", isDark() ? "true" : "false");
+  }}
+  toggle.addEventListener("click", function () {{
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try {{ localStorage.setItem("theme", next); }} catch (e) {{}}
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  }});
+  systemDark.addEventListener("change", function () {{
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  }});
+  show();
+}})();
 </script>
 {mermaid}
 </body>
@@ -250,8 +292,19 @@ if (window.matchMedia("(max-width: 860px)").matches) {{
 
 MERMAID = """<script type="module">
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+const diagrams = [...document.querySelectorAll(".mermaid")];
+diagrams.forEach((d) => { d.dataset.source = d.textContent; });   // keep the source to redraw later
+function isDark() {
+  const chosen = document.documentElement.getAttribute("data-theme");
+  return chosen ? chosen === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+async function draw() {
+  mermaid.initialize({ startOnLoad: false, theme: isDark() ? "dark" : "default" });
+  diagrams.forEach((d) => { d.removeAttribute("data-processed"); d.textContent = d.dataset.source; });
+  await mermaid.run({ nodes: diagrams });
+}
+draw();
+document.addEventListener("themechange", draw);   // redraw diagrams when the light/dark switch flips
 </script>"""
 
 
@@ -271,10 +324,13 @@ def build():
     # Diagrams, screenshots, and PID simulators adapted from the WPILib docs (CC BY 4.0)
     shutil.copytree(ASSETS / "wpilib", OUT / "assets" / "wpilib")
     shutil.copytree(ASSETS / "photos", OUT / "assets" / "photos")
+    # Code colors: light by default; dark when the switch says dark, or when the
+    # device is in dark mode and the switch hasn't been set to light.
     light = HtmlFormatter(style="friendly").get_style_defs(".highlight")
-    dark = HtmlFormatter(style="monokai").get_style_defs(".highlight")
+    dark_auto = HtmlFormatter(style="monokai").get_style_defs(':root:not([data-theme="light"]) .highlight')
+    dark_chosen = HtmlFormatter(style="monokai").get_style_defs(':root[data-theme="dark"] .highlight')
     (OUT / "assets" / "code.css").write_text(
-        f"{light}\n@media (prefers-color-scheme: dark) {{\n{dark}\n}}\n")
+        f"{light}\n@media (prefers-color-scheme: dark) {{\n{dark_auto}\n}}\n{dark_chosen}\n")
     (OUT / ".nojekyll").write_text("")  # tell GitHub Pages to serve files as-is
 
     all_pages = [(t, p) for _, _, nav in TABS for _, pages in nav for t, p in pages]

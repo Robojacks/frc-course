@@ -107,6 +107,33 @@ img { max-width: 100%; }
   white-space: nowrap;
 }
 .header-link:hover { background: var(--header-text); color: var(--plaid-dark); }
+.header-actions { display: flex; align-items: center; gap: 14px; flex: none; }
+
+/* ---------- Light/dark switch (top right of the header) ---------- */
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: 0; padding: 4px; margin: 0; cursor: pointer;
+  color: var(--header-text); border-radius: 999px;
+}
+.theme-toggle:focus-visible { outline: 3px solid var(--silver); outline-offset: 2px; }
+.theme-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; opacity: .55; transition: opacity .2s; }
+.theme-icon-sun circle { fill: currentColor; stroke: none; }
+.theme-icon-moon { fill: currentColor; stroke: none; }
+.theme-track {
+  position: relative; width: 48px; height: 26px; border-radius: 999px;
+  background: #5c616e; border: 2px solid var(--header-text); transition: background .2s;
+}
+.theme-knob {
+  position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--header-text); transition: transform .2s;
+}
+.theme-toggle[aria-checked="true"] .theme-track { background: var(--plaid-light); }
+.theme-toggle[aria-checked="true"] .theme-knob { transform: translateX(22px); }
+.theme-toggle[aria-checked="false"] .theme-icon-sun,
+.theme-toggle[aria-checked="true"] .theme-icon-moon { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .theme-track, .theme-knob, .theme-icon { transition: none; }
+}
 
 /* ---------- Tabs (Lessons / Labs) ---------- */
 .tabs { background: var(--plaid-dark); border-top: 1px solid rgba(255,255,255,.12); }
