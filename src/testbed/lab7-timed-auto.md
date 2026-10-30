@@ -223,6 +223,9 @@ git add .
 git commit -m "Lab 7: timed autonomous"
 ```
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab07-timed-auto**](https://github.com/Robojacks/frc-course/tree/main/examples/lab07-timed-auto) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Run **Drive forward** and **Square** from the chooser
 - [ ] Tune the spin time until a single turn is close to 90°

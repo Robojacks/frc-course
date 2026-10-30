@@ -193,6 +193,9 @@ From now on, commit after each lab, so you can always get back to working code.
 | Robot Code light red after deploy | Your code crashed on startup. Open RioLog and read the first error. |
 | No message in the console | Make sure you deployed after adding the line |
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab00-testbed-setup**](https://github.com/Robojacks/frc-course/tree/main/examples/lab00-testbed-setup) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Install WPILib, FRC Game Tools, REV Hardware Client, and Git
 - [ ] Create **TestBed** from the Command Robot template with team number 4674

@@ -5,7 +5,8 @@ This site is plain HTML. Lessons are written in Markdown in the `src/` folder, a
 ## Quick edits
 1. Edit the lesson's Markdown file in `src/`.
 2. Run `python build.py`.
-3. Commit the `src/` change **and** the rebuilt `docs/` files, and open a pull request.
+3. If you changed code in a **lab** page, also run `python tools/make_examples.py`. It rebuilds the finished projects in `examples/` from the lab pages, so they always match.
+4. Commit the `src/` change **and** the rebuilt `docs/` (and `examples/`) files, and open a pull request.
 
 !!! warning "Don't edit files in `docs/` directly"
     `build.py` regenerates everything in `docs/` from `src/`, so hand edits there get overwritten the next time anyone builds.

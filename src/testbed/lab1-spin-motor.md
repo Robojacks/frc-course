@@ -36,7 +36,10 @@ Before writing code, make sure the hardware is what the code will expect.
 ### Step 2: Constants
 Never put numbers like CAN IDs and speeds directly in your code. Put them in `Constants.java`, so there's one place to change them.
 
-Open `Constants.java` and add a new class inside `Constants`:
+!!! warning "Rename the template's controller first"
+    The WPILib template names the controller `m_driverController`, and its port `kDriverControllerPort`. This course calls them **`m_controller`** and **`kControllerPort`**. In VS Code, click on `m_driverController`, press ++f2++ (**Rename Symbol**), and type `m_controller`. Do the same for `kDriverControllerPort` → `kControllerPort`. ++f2++ renames every use at once, so nothing breaks.
+
+Then open `Constants.java` and add a new class inside `Constants`:
 
 ```java
 public final class Constants {
@@ -188,6 +191,9 @@ git commit -m "Lab 1: spin brushless motor on A"
 | Motor keeps spinning after you let go | The command doesn't stop the motor when it ends. Check that you used `startEnd` with `setMotorSpeed(0.0)` as the end action. |
 | Motor spins the wrong way | Add `brushlessMotorConfig.inverted(true);` in the constructor |
 | Build error: cannot find symbol `SparkMax` | REVLib isn't installed. Go back to Lab 0, Part 4. |
+
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab01-spin-motor**](https://github.com/Robojacks/frc-course/tree/main/examples/lab01-spin-motor) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
 
 ## Try it
 - [ ] Spin the motor with A, and stop it by letting go

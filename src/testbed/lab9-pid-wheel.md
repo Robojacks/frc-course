@@ -207,6 +207,9 @@ git add .
 git commit -m "Lab 9: PID on the wheel"
 ```
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab09-pid-wheel**](https://github.com/Robojacks/frc-course/tree/main/examples/lab09-pid-wheel) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Complete the scorecard: Attempts 3 to 5, three runs each
 - [ ] Graph Position and Target for Attempts 2 through 5, and screenshot each

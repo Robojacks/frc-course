@@ -506,6 +506,9 @@ git commit -m "Lab 10: elevator position control"
 | Slow swinging above and below the target | I is too high |
 | Big overshoot on long moves only | IZone is too big or missing, or the profile is too fast |
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab10-elevator**](https://github.com/Robojacks/frc-course/tree/main/examples/lab10-elevator) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Work out `DistancePerPulse` from your sprocket's pitch diameter, and check it with a tape measure
 - [ ] Find the top and set a safe `MaxHeightMeters`

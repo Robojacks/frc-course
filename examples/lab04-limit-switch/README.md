@@ -1,0 +1,15 @@
+# Lab 4 finished code (TestBed)
+
+This is the **TestBed** project as it looks at the end of [Lab 4](../../src/testbed/lab4-limit-switch.md).
+It runs on the test bed (team 4674).
+
+Use it to check your own work, or to catch up if you missed a lab. Try to finish the lab
+yourself first: you learn much more from fixing your own code than from reading this.
+
+## Open and deploy it
+1. Open this folder in **WPILib VS Code** (File → Open Folder).
+2. Check the CAN IDs, DIO ports, and other numbers in `Constants.java` against your robot.
+3. Build (Ctrl+Shift+P → **WPILib: Build Robot Code**), then deploy.
+
+The vendor libraries it needs are already in `vendordeps/`: WPILib New Commands, REVLib.
+The first build downloads them, so be online for it.

@@ -21,7 +21,9 @@ The **Lessons** tab teaches the ideas. The **Labs** tab is where you try them on
 | [Lab 9: PID on the Wheel](lab9-pid-wheel.md) | Test bed | Lab 8 and [Lesson 12](../controls/12-pid.md) | Turn exactly 10 times with P, then D, then I |
 | [Lab 10: Elevator Position Control](lab10-elevator.md) | WCD | Lab 9 | Move the elevator between START, L2, and L3 with a ProfiledPIDController, in meters, and hold against gravity |
 
-Do them in order. Each lab adds **one** new idea. Labs on the test bed build up the **TestBed** project from Lab 0. Labs on the WCD build up the **WestCoastDrive** project from Lab 2. Commit your work to Git after each lab.
+Do them in order. Each lab adds **one** new idea. Every lab has **finished code** on GitHub, in the [examples folder](https://github.com/Robojacks/frc-course/tree/main/examples): a complete project you can open and deploy if you get stuck.
+
+Each lab adds **one** new idea. Labs on the test bed build up the **TestBed** project from Lab 0. Labs on the WCD build up the **WestCoastDrive** project from Lab 2. Commit your work to Git after each lab.
 
 ## What's on the test bed
 New to any of this hardware? [Lesson 4](../hardware/04-electronics.md) covers the electrical system, and Lessons [4.1](../hardware/04b-motors.md) (motors), [4.2](../hardware/04c-spark-max.md) (SPARK MAX), and [4.3](../hardware/04d-sensors.md) (sensors) cover each part below.

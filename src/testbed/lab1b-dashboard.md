@@ -228,6 +228,9 @@ Your layout file is now in Git, so a teammate can load the same dashboard.
 | Changing **Tunable Speed** does nothing | The command uses `startEnd` instead of `runEnd`, or B isn't bound |
 | Build error: cannot find symbol `DashTable` | `DashTable.java` is in the wrong folder, or its first line isn't `package frc.robot;` |
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab01b-dashboard**](https://github.com/Robojacks/frc-course/tree/main/examples/lab01b-dashboard) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Get all five **Brushless** values showing in Elastic
 - [ ] Hold A and watch the startup current jump. What's the highest number you see?

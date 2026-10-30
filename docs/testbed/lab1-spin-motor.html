@@ -85,7 +85,11 @@
 </ol>
 <h3 id="step-2-constants">Step 2: Constants<a class="headerlink" href="#step-2-constants" title="Permanent link">#</a></h3>
 <p>Never put numbers like CAN IDs and speeds directly in your code. Put them in <code>Constants.java</code>, so there's one place to change them.</p>
-<p>Open <code>Constants.java</code> and add a new class inside <code>Constants</code>:</p>
+<div class="admonition warning">
+<p class="admonition-title">Rename the template's controller first</p>
+<p>The WPILib template names the controller <code>m_driverController</code>, and its port <code>kDriverControllerPort</code>. This course calls them <strong><code>m_controller</code></strong> and <strong><code>kControllerPort</code></strong>. In VS Code, click on <code>m_driverController</code>, press <span class="keys"><kbd class="key-f2">F2</kbd></span> (<strong>Rename Symbol</strong>), and type <code>m_controller</code>. Do the same for <code>kDriverControllerPort</code> → <code>kControllerPort</code>. <span class="keys"><kbd class="key-f2">F2</kbd></span> renames every use at once, so nothing breaks.</p>
+</div>
+<p>Then open <code>Constants.java</code> and add a new class inside <code>Constants</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Constants</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OperatorConstants</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kControllerPort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
@@ -256,6 +260,10 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 </tr>
 </tbody>
 </table>
+<div class="admonition example">
+<p class="admonition-title">Finished code</p>
+<p>Stuck, or missed a lab? <a href="https://github.com/Robojacks/frc-course/tree/main/examples/lab01-spin-motor"><strong>lab01-spin-motor</strong></a> on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.</p>
+</div>
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Spin the motor with A, and stop it by letting go</li>

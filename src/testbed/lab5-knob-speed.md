@@ -178,6 +178,9 @@ git add .
 git commit -m "Lab 5: knob controls speed"
 ```
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab05-knob-speed**](https://github.com/Robojacks/frc-course/tree/main/examples/lab05-knob-speed) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Calibrate the knob and record min, max, and center
 - [ ] Control the motor speed with the knob

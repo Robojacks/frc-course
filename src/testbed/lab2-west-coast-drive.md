@@ -241,6 +241,9 @@ The Xbox controller's two sticks are the two levers. In code, WPILib calls this 
 
 `m_drive.tankDrive(left, right)` sends those two values straight to the two sides. It also **squares** them by default, which gives finer control at low speed: half stick gives about a quarter of full speed ([Lesson 10](../project/10-teleop.md)).
 
+!!! warning "Rename the template's controller first"
+    The WPILib template names the controller `m_driverController`, and its port `kDriverControllerPort`. This course calls them **`m_controller`** and **`kControllerPort`**. In VS Code, click on `m_driverController`, press ++f2++ (**Rename Symbol**), and type `m_controller`. Do the same for `kDriverControllerPort` → `kControllerPort`. ++f2++ renames every use at once, so nothing breaks.
+
 Open `RobotContainer.java`. Add the imports and create the subsystem:
 
 ```java
@@ -333,6 +336,9 @@ Spinning in place usually pulls the most current, because the wheels have to ski
 git add .
 git commit -m "Lab 2: differential drive on the WCD"
 ```
+
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab02-west-coast-drive**](https://github.com/Robojacks/frc-course/tree/main/examples/lab02-west-coast-drive) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
 
 ## Try it
 - [ ] Get every row in the Step 7 table to pass on blocks

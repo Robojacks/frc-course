@@ -377,6 +377,10 @@
 </tbody>
 </table>
 <p><code>m_drive.tankDrive(left, right)</code> sends those two values straight to the two sides. It also <strong>squares</strong> them by default, which gives finer control at low speed: half stick gives about a quarter of full speed (<a href="../project/10-teleop.html">Lesson 10</a>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Rename the template's controller first</p>
+<p>The WPILib template names the controller <code>m_driverController</code>, and its port <code>kDriverControllerPort</code>. This course calls them <strong><code>m_controller</code></strong> and <strong><code>kControllerPort</code></strong>. In VS Code, click on <code>m_driverController</code>, press <span class="keys"><kbd class="key-f2">F2</kbd></span> (<strong>Rename Symbol</strong>), and type <code>m_controller</code>. Do the same for <code>kDriverControllerPort</code> → <code>kControllerPort</code>. <span class="keys"><kbd class="key-f2">F2</kbd></span> renames every use at once, so nothing breaks.</p>
+</div>
 <p>Open <code>RobotContainer.java</code>. Add the imports and create the subsystem:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.MathUtil</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.subsystems.DriveSubsystem</span><span class="p">;</span>
@@ -536,6 +540,10 @@
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
 git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 2: differential drive on the WCD"</span>
 </code></pre></div>
+<div class="admonition example">
+<p class="admonition-title">Finished code</p>
+<p>Stuck, or missed a lab? <a href="https://github.com/Robojacks/frc-course/tree/main/examples/lab02-west-coast-drive"><strong>lab02-west-coast-drive</strong></a> on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.</p>
+</div>
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Get every row in the Step 7 table to pass on blocks</li>

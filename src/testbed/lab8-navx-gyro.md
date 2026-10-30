@@ -227,6 +227,9 @@ git commit -m "Lab 8: NavX gyro turns"
 | Heading goes **down** when turning left | You used `getAngle()` or `getYaw()` instead of `getRotation2d()` |
 | Robot spins forever, then stops after 3 seconds | It turned the opposite way from the target: check the signs in `tankDrive` for the turn |
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab08-navx-gyro**](https://github.com/Robojacks/frc-course/tree/main/examples/lab08-navx-gyro) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Check the heading by hand: +90 left, −90 right
 - [ ] Measure drift: how much does the heading change in one minute sitting still?

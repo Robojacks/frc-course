@@ -151,6 +151,9 @@ git add .
 git commit -m "Lab 3: button bindings"
 ```
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab03-buttons-triggers**](https://github.com/Robojacks/frc-course/tree/main/examples/lab03-buttons-triggers) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Fill in the whole table in Step 3
 - [ ] Do the three B puzzles in Step 4 and explain each one in a sentence

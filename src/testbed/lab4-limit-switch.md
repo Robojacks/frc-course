@@ -148,6 +148,9 @@ git commit -m "Lab 4: limit switch"
 | Motor doesn't stop when the switch is pressed | `.until` is missing, or `isLimitPressed()` returns the wrong value |
 | "Limit switch hit!" prints over and over | You used `whileTrue` instead of `onTrue`, or the switch is bouncing (see the last exercise) |
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab04-limit-switch**](https://github.com/Robojacks/frc-course/tree/main/examples/lab04-limit-switch) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Get **Limit Pressed** reading correctly in Elastic
 - [ ] Spin until the switch is pressed with D-pad up

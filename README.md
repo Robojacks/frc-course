@@ -10,7 +10,8 @@ A tutorial-style course for FRC Java, from installing WPILib to PID, feedforward
 | `assets/style.css` | The site theme. Colors and fonts are at the top. |
 | `build.py` | Turns `src/` into HTML, and holds the lesson order (`NAV`) |
 | `docs/` | The finished HTML site that GitHub Pages serves. Generated, so don't edit by hand. |
-| `testbed-code/` | Early drafts of the test bed wheel code |
+| `examples/` | **Finished code for every lab**: one complete WPILib 2026 project per lab. Generated, so don't edit by hand. |
+| `tools/make_examples.py` | Builds `examples/` from the code in the lab pages, so the two always match |
 
 ## Publish on GitHub Pages
 1. This repo is [Robojacks/frc-course](https://github.com/Robojacks/frc-course).
@@ -22,6 +23,7 @@ A tutorial-style course for FRC Java, from installing WPILib to PID, feedforward
 ```bash
 pip install -r requirements.txt
 python build.py
+python tools/make_examples.py   # only if you changed code in a lab page
 git add .
 git commit -m "Describe the change"
 git push

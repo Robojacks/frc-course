@@ -259,6 +259,9 @@ git add .
 git commit -m "Lab 6: encoder, timed and bang-bang"
 ```
 
+!!! example "Finished code"
+    Stuck, or missed a lab? [**lab06-encoder**](https://github.com/Robojacks/frc-course/tree/main/examples/lab06-encoder) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
+
 ## Try it
 - [ ] Check direction and scale, and get **1.00** for one turn by hand
 - [ ] Watch **Raw Counts**, **Cycles**, and **Position** for one turn. Explain how they're related.

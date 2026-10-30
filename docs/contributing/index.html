@@ -50,7 +50,8 @@
 <ol>
 <li>Edit the lesson's Markdown file in <code>src/</code>.</li>
 <li>Run <code>python build.py</code>.</li>
-<li>Commit the <code>src/</code> change <strong>and</strong> the rebuilt <code>docs/</code> files, and open a pull request.</li>
+<li>If you changed code in a <strong>lab</strong> page, also run <code>python tools/make_examples.py</code>. It rebuilds the finished projects in <code>examples/</code> from the lab pages, so they always match.</li>
+<li>Commit the <code>src/</code> change <strong>and</strong> the rebuilt <code>docs/</code> (and <code>examples/</code>) files, and open a pull request.</li>
 </ol>
 <div class="admonition warning">
 <p class="admonition-title">Don't edit files in <code>docs/</code> directly</p>

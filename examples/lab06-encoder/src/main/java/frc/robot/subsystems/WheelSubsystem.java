@@ -1,0 +1,98 @@
+// RoboJacks 4674 FRC Programming Course: finished code for Lab 6.
+// Built from the WPILib 2026 Command Robot template.
+
+package frc.robot.subsystems;
+
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.kWheelConstants;
+import frc.robot.DashTable;
+
+public class WheelSubsystem extends SubsystemBase {
+    private final SparkMax m_motor =
+        new SparkMax(kWheelConstants.MotorCanId, MotorType.kBrushed);
+
+    private final Encoder m_encoder = new Encoder(
+        kWheelConstants.EncoderChannelA,
+        kWheelConstants.EncoderChannelB,
+        kWheelConstants.EncoderInverted,
+        EncodingType.k4X);
+
+    private double m_target = 0.0;     // where the current attempt is trying to stop
+    private double m_lastVolts = 0.0;  // for the dashboard
+
+    private final DashTable m_dash = new DashTable("Wheel");
+
+    public WheelSubsystem() {
+        SparkMaxConfig config = new SparkMaxConfig();
+        config.smartCurrentLimit(kWheelConstants.CurrentLimitAmps);
+        config.idleMode(IdleMode.kBrake);
+        config.inverted(kWheelConstants.MotorInverted);
+        m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        // One "pulse" = one quadrature cycle. After this, getDistance() is in wheel rotations.
+        m_encoder.setDistancePerPulse(1.0 / kWheelConstants.EncoderCyclesPerRev);
+    }
+
+    public double getRotations() { return m_encoder.getDistance(); }
+    public double getRps()       { return m_encoder.getRate(); }
+
+    private void setVolts(double volts) {
+        m_lastVolts = volts;
+        m_motor.setVoltage(volts);
+    }
+
+    private void stop() {
+        m_lastVolts = 0.0;
+        m_motor.stopMotor();
+    }
+
+    /** Every attempt turns a number of rotations FROM WHEREVER THE WHEEL IS NOW. */
+    private void setTargetFromHere(double rotations) {
+        m_target = getRotations() + rotations;
+    }
+
+    public Command zero() {
+        return runOnce(m_encoder::reset).ignoringDisable(true).withName("Zero");
+    }
+
+    public Command idle() {
+        return run(this::stop).withName("Idle");
+    }
+
+    public Command turnTimed(double volts, double seconds) {
+        return startEnd(() -> setVolts(volts), this::stop)
+            .withTimeout(seconds)
+            .withName("Attempt 1: Timed");
+    }
+
+    public Command turnBangBang(double rotations, double volts) {
+        return runOnce(() -> setTargetFromHere(rotations))
+            .andThen(run(() -> setVolts(volts)))         // full speed the whole way
+            .until(() -> getRotations() >= m_target)     // stop the moment we arrive
+            .withTimeout(5.0)                            // safety: give up if the encoder never gets there
+            .finallyDo(this::stop)
+            .withName("Attempt 2: Bang-Bang");
+    }
+
+    @Override
+    public void periodic() {
+        m_dash.log("Position (rot)", getRotations());
+        m_dash.log("Target (rot)", m_target);
+        m_dash.log("Error (rot)", m_target - getRotations());
+        m_dash.log("Velocity (rot per s)", getRps());
+        m_dash.log("Output (V)", m_lastVolts);
+        m_dash.log("Current (A)", m_motor.getOutputCurrent());
+        m_dash.log("Raw Counts", m_encoder.getRaw());
+        m_dash.log("Cycles", m_encoder.get());
+    }
+}
