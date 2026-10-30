@@ -150,7 +150,7 @@ Most motor controllers talk to the roboRIO over **CAN**, a two-wire daisy chain 
     | A whole group of devices stops responding | Broken connection in the chain before them |
     | One device missing in Phoenix Tuner or REV Hardware Client | Its CAN wires are loose or its ID was never set |
     | "CAN frame not received" errors in the console | The device the code expects isn't on the bus at that ID |
-    | **Every** device times out (for REV: `timed out while waiting for Periodic Status 0: CAN Receive has Timed Out`) | The **yellow and green wires are swapped** somewhere, often right at the roboRIO. Yellow goes to CAN-H and green to CAN-L at **every** connection. |
+    | **Every** device times out (for REV: `timed out while waiting for Period Status 0: CAN Receive has Timed Out`) | The **yellow and green wires are swapped** somewhere, often right at the roboRIO. Yellow goes to CAN-H and green to CAN-L at **every** connection. |
 
 !!! tip "Check the colors at the roboRIO first"
     The roboRIO's CAN port is labeled **H** and **L**. Yellow goes to **H**, green goes to **L**. One swapped connection anywhere in the chain can silence the whole bus, so when nothing on CAN responds, check the colors at each connector, starting at the roboRIO.

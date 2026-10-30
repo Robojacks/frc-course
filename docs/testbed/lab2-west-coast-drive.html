@@ -646,7 +646,7 @@ try {
 <td>Leader and follower are fighting. Check the <code>follow</code> CAN IDs.</td>
 </tr>
 <tr>
-<td>Nothing moves, and the console repeats <code>[Spark Max] IDs: 1, timed out while waiting for Periodic Status 0: HAL: CAN Receive has Timed Out</code> and <code>Setpoint command: Unknown error status</code></td>
+<td>Nothing moves, and the console repeats <code>[Spark Max] IDs: 1, timed out while waiting for Period Status 0: HAL: CAN Receive has Timed Out</code> and <code>Setpoint command: Unknown error status</code></td>
 <td>The roboRIO can't hear that SPARK MAX on CAN. Check, in order: the <strong>yellow and green CAN wires</strong> aren't swapped (yellow to <strong>H</strong>, green to <strong>L</strong>, especially at the roboRIO); the controller's CAN ID in the REV Hardware Client matches <code>Constants</code>; it has power; the CAN chain is connected all the way to the PDH, with <strong>TERM</strong> on (<a href="../hardware/04-electronics.html#can-bus">Lesson 4</a>).</td>
 </tr>
 </tbody>
