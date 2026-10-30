@@ -168,7 +168,7 @@ This is WPILib's vertical arm simulator, with **feedforward and feedback** toget
 
 The simulator for this section runs in a web page, not in GitBook. Use it in either place:
 
-- [This page on the course website](https://YOUR-USERNAME.github.io/frc-course/controls/13-feedforward.html)
+- [This page on the course website](https://robojacks.github.io/frc-course/controls/13-feedforward.html)
 - [Tuning a Vertical Arm Position Controller](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html) in the WPILib docs (CC BY 4.0)
 {% endhint %}
 

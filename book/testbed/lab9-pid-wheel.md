@@ -76,7 +76,7 @@ Click a spot around the circle to set a new angle.
 
 The simulator for this section runs in a web page, not in GitBook. Use it in either place:
 
-- [This page on the course website](https://YOUR-USERNAME.github.io/frc-course/testbed/lab9-pid-wheel.html)
+- [This page on the course website](https://robojacks.github.io/frc-course/testbed/lab9-pid-wheel.html)
 - [Tuning a Turret Position Controller](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html) in the WPILib docs (CC BY 4.0)
 {% endhint %}
 

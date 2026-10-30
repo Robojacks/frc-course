@@ -21,10 +21,10 @@ The course is published two ways from the same lessons:
 - **GitBook** (`book/`): the same lessons in GitBook. The simulators can't run inside GitBook, so those spots link to the website and to the WPILib docs instead.
 
 ## Publish on GitHub Pages
-1. Push this folder to a GitHub repo.
+1. This repo is [Robojacks/frc-course](https://github.com/Robojacks/frc-course).
 2. In the repo, go to **Settings → Pages**.
 3. Under **Build and deployment**, choose **Deploy from a branch**, branch **main**, folder **/docs**.
-4. Wait a minute, and the site appears at `https://YOUR-USERNAME.github.io/REPO-NAME/`.
+4. Wait a minute, and the site appears at `https://robojacks.github.io/frc-course/`.
 
 ## Publish on GitBook
 1. Push this repo to GitHub first (GitBook imports from it).
@@ -43,7 +43,7 @@ The course is published two ways from the same lessons:
 pip install -r requirements.txt
 npm install -g @mermaid-js/mermaid-cli   # once, for the diagrams in the GitBook version
 python build.py
-python build_gitbook.py --site-url https://YOUR-USERNAME.github.io/REPO-NAME
+python build_gitbook.py --site-url https://robojacks.github.io/frc-course
 git add .
 git commit -m "Describe the change"
 git push

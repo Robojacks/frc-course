@@ -34,7 +34,7 @@ WPILib's elevator simulator below runs **PID only**, exactly like this lab. Clic
 
 The simulator for this section runs in a web page, not in GitBook. Use it in either place:
 
-- [This page on the course website](https://YOUR-USERNAME.github.io/frc-course/testbed/lab10-elevator.html)
+- [This page on the course website](https://robojacks.github.io/frc-course/testbed/lab10-elevator.html)
 - [Tuning a Vertical Elevator with Motion Profiling](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html) in the WPILib docs (CC BY 4.0)
 {% endhint %}
 
