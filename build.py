@@ -316,9 +316,13 @@ SIM_HEAD = """<link rel="stylesheet" href="{root}assets/wpilib/pid-tune.css">
 
 
 def build():
+    # GitHub Pages' custom domain lives in docs/CNAME. Keep it across rebuilds.
+    cname = (OUT / "CNAME").read_text() if (OUT / "CNAME").exists() else None
     if OUT.exists():
         shutil.rmtree(OUT)
     (OUT / "assets").mkdir(parents=True)
+    if cname:
+        (OUT / "CNAME").write_text(cname)
     for f in ("style.css", "robojacks-logo.png", "favicon.png"):
         shutil.copy(ASSETS / f, OUT / "assets" / f)
     # Diagrams, screenshots, and PID simulators adapted from the WPILib docs (CC BY 4.0)
