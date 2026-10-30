@@ -13,6 +13,7 @@ Both directions go through **NetworkTables**, WPILib's system for sharing data b
 
     - The **SmartDashboard and Shuffleboard apps** are removed in WPILib 2027. WPILib's advice is to use **Elastic** as the driver dashboard and **AdvantageScope** for debugging.
     - In the 2027 previews, the **`SmartDashboard` class itself** is replaced by new **Telemetry** and **Tunables** APIs, and `SendableChooser` is replaced by **`Selectable`**.
+    - **`SendableChooser`** only reaches the dashboard through `SmartDashboard.putData`, so this course uses its own NetworkTables chooser, `DashChooser`, instead.
     - **NetworkTables 4 stays.** The new 2027 APIs are built on top of it.
 
     So this course writes **2026** code with NetworkTables 4 directly, in a way that maps one-to-one onto the 2027 APIs. The end of this lesson shows exactly how.
@@ -190,6 +191,121 @@ public void periodic() {
 }
 ```
 
+### A dropdown menu: `DashChooser`
+The drive team picks an autonomous routine from a dropdown on the dashboard before each match. Older code does this with `SendableChooser` and `SmartDashboard.putData`. This course uses a small class of its own, `DashChooser`, that sends the menu straight over NetworkTables 4. Its methods have the same names as WPILib 2027's `Selectable`, so moving to 2027 is a rename.
+
+```java
+package frc.robot;
+
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEvent;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringArrayPublisher;
+import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.networktables.StringSubscriber;
+
+/**
+ * A dropdown menu on the dashboard, sent with NetworkTables 4.
+ * Elastic shows it as a ComboBox Chooser. It works like WPILib 2027's Selectable.
+ */
+public class DashChooser<T> {
+  private final Map<String, T> m_options = new LinkedHashMap<>();
+  private String m_defaultName = "";
+
+  private final StringPublisher m_type;
+  private final StringArrayPublisher m_optionNames;
+  private final StringPublisher m_default;
+  private final StringPublisher m_active;
+  private final StringSubscriber m_selected;
+
+  public DashChooser(String tableName) {
+    NetworkTableInstance nt = NetworkTableInstance.getDefault();
+    NetworkTable table = nt.getTable(tableName);
+
+    // ".type" tells Elastic which widget to show
+    m_type = table.getStringTopic(".type").publish();
+    m_type.set("String Chooser");
+
+    m_optionNames = table.getStringArrayTopic("options").publish();
+    m_default = table.getStringTopic("default").publish();
+    m_active = table.getStringTopic("active").publish();
+
+    // The dashboard writes the drive team's pick to "selected". The robot only reads it.
+    m_selected = table.getStringTopic("selected").subscribe("");
+
+    // Whenever the pick changes, report back which option the robot will really use
+    nt.addListener(m_selected, EnumSet.of(NetworkTableEvent.Kind.kValueAll),
+        event -> m_active.set(selectedName()));
+  }
+
+  /** Adds an option and makes it the default: the one used if nobody picks. */
+  public void addDefault(String name, T value) {
+    m_defaultName = name;
+    m_default.set(name);
+    add(name, value);
+  }
+
+  /** Adds an option to the menu. */
+  public void add(String name, T value) {
+    m_options.put(name, value);
+    m_optionNames.set(m_options.keySet().toArray(new String[0]));
+    m_active.set(selectedName());
+  }
+
+  /** The value for the option picked on the dashboard, or the default if nothing valid is picked. */
+  public T getSelected() {
+    return m_options.get(selectedName());
+  }
+
+  private String selectedName() {
+    String name = m_selected.get();
+    return m_options.containsKey(name) ? name : m_defaultName;
+  }
+}
+```
+
+A menu is just a few topics in one table. Elastic reads them and shows a dropdown:
+
+| Topic | Who writes it | What it holds |
+|---|---|---|
+| `.type` | Robot | `"String Chooser"`, which tells Elastic to show a **ComboBox Chooser** |
+| `options` | Robot | Every option's name, in order |
+| `default` | Robot | The option used if nobody picks |
+| `selected` | **Dashboard** | The option the drive team picked |
+| `active` | Robot | The option the robot will really use, so the dashboard can confirm it |
+
+| Code | What it means |
+|---|---|
+| `DashChooser<T>` | A **generic** class: `T` is the type of thing in the menu. `DashChooser<Command>` holds commands. |
+| `LinkedHashMap` | A map that remembers the order you added things, so the menu lists options in that order |
+| `nt.addListener(...)` | Runs the code at the end whenever `selected` changes, without waiting for the robot loop |
+| `m_options.containsKey(name) ? name : m_defaultName` | If the dashboard's pick isn't a real option (or nothing is picked yet), use the default |
+
+Using it in `RobotContainer`:
+
+```java
+private final DashChooser<Command> autoChooser = new DashChooser<>("Auto");
+
+public RobotContainer() {
+    autoChooser.addDefault("Do nothing", Commands.none());
+    autoChooser.add("Drive forward", driveForwardAuto());
+    autoChooser.add("Square", squareAuto());
+}
+
+public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
+}
+```
+
+In Elastic, find the **Auto** table and drag it onto your tab. It appears as a **ComboBox Chooser**.
+
+!!! tip "Add every option in the constructor"
+    Add all the options in `RobotContainer`'s constructor, before the robot is enabled, and don't add more later.
+
 ### What to send
 For any mechanism, send these four kinds of values. With them, you can usually tell in seconds whether a problem is the sensor, the code, or the hardware ([Lesson 9](09-debugging.md)):
 
@@ -225,7 +341,7 @@ The bar at the bottom of Elastic shows **Network Tables: Disconnected** in red u
 | **Number Slider** | A number on a slider | Yes, by dragging |
 | **Boolean Box** | A color for true or false | No |
 | **Toggle Switch** / **Toggle Button** | A boolean | Yes, by clicking |
-| **ComboBox Chooser** | An autonomous chooser (`SendableChooser`) | Yes, by picking an option |
+| **ComboBox Chooser** | An autonomous chooser (`DashChooser`) | Yes, by picking an option |
 
 **Save your layout.** Elastic remembers the layout you build. To keep a copy for the team, export it from Elastic's file menu into your robot project and commit the file to Git.
 
@@ -233,15 +349,14 @@ The bar at the bottom of Elastic shows **Network Tables: Disconnected** in red u
     Put the target and the sensor reading on **one Graph** widget. When you tune a controller in [Lesson 12](../controls/12-pid.md), the gap between the two lines is the error, and you can see overshoot and oscillation at a glance.
 
 ### What still uses `SmartDashboard.putData` in 2026
-Some WPILib objects aren't single numbers. They're **Sendables**: an autonomous chooser, the command scheduler, a `Field2d`, a `Mechanism2d`. In 2026, the way to put these on the dashboard is still `SmartDashboard.putData`. It sends them through NetworkTables 4 (under `/SmartDashboard/`), and Elastic shows them with special widgets.
+Some WPILib objects aren't single numbers. They're **Sendables**: the command scheduler, a `Field2d`, a `Mechanism2d`. In 2026, the way to put these on the dashboard is still `SmartDashboard.putData`. It sends them through NetworkTables 4 (under `/SmartDashboard/`), and Elastic shows them with special widgets.
 
 ```java
-SmartDashboard.putData("Auto", autoChooser);              // a ComboBox Chooser in Elastic
 SmartDashboard.putData(CommandScheduler.getInstance());   // the running commands
 SmartDashboard.putData("Arm/Mechanism", mech);            // a Mechanism2d drawing
 ```
 
-This course uses `SmartDashboard` **only** for these. Plain numbers and booleans always go through NetworkTables publishers.
+This course uses `SmartDashboard` **only** for these. Plain numbers and booleans always go through `DashTable`, and the auto chooser uses `DashChooser`.
 
 ### Logging comes free
 Once you call `DataLogManager.start()` in `Robot`'s constructor, everything you publish to NetworkTables is also **recorded** to a log file on the roboRIO. After a match, open the log in **AdvantageScope** and replay every value ([Lesson 9](09-debugging.md)).
@@ -254,7 +369,8 @@ When the team moves to WPILib 2027, the changes are mostly renames. The 2027 API
 | `new DashTable("Wheel")` | `Telemetry.getTable("Wheel")` |
 | `m_dash.log("Position (rot)", x)` | `table.log("Position (rot)", x)` |
 | `m_dash.tunable("kP", 1.0)` and `.getAsDouble()` | `Tunables.addDouble("Wheel/kP", 1.0)` and `.get()` |
-| `SendableChooser` with `SmartDashboard.putData("Auto", chooser)` | `Selectable` with `Tunables.publish("Auto", chooser)` |
+| `new DashChooser<Command>("Auto")` | `new Selectable<Command>()`, then `Tunables.publish("Auto", chooser)` |
+| `chooser.addDefault(...)`, `chooser.add(...)`, `chooser.getSelected()` | The same three methods on `Selectable` |
 | `SmartDashboard.putData("Field", field)` once | `Telemetry.log("Field", field)` every loop |
 
 In 2027, telemetry is published under `/Telemetry/` and tunables under `/Tunables/` by default, so you'll re-drag your Elastic widgets onto the new topics.
@@ -281,8 +397,11 @@ In simulation (no robot needed):
 ??? question "Elastic says \"Network Tables: Disconnected\" while you're running simulation. What should you check?"
     That the IP address mode is set to **localhost**, and that the simulation is actually running.
 
-??? question "Why does this course still use `SmartDashboard.putData` for the auto chooser?"
-    In 2026, Sendables like `SendableChooser` go to the dashboard through `SmartDashboard.putData`. In 2027 that becomes `Selectable` and `Tunables.publish`.
+??? question "Why does this course use `DashChooser` instead of `SendableChooser`?"
+    `SendableChooser` only reaches the dashboard through `SmartDashboard.putData`, which is going away. `DashChooser` sends the same menu over NetworkTables 4 directly, and its methods match 2027's `Selectable`.
+
+??? question "In a `DashChooser`, who writes `selected`, and who writes `active`?"
+    The dashboard writes `selected` when the drive team picks. The robot writes `active`: the option it will really use.
 
 ??? question "What happens to the SmartDashboard and Shuffleboard apps in 2027?"
     They're removed. WPILib recommends Elastic for the driver dashboard and AdvantageScope for debugging.

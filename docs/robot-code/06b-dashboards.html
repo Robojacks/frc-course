@@ -58,6 +58,7 @@
 <ul>
 <li>The <strong>SmartDashboard and Shuffleboard apps</strong> are removed in WPILib 2027. WPILib's advice is to use <strong>Elastic</strong> as the driver dashboard and <strong>AdvantageScope</strong> for debugging.</li>
 <li>In the 2027 previews, the <strong><code>SmartDashboard</code> class itself</strong> is replaced by new <strong>Telemetry</strong> and <strong>Tunables</strong> APIs, and <code>SendableChooser</code> is replaced by <strong><code>Selectable</code></strong>.</li>
+<li><strong><code>SendableChooser</code></strong> only reaches the dashboard through <code>SmartDashboard.putData</code>, so this course uses its own NetworkTables chooser, <code>DashChooser</code>, instead.</li>
 <li><strong>NetworkTables 4 stays.</strong> The new 2027 APIs are built on top of it.</li>
 </ul>
 <p>So this course writes <strong>2026</strong> code with NetworkTables 4 directly, in a way that maps one-to-one onto the 2027 APIs. The end of this lesson shows exactly how.</p>
@@ -302,6 +303,161 @@
 <span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setP</span><span class="p">(</span><span class="n">m_kP</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">());</span>
 <span class="p">}</span>
 </code></pre></div>
+<h3 id="a-dropdown-menu-dashchooser">A dropdown menu: <code>DashChooser</code><a class="headerlink" href="#a-dropdown-menu-dashchooser" title="Permanent link">#</a></h3>
+<p>The drive team picks an autonomous routine from a dropdown on the dashboard before each match. Older code does this with <code>SendableChooser</code> and <code>SmartDashboard.putData</code>. This course uses a small class of its own, <code>DashChooser</code>, that sends the menu straight over NetworkTables 4. Its methods have the same names as WPILib 2027's <code>Selectable</code>, so moving to 2027 is a rename.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.EnumSet</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.LinkedHashMap</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTable</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTableEvent</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTableInstance</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringArrayPublisher</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringPublisher</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringSubscriber</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * A dropdown menu on the dashboard, sent with NetworkTables 4.</span>
+<span class="cm"> * Elastic shows it as a ComboBox Chooser. It works like WPILib 2027's Selectable.</span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DashChooser</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LinkedHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">m_defaultName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">""</span><span class="p">;</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringPublisher</span><span class="w"> </span><span class="n">m_type</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringArrayPublisher</span><span class="w"> </span><span class="n">m_optionNames</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringPublisher</span><span class="w"> </span><span class="n">m_default</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringPublisher</span><span class="w"> </span><span class="n">m_active</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringSubscriber</span><span class="w"> </span><span class="n">m_selected</span><span class="p">;</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">DashChooser</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">NetworkTableInstance</span><span class="w"> </span><span class="n">nt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NetworkTableInstance</span><span class="p">.</span><span class="na">getDefault</span><span class="p">();</span>
+<span class="w">    </span><span class="n">NetworkTable</span><span class="w"> </span><span class="n">table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nt</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="n">tableName</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// ".type" tells Elastic which widget to show</span>
+<span class="w">    </span><span class="n">m_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="s">".type"</span><span class="p">).</span><span class="na">publish</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_type</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="s">"String Chooser"</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">m_optionNames</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringArrayTopic</span><span class="p">(</span><span class="s">"options"</span><span class="p">).</span><span class="na">publish</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="s">"default"</span><span class="p">).</span><span class="na">publish</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="s">"active"</span><span class="p">).</span><span class="na">publish</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// The dashboard writes the drive team's pick to "selected". The robot only reads it.</span>
+<span class="w">    </span><span class="n">m_selected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="s">"selected"</span><span class="p">).</span><span class="na">subscribe</span><span class="p">(</span><span class="s">""</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Whenever the pick changes, report back which option the robot will really use</span>
+<span class="w">    </span><span class="n">nt</span><span class="p">.</span><span class="na">addListener</span><span class="p">(</span><span class="n">m_selected</span><span class="p">,</span><span class="w"> </span><span class="n">EnumSet</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">NetworkTableEvent</span><span class="p">.</span><span class="na">Kind</span><span class="p">.</span><span class="na">kValueAll</span><span class="p">),</span>
+<span class="w">        </span><span class="n">event</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_active</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">selectedName</span><span class="p">()));</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Adds an option and makes it the default: the one used if nobody picks. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addDefault</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_defaultName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
+<span class="w">    </span><span class="n">m_default</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
+<span class="w">    </span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Adds an option to the menu. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_options</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_optionNames</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">m_options</span><span class="p">.</span><span class="na">keySet</span><span class="p">().</span><span class="na">toArray</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">String</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">));</span>
+<span class="w">    </span><span class="n">m_active</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">selectedName</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** The value for the option picked on the dashboard, or the default if nothing valid is picked. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">getSelected</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_options</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">selectedName</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">selectedName</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_selected</span><span class="p">.</span><span class="na">get</span><span class="p">();</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_options</span><span class="p">.</span><span class="na">containsKey</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">m_defaultName</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>A menu is just a few topics in one table. Elastic reads them and shows a dropdown:</p>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Who writes it</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.type</code></td>
+<td>Robot</td>
+<td><code>"String Chooser"</code>, which tells Elastic to show a <strong>ComboBox Chooser</strong></td>
+</tr>
+<tr>
+<td><code>options</code></td>
+<td>Robot</td>
+<td>Every option's name, in order</td>
+</tr>
+<tr>
+<td><code>default</code></td>
+<td>Robot</td>
+<td>The option used if nobody picks</td>
+</tr>
+<tr>
+<td><code>selected</code></td>
+<td><strong>Dashboard</strong></td>
+<td>The option the drive team picked</td>
+</tr>
+<tr>
+<td><code>active</code></td>
+<td>Robot</td>
+<td>The option the robot will really use, so the dashboard can confirm it</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DashChooser&lt;T&gt;</code></td>
+<td>A <strong>generic</strong> class: <code>T</code> is the type of thing in the menu. <code>DashChooser&lt;Command&gt;</code> holds commands.</td>
+</tr>
+<tr>
+<td><code>LinkedHashMap</code></td>
+<td>A map that remembers the order you added things, so the menu lists options in that order</td>
+</tr>
+<tr>
+<td><code>nt.addListener(...)</code></td>
+<td>Runs the code at the end whenever <code>selected</code> changes, without waiting for the robot loop</td>
+</tr>
+<tr>
+<td><code>m_options.containsKey(name) ? name : m_defaultName</code></td>
+<td>If the dashboard's pick isn't a real option (or nothing is picked yet), use the default</td>
+</tr>
+</tbody>
+</table>
+<p>Using it in <code>RobotContainer</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashChooser</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashChooser</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">);</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="nf">RobotContainer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">addDefault</span><span class="p">(</span><span class="s">"Do nothing"</span><span class="p">,</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">none</span><span class="p">());</span>
+<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Drive forward"</span><span class="p">,</span><span class="w"> </span><span class="n">driveForwardAuto</span><span class="p">());</span>
+<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Square"</span><span class="p">,</span><span class="w"> </span><span class="n">squareAuto</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">getSelected</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>In Elastic, find the <strong>Auto</strong> table and drag it onto your tab. It appears as a <strong>ComboBox Chooser</strong>.</p>
+<div class="admonition tip">
+<p class="admonition-title">Add every option in the constructor</p>
+<p>Add all the options in <code>RobotContainer</code>'s constructor, before the robot is enabled, and don't add more later.</p>
+</div>
 <h3 id="what-to-send">What to send<a class="headerlink" href="#what-to-send" title="Permanent link">#</a></h3>
 <p>For any mechanism, send these four kinds of values. With them, you can usually tell in seconds whether a problem is the sensor, the code, or the hardware (<a href="09-debugging.html">Lesson 9</a>):</p>
 <table>
@@ -399,7 +555,7 @@
 </tr>
 <tr>
 <td><strong>ComboBox Chooser</strong></td>
-<td>An autonomous chooser (<code>SendableChooser</code>)</td>
+<td>An autonomous chooser (<code>DashChooser</code>)</td>
 <td>Yes, by picking an option</td>
 </tr>
 </tbody>
@@ -410,12 +566,11 @@
 <p>Put the target and the sensor reading on <strong>one Graph</strong> widget. When you tune a controller in <a href="../controls/12-pid.html">Lesson 12</a>, the gap between the two lines is the error, and you can see overshoot and oscillation at a glance.</p>
 </div>
 <h3 id="what-still-uses-smartdashboardputdata-in-2026">What still uses <code>SmartDashboard.putData</code> in 2026<a class="headerlink" href="#what-still-uses-smartdashboardputdata-in-2026" title="Permanent link">#</a></h3>
-<p>Some WPILib objects aren't single numbers. They're <strong>Sendables</strong>: an autonomous chooser, the command scheduler, a <code>Field2d</code>, a <code>Mechanism2d</code>. In 2026, the way to put these on the dashboard is still <code>SmartDashboard.putData</code>. It sends them through NetworkTables 4 (under <code>/SmartDashboard/</code>), and Elastic shows them with special widgets.</p>
-<div class="highlight"><pre><span></span><code><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">,</span><span class="w"> </span><span class="n">autoChooser</span><span class="p">);</span><span class="w">              </span><span class="c1">// a ComboBox Chooser in Elastic</span>
-<span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span><span class="w">   </span><span class="c1">// the running commands</span>
+<p>Some WPILib objects aren't single numbers. They're <strong>Sendables</strong>: the command scheduler, a <code>Field2d</code>, a <code>Mechanism2d</code>. In 2026, the way to put these on the dashboard is still <code>SmartDashboard.putData</code>. It sends them through NetworkTables 4 (under <code>/SmartDashboard/</code>), and Elastic shows them with special widgets.</p>
+<div class="highlight"><pre><span></span><code><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span><span class="w">   </span><span class="c1">// the running commands</span>
 <span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Arm/Mechanism"</span><span class="p">,</span><span class="w"> </span><span class="n">mech</span><span class="p">);</span><span class="w">            </span><span class="c1">// a Mechanism2d drawing</span>
 </code></pre></div>
-<p>This course uses <code>SmartDashboard</code> <strong>only</strong> for these. Plain numbers and booleans always go through NetworkTables publishers.</p>
+<p>This course uses <code>SmartDashboard</code> <strong>only</strong> for these. Plain numbers and booleans always go through <code>DashTable</code>, and the auto chooser uses <code>DashChooser</code>.</p>
 <h3 id="logging-comes-free">Logging comes free<a class="headerlink" href="#logging-comes-free" title="Permanent link">#</a></h3>
 <p>Once you call <code>DataLogManager.start()</code> in <code>Robot</code>'s constructor, everything you publish to NetworkTables is also <strong>recorded</strong> to a log file on the roboRIO. After a match, open the log in <strong>AdvantageScope</strong> and replay every value (<a href="09-debugging.html">Lesson 9</a>).</p>
 <h3 id="moving-to-2027">Moving to 2027<a class="headerlink" href="#moving-to-2027" title="Permanent link">#</a></h3>
@@ -441,8 +596,12 @@
 <td><code>Tunables.addDouble("Wheel/kP", 1.0)</code> and <code>.get()</code></td>
 </tr>
 <tr>
-<td><code>SendableChooser</code> with <code>SmartDashboard.putData("Auto", chooser)</code></td>
-<td><code>Selectable</code> with <code>Tunables.publish("Auto", chooser)</code></td>
+<td><code>new DashChooser&lt;Command&gt;("Auto")</code></td>
+<td><code>new Selectable&lt;Command&gt;()</code>, then <code>Tunables.publish("Auto", chooser)</code></td>
+</tr>
+<tr>
+<td><code>chooser.addDefault(...)</code>, <code>chooser.add(...)</code>, <code>chooser.getSelected()</code></td>
+<td>The same three methods on <code>Selectable</code></td>
 </tr>
 <tr>
 <td><code>SmartDashboard.putData("Field", field)</code> once</td>
@@ -478,8 +637,12 @@
 <p>That the IP address mode is set to <strong>localhost</strong>, and that the simulation is actually running.</p>
 </details>
 <details class="question">
-<summary>Why does this course still use <code>SmartDashboard.putData</code> for the auto chooser?</summary>
-<p>In 2026, Sendables like <code>SendableChooser</code> go to the dashboard through <code>SmartDashboard.putData</code>. In 2027 that becomes <code>Selectable</code> and <code>Tunables.publish</code>.</p>
+<summary>Why does this course use <code>DashChooser</code> instead of <code>SendableChooser</code>?</summary>
+<p><code>SendableChooser</code> only reaches the dashboard through <code>SmartDashboard.putData</code>, which is going away. <code>DashChooser</code> sends the same menu over NetworkTables 4 directly, and its methods match 2027's <code>Selectable</code>.</p>
+</details>
+<details class="question">
+<summary>In a <code>DashChooser</code>, who writes <code>selected</code>, and who writes <code>active</code>?</summary>
+<p>The dashboard writes <code>selected</code> when the drive team picks. The robot writes <code>active</code>: the option it will really use.</p>
 </details>
 <details class="question">
 <summary>What happens to the SmartDashboard and Shuffleboard apps in 2027?</summary>

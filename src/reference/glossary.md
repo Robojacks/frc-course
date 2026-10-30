@@ -39,7 +39,7 @@
 | **Pull request (PR)** | A request to merge a branch, with review | 15 |
 | **Requirement** | A command declaring that it uses a subsystem | 7.1 |
 | **roboRIO** | The robot's main computer, which runs your code | 4 |
-| **Sendable** | A WPILib object (like a chooser or the scheduler) that describes itself to a dashboard | 6.1 |
+| **Sendable** | A WPILib object (like the command scheduler) that describes itself to a dashboard | 6.1 |
 | **Setpoint** | The value you want right now (target angle, target speed) | 12, 14 |
 | **Simulation** | Running robot code on your laptop with fake hardware | 0, 9 |
 | **Solenoid** | An electrically controlled air valve | 5 |
