@@ -92,7 +92,7 @@ LABS_NAV = [
         ("Lab 5: Control Speed with a Knob", "testbed/lab5-knob-speed.md"),
         ("Lab 6: Count Turns with an Encoder", "testbed/lab6-encoder.md"),
         ("Lab 7: Timed Autonomous", "testbed/lab7-timed-auto.md"),
-        ("Lab 8: Turn with a Gyro", "testbed/lab8-navx-gyro.md"),
+        ("Lab 8: Gyro Turns and Encoder Distances", "testbed/lab8-navx-gyro.md"),
         ("Lab 9: PID on the Wheel", "testbed/lab9-pid-wheel.md"),
         ("Lab 10: Elevator Position Control", "testbed/lab10-elevator.md"),
     ]),

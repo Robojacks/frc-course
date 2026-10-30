@@ -17,7 +17,7 @@ The **Lessons** tab teaches the ideas. The **Labs** tab is where you try them on
 | [Lab 5: Control Speed with a Knob](lab5-knob-speed.md) | Test bed | Lab 4 | Read an analog sensor, calibrate it, and map it to a speed |
 | [Lab 6: Count Turns with an Encoder](lab6-encoder.md) | Test bed | Lab 5 | Read an encoder, then try to turn exactly 10 times with timing and bang-bang |
 | [Lab 7: Timed Autonomous](lab7-timed-auto.md) | WCD | Lab 6 | Drive a pattern on its own, picked from a dashboard menu |
-| [Lab 8: Turn with a Gyro](lab8-navx-gyro.md) | WCD | Lab 7 | Use the NavX2 to turn by angle instead of by time |
+| [Lab 8: Gyro Turns and Encoder Distances](lab8-navx-gyro.md) | WCD | Lab 7 | Turn by angle with the NavX2, drive exact distances with the drive encoders, and close the square |
 | [Lab 9: PID on the Wheel](lab9-pid-wheel.md) | Test bed | Lab 8 and [Lesson 12](../controls/12-pid.md) | Turn exactly 10 times with P, then D, then I |
 | [Lab 10: Elevator Position Control](lab10-elevator.md) | WCD | Lab 9 | Move the elevator between START, L2, and L3 with a ProfiledPIDController, in meters, and hold against gravity |
 
@@ -52,6 +52,8 @@ Labs 2, 7, 8, and 10 use the team's **West Coast Drive**, a six-wheel, skid stee
 | Motor controllers | 4 SPARK MAXes on CAN, in **brushed** mode |
 | Wheels | 3 per side, chained together, with the center wheels slightly lower |
 | Gyro | **[NavX2](../hardware/04d-sensors.md)** on the roboRIO's MXP port (Lab 8) |
+| Drive encoders | A **REV Through Bore Encoder** on each gearbox output shaft, on the roboRIO's DIO ports (Lab 8) |
+| Wheels | 6 in |
 | Elevator | A **NEO** on a SPARK MAX in brushless mode, with a **REV Through Bore Encoder** on the roboRIO's DIO ports (Lab 10) |
 | Radio | Labeled **4674-6**. The Driver Station connects through it. |
 

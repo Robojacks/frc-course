@@ -660,12 +660,17 @@ public class RobotContainer {{
                   "subsystems/DriveSubsystem.java": drive})
     yield "lab07-timed-auto", "Lab 7", "lab7-timed-auto.md", dict(files), ["REVLib"]
 
-    # ---- Lab 8: the NavX2
-    drive = add_imports(drive, "com.studica.frc.AHRS", "com.studica.frc.AHRS.NavXComType")
+    # ---- Lab 8: the NavX2, then the drive encoders
+    drive = add_imports(drive, "com.studica.frc.AHRS", "com.studica.frc.AHRS.NavXComType",
+                        "edu.wpi.first.wpilibj.CounterBase.EncodingType", "edu.wpi.first.wpilibj.Encoder")
     drive = edit(drive, '  private final TelemetryTable m_telemetry = Telemetry.getTable("Drive");\n',
                  "\n" + java_block(l8, "new AHRS(NavXComType.kMXP_SPI)")
-                 + "\n  private double m_turnTarget = 0.0;   // where the current turn is trying to end\n")
-    for marker in ("public double getHeadingDegrees()", ):
+                 + "\n" + java_block(l8, "private final Encoder m_leftEncoder")
+                 + "\n  private double m_turnTarget = 0.0;   // where the current turn is trying to end\n"
+                 + "  private double m_distanceTarget = 0.0;   // where the current drive is trying to stop\n")
+    drive = edit(drive, "    m_drive.setMaxOutput(kDriveConstants.MaxOutput);\n",
+                 "\n" + java_block(l8, "double metersPerPulse"))
+    for marker in ("public double getHeadingDegrees()", "public double getLeftMeters()"):
         drive = edit(drive, "\n  @Override\n  public void periodic()",
                      "\n" + java_block(l8, marker), where="before")
     turn = java_block(l8, "public Command turnDegreesCommand(")
@@ -673,17 +678,30 @@ public class RobotContainer {{
     drive = edit(drive, "\n  @Override\n  public void periodic()", "\n" + turn, where="before")
     drive = edit(drive, "\n  @Override\n  public void periodic()",
                  "\n" + java_block(l8, "public Command twoSpeedTurnCommand("), where="before")
+    dist = java_block(l8, "public Command driveDistanceCommand(")
+    dist = edit(dist, "  private double m_distanceTarget = 0.0;   // where the current drive is trying to stop\n\n", "", where="replace")
+    drive = edit(drive, "\n  @Override\n  public void periodic()", "\n" + dist, where="before")
+    drive = edit(drive, "\n  @Override\n  public void periodic()",
+                 "\n" + java_block(l8, "public double getEncoderHeadingDegrees()"), where="before")
     drive = edit(drive, '    m_telemetry.log("Battery (V)", RobotController.getBatteryVoltage());\n',
-                 "\n" + java_block(l8, 'm_telemetry.log("Gyro/Heading (deg)"') + java_block(l8, 'm_telemetry.log("Gyro/Turn Target (deg)"'))
+                 "\n" + java_block(l8, 'm_telemetry.log("Gyro/Heading (deg)"') + java_block(l8, 'm_telemetry.log("Gyro/Turn Target (deg)"')
+                 + "\n" + java_block(l8, 'm_telemetry.log("Encoders/Left (m)"')
+                 + java_block(l8, 'm_telemetry.log("Encoders/Distance Target (m)"')
+                 + java_block(l8, 'm_telemetry.log("Encoders/Heading Estimate (deg)"'))
+    enc_consts = java_block(l8, "LeftEncoderChannelA = 2;")
+    constants = edit(constants, "    public static final double MaxOutput = 0.5;    // top speed, 0 to 1. Start slow!\n",
+                     "\n" + enc_consts)
+    constants = add_imports(constants.replace("package frc.robot;\n\n", "package frc.robot;\n\nimport edu.wpi.first.math.util.Units;\n\n", 1))
     gyro_bind = (java_block(l8, "zeroHeadingCommand());") + java_block(l8, "turnDegreesCommand(90, 0.4)")
                  + java_block(l8, "twoSpeedTurnCommand(90));"))
+    enc_bind = java_block(l8, "resetEncodersCommand());") + java_block(l8, "driveDistanceCommand(1.0, 0.4));   // drive 1 meter")
     container = edit(container, "OperatorConstants.kDeadband)));\n",
-                     "\n    // ---- Gyro (Lab 8) ----\n" + gyro_bind)
+                     "\n    // ---- Gyro and encoders (Lab 8) ----\n" + gyro_bind + enc_bind)
     container = re.sub(r"  /\*\* One side of a square:.*?\n  \}\n",
-                       lambda m: "  /** One side of a square: drive forward, pause, turn left 90 degrees by the gyro, pause. */\n"
-                                 + java_block(l8, "twoSpeedTurnCommand(90),"),
+                       lambda m: "  /** One side of a square: forward 1 m by the encoders, pause, turn left 90 degrees by the gyro, pause. */\n"
+                                 + java_block(l8, "driveDistanceCommand(1.0, 0.4),"),
                        container, flags=re.S)
-    files.update({"RobotContainer.java": container, "subsystems/DriveSubsystem.java": drive})
+    files.update({"Constants.java": constants, "RobotContainer.java": container, "subsystems/DriveSubsystem.java": drive})
     yield "lab08-navx-gyro", "Lab 8", "lab8-navx-gyro.md", dict(files), ["REVLib", "Studica"]
 
     # ---- Lab 10: the elevator

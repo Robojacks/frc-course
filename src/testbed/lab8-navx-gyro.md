@@ -1,14 +1,17 @@
-# Lab 8: Turn with a Gyro (NavX2)
+# Lab 8: Turn with a Gyro, Drive with Encoders
 
 ## Why it matters
 In [Lab 7](lab7-timed-auto.md), the timed square never closed. Every "90° turn" was really just "spin for half a second," and the robot had no idea how far it had actually turned.
 
 A **gyro** fixes that. It measures how far the robot has **rotated**, so instead of "spin for 0.5 seconds" you can say "spin until you've turned 90°." In this lab you'll add the team's **NavX2** to the West Coast Drive, read the robot's heading, and use it to make turns that land where you meant.
 
+Then you'll fix the other half of the square. The sides were timed too. The WCD has an **encoder** on each gearbox, so you'll measure how far each side has rolled, in meters, and drive exact distances. By the end, the square is driven entirely by sensors: **encoders** for the straight sides and the **gyro** for the turns.
+
 **Before you start:** finish [Lab 7](lab7-timed-auto.md) and keep its repeatability table. You'll add to the same **WestCoastDrive** project. [Lesson 8](../robot-code/08-sensors.md) covers gyros. Lesson [4.3](../hardware/04d-sensors.md) covers the NavX2's hardware and mounting.
 
 ## Read this
 - [Gyroscopes – Software](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/gyros-software.html)
+- [Encoders – Software](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/encoders-software.html)
 - [NavX2-MXP (Studica)](https://www.studica.com/nav2-mxp-robotics-navigation-sensor)
 
 ## Walkthrough
@@ -35,6 +38,15 @@ The NavX2 plugs into the roboRIO's **MXP** port (the wide connector in the middl
 
 !!! info "If your NavX is connected differently"
     Over USB, use `NavXComType.kUSB1` instead of `kMXP_SPI` in Step 3. Everything else stays the same.
+
+Each side's gearbox also has a **REV Through Bore Encoder** on its **output shaft**, the shaft that drives the wheels. Because the encoder turns at the same speed as the wheels, one encoder rotation is one wheel rotation. Both encoders are wired to the roboRIO's **DIO** ports, two ports each, the same way as the elevator's encoder in Lab 10 and the test bed wheel in [Lab 6](lab6-encoder.md).
+
+| Encoder | DIO ports |
+|---|---|
+| Left gearbox | 2 and 3 |
+| Right gearbox | 4 and 5 |
+
+Check your robot's wiring and use your real port numbers in Step 8.
 
 ### Step 1: Calibration
 When the robot powers on, the NavX spends a few seconds **calibrating**: measuring itself while sitting perfectly still. If the robot moves during that time, the heading will drift for the rest of the session.
@@ -219,25 +231,220 @@ Compare its overshoot with the one-speed turn from Step 6.
 !!! question "Think about it"
     Two speeds work better than one. What about ten speeds, each a bit slower as the robot gets closer? Or a speed that shrinks **smoothly** with the distance left to turn? That idea has a name: it's the **P** in PID, and it's coming in [Lab 9](lab9-pid-wheel.md).
 
-### Step 8: A square that closes
-Go back to `RobotContainer`'s `squareSide()` from Lab 7, and swap the timed spin for a gyro turn:
+### Step 8: Add the drive encoders
+Add these to `kDriveConstants` in `Constants.java`, and add `import edu.wpi.first.math.util.Units;` at the top of the file:
+
+```java
+    // Lab 8: Through Bore Encoders on each gearbox output shaft, wired to the roboRIO
+    public static final int LeftEncoderChannelA = 2;
+    public static final int LeftEncoderChannelB = 3;
+    public static final int RightEncoderChannelA = 4;
+    public static final int RightEncoderChannelB = 5;
+    public static final boolean LeftEncoderInverted = false;
+    public static final boolean RightEncoderInverted = true;   // the right side faces the other way
+    public static final int EncoderCyclesPerRev = 2048;        // Through Bore: 2048 cycles per turn
+
+    public static final double WheelDiameterMeters = Units.inchesToMeters(6.0);
+    public static final double MetersPerRotation = Math.PI * WheelDiameterMeters;   // about 0.479 m
+    public static final double TrackWidthMeters = 0.6;   // measure yours: left wheels' center to right wheels' center
+```
+
+| Constant | What it's for |
+|---|---|
+| `...ChannelA`, `...ChannelB` | The two DIO ports each encoder is wired to |
+| `RightEncoderInverted = true` | The right gearbox faces the other way, so its encoder counts backward when the robot drives forward. This flips it, the same idea as inverting the right motor in Lab 2. |
+| `WheelDiameterMeters` | 6-inch wheels. `Units.inchesToMeters` does the conversion (6 in = 0.1524 m). |
+| `MetersPerRotation` | How far the robot rolls when a wheel turns once: the wheel's **circumference**, π × diameter |
+| `TrackWidthMeters` | The distance between the left and right wheels. You'll use it in Step 11. Measure it with a tape measure. |
+
+Now open `DriveSubsystem.java`. Add the imports:
+
+```java
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.Encoder;
+```
+
+Add the encoders as fields, below the gyro:
+
+```java
+  // Through Bore Encoders on each side's gearbox output shaft (Lab 8)
+  private final Encoder m_leftEncoder = new Encoder(
+      kDriveConstants.LeftEncoderChannelA,
+      kDriveConstants.LeftEncoderChannelB,
+      kDriveConstants.LeftEncoderInverted,
+      EncodingType.k4X);
+  private final Encoder m_rightEncoder = new Encoder(
+      kDriveConstants.RightEncoderChannelA,
+      kDriveConstants.RightEncoderChannelB,
+      kDriveConstants.RightEncoderInverted,
+      EncodingType.k4X);
+```
+
+At the end of the constructor, tell them how far one pulse is:
+
+```java
+    // After this, getDistance() is in meters the wheels have rolled
+    double metersPerPulse = kDriveConstants.MetersPerRotation / kDriveConstants.EncoderCyclesPerRev;
+    m_leftEncoder.setDistancePerPulse(metersPerPulse);
+    m_rightEncoder.setDistancePerPulse(metersPerPulse);
+```
+
+One wheel turn is 2048 pulses and 0.479 m, so each pulse is 0.479 ÷ 2048 meters. After this, `getDistance()` answers in **meters**, not counts. (It's 2048, not 8192, for the same reason as Lab 6: WPILib already handles the 4X counting.)
+
+Add methods to read them:
+
+```java
+  /** How far the left wheels have rolled, in meters, since the last reset. */
+  public double getLeftMeters() {
+    return m_leftEncoder.getDistance();
+  }
+
+  /** How far the right wheels have rolled, in meters, since the last reset. */
+  public double getRightMeters() {
+    return m_rightEncoder.getDistance();
+  }
+
+  /** How far the robot has driven: the average of the two sides. */
+  public double getAverageMeters() {
+    return (getLeftMeters() + getRightMeters()) / 2.0;
+  }
+
+  /** Sets both encoders back to 0. Works while disabled. */
+  public Command resetEncodersCommand() {
+    return runOnce(() -> {
+      m_leftEncoder.reset();
+      m_rightEncoder.reset();
+    }).ignoringDisable(true).withName("Reset Encoders");
+  }
+```
+
+| Method | What it answers |
+|---|---|
+| `getLeftMeters()`, `getRightMeters()` | How far each side has rolled. Forward is positive. |
+| `getAverageMeters()` | How far the robot as a whole has gone. Driving straight, both sides match. Spinning in place, they cancel out to about 0. |
+| `resetEncodersCommand()` | Makes "here" the new 0 m, like zeroing the gyro |
+
+Put them on the dashboard, in `periodic()`:
+
+```java
+    m_telemetry.log("Encoders/Left (m)", getLeftMeters());
+    m_telemetry.log("Encoders/Right (m)", getRightMeters());
+    m_telemetry.log("Encoders/Average (m)", getAverageMeters());
+```
+
+And bind **Start** to reset them, in `configureBindings()`:
+
+```java
+    m_controller.start().onTrue(m_driveSubsystem.resetEncodersCommand());
+```
+
+### Step 9: Check the encoders
+Deploy. Leave the robot **disabled**, and open **Telemetry → Drive → Encoders** in Elastic.
+
+1. Press **Start** to reset. Both read 0.
+2. Push the robot **forward** by hand. **Both** Left and Right must go **up**. If one goes down, flip that side's `...EncoderInverted` in `Constants`.
+3. Put a tape mark on the floor, push the robot forward exactly **1 meter**, and read **Average**. It should be close to **1.00**.
+
+| What you see | Likely cause |
+|---|---|
+| Average reads about **4.0** after 1 m | `EncoderCyclesPerRev` is 8192 instead of 2048 |
+| Average reads about **0.25** after 1 m | The wrong number somewhere in `metersPerPulse`, or one encoder isn't counting (so the average is half). Check both sides separately. |
+| One side always reads 0 | That encoder's DIO ports are wrong, or a wire is loose |
+
+!!! tip "A little off is normal"
+    Wheels squish a bit under the robot's weight, and tread wears down, so a "6-inch" wheel rolls a little less than 0.479 m. If you're off by a steady few percent, adjust `WheelDiameterMeters` until 1 m reads 1.00.
+
+### Step 10: Drive a distance
+Add a command to `DriveSubsystem` that drives until the encoders say it's gone far enough. It's built just like the gyro turn:
+
+```java
+  private double m_distanceTarget = 0.0;   // where the current drive is trying to stop
+
+  /**
+   * Drives straight until the robot has gone the given distance, in meters.
+   * Positive = forward, negative = backward.
+   */
+  public Command driveDistanceCommand(double meters, double speed) {
+    double direction = Math.signum(meters);   // +1 forward, -1 backward
+    return runOnce(() -> m_distanceTarget = getAverageMeters() + meters)
+        .andThen(run(() -> m_drive.tankDrive(direction * speed, direction * speed, false)))
+        .until(() -> direction > 0
+            ? getAverageMeters() >= m_distanceTarget     // forward: wait until we pass it
+            : getAverageMeters() <= m_distanceTarget)    // backward: wait until we pass it going down
+        .withTimeout(5.0)                                // safety: give up if the encoders never get there
+        .finallyDo(() -> m_drive.stopMotor())
+        .withName("Drive " + meters + " m");
+  }
+```
+
+| Piece | What it does |
+|---|---|
+| `m_distanceTarget = getAverageMeters() + meters` | Remembers where to stop: 1 m from **wherever the robot is now**, so you don't have to reset first |
+| `tankDrive(direction * speed, direction * speed, false)` | Both sides the same speed: straight forward (or straight back) |
+| `.until(...)` | Stops the moment the average distance passes the target |
+| `.withTimeout(5.0)` | If an encoder is unplugged, the distance never changes. This stops the robot anyway. |
+
+Add the target to `periodic()` so you can watch it:
+
+```java
+    m_telemetry.log("Encoders/Distance Target (m)", m_distanceTarget);
+```
+
+Bind it to **A**, in `configureBindings()`:
+
+```java
+    m_controller.a().onTrue(m_driveSubsystem.driveDistanceCommand(1.0, 0.4));   // drive 1 meter
+```
+
+**On the floor**, with a tape mark at the robot's front edge: press **A** and measure where it stops. Try speeds of 0.3, 0.5, and 0.7.
+
+**What you'll see:** It goes **at least** 1 m every time, with a little **overshoot** that grows with speed. It's the same bang-bang overshoot as the gyro turns and the Lab 6 wheel. Unlike the timed drive in Lab 7, though, a tired battery doesn't make it come up short: it just takes longer to get there.
+
+### Step 11: Why turns use the gyro, not the encoders
+If the left side rolls backward and the right side rolls forward by the same amount, the robot spins. So you could estimate the heading from the encoders alone:
+
+```java
+  /** Heading estimated from the encoders alone, in degrees. Watch how wrong it gets. */
+  public double getEncoderHeadingDegrees() {
+    return Math.toDegrees((getRightMeters() - getLeftMeters()) / kDriveConstants.TrackWidthMeters);
+  }
+```
+
+| Part | What it means |
+|---|---|
+| `getRightMeters() - getLeftMeters()` | How much farther the right side has rolled than the left |
+| `/ TrackWidthMeters` | Divided by the distance between the wheels, that's the angle turned, in **radians** |
+| `Math.toDegrees(...)` | Radians to degrees |
+
+Add it to `periodic()`:
+
+```java
+    m_telemetry.log("Encoders/Heading Estimate (deg)", getEncoderHeadingDegrees());
+```
+
+**Try it:** zero the gyro (**Back**), reset the encoders (**Start**), and press **X** to turn 90° by the gyro. Compare **Gyro → Heading** with **Encoders → Heading Estimate**.
+
+**What you'll see:** The encoder estimate says the robot turned **much more** than 90°, sometimes 120° or more. A skid steer **skids**: to turn, its wheels slide sideways across the floor, so they roll farther than the robot actually turns. The encoders count every bit of that rolling. The gyro measures the robot's real rotation, so it's the sensor to trust for turns. Encoders are great for **straight** driving, where the wheels don't slide.
+
+### Step 12: A square that closes
+Go back to `RobotContainer`'s `squareSide()` from Lab 7. Swap the timed forward drive for an encoder drive, and the timed spin for a gyro turn:
 
 ```java
   private Command squareSide() {
     return Commands.sequence(
-        m_driveSubsystem.driveForSecondsCommand(0.4, 0.4, 1.0),   // forward (still timed)
+        m_driveSubsystem.driveDistanceCommand(1.0, 0.4),          // forward 1 m by the encoders
         m_driveSubsystem.driveForSecondsCommand(0.0, 0.0, 0.3),   // pause
         m_driveSubsystem.twoSpeedTurnCommand(90),                 // turn left by the gyro
         m_driveSubsystem.driveForSecondsCommand(0.0, 0.0, 0.3));  // pause
   }
 ```
 
-Import `Commands` if needed. Run **Square** five times and fill in the same table as Lab 7. Compare the two tables.
+Import `Commands` if needed. Run **Square** five times and fill in the same table as Lab 7. Compare the two tables: the timed square from Lab 7, and this one, driven entirely by sensors.
 
-### Step 9: Commit
+### Step 13: Commit
 ```bash
 git add .
-git commit -m "Lab 8: NavX gyro turns"
+git commit -m "Lab 8: NavX gyro turns and encoder distances"
 ```
 
 ### When it doesn't work
@@ -249,6 +456,9 @@ git commit -m "Lab 8: NavX gyro turns"
 | Heading slowly creeps while sitting still | Normal drift, but a lot of it means the robot moved during calibration. Restart the robot and keep it still. |
 | Heading goes **down** when turning left | You used `getAngle()` or `getYaw()` instead of `getRotation2d()` |
 | Robot spins forever, then stops after 3 seconds | It turned the opposite way from the target: check the signs in `tankDrive` for the turn |
+| One encoder counts **down** when pushing forward | Flip that side's `...EncoderInverted` in `Constants` |
+| Drive distance never stops (until the 5 second timeout) | An encoder isn't counting, or it counts backward, so the average never reaches the target |
+| Distances are about 4 times too big | `EncoderCyclesPerRev` is 8192; it should be 2048 |
 
 !!! example "Finished code"
     Stuck, or missed a lab? [**lab08-navx-gyro**](https://github.com/Robojacks/frc-course/tree/main/examples/lab08-navx-gyro) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
@@ -258,11 +468,27 @@ git commit -m "Lab 8: NavX gyro turns"
 - [ ] Measure drift: how much does the heading change in one minute sitting still?
 - [ ] Fill in the speed vs. overshoot table for one-speed turns
 - [ ] Compare one-speed and two-speed turns
-- [ ] Run the gyro square and compare with your Lab 7 table
+- [ ] Check both encoders by hand: both count up going forward, and 1 m reads about 1.00
+- [ ] Drive 1 m at three speeds and measure the overshoot
+- [ ] Compare the gyro heading and the encoder heading estimate after a 90° turn. How far off is the estimate?
+- [ ] Run the sensor square and compare with your Lab 7 table
+- [ ] Challenge: make `driveDistanceCommand` slow down for the last 0.2 m, like the two-speed turn
 - [ ] Turn 360° and see if the robot ends facing the same way
 - [ ] Challenge: write `turnToHeadingCommand(double heading)` that turns to an **absolute** heading (like "face 0°") instead of "turn by" an amount
 
 ## Check yourself
+??? question "Why is the right encoder inverted?"
+    The right gearbox faces the opposite way, so its shaft spins the opposite direction when the robot drives forward. Inverting it makes forward count up on both sides.
+
+??? question "With 6-inch wheels, how far does the robot roll when a wheel turns once?"
+    π × 6 in ≈ 18.85 in ≈ **0.479 m**
+
+??? question "Why use the average of both encoders for driving distance?"
+    Driving straight, both sides roll the same distance. If the robot drifts a little to one side, the average is still about the distance its center traveled.
+
+??? question "Why does the encoder heading estimate say the robot turned more than it really did?"
+    A skid steer's wheels slide sideways when it turns, so they roll farther than the robot rotates. The encoders count all of that rolling. The gyro measures the real rotation.
+
 ??? question "What does a gyro measure?"
     How much the robot has rotated. Yaw, the rotation seen from above, is the robot's heading.
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lab 8: Turn with a Gyro | RoboJacks 4674</title>
+<title>Lab 8: Gyro Turns and Encoder Distances | RoboJacks 4674</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
@@ -47,19 +47,21 @@ try {
   <aside class="sidebar">
     <details class="sidebar-toggle" open>
       <summary>Labs menu</summary>
-      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html" class="current" aria-current="page">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html" class="current" aria-current="page">Lab 8: Gyro Turns and Encoder Distances</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
     </details>
   </aside>
   <main id="content" class="content">
     <article>
-<h1 id="lab-8-turn-with-a-gyro-navx2">Lab 8: Turn with a Gyro (NavX2)<a class="headerlink" href="#lab-8-turn-with-a-gyro-navx2" title="Permanent link">#</a></h1>
+<h1 id="lab-8-turn-with-a-gyro-drive-with-encoders">Lab 8: Turn with a Gyro, Drive with Encoders<a class="headerlink" href="#lab-8-turn-with-a-gyro-drive-with-encoders" title="Permanent link">#</a></h1>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>In <a href="lab7-timed-auto.html">Lab 7</a>, the timed square never closed. Every "90° turn" was really just "spin for half a second," and the robot had no idea how far it had actually turned.</p>
 <p>A <strong>gyro</strong> fixes that. It measures how far the robot has <strong>rotated</strong>, so instead of "spin for 0.5 seconds" you can say "spin until you've turned 90°." In this lab you'll add the team's <strong>NavX2</strong> to the West Coast Drive, read the robot's heading, and use it to make turns that land where you meant.</p>
+<p>Then you'll fix the other half of the square. The sides were timed too. The WCD has an <strong>encoder</strong> on each gearbox, so you'll measure how far each side has rolled, in meters, and drive exact distances. By the end, the square is driven entirely by sensors: <strong>encoders</strong> for the straight sides and the <strong>gyro</strong> for the turns.</p>
 <p><strong>Before you start:</strong> finish <a href="lab7-timed-auto.html">Lab 7</a> and keep its repeatability table. You'll add to the same <strong>WestCoastDrive</strong> project. <a href="../robot-code/08-sensors.html">Lesson 8</a> covers gyros. Lesson <a href="../hardware/04d-sensors.html">4.3</a> covers the NavX2's hardware and mounting.</p>
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/gyros-software.html">Gyroscopes – Software</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/encoders-software.html">Encoders – Software</a></li>
 <li><a href="https://www.studica.com/nav2-mxp-robotics-navigation-sensor">NavX2-MXP (Studica)</a></li>
 </ul>
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
@@ -97,6 +99,26 @@ try {
 <p class="admonition-title">If your NavX is connected differently</p>
 <p>Over USB, use <code>NavXComType.kUSB1</code> instead of <code>kMXP_SPI</code> in Step 3. Everything else stays the same.</p>
 </div>
+<p>Each side's gearbox also has a <strong>REV Through Bore Encoder</strong> on its <strong>output shaft</strong>, the shaft that drives the wheels. Because the encoder turns at the same speed as the wheels, one encoder rotation is one wheel rotation. Both encoders are wired to the roboRIO's <strong>DIO</strong> ports, two ports each, the same way as the elevator's encoder in Lab 10 and the test bed wheel in <a href="lab6-encoder.html">Lab 6</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Encoder</th>
+<th>DIO ports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Left gearbox</td>
+<td>2 and 3</td>
+</tr>
+<tr>
+<td>Right gearbox</td>
+<td>4 and 5</td>
+</tr>
+</tbody>
+</table>
+<p>Check your robot's wiring and use your real port numbers in Step 8.</p>
 <h3 id="step-1-calibration">Step 1: Calibration<a class="headerlink" href="#step-1-calibration" title="Permanent link">#</a></h3>
 <p>When the robot powers on, the NavX spends a few seconds <strong>calibrating</strong>: measuring itself while sitting perfectly still. If the robot moves during that time, the heading will drift for the rest of the session.</p>
 <div class="admonition danger">
@@ -344,20 +366,264 @@ try {
 <p class="admonition-title">Think about it</p>
 <p>Two speeds work better than one. What about ten speeds, each a bit slower as the robot gets closer? Or a speed that shrinks <strong>smoothly</strong> with the distance left to turn? That idea has a name: it's the <strong>P</strong> in PID, and it's coming in <a href="lab9-pid-wheel.html">Lab 9</a>.</p>
 </div>
-<h3 id="step-8-a-square-that-closes">Step 8: A square that closes<a class="headerlink" href="#step-8-a-square-that-closes" title="Permanent link">#</a></h3>
-<p>Go back to <code>RobotContainer</code>'s <code>squareSide()</code> from Lab 7, and swap the timed spin for a gyro turn:</p>
+<h3 id="step-8-add-the-drive-encoders">Step 8: Add the drive encoders<a class="headerlink" href="#step-8-add-the-drive-encoders" title="Permanent link">#</a></h3>
+<p>Add these to <code>kDriveConstants</code> in <code>Constants.java</code>, and add <code>import edu.wpi.first.math.util.Units;</code> at the top of the file:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Lab 8: Through Bore Encoders on each gearbox output shaft, wired to the roboRIO</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LeftEncoderChannelA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LeftEncoderChannelB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">RightEncoderChannelA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">RightEncoderChannelB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">LeftEncoderInverted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">RightEncoderInverted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w">   </span><span class="c1">// the right side faces the other way</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">EncoderCyclesPerRev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span><span class="w">        </span><span class="c1">// Through Bore: 2048 cycles per turn</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">WheelDiameterMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mf">6.0</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MetersPerRotation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">WheelDiameterMeters</span><span class="p">;</span><span class="w">   </span><span class="c1">// about 0.479 m</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">TrackWidthMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.6</span><span class="p">;</span><span class="w">   </span><span class="c1">// measure yours: left wheels' center to right wheels' center</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>What it's for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>...ChannelA</code>, <code>...ChannelB</code></td>
+<td>The two DIO ports each encoder is wired to</td>
+</tr>
+<tr>
+<td><code>RightEncoderInverted = true</code></td>
+<td>The right gearbox faces the other way, so its encoder counts backward when the robot drives forward. This flips it, the same idea as inverting the right motor in Lab 2.</td>
+</tr>
+<tr>
+<td><code>WheelDiameterMeters</code></td>
+<td>6-inch wheels. <code>Units.inchesToMeters</code> does the conversion (6 in = 0.1524 m).</td>
+</tr>
+<tr>
+<td><code>MetersPerRotation</code></td>
+<td>How far the robot rolls when a wheel turns once: the wheel's <strong>circumference</strong>, π × diameter</td>
+</tr>
+<tr>
+<td><code>TrackWidthMeters</code></td>
+<td>The distance between the left and right wheels. You'll use it in Step 11. Measure it with a tape measure.</td>
+</tr>
+</tbody>
+</table>
+<p>Now open <code>DriveSubsystem.java</code>. Add the imports:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.CounterBase.EncodingType</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.Encoder</span><span class="p">;</span>
+</code></pre></div>
+<p>Add the encoders as fields, below the gyro:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Through Bore Encoders on each side's gearbox output shaft (Lab 8)</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Encoder</span><span class="w"> </span><span class="n">m_leftEncoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Encoder</span><span class="p">(</span>
+<span class="w">      </span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">LeftEncoderChannelA</span><span class="p">,</span>
+<span class="w">      </span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">LeftEncoderChannelB</span><span class="p">,</span>
+<span class="w">      </span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">LeftEncoderInverted</span><span class="p">,</span>
+<span class="w">      </span><span class="n">EncodingType</span><span class="p">.</span><span class="na">k4X</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Encoder</span><span class="w"> </span><span class="n">m_rightEncoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Encoder</span><span class="p">(</span>
+<span class="w">      </span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">RightEncoderChannelA</span><span class="p">,</span>
+<span class="w">      </span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">RightEncoderChannelB</span><span class="p">,</span>
+<span class="w">      </span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">RightEncoderInverted</span><span class="p">,</span>
+<span class="w">      </span><span class="n">EncodingType</span><span class="p">.</span><span class="na">k4X</span><span class="p">);</span>
+</code></pre></div>
+<p>At the end of the constructor, tell them how far one pulse is:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// After this, getDistance() is in meters the wheels have rolled</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">metersPerPulse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">MetersPerRotation</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">EncoderCyclesPerRev</span><span class="p">;</span>
+<span class="w">    </span><span class="n">m_leftEncoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span><span class="n">metersPerPulse</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_rightEncoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span><span class="n">metersPerPulse</span><span class="p">);</span>
+</code></pre></div>
+<p>One wheel turn is 2048 pulses and 0.479 m, so each pulse is 0.479 ÷ 2048 meters. After this, <code>getDistance()</code> answers in <strong>meters</strong>, not counts. (It's 2048, not 8192, for the same reason as Lab 6: WPILib already handles the 4X counting.)</p>
+<p>Add methods to read them:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** How far the left wheels have rolled, in meters, since the last reset. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getLeftMeters</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_leftEncoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** How far the right wheels have rolled, in meters, since the last reset. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getRightMeters</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_rightEncoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** How far the robot has driven: the average of the two sides. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getAverageMeters</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">getLeftMeters</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">())</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sets both encoders back to 0. Works while disabled. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">resetEncodersCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">m_leftEncoder</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span>
+<span class="w">      </span><span class="n">m_rightEncoder</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}).</span><span class="na">ignoringDisable</span><span class="p">(</span><span class="kc">true</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Reset Encoders"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What it answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getLeftMeters()</code>, <code>getRightMeters()</code></td>
+<td>How far each side has rolled. Forward is positive.</td>
+</tr>
+<tr>
+<td><code>getAverageMeters()</code></td>
+<td>How far the robot as a whole has gone. Driving straight, both sides match. Spinning in place, they cancel out to about 0.</td>
+</tr>
+<tr>
+<td><code>resetEncodersCommand()</code></td>
+<td>Makes "here" the new 0 m, like zeroing the gyro</td>
+</tr>
+</tbody>
+</table>
+<p>Put them on the dashboard, in <code>periodic()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Encoders/Left (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Encoders/Right (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Encoders/Average (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">getAverageMeters</span><span class="p">());</span>
+</code></pre></div>
+<p>And bind <strong>Start</strong> to reset them, in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">start</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">resetEncodersCommand</span><span class="p">());</span>
+</code></pre></div>
+<h3 id="step-9-check-the-encoders">Step 9: Check the encoders<a class="headerlink" href="#step-9-check-the-encoders" title="Permanent link">#</a></h3>
+<p>Deploy. Leave the robot <strong>disabled</strong>, and open <strong>Telemetry → Drive → Encoders</strong> in Elastic.</p>
+<ol>
+<li>Press <strong>Start</strong> to reset. Both read 0.</li>
+<li>Push the robot <strong>forward</strong> by hand. <strong>Both</strong> Left and Right must go <strong>up</strong>. If one goes down, flip that side's <code>...EncoderInverted</code> in <code>Constants</code>.</li>
+<li>Put a tape mark on the floor, push the robot forward exactly <strong>1 meter</strong>, and read <strong>Average</strong>. It should be close to <strong>1.00</strong>.</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>What you see</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Average reads about <strong>4.0</strong> after 1 m</td>
+<td><code>EncoderCyclesPerRev</code> is 8192 instead of 2048</td>
+</tr>
+<tr>
+<td>Average reads about <strong>0.25</strong> after 1 m</td>
+<td>The wrong number somewhere in <code>metersPerPulse</code>, or one encoder isn't counting (so the average is half). Check both sides separately.</td>
+</tr>
+<tr>
+<td>One side always reads 0</td>
+<td>That encoder's DIO ports are wrong, or a wire is loose</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">A little off is normal</p>
+<p>Wheels squish a bit under the robot's weight, and tread wears down, so a "6-inch" wheel rolls a little less than 0.479 m. If you're off by a steady few percent, adjust <code>WheelDiameterMeters</code> until 1 m reads 1.00.</p>
+</div>
+<h3 id="step-10-drive-a-distance">Step 10: Drive a distance<a class="headerlink" href="#step-10-drive-a-distance" title="Permanent link">#</a></h3>
+<p>Add a command to <code>DriveSubsystem</code> that drives until the encoders say it's gone far enough. It's built just like the gyro turn:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_distanceTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">   </span><span class="c1">// where the current drive is trying to stop</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Drives straight until the robot has gone the given distance, in meters.</span>
+<span class="cm">   * Positive = forward, negative = backward.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveDistanceCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">meters</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">signum</span><span class="p">(</span><span class="n">meters</span><span class="p">);</span><span class="w">   </span><span class="c1">// +1 forward, -1 backward</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_distanceTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getAverageMeters</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">meters</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">tankDrive</span><span class="p">(</span><span class="n">direction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="o">?</span><span class="w"> </span><span class="n">getAverageMeters</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">m_distanceTarget</span><span class="w">     </span><span class="c1">// forward: wait until we pass it</span>
+<span class="w">            </span><span class="p">:</span><span class="w"> </span><span class="n">getAverageMeters</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_distanceTarget</span><span class="p">)</span><span class="w">    </span><span class="c1">// backward: wait until we pass it going down</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span><span class="w">                                </span><span class="c1">// safety: give up if the encoders never get there</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">meters</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" m"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>m_distanceTarget = getAverageMeters() + meters</code></td>
+<td>Remembers where to stop: 1 m from <strong>wherever the robot is now</strong>, so you don't have to reset first</td>
+</tr>
+<tr>
+<td><code>tankDrive(direction * speed, direction * speed, false)</code></td>
+<td>Both sides the same speed: straight forward (or straight back)</td>
+</tr>
+<tr>
+<td><code>.until(...)</code></td>
+<td>Stops the moment the average distance passes the target</td>
+</tr>
+<tr>
+<td><code>.withTimeout(5.0)</code></td>
+<td>If an encoder is unplugged, the distance never changes. This stops the robot anyway.</td>
+</tr>
+</tbody>
+</table>
+<p>Add the target to <code>periodic()</code> so you can watch it:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Encoders/Distance Target (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_distanceTarget</span><span class="p">);</span>
+</code></pre></div>
+<p>Bind it to <strong>A</strong>, in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">a</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">));</span><span class="w">   </span><span class="c1">// drive 1 meter</span>
+</code></pre></div>
+<p><strong>On the floor</strong>, with a tape mark at the robot's front edge: press <strong>A</strong> and measure where it stops. Try speeds of 0.3, 0.5, and 0.7.</p>
+<p><strong>What you'll see:</strong> It goes <strong>at least</strong> 1 m every time, with a little <strong>overshoot</strong> that grows with speed. It's the same bang-bang overshoot as the gyro turns and the Lab 6 wheel. Unlike the timed drive in Lab 7, though, a tired battery doesn't make it come up short: it just takes longer to get there.</p>
+<h3 id="step-11-why-turns-use-the-gyro-not-the-encoders">Step 11: Why turns use the gyro, not the encoders<a class="headerlink" href="#step-11-why-turns-use-the-gyro-not-the-encoders" title="Permanent link">#</a></h3>
+<p>If the left side rolls backward and the right side rolls forward by the same amount, the robot spins. So you could estimate the heading from the encoders alone:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Heading estimated from the encoders alone, in degrees. Watch how wrong it gets. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getEncoderHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">toDegrees</span><span class="p">((</span><span class="n">getRightMeters</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">())</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">TrackWidthMeters</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getRightMeters() - getLeftMeters()</code></td>
+<td>How much farther the right side has rolled than the left</td>
+</tr>
+<tr>
+<td><code>/ TrackWidthMeters</code></td>
+<td>Divided by the distance between the wheels, that's the angle turned, in <strong>radians</strong></td>
+</tr>
+<tr>
+<td><code>Math.toDegrees(...)</code></td>
+<td>Radians to degrees</td>
+</tr>
+</tbody>
+</table>
+<p>Add it to <code>periodic()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Encoders/Heading Estimate (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getEncoderHeadingDegrees</span><span class="p">());</span>
+</code></pre></div>
+<p><strong>Try it:</strong> zero the gyro (<strong>Back</strong>), reset the encoders (<strong>Start</strong>), and press <strong>X</strong> to turn 90° by the gyro. Compare <strong>Gyro → Heading</strong> with <strong>Encoders → Heading Estimate</strong>.</p>
+<p><strong>What you'll see:</strong> The encoder estimate says the robot turned <strong>much more</strong> than 90°, sometimes 120° or more. A skid steer <strong>skids</strong>: to turn, its wheels slide sideways across the floor, so they roll farther than the robot actually turns. The encoders count every bit of that rolling. The gyro measures the robot's real rotation, so it's the sensor to trust for turns. Encoders are great for <strong>straight</strong> driving, where the wheels don't slide.</p>
+<h3 id="step-12-a-square-that-closes">Step 12: A square that closes<a class="headerlink" href="#step-12-a-square-that-closes" title="Permanent link">#</a></h3>
+<p>Go back to <code>RobotContainer</code>'s <code>squareSide()</code> from Lab 7. Swap the timed forward drive for an encoder drive, and the timed spin for a gyro turn:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">squareSide</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span>
-<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">),</span><span class="w">   </span><span class="c1">// forward (still timed)</span>
+<span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">),</span><span class="w">          </span><span class="c1">// forward 1 m by the encoders</span>
 <span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">),</span><span class="w">   </span><span class="c1">// pause</span>
 <span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">twoSpeedTurnCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">),</span><span class="w">                 </span><span class="c1">// turn left by the gyro</span>
 <span class="w">        </span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">));</span><span class="w">  </span><span class="c1">// pause</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
-<p>Import <code>Commands</code> if needed. Run <strong>Square</strong> five times and fill in the same table as Lab 7. Compare the two tables.</p>
-<h3 id="step-9-commit">Step 9: Commit<a class="headerlink" href="#step-9-commit" title="Permanent link">#</a></h3>
+<p>Import <code>Commands</code> if needed. Run <strong>Square</strong> five times and fill in the same table as Lab 7. Compare the two tables: the timed square from Lab 7, and this one, driven entirely by sensors.</p>
+<h3 id="step-13-commit">Step 13: Commit<a class="headerlink" href="#step-13-commit" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
-git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 8: NavX gyro turns"</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 8: NavX gyro turns and encoder distances"</span>
 </code></pre></div>
 <h3 id="when-it-doesnt-work">When it doesn't work<a class="headerlink" href="#when-it-doesnt-work" title="Permanent link">#</a></h3>
 <table>
@@ -388,6 +654,18 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <td>Robot spins forever, then stops after 3 seconds</td>
 <td>It turned the opposite way from the target: check the signs in <code>tankDrive</code> for the turn</td>
 </tr>
+<tr>
+<td>One encoder counts <strong>down</strong> when pushing forward</td>
+<td>Flip that side's <code>...EncoderInverted</code> in <code>Constants</code></td>
+</tr>
+<tr>
+<td>Drive distance never stops (until the 5 second timeout)</td>
+<td>An encoder isn't counting, or it counts backward, so the average never reaches the target</td>
+</tr>
+<tr>
+<td>Distances are about 4 times too big</td>
+<td><code>EncoderCyclesPerRev</code> is 8192; it should be 2048</td>
+</tr>
 </tbody>
 </table>
 <div class="admonition example">
@@ -400,11 +678,31 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Measure drift: how much does the heading change in one minute sitting still?</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Fill in the speed vs. overshoot table for one-speed turns</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Compare one-speed and two-speed turns</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run the gyro square and compare with your Lab 7 table</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Check both encoders by hand: both count up going forward, and 1 m reads about 1.00</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Drive 1 m at three speeds and measure the overshoot</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Compare the gyro heading and the encoder heading estimate after a 90° turn. How far off is the estimate?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run the sensor square and compare with your Lab 7 table</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: make <code>driveDistanceCommand</code> slow down for the last 0.2 m, like the two-speed turn</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Turn 360° and see if the robot ends facing the same way</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: write <code>turnToHeadingCommand(double heading)</code> that turns to an <strong>absolute</strong> heading (like "face 0°") instead of "turn by" an amount</li>
 </ul>
 <h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why is the right encoder inverted?</summary>
+<p>The right gearbox faces the opposite way, so its shaft spins the opposite direction when the robot drives forward. Inverting it makes forward count up on both sides.</p>
+</details>
+<details class="question">
+<summary>With 6-inch wheels, how far does the robot roll when a wheel turns once?</summary>
+<p>π × 6 in ≈ 18.85 in ≈ <strong>0.479 m</strong></p>
+</details>
+<details class="question">
+<summary>Why use the average of both encoders for driving distance?</summary>
+<p>Driving straight, both sides roll the same distance. If the robot drifts a little to one side, the average is still about the distance its center traveled.</p>
+</details>
+<details class="question">
+<summary>Why does the encoder heading estimate say the robot turned more than it really did?</summary>
+<p>A skid steer's wheels slide sideways when it turns, so they roll farther than the robot rotates. The encoders count all of that rolling. The gyro measures the real rotation.</p>
+</details>
 <details class="question">
 <summary>What does a gyro measure?</summary>
 <p>How much the robot has rotated. Yaw, the rotation seen from above, is the robot's heading.</p>

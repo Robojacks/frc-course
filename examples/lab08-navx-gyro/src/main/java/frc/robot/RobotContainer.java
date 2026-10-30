@@ -46,11 +46,13 @@ public class RobotContainer {
             () -> -MathUtil.applyDeadband(m_controller.getLeftY(), OperatorConstants.kDeadband),
             () -> -MathUtil.applyDeadband(m_controller.getRightY(), OperatorConstants.kDeadband)));
 
-    // ---- Gyro (Lab 8) ----
+    // ---- Gyro and encoders (Lab 8) ----
     m_controller.back().onTrue(m_driveSubsystem.zeroHeadingCommand());
     m_controller.x().onTrue(m_driveSubsystem.turnDegreesCommand(90, 0.4));    // turn left 90°
     m_controller.b().onTrue(m_driveSubsystem.turnDegreesCommand(-90, 0.4));   // turn right 90°
     m_controller.y().onTrue(m_driveSubsystem.twoSpeedTurnCommand(90));
+    m_controller.start().onTrue(m_driveSubsystem.resetEncodersCommand());
+    m_controller.a().onTrue(m_driveSubsystem.driveDistanceCommand(1.0, 0.4));   // drive 1 meter
   }
 
   public Command getAutonomousCommand() {
@@ -63,10 +65,10 @@ public class RobotContainer {
         .withName("Drive Forward");
   }
 
-  /** One side of a square: drive forward, pause, turn left 90 degrees by the gyro, pause. */
+  /** One side of a square: forward 1 m by the encoders, pause, turn left 90 degrees by the gyro, pause. */
   private Command squareSide() {
     return Commands.sequence(
-        m_driveSubsystem.driveForSecondsCommand(0.4, 0.4, 1.0),   // forward (still timed)
+        m_driveSubsystem.driveDistanceCommand(1.0, 0.4),          // forward 1 m by the encoders
         m_driveSubsystem.driveForSecondsCommand(0.0, 0.0, 0.3),   // pause
         m_driveSubsystem.twoSpeedTurnCommand(90),                 // turn left by the gyro
         m_driveSubsystem.driveForSecondsCommand(0.0, 0.0, 0.3));  // pause

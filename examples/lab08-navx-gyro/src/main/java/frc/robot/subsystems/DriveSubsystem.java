@@ -14,6 +14,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -45,7 +47,20 @@ public class DriveSubsystem extends SubsystemBase {
   // NavX2 on the roboRIO's MXP port, talking over SPI
   private final AHRS m_gyro = new AHRS(NavXComType.kMXP_SPI);
 
+  // Through Bore Encoders on each side's gearbox output shaft (Lab 8)
+  private final Encoder m_leftEncoder = new Encoder(
+      kDriveConstants.LeftEncoderChannelA,
+      kDriveConstants.LeftEncoderChannelB,
+      kDriveConstants.LeftEncoderInverted,
+      EncodingType.k4X);
+  private final Encoder m_rightEncoder = new Encoder(
+      kDriveConstants.RightEncoderChannelA,
+      kDriveConstants.RightEncoderChannelB,
+      kDriveConstants.RightEncoderInverted,
+      EncodingType.k4X);
+
   private double m_turnTarget = 0.0;   // where the current turn is trying to end
+  private double m_distanceTarget = 0.0;   // where the current drive is trying to stop
 
   public DriveSubsystem() {
     // Left leader: normal direction
@@ -70,6 +85,11 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Cap the top speed while we're learning. Raise this in Constants later.
     m_drive.setMaxOutput(kDriveConstants.MaxOutput);
+
+    // After this, getDistance() is in meters the wheels have rolled
+    double metersPerPulse = kDriveConstants.MetersPerRotation / kDriveConstants.EncoderCyclesPerRev;
+    m_leftEncoder.setDistancePerPulse(metersPerPulse);
+    m_rightEncoder.setDistancePerPulse(metersPerPulse);
   }
 
   /** Settings every drive motor shares. */
@@ -107,6 +127,29 @@ public class DriveSubsystem extends SubsystemBase {
     return runOnce(m_gyro::reset).ignoringDisable(true).withName("Zero Heading");
   }
 
+  /** How far the left wheels have rolled, in meters, since the last reset. */
+  public double getLeftMeters() {
+    return m_leftEncoder.getDistance();
+  }
+
+  /** How far the right wheels have rolled, in meters, since the last reset. */
+  public double getRightMeters() {
+    return m_rightEncoder.getDistance();
+  }
+
+  /** How far the robot has driven: the average of the two sides. */
+  public double getAverageMeters() {
+    return (getLeftMeters() + getRightMeters()) / 2.0;
+  }
+
+  /** Sets both encoders back to 0. Works while disabled. */
+  public Command resetEncodersCommand() {
+    return runOnce(() -> {
+      m_leftEncoder.reset();
+      m_rightEncoder.reset();
+    }).ignoringDisable(true).withName("Reset Encoders");
+  }
+
   /**
    * Spins in place until the heading has changed by the given degrees.
    * Positive = turn left, negative = turn right.
@@ -140,6 +183,27 @@ public class DriveSubsystem extends SubsystemBase {
         .withName("Two-Speed Turn " + degrees);
   }
 
+  /**
+   * Drives straight until the robot has gone the given distance, in meters.
+   * Positive = forward, negative = backward.
+   */
+  public Command driveDistanceCommand(double meters, double speed) {
+    double direction = Math.signum(meters);   // +1 forward, -1 backward
+    return runOnce(() -> m_distanceTarget = getAverageMeters() + meters)
+        .andThen(run(() -> m_drive.tankDrive(direction * speed, direction * speed, false)))
+        .until(() -> direction > 0
+            ? getAverageMeters() >= m_distanceTarget     // forward: wait until we pass it
+            : getAverageMeters() <= m_distanceTarget)    // backward: wait until we pass it going down
+        .withTimeout(5.0)                                // safety: give up if the encoders never get there
+        .finallyDo(() -> m_drive.stopMotor())
+        .withName("Drive " + meters + " m");
+  }
+
+  /** Heading estimated from the encoders alone, in degrees. Watch how wrong it gets. */
+  public double getEncoderHeadingDegrees() {
+    return Math.toDegrees((getRightMeters() - getLeftMeters()) / kDriveConstants.TrackWidthMeters);
+  }
+
   @Override
   public void periodic() {
     m_telemetry.log("Left Output", m_leftLeader.getAppliedOutput());
@@ -155,5 +219,11 @@ public class DriveSubsystem extends SubsystemBase {
     m_telemetry.log("Gyro/Calibrating", m_gyro.isCalibrating());
     m_telemetry.log("Gyro/Turn Target (deg)", m_turnTarget);
     m_telemetry.log("Gyro/Turn Error (deg)", m_turnTarget - getHeadingDegrees());
+
+    m_telemetry.log("Encoders/Left (m)", getLeftMeters());
+    m_telemetry.log("Encoders/Right (m)", getRightMeters());
+    m_telemetry.log("Encoders/Average (m)", getAverageMeters());
+    m_telemetry.log("Encoders/Distance Target (m)", m_distanceTarget);
+    m_telemetry.log("Encoders/Heading Estimate (deg)", getEncoderHeadingDegrees());
   }
 }
