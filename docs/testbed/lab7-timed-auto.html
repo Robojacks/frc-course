@@ -84,6 +84,14 @@
 </thead>
 <tbody>
 <tr>
+<td><code>double leftSpeed, double rightSpeed, double seconds</code></td>
+<td>Three inputs, so one method can make any timed drive: forward, backward, or spinning</td>
+</tr>
+<tr>
+<td><code>run(...)</code></td>
+<td>Every loop, send the speeds. <code>DifferentialDrive</code> needs a fresh speed every loop, or its safety feature stops the motors.</td>
+</tr>
+<tr>
 <td><code>tankDrive(left, right, false)</code></td>
 <td>The <code>false</code> turns off squaring, so 0.4 means 40%, not 16%</td>
 </tr>
@@ -122,7 +130,41 @@
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <p>Import <code>edu.wpi.first.wpilibj2.command.Commands</code>.</p>
-<p><code>Commands.sequence(a, b, c)</code> runs <code>a</code>, then <code>b</code>, then <code>c</code>.</p>
+<p>Piece by piece:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>private Command driveForwardAuto()</code></td>
+<td>A method that <strong>builds</strong> a routine and hands it back. Nothing moves until the routine is scheduled.</td>
+</tr>
+<tr>
+<td><code>driveForSecondsCommand(0.4, 0.4, 2.0)</code></td>
+<td>Both sides at 40% for 2 seconds: straight forward</td>
+</tr>
+<tr>
+<td><code>Commands.sequence(a, b, c, d)</code></td>
+<td>One command that runs <code>a</code>, then <code>b</code>, then <code>c</code>, then <code>d</code>. Each starts when the one before it ends.</td>
+</tr>
+<tr>
+<td><code>driveForSecondsCommand(-0.4, 0.4, 0.5)</code></td>
+<td>Left side backward, right side forward: spin left in place, for a guessed 0.5 seconds</td>
+</tr>
+<tr>
+<td><code>Commands.sequence(squareSide(), squareSide(), ...)</code></td>
+<td>A sequence made of sequences: four sides make a square</td>
+</tr>
+<tr>
+<td><code>.withName("Square")</code></td>
+<td>The name the dashboard shows while it runs</td>
+</tr>
+</tbody>
+</table>
 <div class="admonition info">
 <p class="admonition-title">Why pause by driving at 0 instead of <code>Commands.waitSeconds</code>?</p>
 <p><code>DifferentialDrive</code> has a safety feature: if nothing sends it a speed for about a tenth of a second, it stops the motors and prints an "Output not updated often enough" warning. Driving at 0 for the pause keeps it fed, so the console stays quiet. Each <code>squareSide()</code> call builds a <strong>new</strong> set of commands, which matters: one command object can't be used twice in the same routine.</p>
@@ -148,6 +190,40 @@
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <p>Import <code>frc.robot.telemetry.Selectable</code> and <code>frc.robot.telemetry.Tunables</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Selectable&lt;Command&gt;</code></td>
+<td>A menu where each option is a <code>Command</code>. The <code>&lt;Command&gt;</code> tells Java what kind of thing is in the menu.</td>
+</tr>
+<tr>
+<td><code>new Selectable&lt;&gt;()</code></td>
+<td>Makes an empty menu. The <code>&lt;&gt;</code> means "the same type as the field."</td>
+</tr>
+<tr>
+<td><code>addDefault("Do nothing", Commands.none())</code></td>
+<td>Adds an option and makes it the default. <code>Commands.none()</code> is a command that does nothing and ends right away.</td>
+</tr>
+<tr>
+<td><code>add("Square", squareAuto())</code></td>
+<td>Adds another option. <code>squareAuto()</code> runs now, when the menu is built, but only <strong>builds</strong> the routine; nothing moves yet.</td>
+</tr>
+<tr>
+<td><code>Tunables.publish("Auto", m_autoChooser)</code></td>
+<td>Puts the menu on the dashboard</td>
+</tr>
+<tr>
+<td><code>getSelected()</code></td>
+<td>Returns the command for whatever the drive team picked</td>
+</tr>
+</tbody>
+</table>
 <div class="admonition info">
 <p class="admonition-title">Why not <code>SendableChooser</code>?</p>
 <p>You'll see <code>SendableChooser</code> in older code and examples. It only reaches the dashboard through <code>SmartDashboard.putData</code>, which is going away in WPILib 2027. <code>Selectable</code> is its 2027 replacement, and the same lines of code work in 2027 (<a href="../robot-code/06b-dashboards.html#moving-to-2027">Lesson 6.1</a>).</p>

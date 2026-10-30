@@ -56,6 +56,12 @@ Open `RobotContainer.java` and add the knob as a field, next to the controller:
       0.0);   // offset: added to every reading
 ```
 
+| Argument | What it means |
+|---|---|
+| `KnobAnalogPort` (0) | Which **Analog In** port on the roboRIO the knob is wired to |
+| `KnobTurns` (10.0) | The **full range**: when the knob is turned all the way, `get()` reports 10. Halfway reports 5. |
+| `0.0` | The **offset**, added to every reading. 0 means "no shift." |
+
 Import `edu.wpi.first.wpilibj.AnalogPotentiometer`.
 
 Add a telemetry table for the knob's values, below the knob (import `frc.robot.telemetry.Telemetry` and `frc.robot.telemetry.TelemetryTable`):
@@ -82,8 +88,11 @@ And add the method to `RobotContainer`:
   }
 ```
 
+- **`public void updateDashboard()`**: a new method you wrote. `Robot` calls it every loop, so the knob's value stays fresh on the dashboard.
+- **`m_knob.get()`** reads the knob right now, as a number of turns from 0 to 10.
+
 ### Step 3: Calibrate
-Real pots almost never read exactly 0 and exactly 10 at the ends. Deploy (disabled is fine) and watch **Knob/Turns**.
+Real pots almost never read exactly 0 and exactly 10 at the ends. Deploy (disabled is fine) and watch **Turns** in **Telemetry → Knob**.
 
 1. Turn the knob all the way one direction. Write down the reading: **min** = ______
 2. Turn it all the way the other direction. **max** = ______
@@ -139,6 +148,20 @@ Add this method to `RobotContainer`:
   }
 ```
 
+Reading it from the top:
+
+| Line | What it does |
+|---|---|
+| `private double knobToSpeed()` | A method only `RobotContainer` uses (`private`) that answers with a number (`double`) |
+| `double min = ...;` and `double max = ...;` | **Local variables**: short names for the two constants, so the math below is easier to read. They only exist while the method runs. |
+| `double center = (min + max) / 2.0;` | The knob reading that should mean "stopped" |
+| `double halfRange = (max - min) / 2.0;` | How far the knob can turn from center to either end |
+| `double speed = (m_knob.get() - center) / halfRange;` | The linear map: how far from center, as a fraction of the way to the end. Center gives 0, either end gives 1 or -1. |
+| `speed = MathUtil.clamp(speed, -1.0, 1.0);` | Overwrites `speed` with a version that can't go below -1 or above 1 |
+| `return speed * 0.5;` | Hands the answer back to whoever called the method |
+
+Why the safety lines matter:
+
 | Line | Why |
 |---|---|
 | `clamp` | If the knob reads a bit past your measured min or max, the speed still stays between -1 and 1 |
@@ -166,7 +189,7 @@ You already wrote `spinWithSupplierCommand` in Lab 3. It reads a speed every loo
 
 1. Set the knob to the middle. Enable.
 2. Tap **D-pad right**. The motor shouldn't move.
-3. Slowly turn the knob one way. The motor speeds up. Watch **Knob/Speed** on the dashboard.
+3. Slowly turn the knob one way. The motor speeds up. Watch **Speed** in **Telemetry → Knob**.
 4. Turn it back through the middle and the other way. The motor slows, stops, and reverses.
 5. Tap **D-pad right** again to hand control back.
 

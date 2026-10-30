@@ -212,16 +212,115 @@ public class DriveSubsystem extends SubsystemBase {
 }
 ```
 
-Things to notice:
+### The drive subsystem, piece by piece
 
-| Code | What it means |
+#### 1. Four motor controllers, all brushed
+```java
+private final SparkMax m_leftLeader =
+    new SparkMax(kDriveConstants.LeftLeaderCanId, MotorType.kBrushed);
+private final SparkMax m_leftFollower =
+    new SparkMax(kDriveConstants.LeftFollowerCanId, MotorType.kBrushed);
+// ...and the same for the right leader and right follower
+```
+
+One `SparkMax` object for each SPARK MAX on the robot, each with its own CAN ID from `Constants`. They're **`MotorType.kBrushed`** because CIMs are brushed motors. (Lab 1's NEO was `kBrushless`.)
+
+Notice the import at the top: `import frc.robot.Constants.kDriveConstants;`. Importing the inner class lets you write `kDriveConstants.LeftLeaderCanId` instead of `Constants.kDriveConstants.LeftLeaderCanId`.
+
+#### 2. The DifferentialDrive
+```java
+private final DifferentialDrive m_drive =
+    new DifferentialDrive(m_leftLeader::set, m_rightLeader::set);
+```
+
+`DifferentialDrive` is WPILib's class for any robot with a left side and a right side. It does the math for driving, and it has a safety feature: if your code stops sending it speeds, it stops the motors.
+
+| Part | What it means |
 |---|---|
-| `MotorType.kBrushed` | CIMs are brushed. In Lab 1, the NEO was `kBrushless`. |
-| `follow(LeftLeaderCanId)` | "Copy whatever the left leader does." |
-| `inverted(true)` on the right leader | Flips the right side so forward means forward. The right follower copies the leader, so it flips too. |
-| `new DifferentialDrive(m_leftLeader::set, m_rightLeader::set)` | Gives WPILib's drive class a way to set each side. It only needs the leaders. |
-| `m_drive.tankDrive(left, right)` | Sends one speed to the left side and one to the right. Each value goes from -1 (full backward) to 1 (full forward). |
-| `setMaxOutput(0.5)` | Caps every output at 50% while you're learning |
+| `m_leftLeader::set` | A **method reference**: "to set the left side's speed, call `m_leftLeader.set(...)`." It's a shorter way to write the lambda `speed -> m_leftLeader.set(speed)`. |
+| Only the two leaders | The followers copy their leaders on their own, so `DifferentialDrive` never needs to know about them |
+
+#### 3. The telemetry table
+```java
+private final TelemetryTable m_telemetry = Telemetry.getTable("Drive");
+```
+
+Everything this subsystem sends goes in **Telemetry → Drive** in Elastic ([Lab 1.1](lab1b-dashboard.md)).
+
+#### 4. The constructor: one config per motor
+```java
+SparkMaxConfig leftLeaderConfig = baseConfig();
+
+SparkMaxConfig leftFollowerConfig = baseConfig();
+leftFollowerConfig.follow(kDriveConstants.LeftLeaderCanId);
+
+SparkMaxConfig rightLeaderConfig = baseConfig();
+rightLeaderConfig.inverted(true);
+
+SparkMaxConfig rightFollowerConfig = baseConfig();
+rightFollowerConfig.follow(kDriveConstants.RightLeaderCanId);
+```
+
+Each motor controller gets its own settings. All four start from `baseConfig()` (piece 5), then:
+
+| Motor | Extra setting | Why |
+|---|---|---|
+| Left leader | None | It runs normally |
+| Left follower | `follow(LeftLeaderCanId)` | "Copy whatever the controller with this CAN ID does." Following happens on the SPARK MAXes themselves, over CAN. |
+| Right leader | `inverted(true)` | The right gearbox faces the other way, so this flips it. Now "forward" is forward on both sides (Step 4). |
+| Right follower | `follow(RightLeaderCanId)` | Copies the right leader, **including** its inversion |
+
+```java
+m_leftLeader.configure(leftLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+// ...and the same for the other three
+m_drive.setMaxOutput(kDriveConstants.MaxOutput);
+```
+
+`configure(...)` sends each set of settings to its SPARK MAX, the same way as Lab 1. Then `setMaxOutput(0.5)` tells `DifferentialDrive` to scale every output down to at most 50%, so full stick is only half speed while you're learning.
+
+#### 5. Shared settings in one place
+```java
+private static SparkMaxConfig baseConfig() {
+  SparkMaxConfig config = new SparkMaxConfig();
+  config.smartCurrentLimit(kDriveConstants.CurrentLimit);
+  config.idleMode(IdleMode.kBrake);
+  return config;
+}
+```
+
+All four motors need the same current limit and brake mode. Instead of writing those lines four times, this **helper method** builds a config with them and **returns** it. Each call makes a brand-new config, so changing one motor's config (like inverting it) doesn't change the others.
+
+- **`private`**: only this class uses it.
+- **`static`**: it doesn't use any of the subsystem's fields, so it doesn't need an object to run.
+
+#### 6. The drive command
+```java
+public Command differentialDriveCommand(DoubleSupplier leftSpeed, DoubleSupplier rightSpeed) {
+  return run(() -> m_drive.tankDrive(leftSpeed.getAsDouble(), rightSpeed.getAsDouble()))
+      .withName("Differential Drive");
+}
+```
+
+| Part | What it means |
+|---|---|
+| `DoubleSupplier leftSpeed` | Not a number, but something you can **ask** for a number, any time, with `getAsDouble()`. Here, it will read the joystick. |
+| `run(...)` | A command that runs its code **every loop** (every 20 ms) until something stops it. Like `startEnd`, it requires the subsystem. |
+| `m_drive.tankDrive(left, right)` | Sends one speed to the left side and one to the right, each from -1 (full backward) to 1 (full forward) |
+
+Why a `DoubleSupplier` instead of a plain `double`? A `double` would be read **once**, when the command is created, and the robot would drive at that one speed forever. A supplier is read **every loop**, so the robot follows the sticks as they move.
+
+#### 7. Sending values to the dashboard
+```java
+@Override
+public void periodic() {
+  m_telemetry.log("Left Output", m_leftLeader.getAppliedOutput());
+  m_telemetry.log("Left Leader Current (A)", m_leftLeader.getOutputCurrent());
+  m_telemetry.log("Battery (V)", RobotController.getBatteryVoltage());
+  // ...
+}
+```
+
+`periodic()` runs every 20 ms, enabled or not. `@Override` means "this replaces the empty `periodic()` that `SubsystemBase` already has." The values let you check the robot without guessing: each side's output, every motor's current, and the battery voltage.
 
 ### Step 6: Skid steer controls
 If you've ever run a skid steer loader, you already know how to drive this robot. A skid steer has two levers: the left lever runs the left wheels and the right lever runs the right wheels. Push both forward to go straight, push one further to turn, and push them opposite ways to spin in place.

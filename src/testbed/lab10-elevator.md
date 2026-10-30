@@ -325,14 +325,228 @@ public class ElevatorSubsystem extends SubsystemBase {
 }
 ```
 
-| Code | What it means |
+### The elevator subsystem, piece by piece
+It's the longest file in the labs, but most of it is pieces you already know. Here it is in order.
+
+#### 1. The presets
+```java
+public enum Preset { START, L2, L3 }
+```
+
+An **enum** is a type with a fixed list of values. A `Preset` can only be `START`, `L2`, or `L3`. If you type `Preset.L4` by mistake, the code won't build, which is much better than an elevator going to a height you didn't mean. It's `public` and inside the class, so `RobotContainer` uses it as `ElevatorSubsystem.Preset.L2`.
+
+#### 2. The motor and the encoder
+```java
+private final SparkMax m_motor =
+    new SparkMax(kElevatorConstants.MotorCanId, MotorType.kBrushless);
+
+private final Encoder m_encoder = new Encoder(
+    kElevatorConstants.EncoderChannelA,
+    kElevatorConstants.EncoderChannelB,
+    kElevatorConstants.EncoderInverted,
+    EncodingType.k4X);
+```
+
+The same patterns as Labs 1 and 6: a NEO on a SPARK MAX in **brushless** mode, and the Through Bore Encoder on two DIO ports with 4X counting.
+
+#### 3. The controller
+```java
+private final ProfiledPIDController m_pid = new ProfiledPIDController(
+    kElevatorConstants.kP, kElevatorConstants.kI, kElevatorConstants.kD,
+    new TrapezoidProfile.Constraints(
+        kElevatorConstants.MaxVelocityMetersPerSecond,
+        kElevatorConstants.MaxAccelerationMetersPerSecondSquared));
+```
+
+Like Lab 9's `PIDController`, it takes kP, kI, and kD. It also takes **constraints**: the fastest the carriage may move (0.25 m/s) and how quickly it may speed up or slow down (0.5 m/s²). The controller uses those to plan the smooth path from where the carriage is to the goal.
+
+`TrapezoidProfile.Constraints` is named for the shape of the plan: speed ramps up, stays flat, and ramps down, which looks like a trapezoid on a graph ([Lesson 14](../controls/14-profiles.md)).
+
+#### 4. The dashboard and the tunable numbers
+```java
+private double m_lastVolts = 0.0;      // for the dashboard
+
+private final TelemetryTable m_telemetry = Telemetry.getTable("Elevator");
+private final TunableDouble m_kP = Tunables.addDouble("Elevator/kP", kElevatorConstants.kP);
+// ...kI, kD, Max Velocity, and Max Accel the same way
+```
+
+Values go to **Telemetry → Elevator**. Five numbers are tunable from **Tunables → Elevator**: the three gains and the two profile limits.
+
+#### 5. The constructor
+```java
+SparkMaxConfig config = new SparkMaxConfig();
+config.smartCurrentLimit(kElevatorConstants.CurrentLimit);
+config.idleMode(IdleMode.kBrake);    // resists falling when no voltage is applied
+config.inverted(kElevatorConstants.MotorInverted);
+m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+m_encoder.setDistancePerPulse(kElevatorConstants.DistancePerPulse);
+m_encoder.reset();   // the elevator MUST start at the bottom: this is height 0
+
+m_pid.setTolerance(kElevatorConstants.ToleranceMeters);
+m_pid.setIZone(kElevatorConstants.IZoneMeters);
+holdHere();
+```
+
+| Line | What it does |
 |---|---|
-| `public enum Preset { START, L2, L3 }` | An **enum**: a type with a fixed list of values. A preset can only be one of these three, so a typo won't compile. |
-| `m_pid.calculate(getHeightMeters())` | Moves the setpoint one 20 ms step along the profile, then returns PID's voltage to reach it |
-| `m_pid.reset(position, velocity)` | Starts the profile from where the carriage **really** is, so it never plans from a stale spot |
-| `.beforeStarting(...)` | Runs once, before the command's first loop: here, it picks the new goal |
-| `.until(this::atGoal)` | Ends the preset command once the carriage reaches the goal. `atGoal()` checks the **goal**; `atSetpoint()` would only check the profile's current step. |
-| `return switch (preset) { case START -> ... }` | A **switch expression**: picks a value based on which preset it is |
+| `idleMode(IdleMode.kBrake)` | When no voltage is applied, the motor resists turning. It slows a falling carriage, but doesn't hold it up by itself. |
+| `setDistancePerPulse(DistancePerPulse)` | After this, `getDistance()` answers in **meters** of elevator travel (Step 1) |
+| `m_encoder.reset()` | Calls wherever the elevator is right now **0 m**. That's why it must start at the bottom. |
+| `setTolerance(0.006)` | Within 6 mm counts as "there" |
+| `setIZone(0.063)` | Only build up I within 6.3 cm of the goal (Attempt 4) |
+| `holdHere()` | Starts the controller off holding the current height (piece 8) |
+
+#### 6. Reading the height
+```java
+public double getHeightMeters() {
+  return m_encoder.getDistance();
+}
+
+public boolean atGoal() {
+  return m_pid.atGoal();
+}
+```
+
+`atGoal()` is true when the carriage has reached the **goal** you picked. (`atSetpoint()` only checks the profile's current step, which would be true the whole way up.)
+
+#### 7. Every voltage goes through one method, with soft limits
+```java
+private void setVolts(double volts) {
+  double height = getHeightMeters();
+  if (height >= kElevatorConstants.MaxHeightMeters && volts > 0) {
+    volts = 0;   // at the top: never push higher
+  }
+  if (height <= kElevatorConstants.MinHeightMeters && volts < 0) {
+    volts = 0;   // at the bottom: never push lower
+  }
+  m_lastVolts = volts;
+  m_motor.setVoltage(volts);
+}
+```
+
+| Line | What it does |
+|---|---|
+| `if (height >= Max && volts > 0)` | At or above the top **and** trying to go up? `&&` means both must be true. |
+| `volts = 0;` | Then don't. Pushing **down** from the top is still allowed. |
+| The second `if` | The same check for the bottom |
+
+Every command moves the motor through `setVolts`, so no command can skip these checks. These are **soft limits**: limits in code, as opposed to the **hard stop**, the metal the carriage hits.
+
+#### 8. Starting a fresh plan
+```java
+private void holdHere() {
+  m_pid.reset(getHeightMeters());
+  m_pid.setGoal(getHeightMeters());
+}
+
+private void setGoalMeters(double meters) {
+  m_pid.reset(getHeightMeters(), m_encoder.getRate());
+  m_pid.setGoal(MathUtil.clamp(
+      meters, kElevatorConstants.MinHeightMeters, kElevatorConstants.MaxHeightMeters));
+}
+```
+
+| Method | What it does |
+|---|---|
+| `holdHere()` | Throws away the old plan, starts a new one **from the real height**, and makes that same height the goal: "stay right here" |
+| `setGoalMeters(meters)` | Starts a new plan from the real height **and speed** (`getRate()`), toward a new goal |
+| `MathUtil.clamp(meters, Min, Max)` | If a goal is outside the elevator's travel, use the nearest end instead |
+
+`reset(...)` matters because the profile plans from wherever it **thinks** the carriage is. If that's out of date (after manual driving, or after being disabled), the first step of the plan would be far from reality, and the elevator would jump.
+
+#### 9. Turning a preset into meters
+```java
+private static double presetMeters(Preset preset) {
+  return switch (preset) {
+    case START -> kElevatorConstants.StartMeters;
+    case L2 -> kElevatorConstants.L2Meters;
+    case L3 -> kElevatorConstants.L3Meters;
+  };
+}
+```
+
+A **switch expression** picks one value based on which preset it's given: "if it's `START`, the answer is `StartMeters`; if it's `L2`, `L2Meters`..." Java checks that every preset is covered, so if you add `L4` to the enum and forget it here, the build tells you.
+
+#### 10. One step of control
+```java
+private void followProfile() {
+  double volts = m_pid.calculate(getHeightMeters());
+  setVolts(MathUtil.clamp(volts, -kElevatorConstants.MaxVolts, kElevatorConstants.MaxVolts));
+}
+```
+
+`m_pid.calculate(height)` does two things in one call: it moves the **setpoint** one 20 ms step along the plan toward the goal, then runs PID on the gap between the setpoint and the height. The answer, clamped to ±4 V, goes to `setVolts`. Every command that moves the elevator by itself calls this once per loop.
+
+#### 11. The commands
+```java
+public Command holdCommand() {
+  return run(this::followProfile).withName("Hold");
+}
+```
+
+The **default command**. Every loop, follow the plan, and once at the goal, keep holding it. It never ends, because the elevator always needs voltage to fight gravity.
+
+```java
+public Command goToPresetCommand(Preset preset) {
+  return run(this::followProfile)
+      .beforeStarting(() -> setGoalMeters(presetMeters(preset)))
+      .until(this::atGoal)
+      .withName("Elevator to " + preset);
+}
+```
+
+| Part | What it does |
+|---|---|
+| `.beforeStarting(...)` | Once, right before the first loop: set the new goal |
+| `run(this::followProfile)` | Every loop: follow the plan |
+| `.until(this::atGoal)` | End on arrival. Then the default **Hold** command starts again and keeps holding the same goal. |
+
+Because it ends, an auto routine can chain it: `goToPresetCommand(Preset.L2).andThen(...)`.
+
+```java
+public Command manualCommand(double volts) {
+  return runEnd(() -> setVolts(volts), this::holdHere)
+      .withName("Manual " + volts + " V");
+}
+```
+
+While the button is held, apply a fixed voltage (still through the soft limits). When it's released, `holdHere()` makes wherever the carriage stopped the new goal, so it holds there instead of sliding back to the old goal.
+
+```java
+public Command zeroCommand() {
+  return runOnce(() -> {
+    m_encoder.reset();
+    holdHere();
+  }).ignoringDisable(true).withName("Zero");
+}
+```
+
+Calls the current height 0, then starts a fresh plan from there. It works while disabled, so you can lower the carriage by hand and zero it.
+
+#### 12. `periodic()`: safety, tuning, and the dashboard
+```java
+if (DriverStation.isDisabled()) {
+  holdHere();
+}
+
+m_pid.setPID(m_kP.get(), m_kI.get(), m_kD.get());
+m_pid.setConstraints(new TrapezoidProfile.Constraints(
+    m_maxVelocity.get(), m_maxAcceleration.get()));
+
+m_telemetry.log("Height (m)", getHeightMeters());
+m_telemetry.log("Goal (m)", m_pid.getGoal().position);
+m_telemetry.log("Setpoint (m)", m_pid.getSetpoint().position);
+// ...setpoint velocity, error, output, current, and At Goal
+```
+
+| Part | What it does |
+|---|---|
+| `if (DriverStation.isDisabled()) holdHere();` | While disabled, keep the plan and goal on the real height. Someone might push the carriage by hand; when you enable, it holds right there instead of lurching back. |
+| `setPID(...)` and `setConstraints(...)` | Copy the tunable numbers from the dashboard into the controller every loop |
+| `m_pid.getGoal().position` | The preset you picked |
+| `m_pid.getSetpoint().position` and `.velocity` | Where the plan says the carriage should be right now, and how fast it should be moving |
 
 Three safety features are built in:
 

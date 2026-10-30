@@ -53,6 +53,12 @@ Open `SpinBrushlessMotorSubsystem.java`. Add the switch next to the motor:
       new DigitalInput(Constants.kSensorConstants.LimitSwitchDio);
 ```
 
+| Part | What it means |
+|---|---|
+| `DigitalInput` | WPILib's class for anything on a **DIO** port that's simply on or off |
+| `new DigitalInput(2)` | "Watch DIO port 2." The port number comes from `Constants`. |
+| `m_limitSwitch.get()` | Reads the port right now: `true` or `false` |
+
 Import `edu.wpi.first.wpilibj.DigitalInput`. Then add a method that says what the switch **means**:
 
 ```java
@@ -61,6 +67,10 @@ Import `edu.wpi.first.wpilibj.DigitalInput`. Then add a method that says what th
     return !m_limitSwitch.get();   // pressed pulls the signal low, so flip it
   }
 ```
+
+- **`public boolean`**: the method answers a yes-or-no question, `true` or `false`.
+- **`!`** means "not": it flips `true` to `false` and back. With the usual wiring, the port reads `false` when the switch is pressed, so `!` turns that into "pressed = `true`."
+- The `/** ... */` comment above it is a **Javadoc** comment. VS Code shows it when you hover over `isLimitPressed()` anywhere in your code.
 
 !!! tip "Name it for what it means"
     `isLimitPressed()` is much clearer than `getSwitch()`. Everywhere else in your code, `if (isLimitPressed())` reads like English and hides the "pressed is false" wiring detail in one place.
@@ -91,7 +101,11 @@ Add a command that runs the motor and **stops by itself** when the switch is hit
   }
 ```
 
-`.until(condition)` checks the condition every 20 ms. The moment it's `true`, the command ends, and `spinMotorCommand`'s end action stops the motor.
+| Part | What it does |
+|---|---|
+| `spinMotorCommand(speed)` | Lab 1's command: spin, and stop when it ends |
+| `.until(this::isLimitPressed)` | Checks `isLimitPressed()` every 20 ms. The moment it's `true`, the command **ends**, and `spinMotorCommand`'s end action stops the motor. |
+| `this::isLimitPressed` | A **method reference**: "call this subsystem's `isLimitPressed()` whenever you need the answer." It's the short way to write `() -> isLimitPressed()`. |
 
 Bind it in `RobotContainer`:
 
@@ -122,6 +136,8 @@ In step 3 of the test, the command started, saw the switch already pressed, and 
   }
 ```
 
+`.unless(condition)` checks the condition **once, when the command is about to start**. If it's `true`, the command is skipped entirely: it never starts, so the motor never twitches. `.until` and `.unless` look alike but answer different questions: `.until` is "when should I stop?", and `.unless` is "should I start at all?"
+
 ### Step 6: A trigger made from a sensor
 Buttons aren't the only triggers. **Any true/false check** can start a command. Add this in `configureBindings()`:
 
@@ -130,6 +146,13 @@ Buttons aren't the only triggers. **Any true/false check** can start a command. 
     new Trigger(m_spinBrushlessMotorSubsystem::isLimitPressed)
         .onTrue(Commands.print("Limit switch hit!"));
 ```
+
+| Part | What it does |
+|---|---|
+| `new Trigger(...)` | Makes a trigger from any true/false check, not just a button |
+| `m_spinBrushlessMotorSubsystem::isLimitPressed` | The check: is the switch pressed? The trigger asks every 20 ms. |
+| `.onTrue(...)` | Runs the command each time the check **changes** from `false` to `true` |
+| `Commands.print("...")` | A ready-made command that prints a message to the console and ends |
 
 Import `Trigger` and `Commands` if needed. Deploy, open RioLog, and press the switch. The message prints once **each time** the switch goes from not-pressed to pressed, not 50 times a second while you hold it. That's what `onTrue` means: it fires on the **change**.
 

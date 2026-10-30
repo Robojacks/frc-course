@@ -56,6 +56,8 @@ import frc.robot.telemetry.TelemetryTable;
   private final TelemetryTable m_telemetry = Telemetry.getTable("Brushless");
 ```
 
+`Telemetry.getTable("Brushless")` gets the **Brushless** folder inside **Telemetry** on the dashboard. You keep it in a field, `m_telemetry`, so every method in the subsystem can log into it. `TelemetryTable` is the field's type: one folder of dashboard values.
+
 **3. Add a `periodic()` method** at the bottom of the class, before the last `}`:
 
 ```java
@@ -79,6 +81,10 @@ import frc.robot.telemetry.TelemetryTable;
 | `getAppliedOutput()` | The output the SPARK MAX is actually applying, from -1 to 1 |
 | `getMotorTemperature()` | The NEO's temperature, in °C |
 | `getCurrentCommand()` | The command that owns this subsystem right now, or `null` if none |
+
+- **`@Override`** means this replaces the empty `periodic()` that every subsystem already has. If you misspell the name, `@Override` makes the build fail instead of silently never running.
+- **`m_telemetry.log(name, value)`** sends one value. The first time a name is logged, it appears on the dashboard; after that, it just updates.
+- **`Command running = getCurrentCommand();`** asks the subsystem which command is using it right now, and saves the answer in a local variable.
 
 `running == null ? "none" : running.getName()` is a **ternary**: "if nothing is running, send `none`; otherwise send the command's name."
 
@@ -134,6 +140,13 @@ And import it at the top:
 import frc.robot.telemetry.TunableDouble;
 import frc.robot.telemetry.Tunables;
 ```
+
+| Part | What it means |
+|---|---|
+| `TunableDouble` | A number the dashboard can change while the robot runs |
+| `Tunables.addDouble(name, start)` | Makes the tunable number and puts it on the dashboard at `/Tunables/Brushless/Tunable Speed` |
+| `Constants.kBrushlessConstants.BrushlessMotorSpeed` | The starting value, 0.5. Every time the robot code starts, it goes back to this. |
+| A **field**, not inside a method | It's created **once**, when the subsystem is created, and kept for the whole match |
 
 **2. Add a command** below `spinMotorCommand`:
 

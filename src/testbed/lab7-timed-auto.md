@@ -45,6 +45,8 @@ Open `DriveSubsystem.java` and add:
 
 | Piece | Why |
 |---|---|
+| `double leftSpeed, double rightSpeed, double seconds` | Three inputs, so one method can make any timed drive: forward, backward, or spinning |
+| `run(...)` | Every loop, send the speeds. `DifferentialDrive` needs a fresh speed every loop, or its safety feature stops the motors. |
 | `tankDrive(left, right, false)` | The `false` turns off squaring, so 0.4 means 40%, not 16% |
 | `withTimeout(seconds)` | Ends the command after that many seconds |
 | `finallyDo(...)` | Runs when the command ends **for any reason** (finished, timed out, or canceled), so the motors always stop |
@@ -79,7 +81,16 @@ Routines are just commands chained together. Add these methods to `RobotContaine
 
 Import `edu.wpi.first.wpilibj2.command.Commands`.
 
-`Commands.sequence(a, b, c)` runs `a`, then `b`, then `c`.
+Piece by piece:
+
+| Code | What it does |
+|---|---|
+| `private Command driveForwardAuto()` | A method that **builds** a routine and hands it back. Nothing moves until the routine is scheduled. |
+| `driveForSecondsCommand(0.4, 0.4, 2.0)` | Both sides at 40% for 2 seconds: straight forward |
+| `Commands.sequence(a, b, c, d)` | One command that runs `a`, then `b`, then `c`, then `d`. Each starts when the one before it ends. |
+| `driveForSecondsCommand(-0.4, 0.4, 0.5)` | Left side backward, right side forward: spin left in place, for a guessed 0.5 seconds |
+| `Commands.sequence(squareSide(), squareSide(), ...)` | A sequence made of sequences: four sides make a square |
+| `.withName("Square")` | The name the dashboard shows while it runs |
 
 !!! info "Why pause by driving at 0 instead of `Commands.waitSeconds`?"
     `DifferentialDrive` has a safety feature: if nothing sends it a speed for about a tenth of a second, it stops the motors and prints an "Output not updated often enough" warning. Driving at 0 for the pause keeps it fed, so the console stays quiet. Each `squareSide()` call builds a **new** set of commands, which matters: one command object can't be used twice in the same routine.
@@ -114,6 +125,15 @@ And make `getAutonomousCommand()` return the choice:
 ```
 
 Import `frc.robot.telemetry.Selectable` and `frc.robot.telemetry.Tunables`.
+
+| Code | What it does |
+|---|---|
+| `Selectable<Command>` | A menu where each option is a `Command`. The `<Command>` tells Java what kind of thing is in the menu. |
+| `new Selectable<>()` | Makes an empty menu. The `<>` means "the same type as the field." |
+| `addDefault("Do nothing", Commands.none())` | Adds an option and makes it the default. `Commands.none()` is a command that does nothing and ends right away. |
+| `add("Square", squareAuto())` | Adds another option. `squareAuto()` runs now, when the menu is built, but only **builds** the routine; nothing moves yet. |
+| `Tunables.publish("Auto", m_autoChooser)` | Puts the menu on the dashboard |
+| `getSelected()` | Returns the command for whatever the drive team picked |
 
 !!! info "Why not `SendableChooser`?"
     You'll see `SendableChooser` in older code and examples. It only reaches the dashboard through `SmartDashboard.putData`, which is going away in WPILib 2027. `Selectable` is its 2027 replacement, and the same lines of code work in 2027 ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).

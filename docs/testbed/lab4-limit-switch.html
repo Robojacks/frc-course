@@ -92,12 +92,39 @@
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DigitalInput</span><span class="w"> </span><span class="n">m_limitSwitch</span><span class="w"> </span><span class="o">=</span>
 <span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">DigitalInput</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">LimitSwitchDio</span><span class="p">);</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DigitalInput</code></td>
+<td>WPILib's class for anything on a <strong>DIO</strong> port that's simply on or off</td>
+</tr>
+<tr>
+<td><code>new DigitalInput(2)</code></td>
+<td>"Watch DIO port 2." The port number comes from <code>Constants</code>.</td>
+</tr>
+<tr>
+<td><code>m_limitSwitch.get()</code></td>
+<td>Reads the port right now: <code>true</code> or <code>false</code></td>
+</tr>
+</tbody>
+</table>
 <p>Import <code>edu.wpi.first.wpilibj.DigitalInput</code>. Then add a method that says what the switch <strong>means</strong>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** True when the limit switch is pressed. */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isLimitPressed</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">!</span><span class="n">m_limitSwitch</span><span class="p">.</span><span class="na">get</span><span class="p">();</span><span class="w">   </span><span class="c1">// pressed pulls the signal low, so flip it</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
+<ul>
+<li><strong><code>public boolean</code></strong>: the method answers a yes-or-no question, <code>true</code> or <code>false</code>.</li>
+<li><strong><code>!</code></strong> means "not": it flips <code>true</code> to <code>false</code> and back. With the usual wiring, the port reads <code>false</code> when the switch is pressed, so <code>!</code> turns that into "pressed = <code>true</code>."</li>
+<li>The <code>/** ... */</code> comment above it is a <strong>Javadoc</strong> comment. VS Code shows it when you hover over <code>isLimitPressed()</code> anywhere in your code.</li>
+</ul>
 <div class="admonition tip">
 <p class="admonition-title">Name it for what it means</p>
 <p><code>isLimitPressed()</code> is much clearer than <code>getSwitch()</code>. Everywhere else in your code, <code>if (isLimitPressed())</code> reads like English and hides the "pressed is false" wiring detail in one place.</p>
@@ -121,7 +148,28 @@
 <span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin Until Limit"</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
-<p><code>.until(condition)</code> checks the condition every 20 ms. The moment it's <code>true</code>, the command ends, and <code>spinMotorCommand</code>'s end action stops the motor.</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spinMotorCommand(speed)</code></td>
+<td>Lab 1's command: spin, and stop when it ends</td>
+</tr>
+<tr>
+<td><code>.until(this::isLimitPressed)</code></td>
+<td>Checks <code>isLimitPressed()</code> every 20 ms. The moment it's <code>true</code>, the command <strong>ends</strong>, and <code>spinMotorCommand</code>'s end action stops the motor.</td>
+</tr>
+<tr>
+<td><code>this::isLimitPressed</code></td>
+<td>A <strong>method reference</strong>: "call this subsystem's <code>isLimitPressed()</code> whenever you need the answer." It's the short way to write <code>() -&gt; isLimitPressed()</code>.</td>
+</tr>
+</tbody>
+</table>
 <p>Bind it in <code>RobotContainer</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// D-pad up: spin until the limit switch is pressed</span>
 <span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">povUp</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span>
@@ -144,12 +192,39 @@
 <span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin Until Limit"</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
+<p><code>.unless(condition)</code> checks the condition <strong>once, when the command is about to start</strong>. If it's <code>true</code>, the command is skipped entirely: it never starts, so the motor never twitches. <code>.until</code> and <code>.unless</code> look alike but answer different questions: <code>.until</code> is "when should I stop?", and <code>.unless</code> is "should I start at all?"</p>
 <h3 id="step-6-a-trigger-made-from-a-sensor">Step 6: A trigger made from a sensor<a class="headerlink" href="#step-6-a-trigger-made-from-a-sensor" title="Permanent link">#</a></h3>
 <p>Buttons aren't the only triggers. <strong>Any true/false check</strong> can start a command. Add this in <code>configureBindings()</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Whenever the limit switch becomes pressed, print a message</span>
 <span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">Trigger</span><span class="p">(</span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">::</span><span class="n">isLimitPressed</span><span class="p">)</span>
 <span class="w">        </span><span class="p">.</span><span class="na">onTrue</span><span class="p">(</span><span class="n">Commands</span><span class="p">.</span><span class="na">print</span><span class="p">(</span><span class="s">"Limit switch hit!"</span><span class="p">));</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>new Trigger(...)</code></td>
+<td>Makes a trigger from any true/false check, not just a button</td>
+</tr>
+<tr>
+<td><code>m_spinBrushlessMotorSubsystem::isLimitPressed</code></td>
+<td>The check: is the switch pressed? The trigger asks every 20 ms.</td>
+</tr>
+<tr>
+<td><code>.onTrue(...)</code></td>
+<td>Runs the command each time the check <strong>changes</strong> from <code>false</code> to <code>true</code></td>
+</tr>
+<tr>
+<td><code>Commands.print("...")</code></td>
+<td>A ready-made command that prints a message to the console and ends</td>
+</tr>
+</tbody>
+</table>
 <p>Import <code>Trigger</code> and <code>Commands</code> if needed. Deploy, open RioLog, and press the switch. The message prints once <strong>each time</strong> the switch goes from not-pressed to pressed, not 50 times a second while you hold it. That's what <code>onTrue</code> means: it fires on the <strong>change</strong>.</p>
 <h3 id="step-7-commit">Step 7: Commit<a class="headerlink" href="#step-7-commit" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.

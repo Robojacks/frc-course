@@ -112,10 +112,29 @@
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PIDController</span><span class="w"> </span><span class="n">m_pid</span><span class="w"> </span><span class="o">=</span>
 <span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">P</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">I</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">D</span><span class="p">);</span>
 </code></pre></div>
+<p><code>PIDController</code> is WPILib's PID class. You give it the three gains: <strong>kP</strong>, <strong>kI</strong>, and <strong>kD</strong>. It doesn't know anything about motors or encoders. You hand it numbers, and it hands back a number.</p>
 <p>And at the end of the constructor:</p>
 <div class="highlight"><pre><span></span><code><span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setTolerance</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">ToleranceRot</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">ToleranceRps</span><span class="p">);</span>
 <span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setIZone</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">IZone</span><span class="p">);</span><span class="w">       </span><span class="c1">// limits integral windup (Attempt 5)</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setTolerance(0.02, 0.1)</code></td>
+<td>How close counts as "there": within <strong>0.02 rotations</strong> of the target <strong>and</strong> slower than <strong>0.1 rotations per second</strong>. Both have to be true, so it doesn't count as arrived while still swinging past.</td>
+</tr>
+<tr>
+<td><code>setIZone(0.5)</code></td>
+<td>Only let the I term build up when within 0.5 rotations of the target. You'll see why in Attempt 5.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="step-3-make-the-gains-tunable">Step 3: Make the gains tunable<a class="headerlink" href="#step-3-make-the-gains-tunable" title="Permanent link">#</a></h3>
 <p>You'll try a lot of gains in this lab. Redeploying for every one would take forever, so make them <strong>tunable</strong> from Elastic (<a href="lab1b-dashboard.html#step-5-change-the-speed-from-the-dashboard">Lab 1.1</a>).</p>
 <p>Add these fields to the subsystem, below the others:</p>
@@ -130,6 +149,7 @@
 <span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setPID</span><span class="p">(</span><span class="n">m_kP</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w"> </span><span class="n">m_kI</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w"> </span><span class="n">m_kD</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
 <span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setIZone</span><span class="p">(</span><span class="n">m_iZone</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
 </code></pre></div>
+<p><code>setPID</code> replaces all three gains at once. Doing it every loop means a change in Elastic takes effect within 20 ms, even in the middle of a move.</p>
 <p>In Elastic, add <strong>kP</strong>, <strong>kI</strong>, <strong>kD</strong>, and <strong>IZone</strong> from <strong>Tunables → Wheel</strong> as <strong>Text Display</strong> widgets, so you can type new values. Add a <strong>Graph</strong> with <strong>Position (rot)</strong> and <strong>Target (rot)</strong> from <strong>Telemetry → Wheel</strong> together.</p>
 <div class="admonition info">
 <p class="admonition-title">In WPILib 2027</p>
@@ -178,6 +198,70 @@
 <span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Attempts 3-5: PID"</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>Piece by piece:</p>
+<p><strong>First, once:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">setTargetFromHere</span><span class="p">(</span><span class="n">rotations</span><span class="p">);</span>
+<span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span><span class="w">                       </span><span class="c1">// clear old history</span>
+<span class="w">    </span><span class="p">})</span>
+</code></pre></div>
+<p>Pick the target, 10 rotations from here (like Lab 6). Then <code>m_pid.reset()</code> clears what the controller remembers from the last move: the I term's running total, and the last error the D term compares against. Without it, an old move could kick this one.</p>
+<p>The lambda has curly braces <code>{ }</code> because it does two things. Each line inside ends with <code>;</code>.</p>
+<p><strong>Then, every loop:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getRotations</span><span class="p">(),</span><span class="w"> </span><span class="n">m_target</span><span class="p">);</span>
+<span class="w">    </span><span class="n">setVolts</span><span class="p">(</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span><span class="n">volts</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">));</span>
+<span class="p">}))</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>m_pid.calculate(measurement, setpoint)</code></td>
+<td>The PID math: give it where the wheel <strong>is</strong> and where it <strong>should be</strong>, and it returns how many volts to apply. With P only, that's kP × (target − position).</td>
+</tr>
+<tr>
+<td><code>MathUtil.clamp(volts, -6, 6)</code></td>
+<td>Never send more than 6 V either way, however big the error is. Far from the target, PID would ask for 10 V; this keeps the test gentle.</td>
+</tr>
+<tr>
+<td><code>setVolts(...)</code></td>
+<td>Sends it to the motor (and remembers it for the dashboard)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Until it arrives, or gives up:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="p">.</span><span class="na">until</span><span class="p">(</span><span class="n">m_pid</span><span class="p">::</span><span class="n">atSetpoint</span><span class="p">)</span>
+<span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="p">.</span><span class="na">finallyDo</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">stop</span><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.until(m_pid::atSetpoint)</code></td>
+<td>End when the controller says it's within the tolerance you set in Step 2: close enough <strong>and</strong> slow enough</td>
+</tr>
+<tr>
+<td><code>.withTimeout(5.0)</code></td>
+<td>Give up after 5 seconds, in case it never quite gets there</td>
+</tr>
+<tr>
+<td><code>.finallyDo(this::stop)</code></td>
+<td>However it ends, stop the motor</td>
+</tr>
+</tbody>
+</table>
 <p>Bind it on the wheel controller:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_wheelController</span><span class="p">.</span><span class="na">x</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_wheel</span><span class="p">.</span><span class="na">turnPid</span><span class="p">(</span><span class="mi">10</span><span class="p">));</span><span class="w">   </span><span class="c1">// Attempts 3 to 5</span>
 </code></pre></div>

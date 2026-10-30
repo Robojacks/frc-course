@@ -104,6 +104,7 @@
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Everything this subsystem sends shows up in /Telemetry/Brushless on the dashboard</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Brushless"</span><span class="p">);</span>
 </code></pre></div>
+<p><code>Telemetry.getTable("Brushless")</code> gets the <strong>Brushless</strong> folder inside <strong>Telemetry</strong> on the dashboard. You keep it in a field, <code>m_telemetry</code>, so every method in the subsystem can log into it. <code>TelemetryTable</code> is the field's type: one folder of dashboard values.</p>
 <p><strong>3. Add a <code>periodic()</code> method</strong> at the bottom of the class, before the last <code>}</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nd">@Override</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
@@ -147,6 +148,11 @@
 </tr>
 </tbody>
 </table>
+<ul>
+<li><strong><code>@Override</code></strong> means this replaces the empty <code>periodic()</code> that every subsystem already has. If you misspell the name, <code>@Override</code> makes the build fail instead of silently never running.</li>
+<li><strong><code>m_telemetry.log(name, value)</code></strong> sends one value. The first time a name is logged, it appears on the dashboard; after that, it just updates.</li>
+<li><strong><code>Command running = getCurrentCommand();</code></strong> asks the subsystem which command is using it right now, and saves the answer in a local variable.</li>
+</ul>
 <p><code>running == null ? "none" : running.getName()</code> is a <strong>ternary</strong>: "if nothing is running, send <code>none</code>; otherwise send the command's name."</p>
 <h3 id="step-3-open-elastic-and-connect">Step 3: Open Elastic and connect<a class="headerlink" href="#step-3-open-elastic-and-connect" title="Permanent link">#</a></h3>
 <ol>
@@ -241,6 +247,32 @@
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.TunableDouble</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Tunables</span><span class="p">;</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TunableDouble</code></td>
+<td>A number the dashboard can change while the robot runs</td>
+</tr>
+<tr>
+<td><code>Tunables.addDouble(name, start)</code></td>
+<td>Makes the tunable number and puts it on the dashboard at <code>/Tunables/Brushless/Tunable Speed</code></td>
+</tr>
+<tr>
+<td><code>Constants.kBrushlessConstants.BrushlessMotorSpeed</code></td>
+<td>The starting value, 0.5. Every time the robot code starts, it goes back to this.</td>
+</tr>
+<tr>
+<td>A <strong>field</strong>, not inside a method</td>
+<td>It's created <strong>once</strong>, when the subsystem is created, and kept for the whole match</td>
+</tr>
+</tbody>
+</table>
 <p><strong>2. Add a command</strong> below <code>spinMotorCommand</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Spins the motor at whatever speed is on the dashboard, reading it every loop. */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinAtTunableSpeedCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>

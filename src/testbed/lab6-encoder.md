@@ -152,6 +152,125 @@ public class WheelSubsystem extends SubsystemBase {
 }
 ```
 
+### The wheel subsystem, piece by piece
+
+#### 1. The motor: a brushed 775pro
+```java
+private final SparkMax m_motor =
+    new SparkMax(kWheelConstants.MotorCanId, MotorType.kBrushed);
+```
+
+The same kind of field as Lab 1, but this SPARK MAX drives a **775pro**, which is **brushed**, on CAN ID 9.
+
+#### 2. The encoder
+```java
+private final Encoder m_encoder = new Encoder(
+    kWheelConstants.EncoderChannelA,
+    kWheelConstants.EncoderChannelB,
+    kWheelConstants.EncoderInverted,
+    EncodingType.k4X);
+```
+
+| Argument | What it means |
+|---|---|
+| `EncoderChannelA`, `EncoderChannelB` | The two DIO ports the encoder's A and B wires are plugged into (0 and 1) |
+| `EncoderInverted` | `true` flips the direction, so "forward" counts up. You'll check this in Step 5. |
+| `EncodingType.k4X` | Count **every** edge of both signals: 4 counts per cycle, the most precise setting |
+
+`Encoder` is a **WPILib** class: the encoder is wired to the roboRIO, not to the SPARK MAX.
+
+#### 3. Remembering the target and the output
+```java
+private double m_target = 0.0;     // where the current attempt is trying to stop
+private double m_lastVolts = 0.0;  // for the dashboard
+
+private final TelemetryTable m_telemetry = Telemetry.getTable("Wheel");
+```
+
+These aren't `final`, because they change while the robot runs. `m_target` is where the current move is trying to stop. `m_lastVolts` remembers the last voltage sent, so the dashboard can show it.
+
+#### 4. The constructor
+```java
+SparkMaxConfig config = new SparkMaxConfig();
+config.smartCurrentLimit(kWheelConstants.CurrentLimitAmps);
+config.idleMode(IdleMode.kBrake);
+config.inverted(kWheelConstants.MotorInverted);
+m_motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+m_encoder.setDistancePerPulse(1.0 / kWheelConstants.EncoderCyclesPerRev);
+```
+
+The first five lines set up the motor like Lab 1, with a 30 A limit (a 775pro overheats quickly) and a setting to flip the motor's direction if needed.
+
+The last line is the important one. **`setDistancePerPulse`** tells the encoder how far one "pulse" (one full cycle) moves. One wheel rotation is 2048 cycles, so one cycle is `1.0 / 2048` of a rotation. After this line, `getDistance()` answers in **wheel rotations** instead of raw counts. (The 4X counting is handled for you; that's why it's 2048, not 8192.)
+
+#### 5. Small methods with clear names
+```java
+public double getRotations() { return m_encoder.getDistance(); }
+public double getRps()       { return m_encoder.getRate(); }
+```
+
+| Method | Answers |
+|---|---|
+| `getRotations()` | How many rotations the wheel has turned since the encoder was zeroed |
+| `getRps()` | How fast it's turning right now, in rotations per second. `getRate()` uses the same distance-per-pulse setting. |
+
+These are written on one line each because they're so short. Giving them names means the rest of the code reads like English: `getRotations() >= m_target`.
+
+#### 6. Setting the motor, and stopping it
+```java
+private void setVolts(double volts) {
+    m_lastVolts = volts;
+    m_motor.setVoltage(volts);
+}
+
+private void stop() {
+    m_lastVolts = 0.0;
+    m_motor.stopMotor();
+}
+```
+
+**`setVoltage`** asks for a number of **volts** (up to about 12), instead of a fraction like `set(0.5)`. 4 V is 4 V whether the battery is full or tired, so tests are more repeatable. Both methods also update `m_lastVolts`, so the dashboard always shows what the motor was told. They're `private`: only this subsystem's commands can move the motor.
+
+#### 7. Picking a target from where the wheel is now
+```java
+private void setTargetFromHere(double rotations) {
+    m_target = getRotations() + rotations;
+}
+```
+
+"Turn 10 rotations" means 10 more **from here**, not "go to position 10." If the wheel is at 3.2, the target becomes 13.2. That way you can run an attempt again without zeroing first.
+
+#### 8. Two simple commands
+```java
+public Command zero() {
+    return runOnce(m_encoder::reset).ignoringDisable(true).withName("Zero");
+}
+
+public Command idle() {
+    return run(this::stop).withName("Idle");
+}
+```
+
+| Code | What it does |
+|---|---|
+| `runOnce(m_encoder::reset)` | Sets the encoder's count back to 0, once |
+| `.ignoringDisable(true)` | Lets this command run while the robot is **disabled**, so you can zero it without enabling |
+| `run(this::stop)` | Calls `stop()` every loop. It becomes the default command, so the wheel stays stopped when nothing else is running. |
+
+#### 9. The dashboard
+```java
+@Override
+public void periodic() {
+    m_telemetry.log("Position (rot)", getRotations());
+    m_telemetry.log("Target (rot)", m_target);
+    m_telemetry.log("Error (rot)", m_target - getRotations());
+    // ...velocity, output, and current
+}
+```
+
+**Error** is the target minus the position: how far is left to go. It's positive before the target and negative after an overshoot. You'll watch it a lot in this lab and in Lab 9.
+
 ### Step 4: Bind the wheel controller
 Open `RobotContainer.java`. Add the wheel subsystem and a second controller:
 
@@ -200,6 +319,13 @@ public Command turnTimed(double volts, double seconds) {
 }
 ```
 
+| Part | What it does |
+|---|---|
+| `startEnd(() -> setVolts(volts), this::stop)` | When it starts, set the voltage. When it ends, stop. |
+| `.withTimeout(seconds)` | End after this many seconds |
+
+Nowhere does this code read the encoder. That's what **open loop** means: it acts without checking the result.
+
 1. Run it once with a guess like `turnTimed(4.0, 2.0)`. See how many turns you got.
 2. Adjust the time until one run lands near 10.
 3. Now run it three times **without changing anything**, and record the results.
@@ -226,6 +352,18 @@ public Command turnBangBang(double rotations, double volts) {
         .withName("Attempt 2: Bang-Bang");
 }
 ```
+
+Read it as a list of steps that run in order:
+
+| Part | What it does |
+|---|---|
+| `runOnce(() -> setTargetFromHere(rotations))` | First, once: pick the target, 10 rotations from here |
+| `.andThen(run(() -> setVolts(volts)))` | Then, every loop: run at full voltage |
+| `.until(() -> getRotations() >= m_target)` | Every loop, check: have we reached the target? If so, end. |
+| `.withTimeout(5.0)` | Safety: if 5 seconds pass and it still hasn't arrived (a loose encoder wire, say), give up |
+| `.finallyDo(this::stop)` | However the command ends (arrived, timed out, or interrupted by another button), stop the motor |
+
+`>=` is "greater than or equal to." It uses `>=` instead of `==` because the position jumps past 10.000 between loops; it would almost never be **exactly** 10.
 
 It's called **bang-bang** because the output is either fully on or fully off, nothing in between.
 

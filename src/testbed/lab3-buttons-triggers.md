@@ -50,6 +50,49 @@ Add this import at the top:
 import java.util.function.DoubleSupplier;
 ```
 
+#### The three commands, piece by piece
+
+**`stopCommand`**
+
+```java
+return runOnce(() -> setMotorSpeed(0.0)).withName("Stop");
+```
+
+`runOnce(...)` builds a command that runs its code **one time** and then **finishes right away**. Here, it sets the speed to 0. Because it requires the subsystem, starting it also **interrupts** whatever command was using the motor.
+
+**`spinForSecondsCommand`**
+
+```java
+return spinMotorCommand(speed).withTimeout(seconds).withName("Spin " + seconds + " s");
+```
+
+This doesn't write a new command from scratch. It **reuses** `spinMotorCommand` and adds a **decorator**:
+
+| Part | What it does |
+|---|---|
+| `spinMotorCommand(speed)` | The command from Lab 1: start spinning, stop when it ends |
+| `.withTimeout(seconds)` | Wraps it so it **ends by itself** after that many seconds. Ending runs `spinMotorCommand`'s end action, so the motor stops. |
+| `"Spin " + seconds + " s"` | Joins text and a number into one name, like `Spin 2.0 s` |
+
+**`spinWithSupplierCommand`**
+
+```java
+return runEnd(
+    () -> setMotorSpeed(speed.getAsDouble()),   // every loop
+    () -> setMotorSpeed(0.0)                     // when it ends
+).withName("Throttle");
+```
+
+| Part | What it does |
+|---|---|
+| `DoubleSupplier speed` | Something you can ask for a number at any time. Here it will be "how far is the trigger squeezed?" |
+| `runEnd(run, end)` | Runs the first lambda **every loop** while the command runs, and the second **once** when it ends |
+| `speed.getAsDouble()` | Asks the supplier for the current number, fresh every 20 ms |
+
+Compare `runEnd` with Lab 1's `startEnd`: `startEnd` sets the speed **once** at the start, which is fine for a fixed speed. A trigger keeps changing, so it has to be read **every loop**.
+
+**When does each command end?**
+
 | Command | Ends on its own? | How it ends |
 |---|---|---|
 | `spinMotorCommand` | **No** | Only when something cancels it. Then it stops the motor. |
@@ -97,6 +140,30 @@ Open `RobotContainer.java`. Keep Lab 1's **A** binding and add the rest in `conf
 
 Add the imports `CommandScheduler` and `SmartDashboard` if VS Code underlines them (click the lightbulb).
 
+#### The bindings, piece by piece
+Every binding has the same shape: **a trigger**, then **a binding type**, then **a command**.
+
+```java
+m_controller.b().onTrue( m_spinBrushlessMotorSubsystem.spinMotorCommand(...) );
+//  trigger     binding    command
+```
+
+| Trigger | Becomes true when |
+|---|---|
+| `m_controller.a()`, `b()`, `x()`, `y()` | That button is pressed |
+| `m_controller.rightBumper()` | The right bumper is pressed |
+| `m_controller.rightTrigger()` | The right trigger is squeezed past halfway |
+
+| Binding type | What it does with the command |
+|---|---|
+| `whileTrue(cmd)` | **Starts** it when the trigger becomes true, **cancels** it when the trigger becomes false |
+| `onTrue(cmd)` | **Starts** it when the trigger becomes true. Never cancels it. |
+| `toggleOnTrue(cmd)` | Each press flips it: **starts** it if it isn't running, **cancels** it if it is |
+
+So **A** (`whileTrue`) spins only while you hold it, but **B** (`onTrue`) starts the same command and never stops it. Step 4 is about that.
+
+The last line, `SmartDashboard.putData(CommandScheduler.getInstance())`, puts the **command scheduler** on the dashboard: a live list of every command that's running.
+
 !!! info "Why `SmartDashboard` here?"
     The scheduler isn't a single number. It's a **Sendable**, a WPILib object that describes itself to the dashboard. In 2026, Sendables still go on the dashboard with `SmartDashboard.putData`. Plain values always use the course's `Telemetry` library ([Lesson 6.1](../robot-code/06b-dashboards.md#what-still-uses-smartdashboardputdata-in-2026)).
 
@@ -132,13 +199,19 @@ In every case the motor stops, but for the same reason: **only one command can u
 ### Step 5: A default command
 Right now, when no command is running, the SPARK MAX just keeps doing whatever it was last told. A **default command** runs whenever nothing else is using the subsystem, so you can make "stopped" the resting state.
 
-In `RobotContainer`'s constructor, before `configureBindings()`:
+In `configureBindings()`, after the button bindings:
 
 ```java
     m_spinBrushlessMotorSubsystem.setDefaultCommand(
         m_spinBrushlessMotorSubsystem.run(() -> m_spinBrushlessMotorSubsystem.setMotorSpeed(0.0))
             .withName("Idle"));
 ```
+
+| Part | What it does |
+|---|---|
+| `setDefaultCommand(cmd)` | Tells the scheduler: "whenever no other command is using this subsystem, run this one" |
+| `m_spinBrushlessMotorSubsystem.run(...)` | Builds a command **from outside** the subsystem. It still requires the subsystem, because you called `run` on it. |
+| `() -> ...setMotorSpeed(0.0)` | Every loop, set the speed to 0 |
 
 Deploy and watch the Scheduler widget. **Idle** shows whenever no button command is running. Press any button: Idle disappears, the button's command runs, and when it ends, Idle comes right back.
 

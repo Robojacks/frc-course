@@ -208,6 +208,142 @@
 <span class="w">    </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<h3 id="the-wheel-subsystem-piece-by-piece">The wheel subsystem, piece by piece<a class="headerlink" href="#the-wheel-subsystem-piece-by-piece" title="Permanent link">#</a></h3>
+<h4 id="1-the-motor-a-brushed-775pro">1. The motor: a brushed 775pro<a class="headerlink" href="#1-the-motor-a-brushed-775pro" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SparkMax</span><span class="w"> </span><span class="n">m_motor</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">MotorCanId</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushed</span><span class="p">);</span>
+</code></pre></div>
+<p>The same kind of field as Lab 1, but this SPARK MAX drives a <strong>775pro</strong>, which is <strong>brushed</strong>, on CAN ID 9.</p>
+<h4 id="2-the-encoder">2. The encoder<a class="headerlink" href="#2-the-encoder" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Encoder</span><span class="w"> </span><span class="n">m_encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Encoder</span><span class="p">(</span>
+<span class="w">    </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">EncoderChannelA</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">EncoderChannelB</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">EncoderInverted</span><span class="p">,</span>
+<span class="w">    </span><span class="n">EncodingType</span><span class="p">.</span><span class="na">k4X</span><span class="p">);</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EncoderChannelA</code>, <code>EncoderChannelB</code></td>
+<td>The two DIO ports the encoder's A and B wires are plugged into (0 and 1)</td>
+</tr>
+<tr>
+<td><code>EncoderInverted</code></td>
+<td><code>true</code> flips the direction, so "forward" counts up. You'll check this in Step 5.</td>
+</tr>
+<tr>
+<td><code>EncodingType.k4X</code></td>
+<td>Count <strong>every</strong> edge of both signals: 4 counts per cycle, the most precise setting</td>
+</tr>
+</tbody>
+</table>
+<p><code>Encoder</code> is a <strong>WPILib</strong> class: the encoder is wired to the roboRIO, not to the SPARK MAX.</p>
+<h4 id="3-remembering-the-target-and-the-output">3. Remembering the target and the output<a class="headerlink" href="#3-remembering-the-target-and-the-output" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">     </span><span class="c1">// where the current attempt is trying to stop</span>
+<span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_lastVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">  </span><span class="c1">// for the dashboard</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Wheel"</span><span class="p">);</span>
+</code></pre></div>
+<p>These aren't <code>final</code>, because they change while the robot runs. <code>m_target</code> is where the current move is trying to stop. <code>m_lastVolts</code> remembers the last voltage sent, so the dashboard can show it.</p>
+<h4 id="4-the-constructor">4. The constructor<a class="headerlink" href="#4-the-constructor" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMaxConfig</span><span class="p">();</span>
+<span class="n">config</span><span class="p">.</span><span class="na">smartCurrentLimit</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">CurrentLimitAmps</span><span class="p">);</span>
+<span class="n">config</span><span class="p">.</span><span class="na">idleMode</span><span class="p">(</span><span class="n">IdleMode</span><span class="p">.</span><span class="na">kBrake</span><span class="p">);</span>
+<span class="n">config</span><span class="p">.</span><span class="na">inverted</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">MotorInverted</span><span class="p">);</span>
+<span class="n">m_motor</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+
+<span class="n">m_encoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span><span class="mf">1.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">EncoderCyclesPerRev</span><span class="p">);</span>
+</code></pre></div>
+<p>The first five lines set up the motor like Lab 1, with a 30 A limit (a 775pro overheats quickly) and a setting to flip the motor's direction if needed.</p>
+<p>The last line is the important one. <strong><code>setDistancePerPulse</code></strong> tells the encoder how far one "pulse" (one full cycle) moves. One wheel rotation is 2048 cycles, so one cycle is <code>1.0 / 2048</code> of a rotation. After this line, <code>getDistance()</code> answers in <strong>wheel rotations</strong> instead of raw counts. (The 4X counting is handled for you; that's why it's 2048, not 8192.)</p>
+<h4 id="5-small-methods-with-clear-names">5. Small methods with clear names<a class="headerlink" href="#5-small-methods-with-clear-names" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getRotations</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getRps</span><span class="p">()</span><span class="w">       </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">getRate</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getRotations()</code></td>
+<td>How many rotations the wheel has turned since the encoder was zeroed</td>
+</tr>
+<tr>
+<td><code>getRps()</code></td>
+<td>How fast it's turning right now, in rotations per second. <code>getRate()</code> uses the same distance-per-pulse setting.</td>
+</tr>
+</tbody>
+</table>
+<p>These are written on one line each because they're so short. Giving them names means the rest of the code reads like English: <code>getRotations() &gt;= m_target</code>.</p>
+<h4 id="6-setting-the-motor-and-stopping-it">6. Setting the motor, and stopping it<a class="headerlink" href="#6-setting-the-motor-and-stopping-it" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setVolts</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_lastVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volts</span><span class="p">;</span>
+<span class="w">    </span><span class="n">m_motor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">volts</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">stop</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_lastVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">m_motor</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong><code>setVoltage</code></strong> asks for a number of <strong>volts</strong> (up to about 12), instead of a fraction like <code>set(0.5)</code>. 4 V is 4 V whether the battery is full or tired, so tests are more repeatable. Both methods also update <code>m_lastVolts</code>, so the dashboard always shows what the motor was told. They're <code>private</code>: only this subsystem's commands can move the motor.</p>
+<h4 id="7-picking-a-target-from-where-the-wheel-is-now">7. Picking a target from where the wheel is now<a class="headerlink" href="#7-picking-a-target-from-where-the-wheel-is-now" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setTargetFromHere</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">rotations</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRotations</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rotations</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>"Turn 10 rotations" means 10 more <strong>from here</strong>, not "go to position 10." If the wheel is at 3.2, the target becomes 13.2. That way you can run an attempt again without zeroing first.</p>
+<h4 id="8-two-simple-commands">8. Two simple commands<a class="headerlink" href="#8-two-simple-commands" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">zero</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="n">m_encoder</span><span class="p">::</span><span class="n">reset</span><span class="p">).</span><span class="na">ignoringDisable</span><span class="p">(</span><span class="kc">true</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Zero"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">idle</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">stop</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Idle"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>runOnce(m_encoder::reset)</code></td>
+<td>Sets the encoder's count back to 0, once</td>
+</tr>
+<tr>
+<td><code>.ignoringDisable(true)</code></td>
+<td>Lets this command run while the robot is <strong>disabled</strong>, so you can zero it without enabling</td>
+</tr>
+<tr>
+<td><code>run(this::stop)</code></td>
+<td>Calls <code>stop()</code> every loop. It becomes the default command, so the wheel stays stopped when nothing else is running.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="9-the-dashboard">9. The dashboard<a class="headerlink" href="#9-the-dashboard" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Position (rot)"</span><span class="p">,</span><span class="w"> </span><span class="n">getRotations</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Target (rot)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_target</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Error (rot)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_target</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getRotations</span><span class="p">());</span>
+<span class="w">    </span><span class="c1">// ...velocity, output, and current</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Error</strong> is the target minus the position: how far is left to go. It's positive before the target and negative after an overshoot. You'll watch it a lot in this lab and in Lab 9.</p>
 <h3 id="step-4-bind-the-wheel-controller">Step 4: Bind the wheel controller<a class="headerlink" href="#step-4-bind-the-wheel-controller" title="Permanent link">#</a></h3>
 <p>Open <code>RobotContainer.java</code>. Add the wheel subsystem and a second controller:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">WheelSubsystem</span><span class="w"> </span><span class="n">m_wheel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">WheelSubsystem</span><span class="p">();</span>
@@ -243,6 +379,25 @@
 <span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Attempt 1: Timed"</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>startEnd(() -&gt; setVolts(volts), this::stop)</code></td>
+<td>When it starts, set the voltage. When it ends, stop.</td>
+</tr>
+<tr>
+<td><code>.withTimeout(seconds)</code></td>
+<td>End after this many seconds</td>
+</tr>
+</tbody>
+</table>
+<p>Nowhere does this code read the encoder. That's what <strong>open loop</strong> means: it acts without checking the result.</p>
 <ol>
 <li>Run it once with a guess like <code>turnTimed(4.0, 2.0)</code>. See how many turns you got.</li>
 <li>Adjust the time until one run lands near 10.</li>
@@ -264,6 +419,38 @@
 <span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Attempt 2: Bang-Bang"</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>Read it as a list of steps that run in order:</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>runOnce(() -&gt; setTargetFromHere(rotations))</code></td>
+<td>First, once: pick the target, 10 rotations from here</td>
+</tr>
+<tr>
+<td><code>.andThen(run(() -&gt; setVolts(volts)))</code></td>
+<td>Then, every loop: run at full voltage</td>
+</tr>
+<tr>
+<td><code>.until(() -&gt; getRotations() &gt;= m_target)</code></td>
+<td>Every loop, check: have we reached the target? If so, end.</td>
+</tr>
+<tr>
+<td><code>.withTimeout(5.0)</code></td>
+<td>Safety: if 5 seconds pass and it still hasn't arrived (a loose encoder wire, say), give up</td>
+</tr>
+<tr>
+<td><code>.finallyDo(this::stop)</code></td>
+<td>However the command ends (arrived, timed out, or interrupted by another button), stop the motor</td>
+</tr>
+</tbody>
+</table>
+<p><code>&gt;=</code> is "greater than or equal to." It uses <code>&gt;=</code> instead of <code>==</code> because the position jumps past 10.000 between loops; it would almost never be <strong>exactly</strong> 10.</p>
 <p>It's called <strong>bang-bang</strong> because the output is either fully on or fully off, nothing in between.</p>
 <p>Run <code>turnBangBang(10, 4.0)</code> three times. Then try it at 2 V and at 6 V.</p>
 <p><strong>What you'll see:</strong> Much more consistent than timing, but it always <strong>overshoots</strong>. When the code says stop, the wheel is still moving at full speed, and it takes time to coast to a halt, even in brake mode. The faster it's going, the further it overshoots. Watch <strong>Error</strong> go negative on the dashboard.</p>

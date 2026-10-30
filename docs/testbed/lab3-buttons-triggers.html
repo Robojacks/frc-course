@@ -77,6 +77,67 @@
 <p>Add this import at the top:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
 </code></pre></div>
+<h4 id="the-three-commands-piece-by-piece">The three commands, piece by piece<a class="headerlink" href="#the-three-commands-piece-by-piece" title="Permanent link">#</a></h4>
+<p><strong><code>stopCommand</code></strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Stop"</span><span class="p">);</span>
+</code></pre></div>
+<p><code>runOnce(...)</code> builds a command that runs its code <strong>one time</strong> and then <strong>finishes right away</strong>. Here, it sets the speed to 0. Because it requires the subsystem, starting it also <strong>interrupts</strong> whatever command was using the motor.</p>
+<p><strong><code>spinForSecondsCommand</code></strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span><span class="w"> </span><span class="n">spinMotorCommand</span><span class="p">(</span><span class="n">speed</span><span class="p">).</span><span class="na">withTimeout</span><span class="p">(</span><span class="n">seconds</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">seconds</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" s"</span><span class="p">);</span>
+</code></pre></div>
+<p>This doesn't write a new command from scratch. It <strong>reuses</strong> <code>spinMotorCommand</code> and adds a <strong>decorator</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spinMotorCommand(speed)</code></td>
+<td>The command from Lab 1: start spinning, stop when it ends</td>
+</tr>
+<tr>
+<td><code>.withTimeout(seconds)</code></td>
+<td>Wraps it so it <strong>ends by itself</strong> after that many seconds. Ending runs <code>spinMotorCommand</code>'s end action, so the motor stops.</td>
+</tr>
+<tr>
+<td><code>"Spin " + seconds + " s"</code></td>
+<td>Joins text and a number into one name, like <code>Spin 2.0 s</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>spinWithSupplierCommand</code></strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">return</span><span class="w"> </span><span class="n">runEnd</span><span class="p">(</span>
+<span class="w">    </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="n">speed</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">()),</span><span class="w">   </span><span class="c1">// every loop</span>
+<span class="w">    </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">                     </span><span class="c1">// when it ends</span>
+<span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Throttle"</span><span class="p">);</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DoubleSupplier speed</code></td>
+<td>Something you can ask for a number at any time. Here it will be "how far is the trigger squeezed?"</td>
+</tr>
+<tr>
+<td><code>runEnd(run, end)</code></td>
+<td>Runs the first lambda <strong>every loop</strong> while the command runs, and the second <strong>once</strong> when it ends</td>
+</tr>
+<tr>
+<td><code>speed.getAsDouble()</code></td>
+<td>Asks the supplier for the current number, fresh every 20 ms</td>
+</tr>
+</tbody>
+</table>
+<p>Compare <code>runEnd</code> with Lab 1's <code>startEnd</code>: <code>startEnd</code> sets the speed <strong>once</strong> at the start, which is fine for a fixed speed. A trigger keeps changing, so it has to be read <strong>every loop</strong>.</p>
+<p><strong>When does each command end?</strong></p>
 <table>
 <thead>
 <tr>
@@ -144,6 +205,57 @@
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <p>Add the imports <code>CommandScheduler</code> and <code>SmartDashboard</code> if VS Code underlines them (click the lightbulb).</p>
+<h4 id="the-bindings-piece-by-piece">The bindings, piece by piece<a class="headerlink" href="#the-bindings-piece-by-piece" title="Permanent link">#</a></h4>
+<p>Every binding has the same shape: <strong>a trigger</strong>, then <strong>a binding type</strong>, then <strong>a command</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="n">m_controller</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="w"> </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinMotorCommand</span><span class="p">(...)</span><span class="w"> </span><span class="p">);</span>
+<span class="c1">//  trigger     binding    command</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Becomes true when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>m_controller.a()</code>, <code>b()</code>, <code>x()</code>, <code>y()</code></td>
+<td>That button is pressed</td>
+</tr>
+<tr>
+<td><code>m_controller.rightBumper()</code></td>
+<td>The right bumper is pressed</td>
+</tr>
+<tr>
+<td><code>m_controller.rightTrigger()</code></td>
+<td>The right trigger is squeezed past halfway</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Binding type</th>
+<th>What it does with the command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>whileTrue(cmd)</code></td>
+<td><strong>Starts</strong> it when the trigger becomes true, <strong>cancels</strong> it when the trigger becomes false</td>
+</tr>
+<tr>
+<td><code>onTrue(cmd)</code></td>
+<td><strong>Starts</strong> it when the trigger becomes true. Never cancels it.</td>
+</tr>
+<tr>
+<td><code>toggleOnTrue(cmd)</code></td>
+<td>Each press flips it: <strong>starts</strong> it if it isn't running, <strong>cancels</strong> it if it is</td>
+</tr>
+</tbody>
+</table>
+<p>So <strong>A</strong> (<code>whileTrue</code>) spins only while you hold it, but <strong>B</strong> (<code>onTrue</code>) starts the same command and never stops it. Step 4 is about that.</p>
+<p>The last line, <code>SmartDashboard.putData(CommandScheduler.getInstance())</code>, puts the <strong>command scheduler</strong> on the dashboard: a live list of every command that's running.</p>
 <div class="admonition info">
 <p class="admonition-title">Why <code>SmartDashboard</code> here?</p>
 <p>The scheduler isn't a single number. It's a <strong>Sendable</strong>, a WPILib object that describes itself to the dashboard. In 2026, Sendables still go on the dashboard with <code>SmartDashboard.putData</code>. Plain values always use the course's <code>Telemetry</code> library (<a href="../robot-code/06b-dashboards.html#what-still-uses-smartdashboardputdata-in-2026">Lesson 6.1</a>).</p>
@@ -224,11 +336,33 @@
 </div>
 <h3 id="step-5-a-default-command">Step 5: A default command<a class="headerlink" href="#step-5-a-default-command" title="Permanent link">#</a></h3>
 <p>Right now, when no command is running, the SPARK MAX just keeps doing whatever it was last told. A <strong>default command</strong> runs whenever nothing else is using the subsystem, so you can make "stopped" the resting state.</p>
-<p>In <code>RobotContainer</code>'s constructor, before <code>configureBindings()</code>:</p>
+<p>In <code>configureBindings()</code>, after the button bindings:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">setDefaultCommand</span><span class="p">(</span>
 <span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
 <span class="w">            </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Idle"</span><span class="p">));</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setDefaultCommand(cmd)</code></td>
+<td>Tells the scheduler: "whenever no other command is using this subsystem, run this one"</td>
+</tr>
+<tr>
+<td><code>m_spinBrushlessMotorSubsystem.run(...)</code></td>
+<td>Builds a command <strong>from outside</strong> the subsystem. It still requires the subsystem, because you called <code>run</code> on it.</td>
+</tr>
+<tr>
+<td><code>() -&gt; ...setMotorSpeed(0.0)</code></td>
+<td>Every loop, set the speed to 0</td>
+</tr>
+</tbody>
+</table>
 <p>Deploy and watch the Scheduler widget. <strong>Idle</strong> shows whenever no button command is running. Press any button: Idle disappears, the button's command runs, and when it ends, Idle comes right back.</p>
 <div class="admonition question">
 <p class="admonition-title">Think about it</p>

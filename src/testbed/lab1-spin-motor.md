@@ -55,6 +55,14 @@ public final class Constants {
 }
 ```
 
+| Part | What it means |
+|---|---|
+| `public static class kBrushlessConstants` | A group of constants for the brushless motor, inside `Constants`. You'll use it as `Constants.kBrushlessConstants.BrushlessMotorSpeed`. |
+| `public` | Any file can read it |
+| `static` | It belongs to the class itself, so you don't need to create a `Constants` object to use it |
+| `final` | It can never change while the robot runs. That's what makes it a constant. |
+| `int` / `double` | A whole number (CAN IDs, amps) / a number with a decimal point (speeds) |
+
 !!! info "Why a current limit of 40 amps?"
     The test bed's power distribution has **40 A breakers**. A limit above 40 A can trip the breaker if the motor gets stuck. If your motor is a small **NEO 550**, use about **20 A** instead, because it can overheat quickly at 40.
 
@@ -123,13 +131,100 @@ public class SpinBrushlessMotorSubsystem extends SubsystemBase {
 }
 ```
 
-Three ideas in this file are worth slowing down for:
+### The subsystem, piece by piece
+That's a lot of new code at once. Here it is again, one piece at a time.
 
-| Code | What it means |
+#### 1. The package and the imports
+```java
+package frc.robot.subsystems;
+
+import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+// ...and the others
+```
+
+- **`package frc.robot.subsystems;`** says which folder this file lives in. It must match the folder, or the build fails.
+- Each **`import`** lets this file use a class from somewhere else, by its short name. `com.revrobotics...` classes come from **REVLib** (Lab 0, Part 4). `edu.wpi.first...` classes come from **WPILib**. `frc.robot.Constants` is your own file.
+- You rarely type imports yourself. When VS Code underlines a class name in red, click it and use the lightbulb (or ++ctrl+period++) to add the import.
+
+#### 2. The class line
+```java
+public class SpinBrushlessMotorSubsystem extends SubsystemBase {
+```
+
+- **`public class SpinBrushlessMotorSubsystem`** creates a new class. The class name must match the file name exactly.
+- **`extends SubsystemBase`** makes it a **subsystem**: WPILib's name for one mechanism and its hardware. Because of `extends`, this class gets everything `SubsystemBase` already has for free, including command builders like `startEnd`, and a `periodic()` method the robot calls every 20 ms.
+
+#### 3. The motor controller
+```java
+private final SparkMax m_brushlessMotor = new SparkMax(
+    Constants.kBrushlessConstants.BrushlessMotorCanId, MotorType.kBrushless);
+```
+
+| Part | What it means |
 |---|---|
-| `new SparkMax(8, MotorType.kBrushless)` | "Talk to the SPARK MAX at CAN ID 8, which drives a brushless motor." |
-| `SparkMaxConfig` and `configure(...)` | Settings like current limit and brake mode are collected first, then sent to the controller all at once. |
-| `startEnd(start, end)` | Builds a **command**: run `start` when it begins, run `end` when it stops. Because it comes from the subsystem, the command automatically "owns" the motor while it runs. |
+| `private` | Only code inside this class can touch the motor. Everything else has to go through the subsystem's methods. |
+| `final` | This variable will always point at this same motor controller. It can't be swapped out by accident. |
+| `SparkMax` | The type: a REV SPARK MAX motor controller |
+| `m_brushlessMotor` | The variable's name. The `m_` means "member": it belongs to the object, not to one method. |
+| `new SparkMax(8, MotorType.kBrushless)` | Creates the object that talks to the SPARK MAX with **CAN ID 8**, which is driving a **brushless** motor |
+
+The CAN ID comes from `Constants`, so if the wiring ever changes, you only change one number in one file.
+
+#### 4. The constructor: setting up the motor
+```java
+public SpinBrushlessMotorSubsystem() {
+  SparkMaxConfig brushlessMotorConfig = new SparkMaxConfig();
+  brushlessMotorConfig.smartCurrentLimit(Constants.kBrushlessConstants.BrushlessMotorCurrentLimit);
+  brushlessMotorConfig.idleMode(IdleMode.kBrake);
+  m_brushlessMotor.configure(
+      brushlessMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+}
+```
+
+A **constructor** is the method with the same name as the class and no return type. It runs **once**, when `RobotContainer` creates the subsystem with `new SpinBrushlessMotorSubsystem()`.
+
+| Line | What it does |
+|---|---|
+| `new SparkMaxConfig()` | Makes an empty list of settings. Nothing is sent to the motor controller yet. |
+| `smartCurrentLimit(40)` | Adds a setting: never pull more than 40 amps, to protect the motor and the breaker |
+| `idleMode(IdleMode.kBrake)` | Adds a setting: when the motor is told 0, actively stop instead of coasting |
+| `configure(config, ...)` | Sends all the settings to the SPARK MAX in one go |
+| `ResetMode.kResetSafeParameters` | First reset the SPARK MAX to known defaults, so old settings from someone else's code don't linger |
+| `PersistMode.kPersistParameters` | Save the settings inside the SPARK MAX, so they survive a power blip during a match |
+
+#### 5. A method that sets the speed
+```java
+public void setMotorSpeed(double speed) {
+  m_brushlessMotor.set(speed);
+}
+```
+
+- **`public`**: other classes (like `RobotContainer`) can call it.
+- **`void`**: it doesn't return anything. It just does something.
+- **`double speed`**: it takes one number. `set()` expects **-1.0** (full reverse) to **1.0** (full forward); 0.5 is half power.
+
+#### 6. The command
+```java
+public Command spinMotorCommand(double speed) {
+  return startEnd(
+      () -> setMotorSpeed(speed),   // runs once, when the command starts
+      () -> setMotorSpeed(0.0)      // runs once, when the command ends
+  ).withName("Spin Brushless");
+}
+```
+
+This method doesn't spin the motor. It **builds and returns a command** that knows how to spin it. The command runs later, when a button starts it.
+
+| Part | What it means |
+|---|---|
+| `public Command` | The method hands back a `Command` object |
+| `startEnd(start, end)` | A WPILib command builder: run `start` once when the command begins, and `end` once when it stops |
+| `() -> setMotorSpeed(speed)` | A **lambda**: a little piece of code saved to run later. `()` means it takes no inputs; `->` points at what it does. |
+| `.withName("Spin Brushless")` | Gives the command a name, which shows up on the dashboard and in error messages |
+
+Because `startEnd` comes from the subsystem, the command automatically **requires** the subsystem: while it runs, no other command can use this motor at the same time.
 
 !!! tip "Where does `startEnd` come from?"
     Your class `extends SubsystemBase`, so it gets WPILib's command-building methods for free: `startEnd`, `run`, `runOnce`, and more ([Lesson 7](../robot-code/07-command-based.md)).

@@ -53,12 +53,19 @@ Add the controller as a field, next to the encoder:
         new PIDController(kWheelConstants.P, kWheelConstants.I, kWheelConstants.D);
 ```
 
+`PIDController` is WPILib's PID class. You give it the three gains: **kP**, **kI**, and **kD**. It doesn't know anything about motors or encoders. You hand it numbers, and it hands back a number.
+
 And at the end of the constructor:
 
 ```java
         m_pid.setTolerance(kWheelConstants.ToleranceRot, kWheelConstants.ToleranceRps);
         m_pid.setIZone(kWheelConstants.IZone);       // limits integral windup (Attempt 5)
 ```
+
+| Line | What it does |
+|---|---|
+| `setTolerance(0.02, 0.1)` | How close counts as "there": within **0.02 rotations** of the target **and** slower than **0.1 rotations per second**. Both have to be true, so it doesn't count as arrived while still swinging past. |
+| `setIZone(0.5)` | Only let the I term build up when within 0.5 rotations of the target. You'll see why in Attempt 5. |
 
 ### Step 3: Make the gains tunable
 You'll try a lot of gains in this lab. Redeploying for every one would take forever, so make them **tunable** from Elastic ([Lab 1.1](lab1b-dashboard.md#step-5-change-the-speed-from-the-dashboard)).
@@ -80,6 +87,8 @@ Import `frc.robot.telemetry.TunableDouble` and `frc.robot.telemetry.Tunables`. T
         m_pid.setPID(m_kP.get(), m_kI.get(), m_kD.get());
         m_pid.setIZone(m_iZone.get());
 ```
+
+`setPID` replaces all three gains at once. Doing it every loop means a change in Elastic takes effect within 20 ms, even in the middle of a move.
 
 In Elastic, add **kP**, **kI**, **kD**, and **IZone** from **Tunables → Wheel** as **Text Display** widgets, so you can type new values. Add a **Graph** with **Position (rot)** and **Target (rot)** from **Telemetry → Wheel** together.
 
@@ -136,6 +145,50 @@ public Command turnPid(double rotations) {
         .withName("Attempts 3-5: PID");
 }
 ```
+
+Piece by piece:
+
+**First, once:**
+
+```java
+return runOnce(() -> {
+        setTargetFromHere(rotations);
+        m_pid.reset();                       // clear old history
+    })
+```
+
+Pick the target, 10 rotations from here (like Lab 6). Then `m_pid.reset()` clears what the controller remembers from the last move: the I term's running total, and the last error the D term compares against. Without it, an old move could kick this one.
+
+The lambda has curly braces `{ }` because it does two things. Each line inside ends with `;`.
+
+**Then, every loop:**
+
+```java
+.andThen(run(() -> {
+    double volts = m_pid.calculate(getRotations(), m_target);
+    setVolts(MathUtil.clamp(volts, -kWheelConstants.MaxVolts, kWheelConstants.MaxVolts));
+}))
+```
+
+| Line | What it does |
+|---|---|
+| `m_pid.calculate(measurement, setpoint)` | The PID math: give it where the wheel **is** and where it **should be**, and it returns how many volts to apply. With P only, that's kP × (target − position). |
+| `MathUtil.clamp(volts, -6, 6)` | Never send more than 6 V either way, however big the error is. Far from the target, PID would ask for 10 V; this keeps the test gentle. |
+| `setVolts(...)` | Sends it to the motor (and remembers it for the dashboard) |
+
+**Until it arrives, or gives up:**
+
+```java
+.until(m_pid::atSetpoint)
+.withTimeout(5.0)
+.finallyDo(this::stop)
+```
+
+| Line | What it does |
+|---|---|
+| `.until(m_pid::atSetpoint)` | End when the controller says it's within the tolerance you set in Step 2: close enough **and** slow enough |
+| `.withTimeout(5.0)` | Give up after 5 seconds, in case it never quite gets there |
+| `.finallyDo(this::stop)` | However it ends, stop the motor |
 
 Bind it on the wheel controller:
 

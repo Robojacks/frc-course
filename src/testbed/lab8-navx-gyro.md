@@ -65,6 +65,11 @@ Add the gyro as a field:
   private final AHRS m_gyro = new AHRS(NavXComType.kMXP_SPI);
 ```
 
+| Part | What it means |
+|---|---|
+| `AHRS` | Studica's class for the NavX. AHRS stands for "attitude and heading reference system": a sensor that knows which way it's pointing. |
+| `NavXComType.kMXP_SPI` | How the NavX talks to the roboRIO: plugged into the **MXP** port, using the fast **SPI** connection |
+
 Add methods to read and reset the heading:
 
 ```java
@@ -78,6 +83,13 @@ Add methods to read and reset the heading:
     return runOnce(m_gyro::reset).ignoringDisable(true).withName("Zero Heading");
   }
 ```
+
+| Code | What it does |
+|---|---|
+| `m_gyro.getRotation2d()` | The robot's heading as a WPILib `Rotation2d`, where **left (counterclockwise) is positive**, the WPILib standard |
+| `.getDegrees()` | Turns that into a plain number of degrees |
+| `runOnce(m_gyro::reset)` | Makes "the way the robot is pointing right now" the new 0° |
+| `.ignoringDisable(true)` | Lets you zero it while the robot is disabled, before a match |
 
 ### Step 4: Show it on the dashboard
 Add to the drive subsystem's `periodic()`. These go in **Telemetry → Drive**, in a **Gyro** folder:
@@ -132,9 +144,12 @@ Reading it:
 
 | Piece | What it does |
 |---|---|
+| `private double m_turnTarget` | A field, so `periodic()` can show the target on the dashboard while the turn runs |
+| `double direction = Math.signum(degrees);` | `Math.signum` gives **+1** for a positive number and **-1** for a negative one. Positive degrees means turn left, so `direction` is +1 for left and -1 for right. |
 | `runOnce(() -> m_turnTarget = getHeadingDegrees() + degrees)` | Remembers where to stop: 90° from **wherever the robot is now** |
 | `tankDrive(-direction * speed, direction * speed, false)` | Spins in place. For a left turn, left side back and right side forward. |
 | `.until(...)` | Stops the moment the heading reaches the target |
+| `direction > 0 ? A : B` | A **ternary**: "if turning left, use check A; otherwise use check B." Turning left, the heading goes **up** to the target (`>=`); turning right, it goes **down** (`<=`). |
 | `.withTimeout(3.0)` | If the gyro is unplugged, the heading never changes. This stops the robot anyway. |
 
 Add the debug values to `periodic()` so you can watch it:
@@ -184,6 +199,14 @@ One simple fix: turn fast for most of the way, then slow for the last part. This
 ```
 
 The target is set **once**, at the start, so the whole turn aims at the same spot. Only the speed changes along the way.
+
+The new part is inside `run(...)`, which now has curly braces `{ }` because it does several things every loop:
+
+| Line | What it does |
+|---|---|
+| `double remaining = Math.abs(m_turnTarget - getHeadingDegrees());` | How many degrees are left. `Math.abs` drops the minus sign, so it works for left and right turns. |
+| `double speed = (remaining > 20.0) ? 0.6 : 0.25;` | Another ternary: more than 20° to go, use 0.6; otherwise 0.25 |
+| `m_drive.tankDrive(-direction * speed, direction * speed, false);` | Spin at that speed, in the right direction |
 
 Bind it to Y:
 

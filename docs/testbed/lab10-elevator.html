@@ -393,37 +393,273 @@ distance per pulse    = meters per revolution ÷ 2048
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<h3 id="the-elevator-subsystem-piece-by-piece">The elevator subsystem, piece by piece<a class="headerlink" href="#the-elevator-subsystem-piece-by-piece" title="Permanent link">#</a></h3>
+<p>It's the longest file in the labs, but most of it is pieces you already know. Here it is in order.</p>
+<h4 id="1-the-presets">1. The presets<a class="headerlink" href="#1-the-presets" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">enum</span><span class="w"> </span><span class="n">Preset</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">START</span><span class="p">,</span><span class="w"> </span><span class="n">L2</span><span class="p">,</span><span class="w"> </span><span class="n">L3</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>An <strong>enum</strong> is a type with a fixed list of values. A <code>Preset</code> can only be <code>START</code>, <code>L2</code>, or <code>L3</code>. If you type <code>Preset.L4</code> by mistake, the code won't build, which is much better than an elevator going to a height you didn't mean. It's <code>public</code> and inside the class, so <code>RobotContainer</code> uses it as <code>ElevatorSubsystem.Preset.L2</code>.</p>
+<h4 id="2-the-motor-and-the-encoder">2. The motor and the encoder<a class="headerlink" href="#2-the-motor-and-the-encoder" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SparkMax</span><span class="w"> </span><span class="n">m_motor</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MotorCanId</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushless</span><span class="p">);</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Encoder</span><span class="w"> </span><span class="n">m_encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Encoder</span><span class="p">(</span>
+<span class="w">    </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">EncoderChannelA</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">EncoderChannelB</span><span class="p">,</span>
+<span class="w">    </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">EncoderInverted</span><span class="p">,</span>
+<span class="w">    </span><span class="n">EncodingType</span><span class="p">.</span><span class="na">k4X</span><span class="p">);</span>
+</code></pre></div>
+<p>The same patterns as Labs 1 and 6: a NEO on a SPARK MAX in <strong>brushless</strong> mode, and the Through Bore Encoder on two DIO ports with 4X counting.</p>
+<h4 id="3-the-controller">3. The controller<a class="headerlink" href="#3-the-controller" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ProfiledPIDController</span><span class="w"> </span><span class="n">m_pid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ProfiledPIDController</span><span class="p">(</span>
+<span class="w">    </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kP</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kI</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kD</span><span class="p">,</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">Constraints</span><span class="p">(</span>
+<span class="w">        </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxVelocityMetersPerSecond</span><span class="p">,</span>
+<span class="w">        </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxAccelerationMetersPerSecondSquared</span><span class="p">));</span>
+</code></pre></div>
+<p>Like Lab 9's <code>PIDController</code>, it takes kP, kI, and kD. It also takes <strong>constraints</strong>: the fastest the carriage may move (0.25 m/s) and how quickly it may speed up or slow down (0.5 m/s²). The controller uses those to plan the smooth path from where the carriage is to the goal.</p>
+<p><code>TrapezoidProfile.Constraints</code> is named for the shape of the plan: speed ramps up, stays flat, and ramps down, which looks like a trapezoid on a graph (<a href="../controls/14-profiles.html">Lesson 14</a>).</p>
+<h4 id="4-the-dashboard-and-the-tunable-numbers">4. The dashboard and the tunable numbers<a class="headerlink" href="#4-the-dashboard-and-the-tunable-numbers" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_lastVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">      </span><span class="c1">// for the dashboard</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Elevator"</span><span class="p">);</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TunableDouble</span><span class="w"> </span><span class="n">m_kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Tunables</span><span class="p">.</span><span class="na">addDouble</span><span class="p">(</span><span class="s">"Elevator/kP"</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kP</span><span class="p">);</span>
+<span class="c1">// ...kI, kD, Max Velocity, and Max Accel the same way</span>
+</code></pre></div>
+<p>Values go to <strong>Telemetry → Elevator</strong>. Five numbers are tunable from <strong>Tunables → Elevator</strong>: the three gains and the two profile limits.</p>
+<h4 id="5-the-constructor">5. The constructor<a class="headerlink" href="#5-the-constructor" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMaxConfig</span><span class="p">();</span>
+<span class="n">config</span><span class="p">.</span><span class="na">smartCurrentLimit</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">CurrentLimit</span><span class="p">);</span>
+<span class="n">config</span><span class="p">.</span><span class="na">idleMode</span><span class="p">(</span><span class="n">IdleMode</span><span class="p">.</span><span class="na">kBrake</span><span class="p">);</span><span class="w">    </span><span class="c1">// resists falling when no voltage is applied</span>
+<span class="n">config</span><span class="p">.</span><span class="na">inverted</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MotorInverted</span><span class="p">);</span>
+<span class="n">m_motor</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+
+<span class="n">m_encoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">DistancePerPulse</span><span class="p">);</span>
+<span class="n">m_encoder</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span><span class="w">   </span><span class="c1">// the elevator MUST start at the bottom: this is height 0</span>
+
+<span class="n">m_pid</span><span class="p">.</span><span class="na">setTolerance</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">ToleranceMeters</span><span class="p">);</span>
+<span class="n">m_pid</span><span class="p">.</span><span class="na">setIZone</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">IZoneMeters</span><span class="p">);</span>
+<span class="n">holdHere</span><span class="p">();</span>
+</code></pre></div>
 <table>
 <thead>
 <tr>
-<th>Code</th>
-<th>What it means</th>
+<th>Line</th>
+<th>What it does</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>public enum Preset { START, L2, L3 }</code></td>
-<td>An <strong>enum</strong>: a type with a fixed list of values. A preset can only be one of these three, so a typo won't compile.</td>
+<td><code>idleMode(IdleMode.kBrake)</code></td>
+<td>When no voltage is applied, the motor resists turning. It slows a falling carriage, but doesn't hold it up by itself.</td>
 </tr>
 <tr>
-<td><code>m_pid.calculate(getHeightMeters())</code></td>
-<td>Moves the setpoint one 20 ms step along the profile, then returns PID's voltage to reach it</td>
+<td><code>setDistancePerPulse(DistancePerPulse)</code></td>
+<td>After this, <code>getDistance()</code> answers in <strong>meters</strong> of elevator travel (Step 1)</td>
 </tr>
 <tr>
-<td><code>m_pid.reset(position, velocity)</code></td>
-<td>Starts the profile from where the carriage <strong>really</strong> is, so it never plans from a stale spot</td>
+<td><code>m_encoder.reset()</code></td>
+<td>Calls wherever the elevator is right now <strong>0 m</strong>. That's why it must start at the bottom.</td>
 </tr>
+<tr>
+<td><code>setTolerance(0.006)</code></td>
+<td>Within 6 mm counts as "there"</td>
+</tr>
+<tr>
+<td><code>setIZone(0.063)</code></td>
+<td>Only build up I within 6.3 cm of the goal (Attempt 4)</td>
+</tr>
+<tr>
+<td><code>holdHere()</code></td>
+<td>Starts the controller off holding the current height (piece 8)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="6-reading-the-height">6. Reading the height<a class="headerlink" href="#6-reading-the-height" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getHeightMeters</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">atGoal</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">atGoal</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>atGoal()</code> is true when the carriage has reached the <strong>goal</strong> you picked. (<code>atSetpoint()</code> only checks the profile's current step, which would be true the whole way up.)</p>
+<h4 id="7-every-voltage-goes-through-one-method-with-soft-limits">7. Every voltage goes through one method, with soft limits<a class="headerlink" href="#7-every-voltage-goes-through-one-method-with-soft-limits" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setVolts</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHeightMeters</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">height</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxHeightMeters</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">volts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">   </span><span class="c1">// at the top: never push higher</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">height</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MinHeightMeters</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">volts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">   </span><span class="c1">// at the bottom: never push lower</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">m_lastVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">volts</span><span class="p">;</span>
+<span class="w">  </span><span class="n">m_motor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">volts</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>if (height &gt;= Max &amp;&amp; volts &gt; 0)</code></td>
+<td>At or above the top <strong>and</strong> trying to go up? <code>&amp;&amp;</code> means both must be true.</td>
+</tr>
+<tr>
+<td><code>volts = 0;</code></td>
+<td>Then don't. Pushing <strong>down</strong> from the top is still allowed.</td>
+</tr>
+<tr>
+<td>The second <code>if</code></td>
+<td>The same check for the bottom</td>
+</tr>
+</tbody>
+</table>
+<p>Every command moves the motor through <code>setVolts</code>, so no command can skip these checks. These are <strong>soft limits</strong>: limits in code, as opposed to the <strong>hard stop</strong>, the metal the carriage hits.</p>
+<h4 id="8-starting-a-fresh-plan">8. Starting a fresh plan<a class="headerlink" href="#8-starting-a-fresh-plan" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">holdHere</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">m_pid</span><span class="p">.</span><span class="na">reset</span><span class="p">(</span><span class="n">getHeightMeters</span><span class="p">());</span>
+<span class="w">  </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setGoal</span><span class="p">(</span><span class="n">getHeightMeters</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setGoalMeters</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">meters</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">m_pid</span><span class="p">.</span><span class="na">reset</span><span class="p">(</span><span class="n">getHeightMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">getRate</span><span class="p">());</span>
+<span class="w">  </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setGoal</span><span class="p">(</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span>
+<span class="w">      </span><span class="n">meters</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MinHeightMeters</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxHeightMeters</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>holdHere()</code></td>
+<td>Throws away the old plan, starts a new one <strong>from the real height</strong>, and makes that same height the goal: "stay right here"</td>
+</tr>
+<tr>
+<td><code>setGoalMeters(meters)</code></td>
+<td>Starts a new plan from the real height <strong>and speed</strong> (<code>getRate()</code>), toward a new goal</td>
+</tr>
+<tr>
+<td><code>MathUtil.clamp(meters, Min, Max)</code></td>
+<td>If a goal is outside the elevator's travel, use the nearest end instead</td>
+</tr>
+</tbody>
+</table>
+<p><code>reset(...)</code> matters because the profile plans from wherever it <strong>thinks</strong> the carriage is. If that's out of date (after manual driving, or after being disabled), the first step of the plan would be far from reality, and the elevator would jump.</p>
+<h4 id="9-turning-a-preset-into-meters">9. Turning a preset into meters<a class="headerlink" href="#9-turning-a-preset-into-meters" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">presetMeters</span><span class="p">(</span><span class="n">Preset</span><span class="w"> </span><span class="n">preset</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">preset</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">START</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">StartMeters</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">L2</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">L2Meters</span><span class="p">;</span>
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="n">L3</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">L3Meters</span><span class="p">;</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>A <strong>switch expression</strong> picks one value based on which preset it's given: "if it's <code>START</code>, the answer is <code>StartMeters</code>; if it's <code>L2</code>, <code>L2Meters</code>..." Java checks that every preset is covered, so if you add <code>L4</code> to the enum and forget it here, the build tells you.</p>
+<h4 id="10-one-step-of-control">10. One step of control<a class="headerlink" href="#10-one-step-of-control" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">followProfile</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getHeightMeters</span><span class="p">());</span>
+<span class="w">  </span><span class="n">setVolts</span><span class="p">(</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span><span class="n">volts</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>m_pid.calculate(height)</code> does two things in one call: it moves the <strong>setpoint</strong> one 20 ms step along the plan toward the goal, then runs PID on the gap between the setpoint and the height. The answer, clamped to ±4 V, goes to <code>setVolts</code>. Every command that moves the elevator by itself calls this once per loop.</p>
+<h4 id="11-the-commands">11. The commands<a class="headerlink" href="#11-the-commands" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">holdCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">followProfile</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Hold"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <strong>default command</strong>. Every loop, follow the plan, and once at the goal, keep holding it. It never ends, because the elevator always needs voltage to fight gravity.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">goToPresetCommand</span><span class="p">(</span><span class="n">Preset</span><span class="w"> </span><span class="n">preset</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">followProfile</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="na">beforeStarting</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setGoalMeters</span><span class="p">(</span><span class="n">presetMeters</span><span class="p">(</span><span class="n">preset</span><span class="p">)))</span>
+<span class="w">      </span><span class="p">.</span><span class="na">until</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">atGoal</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Elevator to "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">preset</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td><code>.beforeStarting(...)</code></td>
-<td>Runs once, before the command's first loop: here, it picks the new goal</td>
+<td>Once, right before the first loop: set the new goal</td>
+</tr>
+<tr>
+<td><code>run(this::followProfile)</code></td>
+<td>Every loop: follow the plan</td>
 </tr>
 <tr>
 <td><code>.until(this::atGoal)</code></td>
-<td>Ends the preset command once the carriage reaches the goal. <code>atGoal()</code> checks the <strong>goal</strong>; <code>atSetpoint()</code> would only check the profile's current step.</td>
+<td>End on arrival. Then the default <strong>Hold</strong> command starts again and keeps holding the same goal.</td>
+</tr>
+</tbody>
+</table>
+<p>Because it ends, an auto routine can chain it: <code>goToPresetCommand(Preset.L2).andThen(...)</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">manualCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">runEnd</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setVolts</span><span class="p">(</span><span class="n">volts</span><span class="p">),</span><span class="w"> </span><span class="k">this</span><span class="p">::</span><span class="n">holdHere</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Manual "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" V"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>While the button is held, apply a fixed voltage (still through the soft limits). When it's released, <code>holdHere()</code> makes wherever the carriage stopped the new goal, so it holds there instead of sliding back to the old goal.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">zeroCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span>
+<span class="w">    </span><span class="n">holdHere</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}).</span><span class="na">ignoringDisable</span><span class="p">(</span><span class="kc">true</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Zero"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Calls the current height 0, then starts a fresh plan from there. It works while disabled, so you can lower the carriage by hand and zero it.</p>
+<h4 id="12-periodic-safety-tuning-and-the-dashboard">12. <code>periodic()</code>: safety, tuning, and the dashboard<a class="headerlink" href="#12-periodic-safety-tuning-and-the-dashboard" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">DriverStation</span><span class="p">.</span><span class="na">isDisabled</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">holdHere</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="n">m_pid</span><span class="p">.</span><span class="na">setPID</span><span class="p">(</span><span class="n">m_kP</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w"> </span><span class="n">m_kI</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w"> </span><span class="n">m_kD</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
+<span class="n">m_pid</span><span class="p">.</span><span class="na">setConstraints</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">Constraints</span><span class="p">(</span>
+<span class="w">    </span><span class="n">m_maxVelocity</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w"> </span><span class="n">m_maxAcceleration</span><span class="p">.</span><span class="na">get</span><span class="p">()));</span>
+
+<span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Height (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">getHeightMeters</span><span class="p">());</span>
+<span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Goal (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">getGoal</span><span class="p">().</span><span class="na">position</span><span class="p">);</span>
+<span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Setpoint (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">getSetpoint</span><span class="p">().</span><span class="na">position</span><span class="p">);</span>
+<span class="c1">// ...setpoint velocity, error, output, current, and At Goal</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>if (DriverStation.isDisabled()) holdHere();</code></td>
+<td>While disabled, keep the plan and goal on the real height. Someone might push the carriage by hand; when you enable, it holds right there instead of lurching back.</td>
 </tr>
 <tr>
-<td><code>return switch (preset) { case START -&gt; ... }</code></td>
-<td>A <strong>switch expression</strong>: picks a value based on which preset it is</td>
+<td><code>setPID(...)</code> and <code>setConstraints(...)</code></td>
+<td>Copy the tunable numbers from the dashboard into the controller every loop</td>
+</tr>
+<tr>
+<td><code>m_pid.getGoal().position</code></td>
+<td>The preset you picked</td>
+</tr>
+<tr>
+<td><code>m_pid.getSetpoint().position</code> and <code>.velocity</code></td>
+<td>Where the plan says the carriage should be right now, and how fast it should be moving</td>
 </tr>
 </tbody>
 </table>

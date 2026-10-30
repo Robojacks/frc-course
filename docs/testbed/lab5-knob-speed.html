@@ -96,6 +96,28 @@
 <span class="w">      </span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">KnobTurns</span><span class="p">,</span>
 <span class="w">      </span><span class="mf">0.0</span><span class="p">);</span><span class="w">   </span><span class="c1">// offset: added to every reading</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>KnobAnalogPort</code> (0)</td>
+<td>Which <strong>Analog In</strong> port on the roboRIO the knob is wired to</td>
+</tr>
+<tr>
+<td><code>KnobTurns</code> (10.0)</td>
+<td>The <strong>full range</strong>: when the knob is turned all the way, <code>get()</code> reports 10. Halfway reports 5.</td>
+</tr>
+<tr>
+<td><code>0.0</code></td>
+<td>The <strong>offset</strong>, added to every reading. 0 means "no shift."</td>
+</tr>
+</tbody>
+</table>
 <p>Import <code>edu.wpi.first.wpilibj.AnalogPotentiometer</code>.</p>
 <p>Add a telemetry table for the knob's values, below the knob (import <code>frc.robot.telemetry.Telemetry</code> and <code>frc.robot.telemetry.TelemetryTable</code>):</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_knobTelemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Knob"</span><span class="p">);</span>
@@ -113,8 +135,12 @@
 <span class="w">    </span><span class="n">m_knobTelemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Turns"</span><span class="p">,</span><span class="w"> </span><span class="n">m_knob</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
+<ul>
+<li><strong><code>public void updateDashboard()</code></strong>: a new method you wrote. <code>Robot</code> calls it every loop, so the knob's value stays fresh on the dashboard.</li>
+<li><strong><code>m_knob.get()</code></strong> reads the knob right now, as a number of turns from 0 to 10.</li>
+</ul>
 <h3 id="step-3-calibrate">Step 3: Calibrate<a class="headerlink" href="#step-3-calibrate" title="Permanent link">#</a></h3>
-<p>Real pots almost never read exactly 0 and exactly 10 at the ends. Deploy (disabled is fine) and watch <strong>Knob/Turns</strong>.</p>
+<p>Real pots almost never read exactly 0 and exactly 10 at the ends. Deploy (disabled is fine) and watch <strong>Turns</strong> in <strong>Telemetry → Knob</strong>.</p>
 <ol>
 <li>Turn the knob all the way one direction. Write down the reading: <strong>min</strong> = ______</li>
 <li>Turn it all the way the other direction. <strong>max</strong> = ______</li>
@@ -175,6 +201,46 @@ speed     = (turns - center) / halfRange
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">speed</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">                            </span><span class="c1">// cap at 50% while learning</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
+<p>Reading it from the top:</p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>private double knobToSpeed()</code></td>
+<td>A method only <code>RobotContainer</code> uses (<code>private</code>) that answers with a number (<code>double</code>)</td>
+</tr>
+<tr>
+<td><code>double min = ...;</code> and <code>double max = ...;</code></td>
+<td><strong>Local variables</strong>: short names for the two constants, so the math below is easier to read. They only exist while the method runs.</td>
+</tr>
+<tr>
+<td><code>double center = (min + max) / 2.0;</code></td>
+<td>The knob reading that should mean "stopped"</td>
+</tr>
+<tr>
+<td><code>double halfRange = (max - min) / 2.0;</code></td>
+<td>How far the knob can turn from center to either end</td>
+</tr>
+<tr>
+<td><code>double speed = (m_knob.get() - center) / halfRange;</code></td>
+<td>The linear map: how far from center, as a fraction of the way to the end. Center gives 0, either end gives 1 or -1.</td>
+</tr>
+<tr>
+<td><code>speed = MathUtil.clamp(speed, -1.0, 1.0);</code></td>
+<td>Overwrites <code>speed</code> with a version that can't go below -1 or above 1</td>
+</tr>
+<tr>
+<td><code>return speed * 0.5;</code></td>
+<td>Hands the answer back to whoever called the method</td>
+</tr>
+</tbody>
+</table>
+<p>Why the safety lines matter:</p>
 <table>
 <thead>
 <tr>
@@ -211,7 +277,7 @@ speed     = (turns - center) / halfRange
 <ol>
 <li>Set the knob to the middle. Enable.</li>
 <li>Tap <strong>D-pad right</strong>. The motor shouldn't move.</li>
-<li>Slowly turn the knob one way. The motor speeds up. Watch <strong>Knob/Speed</strong> on the dashboard.</li>
+<li>Slowly turn the knob one way. The motor speeds up. Watch <strong>Speed</strong> in <strong>Telemetry → Knob</strong>.</li>
 <li>Turn it back through the middle and the other way. The motor slows, stops, and reverses.</li>
 <li>Tap <strong>D-pad right</strong> again to hand control back.</li>
 </ol>

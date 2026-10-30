@@ -104,6 +104,24 @@
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// NavX2 on the roboRIO's MXP port, talking over SPI</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">AHRS</span><span class="w"> </span><span class="n">m_gyro</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AHRS</span><span class="p">(</span><span class="n">NavXComType</span><span class="p">.</span><span class="na">kMXP_SPI</span><span class="p">);</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AHRS</code></td>
+<td>Studica's class for the NavX. AHRS stands for "attitude and heading reference system": a sensor that knows which way it's pointing.</td>
+</tr>
+<tr>
+<td><code>NavXComType.kMXP_SPI</code></td>
+<td>How the NavX talks to the roboRIO: plugged into the <strong>MXP</strong> port, using the fast <strong>SPI</strong> connection</td>
+</tr>
+</tbody>
+</table>
 <p>Add methods to read and reset the heading:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Robot heading in degrees. Turning left (counterclockwise) makes it go up. */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
@@ -115,6 +133,32 @@
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">::</span><span class="n">reset</span><span class="p">).</span><span class="na">ignoringDisable</span><span class="p">(</span><span class="kc">true</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Zero Heading"</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>m_gyro.getRotation2d()</code></td>
+<td>The robot's heading as a WPILib <code>Rotation2d</code>, where <strong>left (counterclockwise) is positive</strong>, the WPILib standard</td>
+</tr>
+<tr>
+<td><code>.getDegrees()</code></td>
+<td>Turns that into a plain number of degrees</td>
+</tr>
+<tr>
+<td><code>runOnce(m_gyro::reset)</code></td>
+<td>Makes "the way the robot is pointing right now" the new 0°</td>
+</tr>
+<tr>
+<td><code>.ignoringDisable(true)</code></td>
+<td>Lets you zero it while the robot is disabled, before a match</td>
+</tr>
+</tbody>
+</table>
 <h3 id="step-4-show-it-on-the-dashboard">Step 4: Show it on the dashboard<a class="headerlink" href="#step-4-show-it-on-the-dashboard" title="Permanent link">#</a></h3>
 <p>Add to the drive subsystem's <code>periodic()</code>. These go in <strong>Telemetry → Drive</strong>, in a <strong>Gyro</strong> folder:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Gyro/Heading (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">());</span>
@@ -164,6 +208,14 @@
 </thead>
 <tbody>
 <tr>
+<td><code>private double m_turnTarget</code></td>
+<td>A field, so <code>periodic()</code> can show the target on the dashboard while the turn runs</td>
+</tr>
+<tr>
+<td><code>double direction = Math.signum(degrees);</code></td>
+<td><code>Math.signum</code> gives <strong>+1</strong> for a positive number and <strong>-1</strong> for a negative one. Positive degrees means turn left, so <code>direction</code> is +1 for left and -1 for right.</td>
+</tr>
+<tr>
 <td><code>runOnce(() -&gt; m_turnTarget = getHeadingDegrees() + degrees)</code></td>
 <td>Remembers where to stop: 90° from <strong>wherever the robot is now</strong></td>
 </tr>
@@ -174,6 +226,10 @@
 <tr>
 <td><code>.until(...)</code></td>
 <td>Stops the moment the heading reaches the target</td>
+</tr>
+<tr>
+<td><code>direction &gt; 0 ? A : B</code></td>
+<td>A <strong>ternary</strong>: "if turning left, use check A; otherwise use check B." Turning left, the heading goes <strong>up</strong> to the target (<code>&gt;=</code>); turning right, it goes <strong>down</strong> (<code>&lt;=</code>).</td>
 </tr>
 <tr>
 <td><code>.withTimeout(3.0)</code></td>
@@ -241,6 +297,29 @@
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <p>The target is set <strong>once</strong>, at the start, so the whole turn aims at the same spot. Only the speed changes along the way.</p>
+<p>The new part is inside <code>run(...)</code>, which now has curly braces <code>{ }</code> because it does several things every loop:</p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>double remaining = Math.abs(m_turnTarget - getHeadingDegrees());</code></td>
+<td>How many degrees are left. <code>Math.abs</code> drops the minus sign, so it works for left and right turns.</td>
+</tr>
+<tr>
+<td><code>double speed = (remaining &gt; 20.0) ? 0.6 : 0.25;</code></td>
+<td>Another ternary: more than 20° to go, use 0.6; otherwise 0.25</td>
+</tr>
+<tr>
+<td><code>m_drive.tankDrive(-direction * speed, direction * speed, false);</code></td>
+<td>Spin at that speed, in the right direction</td>
+</tr>
+</tbody>
+</table>
 <p>Bind it to Y:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">y</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">twoSpeedTurnCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">));</span>
 </code></pre></div>

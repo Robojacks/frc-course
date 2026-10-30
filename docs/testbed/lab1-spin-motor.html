@@ -102,6 +102,36 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>public static class kBrushlessConstants</code></td>
+<td>A group of constants for the brushless motor, inside <code>Constants</code>. You'll use it as <code>Constants.kBrushlessConstants.BrushlessMotorSpeed</code>.</td>
+</tr>
+<tr>
+<td><code>public</code></td>
+<td>Any file can read it</td>
+</tr>
+<tr>
+<td><code>static</code></td>
+<td>It belongs to the class itself, so you don't need to create a <code>Constants</code> object to use it</td>
+</tr>
+<tr>
+<td><code>final</code></td>
+<td>It can never change while the robot runs. That's what makes it a constant.</td>
+</tr>
+<tr>
+<td><code>int</code> / <code>double</code></td>
+<td>A whole number (CAN IDs, amps) / a number with a decimal point (speeds)</td>
+</tr>
+</tbody>
+</table>
 <div class="admonition info">
 <p class="admonition-title">Why a current limit of 40 amps?</p>
 <p>The test bed's power distribution has <strong>40 A breakers</strong>. A limit above 40 A can trip the breaker if the motor gets stuck. If your motor is a small <strong>NEO 550</strong>, use about <strong>20 A</strong> instead, because it can overheat quickly at 40.</p>
@@ -168,29 +198,153 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Three ideas in this file are worth slowing down for:</p>
+<h3 id="the-subsystem-piece-by-piece">The subsystem, piece by piece<a class="headerlink" href="#the-subsystem-piece-by-piece" title="Permanent link">#</a></h3>
+<p>That's a lot of new code at once. Here it is again, one piece at a time.</p>
+<h4 id="1-the-package-and-the-imports">1. The package and the imports<a class="headerlink" href="#1-the-package-and-the-imports" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.SparkMax</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants</span><span class="p">;</span>
+<span class="c1">// ...and the others</span>
+</code></pre></div>
+<ul>
+<li><strong><code>package frc.robot.subsystems;</code></strong> says which folder this file lives in. It must match the folder, or the build fails.</li>
+<li>Each <strong><code>import</code></strong> lets this file use a class from somewhere else, by its short name. <code>com.revrobotics...</code> classes come from <strong>REVLib</strong> (Lab 0, Part 4). <code>edu.wpi.first...</code> classes come from <strong>WPILib</strong>. <code>frc.robot.Constants</code> is your own file.</li>
+<li>You rarely type imports yourself. When VS Code underlines a class name in red, click it and use the lightbulb (or <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-period">.</kbd></span>) to add the import.</li>
+</ul>
+<h4 id="2-the-class-line">2. The class line<a class="headerlink" href="#2-the-class-line" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">SpinBrushlessMotorSubsystem</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+</code></pre></div>
+<ul>
+<li><strong><code>public class SpinBrushlessMotorSubsystem</code></strong> creates a new class. The class name must match the file name exactly.</li>
+<li><strong><code>extends SubsystemBase</code></strong> makes it a <strong>subsystem</strong>: WPILib's name for one mechanism and its hardware. Because of <code>extends</code>, this class gets everything <code>SubsystemBase</code> already has for free, including command builders like <code>startEnd</code>, and a <code>periodic()</code> method the robot calls every 20 ms.</li>
+</ul>
+<h4 id="3-the-motor-controller">3. The motor controller<a class="headerlink" href="#3-the-motor-controller" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SparkMax</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span>
+<span class="w">    </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorCanId</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushless</span><span class="p">);</span>
+</code></pre></div>
 <table>
 <thead>
 <tr>
-<th>Code</th>
+<th>Part</th>
 <th>What it means</th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td><code>private</code></td>
+<td>Only code inside this class can touch the motor. Everything else has to go through the subsystem's methods.</td>
+</tr>
+<tr>
+<td><code>final</code></td>
+<td>This variable will always point at this same motor controller. It can't be swapped out by accident.</td>
+</tr>
+<tr>
+<td><code>SparkMax</code></td>
+<td>The type: a REV SPARK MAX motor controller</td>
+</tr>
+<tr>
+<td><code>m_brushlessMotor</code></td>
+<td>The variable's name. The <code>m_</code> means "member": it belongs to the object, not to one method.</td>
+</tr>
+<tr>
 <td><code>new SparkMax(8, MotorType.kBrushless)</code></td>
-<td>"Talk to the SPARK MAX at CAN ID 8, which drives a brushless motor."</td>
-</tr>
-<tr>
-<td><code>SparkMaxConfig</code> and <code>configure(...)</code></td>
-<td>Settings like current limit and brake mode are collected first, then sent to the controller all at once.</td>
-</tr>
-<tr>
-<td><code>startEnd(start, end)</code></td>
-<td>Builds a <strong>command</strong>: run <code>start</code> when it begins, run <code>end</code> when it stops. Because it comes from the subsystem, the command automatically "owns" the motor while it runs.</td>
+<td>Creates the object that talks to the SPARK MAX with <strong>CAN ID 8</strong>, which is driving a <strong>brushless</strong> motor</td>
 </tr>
 </tbody>
 </table>
+<p>The CAN ID comes from <code>Constants</code>, so if the wiring ever changes, you only change one number in one file.</p>
+<h4 id="4-the-constructor-setting-up-the-motor">4. The constructor: setting up the motor<a class="headerlink" href="#4-the-constructor-setting-up-the-motor" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="nf">SpinBrushlessMotorSubsystem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">brushlessMotorConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMaxConfig</span><span class="p">();</span>
+<span class="w">  </span><span class="n">brushlessMotorConfig</span><span class="p">.</span><span class="na">smartCurrentLimit</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorCurrentLimit</span><span class="p">);</span>
+<span class="w">  </span><span class="n">brushlessMotorConfig</span><span class="p">.</span><span class="na">idleMode</span><span class="p">(</span><span class="n">IdleMode</span><span class="p">.</span><span class="na">kBrake</span><span class="p">);</span>
+<span class="w">  </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span>
+<span class="w">      </span><span class="n">brushlessMotorConfig</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>A <strong>constructor</strong> is the method with the same name as the class and no return type. It runs <strong>once</strong>, when <code>RobotContainer</code> creates the subsystem with <code>new SpinBrushlessMotorSubsystem()</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>new SparkMaxConfig()</code></td>
+<td>Makes an empty list of settings. Nothing is sent to the motor controller yet.</td>
+</tr>
+<tr>
+<td><code>smartCurrentLimit(40)</code></td>
+<td>Adds a setting: never pull more than 40 amps, to protect the motor and the breaker</td>
+</tr>
+<tr>
+<td><code>idleMode(IdleMode.kBrake)</code></td>
+<td>Adds a setting: when the motor is told 0, actively stop instead of coasting</td>
+</tr>
+<tr>
+<td><code>configure(config, ...)</code></td>
+<td>Sends all the settings to the SPARK MAX in one go</td>
+</tr>
+<tr>
+<td><code>ResetMode.kResetSafeParameters</code></td>
+<td>First reset the SPARK MAX to known defaults, so old settings from someone else's code don't linger</td>
+</tr>
+<tr>
+<td><code>PersistMode.kPersistParameters</code></td>
+<td>Save the settings inside the SPARK MAX, so they survive a power blip during a match</td>
+</tr>
+</tbody>
+</table>
+<h4 id="5-a-method-that-sets-the-speed">5. A method that sets the speed<a class="headerlink" href="#5-a-method-that-sets-the-speed" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setMotorSpeed</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">speed</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><strong><code>public</code></strong>: other classes (like <code>RobotContainer</code>) can call it.</li>
+<li><strong><code>void</code></strong>: it doesn't return anything. It just does something.</li>
+<li><strong><code>double speed</code></strong>: it takes one number. <code>set()</code> expects <strong>-1.0</strong> (full reverse) to <strong>1.0</strong> (full forward); 0.5 is half power.</li>
+</ul>
+<h4 id="6-the-command">6. The command<a class="headerlink" href="#6-the-command" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinMotorCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">startEnd</span><span class="p">(</span>
+<span class="w">      </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="n">speed</span><span class="p">),</span><span class="w">   </span><span class="c1">// runs once, when the command starts</span>
+<span class="w">      </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">      </span><span class="c1">// runs once, when the command ends</span>
+<span class="w">  </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin Brushless"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>This method doesn't spin the motor. It <strong>builds and returns a command</strong> that knows how to spin it. The command runs later, when a button starts it.</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>public Command</code></td>
+<td>The method hands back a <code>Command</code> object</td>
+</tr>
+<tr>
+<td><code>startEnd(start, end)</code></td>
+<td>A WPILib command builder: run <code>start</code> once when the command begins, and <code>end</code> once when it stops</td>
+</tr>
+<tr>
+<td><code>() -&gt; setMotorSpeed(speed)</code></td>
+<td>A <strong>lambda</strong>: a little piece of code saved to run later. <code>()</code> means it takes no inputs; <code>-&gt;</code> points at what it does.</td>
+</tr>
+<tr>
+<td><code>.withName("Spin Brushless")</code></td>
+<td>Gives the command a name, which shows up on the dashboard and in error messages</td>
+</tr>
+</tbody>
+</table>
+<p>Because <code>startEnd</code> comes from the subsystem, the command automatically <strong>requires</strong> the subsystem: while it runs, no other command can use this motor at the same time.</p>
 <div class="admonition tip">
 <p class="admonition-title">Where does <code>startEnd</code> come from?</p>
 <p>Your class <code>extends SubsystemBase</code>, so it gets WPILib's command-building methods for free: <code>startEnd</code>, <code>run</code>, <code>runOnce</code>, and more (<a href="../robot-code/07-command-based.html">Lesson 7</a>).</p>
