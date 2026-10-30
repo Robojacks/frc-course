@@ -18,7 +18,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.kDriveConstants;
-import frc.robot.DashTable;
+import frc.robot.telemetry.Telemetry;
+import frc.robot.telemetry.TelemetryTable;
 
 public class DriveSubsystem extends SubsystemBase {
   // Four SPARK MAXes, all BRUSHED, because CIMs are brushed motors.
@@ -37,7 +38,7 @@ public class DriveSubsystem extends SubsystemBase {
       new DifferentialDrive(m_leftLeader::set, m_rightLeader::set);
 
   // Everything this subsystem sends shows up under "Drive" in Elastic
-  private final DashTable m_dash = new DashTable("Drive");
+  private final TelemetryTable m_telemetry = Telemetry.getTable("Drive");
 
   public DriveSubsystem() {
     // Left leader: normal direction
@@ -83,12 +84,12 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_dash.log("Left Output", m_leftLeader.getAppliedOutput());
-    m_dash.log("Right Output", m_rightLeader.getAppliedOutput());
-    m_dash.log("Left Leader Current (A)", m_leftLeader.getOutputCurrent());
-    m_dash.log("Left Follower Current (A)", m_leftFollower.getOutputCurrent());
-    m_dash.log("Right Leader Current (A)", m_rightLeader.getOutputCurrent());
-    m_dash.log("Right Follower Current (A)", m_rightFollower.getOutputCurrent());
-    m_dash.log("Battery (V)", RobotController.getBatteryVoltage());
+    m_telemetry.log("Left Output", m_leftLeader.getAppliedOutput());
+    m_telemetry.log("Right Output", m_rightLeader.getAppliedOutput());
+    m_telemetry.log("Left Leader Current (A)", m_leftLeader.getOutputCurrent());
+    m_telemetry.log("Left Follower Current (A)", m_leftFollower.getOutputCurrent());
+    m_telemetry.log("Right Leader Current (A)", m_rightLeader.getOutputCurrent());
+    m_telemetry.log("Right Follower Current (A)", m_rightFollower.getOutputCurrent());
+    m_telemetry.log("Battery (V)", RobotController.getBatteryVoltage());
   }
 }

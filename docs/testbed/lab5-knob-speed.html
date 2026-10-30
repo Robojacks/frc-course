@@ -97,8 +97,8 @@
 <span class="w">      </span><span class="mf">0.0</span><span class="p">);</span><span class="w">   </span><span class="c1">// offset: added to every reading</span>
 </code></pre></div>
 <p>Import <code>edu.wpi.first.wpilibj.AnalogPotentiometer</code>.</p>
-<p>Add a <code>DashTable</code> for the knob's values, below the knob:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashTable</span><span class="w"> </span><span class="n">m_knobDash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashTable</span><span class="p">(</span><span class="s">"Knob"</span><span class="p">);</span>
+<p>Add a telemetry table for the knob's values, below the knob (import <code>frc.robot.telemetry.Telemetry</code> and <code>frc.robot.telemetry.TelemetryTable</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_knobTelemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Knob"</span><span class="p">);</span>
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Why put the knob in RobotContainer?</p>
@@ -110,7 +110,7 @@
 <p>And add the method to <code>RobotContainer</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Called every loop from Robot.robotPeriodic(). */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updateDashboard</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_knobDash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Turns"</span><span class="p">,</span><span class="w"> </span><span class="n">m_knob</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_knobTelemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Turns"</span><span class="p">,</span><span class="w"> </span><span class="n">m_knob</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <h3 id="step-3-calibrate">Step 3: Calibrate<a class="headerlink" href="#step-3-calibrate" title="Permanent link">#</a></h3>
@@ -198,7 +198,7 @@ speed     = (turns - center) / halfRange
 </tbody>
 </table>
 <p>Add the speed to <code>updateDashboard()</code> so you can watch it:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_knobDash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">knobToSpeed</span><span class="p">());</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_knobTelemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">knobToSpeed</span><span class="p">());</span>
 </code></pre></div>
 <h3 id="step-5-let-the-knob-drive-the-motor">Step 5: Let the knob drive the motor<a class="headerlink" href="#step-5-let-the-knob-drive-the-motor" title="Permanent link">#</a></h3>
 <p>You already wrote <code>spinWithSupplierCommand</code> in Lab 3. It reads a speed every loop, which is exactly what the knob needs. Bind it in <code>configureBindings()</code>:</p>

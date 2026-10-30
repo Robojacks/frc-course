@@ -145,7 +145,7 @@
 </div>
 <h3 id="new-project">New project<a class="headerlink" href="#new-project" title="Permanent link">#</a></h3>
 <p>The WCD is its own robot with its own roboRIO, so it gets its own project. Repeat <a href="lab0-first-project.html">Lab 0</a>, Parts 2 to 4, but name the project <strong>WestCoastDrive</strong>. Remember to install <strong>REVLib</strong>.</p>
-<p>Then copy <code>DashTable.java</code> from your <strong>TestBed</strong> project (<a href="lab1b-dashboard.html">Lab 1.1</a>) into the new project's <code>frc/robot</code> folder, next to <code>Robot.java</code>. Every subsystem uses it to send values to Elastic.</p>
+<p>Then copy the <strong><code>telemetry</code></strong> folder from your <strong>TestBed</strong> project (<a href="lab1b-dashboard.html">Lab 1.1</a>) into the new project's <code>frc/robot</code> folder, next to <code>Robot.java</code>. (It's also <a href="https://github.com/Robojacks/frc-course/tree/main/library/telemetry">on GitHub</a>.) Every subsystem uses it to send values to Elastic.</p>
 <h3 id="step-1-check-the-spark-maxes">Step 1: Check the SPARK MAXes<a class="headerlink" href="#step-1-check-the-spark-maxes" title="Permanent link">#</a></h3>
 <ol>
 <li>Connect each SPARK MAX to your laptop over USB-C and open the <strong>REV Hardware Client</strong>.</li>
@@ -219,7 +219,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants.kDriveConstants</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.DashTable</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Telemetry</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.TelemetryTable</span><span class="p">;</span>
 
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DriveSubsystem</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="c1">// Four SPARK MAXes, all BRUSHED, because CIMs are brushed motors.</span>
@@ -238,7 +239,7 @@
 <span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDrive</span><span class="p">(</span><span class="n">m_leftLeader</span><span class="p">::</span><span class="n">set</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightLeader</span><span class="p">::</span><span class="n">set</span><span class="p">);</span>
 
 <span class="w">  </span><span class="c1">// Everything this subsystem sends shows up under "Drive" in Elastic</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashTable</span><span class="w"> </span><span class="n">m_dash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashTable</span><span class="p">(</span><span class="s">"Drive"</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Drive"</span><span class="p">);</span>
 
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">DriveSubsystem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// Left leader: normal direction</span>
@@ -284,13 +285,13 @@
 
 <span class="w">  </span><span class="nd">@Override</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Left Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_leftLeader</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Right Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightLeader</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Left Leader Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_leftLeader</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Left Follower Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_leftFollower</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Right Leader Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightLeader</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Right Follower Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightFollower</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Battery (V)"</span><span class="p">,</span><span class="w"> </span><span class="n">RobotController</span><span class="p">.</span><span class="na">getBatteryVoltage</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Left Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_leftLeader</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Right Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightLeader</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Left Leader Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_leftLeader</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Left Follower Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_leftFollower</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Right Leader Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightLeader</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Right Follower Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_rightFollower</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Battery (V)"</span><span class="p">,</span><span class="w"> </span><span class="n">RobotController</span><span class="p">.</span><span class="na">getBatteryVoltage</span><span class="p">());</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>

@@ -58,10 +58,10 @@ Open `RobotContainer.java` and add the knob as a field, next to the controller:
 
 Import `edu.wpi.first.wpilibj.AnalogPotentiometer`.
 
-Add a `DashTable` for the knob's values, below the knob:
+Add a telemetry table for the knob's values, below the knob (import `frc.robot.telemetry.Telemetry` and `frc.robot.telemetry.TelemetryTable`):
 
 ```java
-  private final DashTable m_knobDash = new DashTable("Knob");
+  private final TelemetryTable m_knobTelemetry = Telemetry.getTable("Knob");
 ```
 
 !!! info "Why put the knob in RobotContainer?"
@@ -78,7 +78,7 @@ And add the method to `RobotContainer`:
 ```java
   /** Called every loop from Robot.robotPeriodic(). */
   public void updateDashboard() {
-    m_knobDash.log("Turns", m_knob.get());
+    m_knobTelemetry.log("Turns", m_knob.get());
   }
 ```
 
@@ -148,7 +148,7 @@ Add this method to `RobotContainer`:
 Add the speed to `updateDashboard()` so you can watch it:
 
 ```java
-    m_knobDash.log("Speed", knobToSpeed());
+    m_knobTelemetry.log("Speed", knobToSpeed());
 ```
 
 ### Step 5: Let the knob drive the motor

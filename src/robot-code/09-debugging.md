@@ -23,24 +23,24 @@ Your robot runs 50 loops a second, so you need a way to watch values change live
 
 **Don't use `System.out.println` for live values.** Fifty lines a second floods the console, and you can't read any of them.
 
-**Send values over NetworkTables.** Each value updates in place on the dashboard. With the `DashTable` helper from [Lesson 6.1](06b-dashboards.md):
+**Send values over NetworkTables.** Each value updates in place on the dashboard. With the course's telemetry library from [Lesson 6.1](06b-dashboards.md):
 
 ```java
-private final DashTable dash = new DashTable("Arm");
+private final TelemetryTable telemetry = Telemetry.getTable("Arm");
 
 @Override
 public void periodic() {
-    dash.log("Angle (deg)", getAngleDegrees());
-    dash.log("Target (deg)", targetDegrees);
-    dash.log("Output (V)", lastVoltage);
-    dash.log("At Target", atTarget());
+    telemetry.log("Angle (deg)", getAngleDegrees());
+    telemetry.log("Target (deg)", targetDegrees);
+    telemetry.log("Output (V)", lastVoltage);
+    telemetry.log("At Target", atTarget());
 }
 ```
 
 A subsystem's `periodic()` runs every loop, which makes it the right place for telemetry.
 
 !!! tip "Name values like folders"
-    A `DashTable` named `"Arm"` groups every arm value under **Arm** on the dashboard, and `"Angle (deg)"`, and the unit in parentheses means nobody has to guess.
+    `Telemetry.getTable("Arm")` groups every arm value in an **Arm** folder on the dashboard, and the unit in `"Angle (deg)"` means nobody has to guess.
 
 **What to publish for any mechanism:**
 
@@ -183,7 +183,7 @@ public void periodic() {
 ```
 
 ## Try it
-- [ ] Add the four standard values (sensor, target, output, state) for a subsystem with `DashTable`, and watch them in Elastic (IP mode **localhost** in simulation)
+- [ ] Add the four standard values (sensor, target, output, state) for a subsystem with `Telemetry`, and watch them in Elastic (IP mode **localhost** in simulation)
 - [ ] Add `SmartDashboard.putData(CommandScheduler.getInstance())` and watch commands start and stop as you press buttons
 - [ ] Open the **ArmSimulation** example, run it, and move the arm with the joystick. Find its `simulationPeriodic()`.
 - [ ] Add `DataLogManager.start()`, run in sim for a minute, then open the log in AdvantageScope

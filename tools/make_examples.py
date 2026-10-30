@@ -32,6 +32,11 @@ HEADER = """// RoboJacks 4674 FRC Programming Course: finished code for {lab}.
 
 # --------------------------------------------------------------------------- helpers
 
+def library_files():
+    """The course's telemetry library (library/telemetry), as files in frc/robot/telemetry."""
+    return {f"telemetry/{f.name}": f.read_text() for f in sorted((ROOT / "library" / "telemetry").glob("*.java"))}
+
+
 def lab_text(name):
     return (LABS / name).read_text()
 
@@ -421,7 +426,7 @@ def testbed_states():
     l6 = lab_text("lab6-encoder.md")
     l9 = lab_text("lab9-pid-wheel.md")
 
-    dashtable = java_block(l1b, "public class DashTable")
+    library = library_files()
 
     # ---- Lab 0: the template, plus a hello message
     files = {
@@ -461,17 +466,19 @@ def testbed_states():
                   "subsystems/SpinBrushlessMotorSubsystem.java": spin})
     yield "lab01-spin-motor", "Lab 1", "lab1-spin-motor.md", dict(files), ["REVLib"]
 
-    # ---- Lab 1.1: DashTable, periodic(), and a tunable speed on B
-    spin = add_imports(spin, "frc.robot.DashTable", "java.util.function.DoubleSupplier")
+    # ---- Lab 1.1: the telemetry library, periodic(), and a tunable speed on B
+    spin = add_imports(spin, "frc.robot.telemetry.Telemetry", "frc.robot.telemetry.TelemetryTable",
+                       "frc.robot.telemetry.TunableDouble", "frc.robot.telemetry.Tunables")
     spin = edit(spin, "MotorType.kBrushless);\n",
-                "\n" + java_block(l1b, 'new DashTable("Brushless")') + "\n"
+                "\n" + java_block(l1b, 'Telemetry.getTable("Brushless")') + "\n"
                 + java_block(l1b, "m_tunableSpeed ="))
     spin = edit(spin, '    ).withName("Spin Brushless");\n  }\n',
                 "\n" + java_block(l1b, "spinAtTunableSpeedCommand()"))
     spin = add_member(spin, java_block(l1b, "public void periodic()"))
     container = edit(container, "          Constants.kBrushlessConstants.BrushlessMotorSpeed));\n",
                      "\n" + indent(java_block(l1b, "spinAtTunableSpeedCommand());"), 2) + "\n")
-    files.update({"DashTable.java": dashtable, "RobotContainer.java": container,
+    files.update(library)
+    files.update({"RobotContainer.java": container,
                   "subsystems/SpinBrushlessMotorSubsystem.java": spin})
     yield "lab01b-dashboard", "Lab 1.1", "lab1b-dashboard.md", dict(files), ["REVLib"]
 
@@ -479,6 +486,7 @@ def testbed_states():
     spin = edit(spin, "\n  /** Spins the motor at whatever speed is on the dashboard",
                 "\n" + indent(java_block(l3, "public Command stopCommand()"), 0) + "\n",
                 where="before")
+    spin = add_imports(spin, "java.util.function.DoubleSupplier")   # Lab 3 says to add this import
     bindings = java_block(l3, "private void configureBindings()")
     default_cmd = java_block(l3, "setDefaultCommand(")
     bindings = edit(bindings, "\n    // Show which commands are running, live\n",
@@ -499,7 +507,7 @@ def testbed_states():
     constants = edit(constants, "  }\n}\n", "  }\n\n" + java_block(l4, "kSensorConstants").rstrip("\n") + "\n}\n",
                      where="replace")
     spin = add_imports(spin, "edu.wpi.first.wpilibj.DigitalInput")
-    spin = edit(spin, '  // Everything this subsystem sends shows up under "Brushless" on the dashboard\n',
+    spin = edit(spin, '  // Everything this subsystem sends shows up in /Telemetry/Brushless on the dashboard\n',
                 "  // The limit switch on the test bed (Lab 4)\n" + java_block(l4, "new DigitalInput(") + "\n",
                 where="before")
     spin = edit(spin, "\n  /** Spins the motor at whatever speed is on the dashboard",
@@ -509,8 +517,8 @@ def testbed_states():
                          "  /** Spins until the limit switch is pressed, then stops. Won't start if it's already pressed. */\n"
                          "  public Command spinUntilLimitCommand") + "\n",
                 where="before")
-    spin = edit(spin, '    m_dash.log("Command", running == null ? "none" : running.getName());\n',
-                java_block(l4, 'm_dash.log("Limit Pressed"'))
+    spin = edit(spin, '    m_telemetry.log("Command", running == null ? "none" : running.getName());\n',
+                java_block(l4, 'm_telemetry.log("Limit Pressed"'))
     pov = java_block(l4, "m_controller.povUp()")
     trig = java_block(l4, "new Trigger(")
     container = edit(container, "\n    // Show which commands are running, live\n",
@@ -528,16 +536,17 @@ def testbed_states():
     constants = re.sub(r"  public static class kSensorConstants \{.*?\n  \}\n", lambda m: sensor5, constants, flags=re.S)
     container = edit(container, "      new CommandXboxController(OperatorConstants.kControllerPort);\n",
                      "\n" + java_block(l5, "new AnalogPotentiometer(") + "\n"
-                     + java_block(l5, 'new DashTable("Knob")'))
+                     + java_block(l5, 'Telemetry.getTable("Knob")'))
     container = edit(container, "\n  /**\n   * Use this to pass the autonomous command",
                      "\n" + java_block(l5, "public void updateDashboard()").rstrip("\n").replace(
-                         '    m_knobDash.log("Turns", m_knob.get());\n',
-                         '    m_knobDash.log("Turns", m_knob.get());\n' + java_block(l5, 'm_knobDash.log("Speed"'))
+                         '    m_knobTelemetry.log("Turns", m_knob.get());\n',
+                         '    m_knobTelemetry.log("Turns", m_knob.get());\n' + java_block(l5, 'm_knobTelemetry.log("Speed"'))
                      + "\n\n" + java_block(l5, "private double knobToSpeed()").rstrip("\n") + "\n",
                      where="before")
     container = edit(container, "\n    // Show which commands are running, live\n",
                      "\n" + java_block(l5, "m_controller.povRight()"), where="before")
-    container = add_imports(container, "edu.wpi.first.wpilibj.AnalogPotentiometer", "edu.wpi.first.math.MathUtil")
+    container = add_imports(container, "edu.wpi.first.wpilibj.AnalogPotentiometer", "edu.wpi.first.math.MathUtil",
+                            "frc.robot.telemetry.Telemetry", "frc.robot.telemetry.TelemetryTable")
     files.update({"Constants.java": constants, "RobotContainer.java": container,
                   "Robot.java": template_robot(println=True, update_dashboard=True)})
     yield "lab05-knob-speed", "Lab 5", "lab5-knob-speed.md", dict(files), ["REVLib"]
@@ -546,8 +555,8 @@ def testbed_states():
     wheel_consts = indent(re.sub(r"(?m)^    ", "  ", java_block(l6, "public static class kWheelConstants")), 2)
     constants = constants.rstrip().rstrip("}").rstrip() + "\n\n" + wheel_consts + "\n}\n"
     wheel = java_block(l6, "public class WheelSubsystem")
-    wheel = edit(wheel, '        m_dash.log("Current (A)", m_motor.getOutputCurrent());\n',
-                 java_block(l6, 'm_dash.log("Raw Counts"'))
+    wheel = edit(wheel, '        m_telemetry.log("Current (A)", m_motor.getOutputCurrent());\n',
+                 java_block(l6, 'm_telemetry.log("Raw Counts"'))
     for marker in ("public Command turnTimed(", "public Command turnBangBang("):
         wheel = edit(wheel, "\n    @Override\n    public void periodic()",
                      "\n" + indent(java_block(l6, marker), 4) + "\n", where="before")
@@ -568,10 +577,10 @@ def testbed_states():
     constants = edit(constants, "    public static final double MaxVolts = 6.0;       // keeps PID tests gentle in Lab 9\n",
                      "\n    // Lab 9: PID\n" + gains)
     wheel = add_imports(wheel, "edu.wpi.first.math.MathUtil", "edu.wpi.first.math.controller.PIDController",
-                        "java.util.function.DoubleSupplier")
+                        "frc.robot.telemetry.TunableDouble", "frc.robot.telemetry.Tunables")
     wheel = edit(wheel, "        EncodingType.k4X);\n", "\n" + java_block(l9, "new PIDController(kWheelConstants.P"))
-    wheel = edit(wheel, '    private final DashTable m_dash = new DashTable("Wheel");\n',
-                 "\n" + java_block(l9, 'm_dash.tunable("kP"'))
+    wheel = edit(wheel, '    private final TelemetryTable m_telemetry = Telemetry.getTable("Wheel");\n',
+                 "\n" + java_block(l9, 'Tunables.addDouble("Wheel/kP"'))
     wheel = edit(wheel, "        m_encoder.setDistancePerPulse(1.0 / kWheelConstants.EncoderCyclesPerRev);\n",
                  "\n" + java_block(l9, "m_pid.setTolerance("))
     wheel = edit(wheel, "    public void periodic() {\n", java_block(l9, "m_pid.setPID(") + "\n")
@@ -590,7 +599,7 @@ def wcd_states():
     l7 = lab_text("lab7-timed-auto.md")
     l8 = lab_text("lab8-navx-gyro.md")
     l10 = lab_text("lab10-elevator.md")
-    dashtable = java_block(lab_text("lab1b-dashboard.md"), "public class DashTable")
+    library = library_files()
 
     # ---- Lab 2
     constants = "package frc.robot;\n\n" + java_block(l2, "public final class Constants")
@@ -630,30 +639,30 @@ public class RobotContainer {{
         "Robot.java": template_robot(),
         "Constants.java": constants,
         "RobotContainer.java": container,
-        "DashTable.java": dashtable,
         "subsystems/DriveSubsystem.java": drive,
     }
+    files.update(library)
     yield "lab02-west-coast-drive", "Lab 2", "lab2-west-coast-drive.md", dict(files), ["REVLib"]
 
     # ---- Lab 7: timed autos and the chooser
     drive = edit(drive, "\n  @Override\n  public void periodic()",
                  "\n" + java_block(l7, "public Command driveForSecondsCommand(") + "", where="before")
-    chooser = java_block(l7, "public class DashChooser")
     container = edit(container, "      new CommandXboxController(OperatorConstants.kControllerPort);\n",
-                     "\n  // The autonomous menu in Elastic\n" + java_block(l7, "new DashChooser<>(\"Auto\")"))
+                     "\n  // The autonomous menu in Elastic\n" + java_block(l7, "new Selectable<>()"))
     container = edit(container, "    configureBindings();\n", "\n" + java_block(l7, "m_autoChooser.addDefault("))
     autos = java_block(l7, "private Command squareAuto()")
     container = re.sub(r"  public Command getAutonomousCommand\(\) \{.*?\n  \}\n",
                        lambda m: java_block(l7, "return m_autoChooser.getSelected();") + "\n" + autos,
                        container, flags=re.S)
-    container = add_imports(container, "edu.wpi.first.wpilibj2.command.Commands")
-    files.update({"RobotContainer.java": container, "DashChooser.java": chooser,
+    container = add_imports(container, "edu.wpi.first.wpilibj2.command.Commands",
+                            "frc.robot.telemetry.Selectable", "frc.robot.telemetry.Tunables")
+    files.update({"RobotContainer.java": container,
                   "subsystems/DriveSubsystem.java": drive})
     yield "lab07-timed-auto", "Lab 7", "lab7-timed-auto.md", dict(files), ["REVLib"]
 
     # ---- Lab 8: the NavX2
     drive = add_imports(drive, "com.studica.frc.AHRS", "com.studica.frc.AHRS.NavXComType")
-    drive = edit(drive, '  private final DashTable m_dash = new DashTable("Drive");\n',
+    drive = edit(drive, '  private final TelemetryTable m_telemetry = Telemetry.getTable("Drive");\n',
                  "\n" + java_block(l8, "new AHRS(NavXComType.kMXP_SPI)")
                  + "\n  private double m_turnTarget = 0.0;   // where the current turn is trying to end\n")
     for marker in ("public double getHeadingDegrees()", ):
@@ -664,8 +673,8 @@ public class RobotContainer {{
     drive = edit(drive, "\n  @Override\n  public void periodic()", "\n" + turn, where="before")
     drive = edit(drive, "\n  @Override\n  public void periodic()",
                  "\n" + java_block(l8, "public Command twoSpeedTurnCommand("), where="before")
-    drive = edit(drive, '    m_dash.log("Battery (V)", RobotController.getBatteryVoltage());\n',
-                 "\n" + java_block(l8, 'm_dash.log("Gyro/Heading (deg)"') + java_block(l8, 'm_dash.log("Gyro/Turn Target (deg)"'))
+    drive = edit(drive, '    m_telemetry.log("Battery (V)", RobotController.getBatteryVoltage());\n',
+                 "\n" + java_block(l8, 'm_telemetry.log("Gyro/Heading (deg)"') + java_block(l8, 'm_telemetry.log("Gyro/Turn Target (deg)"'))
     gyro_bind = (java_block(l8, "zeroHeadingCommand());") + java_block(l8, "turnDegreesCommand(90, 0.4)")
                  + java_block(l8, "twoSpeedTurnCommand(90));"))
     container = edit(container, "OperatorConstants.kDeadband)));\n",

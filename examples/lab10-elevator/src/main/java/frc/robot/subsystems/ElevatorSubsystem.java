@@ -3,8 +3,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.function.DoubleSupplier;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -22,7 +20,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.kElevatorConstants;
-import frc.robot.DashTable;
+import frc.robot.telemetry.Telemetry;
+import frc.robot.telemetry.TelemetryTable;
+import frc.robot.telemetry.TunableDouble;
+import frc.robot.telemetry.Tunables;
 
 public class ElevatorSubsystem extends SubsystemBase {
   /** The heights the operator can pick. */
@@ -48,15 +49,15 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private double m_lastVolts = 0.0;      // for the dashboard
 
-  // Values go to the "Elevator" table in Elastic. The gains and limits are tunable while you test.
-  private final DashTable m_dash = new DashTable("Elevator");
-  private final DoubleSupplier m_kP = m_dash.tunable("kP", kElevatorConstants.kP);
-  private final DoubleSupplier m_kI = m_dash.tunable("kI", kElevatorConstants.kI);
-  private final DoubleSupplier m_kD = m_dash.tunable("kD", kElevatorConstants.kD);
-  private final DoubleSupplier m_maxVelocity =
-      m_dash.tunable("Max Velocity (m per s)", kElevatorConstants.MaxVelocityMetersPerSecond);
-  private final DoubleSupplier m_maxAcceleration =
-      m_dash.tunable("Max Accel (m per s2)", kElevatorConstants.MaxAccelerationMetersPerSecondSquared);
+  // Values go to /Telemetry/Elevator. The gains and limits are tunable (/Tunables/Elevator) while you test.
+  private final TelemetryTable m_telemetry = Telemetry.getTable("Elevator");
+  private final TunableDouble m_kP = Tunables.addDouble("Elevator/kP", kElevatorConstants.kP);
+  private final TunableDouble m_kI = Tunables.addDouble("Elevator/kI", kElevatorConstants.kI);
+  private final TunableDouble m_kD = Tunables.addDouble("Elevator/kD", kElevatorConstants.kD);
+  private final TunableDouble m_maxVelocity =
+      Tunables.addDouble("Elevator/Max Velocity (m per s)", kElevatorConstants.MaxVelocityMetersPerSecond);
+  private final TunableDouble m_maxAcceleration =
+      Tunables.addDouble("Elevator/Max Accel (m per s2)", kElevatorConstants.MaxAccelerationMetersPerSecondSquared);
 
   public ElevatorSubsystem() {
     SparkMaxConfig config = new SparkMaxConfig();
@@ -161,17 +162,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     // Use whatever gains and limits are on the dashboard right now
-    m_pid.setPID(m_kP.getAsDouble(), m_kI.getAsDouble(), m_kD.getAsDouble());
+    m_pid.setPID(m_kP.get(), m_kI.get(), m_kD.get());
     m_pid.setConstraints(new TrapezoidProfile.Constraints(
-        m_maxVelocity.getAsDouble(), m_maxAcceleration.getAsDouble()));
+        m_maxVelocity.get(), m_maxAcceleration.get()));
 
-    m_dash.log("Height (m)", getHeightMeters());
-    m_dash.log("Goal (m)", m_pid.getGoal().position);
-    m_dash.log("Setpoint (m)", m_pid.getSetpoint().position);
-    m_dash.log("Setpoint Velocity (m per s)", m_pid.getSetpoint().velocity);
-    m_dash.log("Error (m)", m_pid.getGoal().position - getHeightMeters());
-    m_dash.log("Output (V)", m_lastVolts);
-    m_dash.log("Current (A)", m_motor.getOutputCurrent());
-    m_dash.log("At Goal", atGoal());
+    m_telemetry.log("Height (m)", getHeightMeters());
+    m_telemetry.log("Goal (m)", m_pid.getGoal().position);
+    m_telemetry.log("Setpoint (m)", m_pid.getSetpoint().position);
+    m_telemetry.log("Setpoint Velocity (m per s)", m_pid.getSetpoint().velocity);
+    m_telemetry.log("Error (m)", m_pid.getGoal().position - getHeightMeters());
+    m_telemetry.log("Output (V)", m_lastVolts);
+    m_telemetry.log("Current (A)", m_motor.getOutputCurrent());
+    m_telemetry.log("At Goal", atGoal());
   }
 }

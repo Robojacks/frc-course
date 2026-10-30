@@ -12,6 +12,8 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.Preset;
+import frc.robot.telemetry.Selectable;
+import frc.robot.telemetry.Tunables;
 
 /**
  * This class is where the bulk of the robot should be declared: subsystems, controllers,
@@ -30,7 +32,7 @@ public class RobotContainer {
   private final CommandXboxController m_operator = new CommandXboxController(1);
 
   // The autonomous menu in Elastic
-  private final DashChooser<Command> m_autoChooser = new DashChooser<>("Auto");
+  private final Selectable<Command> m_autoChooser = new Selectable<>();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -39,6 +41,7 @@ public class RobotContainer {
     m_autoChooser.addDefault("Do nothing", Commands.none());
     m_autoChooser.add("Drive forward", driveForwardAuto());
     m_autoChooser.add("Square", squareAuto());
+    Tunables.publish("Auto", m_autoChooser);   // shows up as /Tunables/Auto
   }
 
   private void configureBindings() {

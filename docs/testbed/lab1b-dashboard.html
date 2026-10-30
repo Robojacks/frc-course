@@ -41,7 +41,7 @@
 <p>In Lab 1 the motor spun, but you couldn't see how fast, or how much current it pulled. Every lab after this one depends on watching numbers change live: encoder positions, errors, PID outputs. And when you tune something, redeploying for every small change wastes a lot of robot time.</p>
 <p>In this lab you'll:</p>
 <ul>
-<li>add a small helper class, <code>DashTable</code>, that sends values over <strong>NetworkTables 4</strong></li>
+<li>add the course's <strong>telemetry library</strong>, which sends values over <strong>NetworkTables 4</strong> using WPILib 2027's API</li>
 <li>send the motor's speed, current, and output to <strong>Elastic</strong></li>
 <li>build an Elastic layout with graphs</li>
 <li>change the motor's speed <strong>from the dashboard</strong>, without redeploying</li>
@@ -54,146 +54,67 @@
 <li><a href="https://frc-elastic.gitbook.io/docs/getting-started/connecting-to-your-robot">Elastic: Connecting to your robot</a></li>
 </ul>
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
-<h3 id="step-1-add-dashtable">Step 1: Add <code>DashTable</code><a class="headerlink" href="#step-1-add-dashtable" title="Permanent link">#</a></h3>
+<h3 id="step-1-add-the-telemetry-library">Step 1: Add the telemetry library<a class="headerlink" href="#step-1-add-the-telemetry-library" title="Permanent link">#</a></h3>
+<p>The course has a small library for dashboards, in a folder called <code>telemetry</code>. It's a 2026 copy of the <strong>Telemetry</strong> and <strong>Tunables</strong> APIs that WPILib adds in 2027, with the same names, so everything you write in these labs already works the 2027 way (<a href="../robot-code/06b-dashboards.html#the-courses-telemetry-library-2027s-api-today">Lesson 6.1</a>).</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it's for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Telemetry.java</code></td>
+<td>Where you start: <code>Telemetry.getTable("Brushless")</code></td>
+</tr>
+<tr>
+<td><code>TelemetryTable.java</code></td>
+<td>One folder of values: <code>table.log("Current (A)", amps)</code></td>
+</tr>
+<tr>
+<td><code>Tunables.java</code></td>
+<td>Numbers you change from the dashboard: <code>Tunables.addDouble(...)</code></td>
+</tr>
+<tr>
+<td><code>TunableDouble.java</code></td>
+<td>One tunable number: <code>speed.get()</code></td>
+</tr>
+<tr>
+<td><code>Selectable.java</code></td>
+<td>A dropdown menu (you'll use it in Lab 7)</td>
+</tr>
+</tbody>
+</table>
+<p>You don't type these in. Copy them:</p>
 <ol>
-<li>In VS Code, right-click the <code>frc/robot</code> folder (the one with <code>Robot.java</code>), choose <strong>New File</strong>, and name it <code>DashTable.java</code>.</li>
-<li>Type in this class. It's the same one from <a href="../robot-code/06b-dashboards.html#a-helper-dashtable">Lesson 6.1</a>.</li>
+<li>In VS Code, right-click the <code>frc/robot</code> folder (the one with <code>Robot.java</code>), choose <strong>New Folder</strong>, and name it <code>telemetry</code>.</li>
+<li>Open the <a href="https://github.com/Robojacks/frc-course/tree/main/library/telemetry"><strong>telemetry</strong> folder on GitHub</a>.</li>
+<li>For each of the five files: click it, click the <strong>Copy raw file</strong> button, then in VS Code right-click your <code>telemetry</code> folder → <strong>New File</strong>, give it the <strong>same name</strong>, and paste.</li>
+<li>Check that each file's first line is <code>package frc.robot.telemetry;</code>.</li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.HashMap</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.BooleanPublisher</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.DoubleEntry</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.DoublePublisher</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTable</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTableInstance</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringPublisher</span><span class="p">;</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * One folder ("table") of values on the dashboard, sent with NetworkTables 4.</span>
-<span class="cm"> *</span>
-<span class="cm"> * &lt;p&gt;Each subsystem makes its own DashTable, named after the subsystem. Every value it logs</span>
-<span class="cm"> * shows up in Elastic inside that folder. For example:</span>
-<span class="cm"> *</span>
-<span class="cm"> * &lt;pre&gt;</span>
-<span class="cm"> *   DashTable dash = new DashTable("Wheel");</span>
-<span class="cm"> *   dash.log("Position (rot)", 3.4);   // shows up in Elastic as /Wheel/Position (rot)</span>
-<span class="cm"> * &lt;/pre&gt;</span>
-<span class="cm"> *</span>
-<span class="cm"> * &lt;p&gt;In WPILib 2027, this class is replaced by the built-in Telemetry and Tunables APIs:</span>
-<span class="cm"> * {@code new DashTable("Wheel")} becomes {@code Telemetry.getTable("Wheel")}, and</span>
-<span class="cm"> * {@code tunable(...)} becomes {@code Tunables.addDouble(...)}.</span>
-<span class="cm"> */</span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DashTable</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="c1">// The NetworkTables folder this DashTable writes into, like /Wheel</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">NetworkTable</span><span class="w"> </span><span class="n">m_table</span><span class="p">;</span>
-
-<span class="w">  </span><span class="c1">// One publisher per value, remembered by name so it's only created once.</span>
-<span class="w">  </span><span class="c1">// A Map is a lookup table: give it a key (the value's name), get back its publisher.</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">DoublePublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_numbers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">BooleanPublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_booleans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">StringPublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_strings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
-
-<span class="w">  </span><span class="c1">// Tunable numbers use entries, which can both send a value AND read back changes from the dashboard</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">DoubleEntry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_tunables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
-
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * Creates a folder of dashboard values.</span>
-<span class="cm">   *</span>
-<span class="cm">   * @param tableName the folder's name in Elastic, usually the subsystem's name (like "Wheel")</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">DashTable</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// getDefault() is the robot's one NetworkTables instance; getTable() picks the folder</span>
-<span class="w">    </span><span class="n">m_table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NetworkTableInstance</span><span class="p">.</span><span class="na">getDefault</span><span class="p">().</span><span class="na">getTable</span><span class="p">(</span><span class="n">tableName</span><span class="p">);</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * Sends a number to the dashboard. Call it every loop (for example, in periodic()).</span>
-<span class="cm">   *</span>
-<span class="cm">   * @param key the value's name in Elastic. Put units in it, like "Height (m)".</span>
-<span class="cm">   * @param value the number to show</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// computeIfAbsent: "find the publisher for this key; if there isn't one yet, make it</span>
-<span class="w">    </span><span class="c1">// with this code and remember it." So the first call creates the publisher,</span>
-<span class="w">    </span><span class="c1">// and every later call just reuses it and sends the new value.</span>
-<span class="w">    </span><span class="n">m_numbers</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * Sends true or false to the dashboard. Show it as a Boolean Box in Elastic.</span>
-<span class="cm">   *</span>
-<span class="cm">   * @param key the value's name in Elastic, like "At Goal"</span>
-<span class="cm">   * @param value true or false</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// Same pattern as the number version, with a BooleanPublisher</span>
-<span class="w">    </span><span class="n">m_booleans</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getBooleanTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * Sends text to the dashboard. Show it as a Text Display in Elastic.</span>
-<span class="cm">   *</span>
-<span class="cm">   * @param key the value's name in Elastic, like "Command"</span>
-<span class="cm">   * @param value the text to show</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// Same pattern again, with a StringPublisher</span>
-<span class="w">    </span><span class="n">m_strings</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * Makes a number you can change from the dashboard while the robot runs, like a PID gain.</span>
-<span class="cm">   *</span>
-<span class="cm">   * &lt;p&gt;Call this ONCE, when you create a field, and keep what it returns. Then call</span>
-<span class="cm">   * {@code getAsDouble()} on it whenever you need the current value.</span>
-<span class="cm">   *</span>
-<span class="cm">   * &lt;p&gt;The number goes back to defaultValue every time the robot code starts, so dashboard</span>
-<span class="cm">   * changes are NOT saved. When you find a good value, copy it into Constants.java.</span>
-<span class="cm">   *</span>
-<span class="cm">   * @param key the number's name in Elastic, like "kP"</span>
-<span class="cm">   * @param defaultValue the starting value, usually from Constants</span>
-<span class="cm">   * @return something you can ask for the current value at any time, with getAsDouble()</span>
-<span class="cm">   */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="nf">tunable</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">defaultValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">DoubleEntry</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_tunables</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="c1">// An entry is a publisher and a subscriber in one: it sends values and reads changes</span>
-<span class="w">      </span><span class="n">DoubleEntry</span><span class="w"> </span><span class="n">newEntry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">getEntry</span><span class="p">(</span><span class="n">defaultValue</span><span class="p">);</span>
-<span class="w">      </span><span class="n">newEntry</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">defaultValue</span><span class="p">);</span><span class="w">   </span><span class="c1">// put the starting value on the dashboard</span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">newEntry</span><span class="p">;</span>
-<span class="w">    </span><span class="p">});</span>
-<span class="w">    </span><span class="c1">// entry::get is a method reference: "call entry.get() whenever someone asks for the value"</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">entry</span><span class="p">::</span><span class="n">get</span><span class="p">;</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">You'll use this in every lab</p>
-<p><code>DashTable</code> is all you need for dashboards from now on. When the team moves to WPILib 2027, <code>DashTable</code> becomes the new <code>TelemetryTable</code>, and <code>tunable</code> becomes <code>Tunables.addDouble</code> (<a href="../robot-code/06b-dashboards.html#moving-to-2027">Lesson 6.1</a>).</p>
-</div>
+<p>Then open <code>TelemetryTable.java</code> and read it. Every line is commented, and it uses exactly the publishers from <a href="../robot-code/06b-dashboards.html#publishing-a-value">Lesson 6.1</a>.</p>
 <h3 id="step-2-send-the-motors-values">Step 2: Send the motor's values<a class="headerlink" href="#step-2-send-the-motors-values" title="Permanent link">#</a></h3>
 <p>Open <code>SpinBrushlessMotorSubsystem.java</code>.</p>
-<p><strong>1. Import <code>DashTable</code></strong> with the other imports:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.DashTable</span><span class="p">;</span>
+<p><strong>1. Import the library</strong> with the other imports:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Telemetry</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.TelemetryTable</span><span class="p">;</span>
 </code></pre></div>
 <p><strong>2. Add a field</strong> below the motor:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Everything this subsystem sends shows up under "Brushless" on the dashboard</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashTable</span><span class="w"> </span><span class="n">m_dash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashTable</span><span class="p">(</span><span class="s">"Brushless"</span><span class="p">);</span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Everything this subsystem sends shows up in /Telemetry/Brushless on the dashboard</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Brushless"</span><span class="p">);</span>
 </code></pre></div>
 <p><strong>3. Add a <code>periodic()</code> method</strong> at the bottom of the class, before the last <code>}</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nd">@Override</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// Runs every 20 ms, enabled or not</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Velocity (RPM)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getEncoder</span><span class="p">().</span><span class="na">getVelocity</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Applied Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Temperature (C)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getMotorTemperature</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Velocity (RPM)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getEncoder</span><span class="p">().</span><span class="na">getVelocity</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Applied Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Temperature (C)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getMotorTemperature</span><span class="p">());</span>
 
 <span class="w">    </span><span class="n">Command</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getCurrentCommand</span><span class="p">();</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Command"</span><span class="p">,</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"none"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">running</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Command"</span><span class="p">,</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"none"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">running</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <table>
@@ -239,7 +160,7 @@
 <h3 id="step-4-build-a-layout">Step 4: Build a layout<a class="headerlink" href="#step-4-build-a-layout" title="Permanent link">#</a></h3>
 <ol>
 <li>Make a new tab and name it <strong>Test Bed</strong>.</li>
-<li>Open Elastic's list of topics and find the <strong>Brushless</strong> table.</li>
+<li>Open Elastic's list of topics, then <strong>Telemetry → Brushless</strong>.</li>
 <li>Drag these onto the grid:</li>
 </ol>
 <table>
@@ -311,20 +232,21 @@
 <p>That jump in current at startup is why current limits matter: starting a motor takes much more current than keeping it spinning.</p>
 <h3 id="step-5-change-the-speed-from-the-dashboard">Step 5: Change the speed from the dashboard<a class="headerlink" href="#step-5-change-the-speed-from-the-dashboard" title="Permanent link">#</a></h3>
 <p>Right now the speed comes from <code>Constants</code>, so changing it means redeploying. Make it <strong>tunable</strong> instead.</p>
-<p><strong>1. In the subsystem</strong>, add a field below <code>m_dash</code>:</p>
+<p><strong>1. In the subsystem</strong>, add a field below <code>m_telemetry</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// A speed you can change in Elastic. It starts at the value in Constants.</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_tunableSpeed</span><span class="w"> </span><span class="o">=</span>
-<span class="w">      </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"Tunable Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorSpeed</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TunableDouble</span><span class="w"> </span><span class="n">m_tunableSpeed</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="n">Tunables</span><span class="p">.</span><span class="na">addDouble</span><span class="p">(</span><span class="s">"Brushless/Tunable Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorSpeed</span><span class="p">);</span>
 </code></pre></div>
 <p>And import it at the top:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.TunableDouble</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Tunables</span><span class="p">;</span>
 </code></pre></div>
 <p><strong>2. Add a command</strong> below <code>spinMotorCommand</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Spins the motor at whatever speed is on the dashboard, reading it every loop. */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinAtTunableSpeedCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runEnd</span><span class="p">(</span>
-<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="n">m_tunableSpeed</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">()),</span><span class="w">   </span><span class="c1">// every loop while it runs</span>
-<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">                              </span><span class="c1">// once, when it ends</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="n">m_tunableSpeed</span><span class="p">.</span><span class="na">get</span><span class="p">()),</span><span class="w">   </span><span class="c1">// every loop while it runs</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">                      </span><span class="c1">// once, when it ends</span>
 <span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin Tunable"</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
@@ -333,7 +255,7 @@
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Spin at the dashboard's speed while B is held</span>
 <span class="w">  </span><span class="n">m_controller</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinAtTunableSpeedCommand</span><span class="p">());</span>
 </code></pre></div>
-<p><strong>4. Try it.</strong> Deploy. In Elastic, drag <strong>Tunable Speed</strong> onto your tab as a <strong>Number Slider</strong> (or a Text Display you can edit). Hold B, then change the speed. The motor follows right away.</p>
+<p><strong>4. Try it.</strong> Deploy. In Elastic, drag <strong>Tunable Speed</strong> (in <strong>Tunables → Brushless</strong>) onto your tab as a <strong>Number Slider</strong> (or a Text Display you can edit). Hold B, then change the speed. The motor follows right away.</p>
 <div class="admonition warning">
 <p class="admonition-title">Keep tunable speeds small</p>
 <p>A tunable lets anyone at the laptop change how the robot moves while it's enabled. Keep the test bed clear, and don't go above 1.0 or below -1.0. In real robot code, clamp tunable values with <code>MathUtil.clamp(value, -1, 1)</code>.</p>
@@ -345,7 +267,7 @@
 <li>Commit:</li>
 </ol>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
-git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 1.1: DashTable, Elastic layout, tunable speed"</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 1.1: telemetry library, Elastic layout, tunable speed"</span>
 </code></pre></div>
 <p>Your layout file is now in Git, so a teammate can load the same dashboard.</p>
 <h3 id="when-it-doesnt-work">When it doesn't work<a class="headerlink" href="#when-it-doesnt-work" title="Permanent link">#</a></h3>
@@ -362,7 +284,7 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <td>The Driver Station isn't connected, or the IP mode isn't <strong>Driver Station</strong>. In simulation, use <strong>localhost</strong>.</td>
 </tr>
 <tr>
-<td>Connected, but there's no <strong>Brushless</strong> table</td>
+<td>Connected, but there's no <strong>Telemetry → Brushless</strong> folder</td>
 <td>The new code isn't deployed, or <code>periodic()</code> is missing <code>@Override</code> or has a typo in its name</td>
 </tr>
 <tr>
@@ -374,8 +296,8 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <td>The command uses <code>startEnd</code> instead of <code>runEnd</code>, or B isn't bound</td>
 </tr>
 <tr>
-<td>Build error: cannot find symbol <code>DashTable</code></td>
-<td><code>DashTable.java</code> is in the wrong folder, or its first line isn't <code>package frc.robot;</code></td>
+<td>Build error: cannot find symbol <code>Telemetry</code></td>
+<td>The <code>telemetry</code> folder isn't inside <code>frc/robot</code>, a file is missing, or the import is missing</td>
 </tr>
 </tbody>
 </table>
@@ -389,13 +311,13 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Hold A and watch the startup current jump. What's the highest number you see?</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add an <strong>X</strong> binding that spins at 1.0. Compare the startup current to 0.5.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Use the B button and <strong>Tunable Speed</strong> to find the slowest speed where the motor still turns reliably</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>m_dash.log("At Speed", ...)</code> that's <code>true</code> when the velocity is above 2000 RPM. Show it as a <strong>Boolean Box</strong>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>m_telemetry.log("At Speed", ...)</code> that's <code>true</code> when the velocity is above 2000 RPM. Show it as a <strong>Boolean Box</strong>.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run the code in <strong>simulation</strong>, connect Elastic with <strong>localhost</strong>, and find the same values. Which ones still change in simulation, and which don't?</li>
 </ul>
 <h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
 <details class="question">
-<summary>Where does <code>m_dash.log(\"Current (A)\", ...)</code> show up in Elastic?</summary>
-<p>In the <strong>Brushless</strong> table, as <code>/Brushless/Current (A)</code>.</p>
+<summary>Where does <code>m_telemetry.log(\"Current (A)\", ...)</code> show up in Elastic?</summary>
+<p>In <strong>Telemetry → Brushless</strong>, as <code>/Telemetry/Brushless/Current (A)</code>.</p>
 </details>
 <details class="question">
 <summary>Why does <code>spinAtTunableSpeedCommand</code> use <code>runEnd</code> instead of <code>startEnd</code>?</summary>
@@ -410,8 +332,8 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <p>A motor that isn't moving yet pulls much more current than one that's already spinning. The current limit keeps that jump from tripping the breaker or browning out the robot.</p>
 </details>
 <details class="question">
-<summary>What will <code>DashTable</code> turn into when the team moves to WPILib 2027?</summary>
-<p><code>Telemetry.getTable(...)</code> for logging values, and <code>Tunables.addDouble(...)</code> for tunable numbers.</p>
+<summary>What changes in this lab's code when the team moves to WPILib 2027?</summary>
+<p>Only the imports. Delete the <code>telemetry</code> folder and import WPILib's <code>Telemetry</code>, <code>TelemetryTable</code>, <code>Tunables</code>, and <code>TunableDouble</code> instead. The rest stays the same.</p>
 </details>
     </article>
     <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab1-spin-motor.html"><span>Previous</span>Lab 1: Spin a Brushless Motor</a><a class="pager-next" href="lab2-west-coast-drive.html"><span>Next</span>Lab 2: Drive a West Coast Drive</a></nav>

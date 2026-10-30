@@ -103,10 +103,10 @@
 <p><code>isLimitPressed()</code> is much clearer than <code>getSwitch()</code>. Everywhere else in your code, <code>if (isLimitPressed())</code> reads like English and hides the "pressed is false" wiring detail in one place.</p>
 </div>
 <p>Add it to <code>periodic()</code> so you can see it:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Limit Pressed"</span><span class="p">,</span><span class="w"> </span><span class="n">isLimitPressed</span><span class="p">());</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Limit Pressed"</span><span class="p">,</span><span class="w"> </span><span class="n">isLimitPressed</span><span class="p">());</span>
 </code></pre></div>
 <h3 id="step-3-check-it-on-the-dashboard">Step 3: Check it on the dashboard<a class="headerlink" href="#step-3-check-it-on-the-dashboard" title="Permanent link">#</a></h3>
-<p>Deploy (the robot can stay <strong>disabled</strong>). In Elastic, find <strong>Limit Pressed</strong> in the <strong>Brushless</strong> table and show it as a <strong>Boolean Box</strong>.</p>
+<p>Deploy (the robot can stay <strong>disabled</strong>). In Elastic, find <strong>Limit Pressed</strong> in <strong>Telemetry → Brushless</strong> and show it as a <strong>Boolean Box</strong>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Not touching the switch: shows <strong>false</strong></li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Holding the switch down: shows <strong>true</strong></li>

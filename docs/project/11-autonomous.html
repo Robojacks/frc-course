@@ -51,7 +51,7 @@
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html">Command Compositions</a></li>
-<li><a href="../robot-code/06b-dashboards.html#a-dropdown-menu-dashchooser">Lesson 6.1: A dropdown menu with <code>DashChooser</code></a></li>
+<li><a href="../robot-code/06b-dashboards.html#a-dropdown-menu-selectable">Lesson 6.1: A dropdown menu with <code>Selectable</code></a></li>
 </ul>
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
 <h3 id="how-autonomous-starts-and-stops">How autonomous starts and stops<a class="headerlink" href="#how-autonomous-starts-and-stops" title="Permanent link">#</a></h3>
@@ -186,9 +186,9 @@
 <p class="admonition-title">Write autos as named methods</p>
 <p>Build each routine in its own method, like <code>scoreAndBackUp()</code>. Each call makes a <strong>fresh</strong> command object. Reusing one command object in two routines causes an error, because a command can only belong to one composition.</p>
 </div>
-<h3 id="let-the-drive-team-choose-dashchooser">Let the drive team choose: DashChooser<a class="headerlink" href="#let-the-drive-team-choose-dashchooser" title="Permanent link">#</a></h3>
-<p>Different match strategies need different autos. A <code>DashChooser</code> (<a href="../robot-code/06b-dashboards.html#a-dropdown-menu-dashchooser">Lesson 6.1</a>) puts a dropdown menu in Elastic:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashChooser</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashChooser</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">);</span>
+<h3 id="let-the-drive-team-choose-selectable">Let the drive team choose: Selectable<a class="headerlink" href="#let-the-drive-team-choose-selectable" title="Permanent link">#</a></h3>
+<p>Different match strategies need different autos. A <code>Selectable</code> (<a href="../robot-code/06b-dashboards.html#a-dropdown-menu-selectable">Lesson 6.1</a>) puts a dropdown menu in Elastic:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;&gt;</span><span class="p">();</span>
 
 <span class="kd">public</span><span class="w"> </span><span class="nf">RobotContainer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="c1">// ...subsystems and default commands...</span>
@@ -197,6 +197,7 @@
 <span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Drive forward 2 m"</span><span class="p">,</span><span class="w"> </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveDistance</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">));</span>
 <span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Score and back up"</span><span class="p">,</span><span class="w"> </span><span class="n">scoreAndBackUp</span><span class="p">());</span>
 <span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Drive and intake"</span><span class="p">,</span><span class="w"> </span><span class="n">driveAndIntake</span><span class="p">());</span>
+<span class="w">    </span><span class="n">Tunables</span><span class="p">.</span><span class="na">publish</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">,</span><span class="w"> </span><span class="n">autoChooser</span><span class="p">);</span><span class="w">   </span><span class="c1">// shows up as /Tunables/Auto</span>
 
 <span class="w">    </span><span class="n">configureBindings</span><span class="p">();</span>
 <span class="p">}</span>
@@ -205,7 +206,7 @@
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">getSelected</span><span class="p">();</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The drive team picks a routine in Elastic (the <strong>Auto</strong> table, shown as a <strong>ComboBox Chooser</strong>) before the match. Make <strong>"Do nothing"</strong> the default, so a robot whose drive team forgot to choose sits still instead of running a routine meant for a different starting spot.</p>
+<p>The drive team picks a routine in Elastic (<strong>Tunables → Auto</strong>, shown as a <strong>ComboBox Chooser</strong>) before the match. Make <strong>"Do nothing"</strong> the default, so a robot whose drive team forgot to choose sits still instead of running a routine meant for a different starting spot.</p>
 <h3 id="testing-autos">Testing autos<a class="headerlink" href="#testing-autos" title="Permanent link">#</a></h3>
 <ol>
 <li><strong>In simulation first.</strong> Watch the dashboard distance and command names. Does each step start and end when you expect?</li>
@@ -222,7 +223,7 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>driveForSeconds</code> and run it in simulation (select <strong>Autonomous</strong>, then enable)</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>driveDistance</code> and confirm on the dashboard that it stops near the target distance</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build <code>scoreAndBackUp()</code> and watch each step on the scheduler dashboard</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <code>DashChooser</code> with at least three options, with "Do nothing" as the default</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <code>Selectable</code> with at least three options, with "Do nothing" as the default</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build a routine that uses <code>deadline</code> to run the intake while driving</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: write <code>turnDegrees(double degrees)</code> using the gyro from <a href="../robot-code/08-sensors.html">Lesson 8</a>, and use it to drive a square</li>
 </ul>

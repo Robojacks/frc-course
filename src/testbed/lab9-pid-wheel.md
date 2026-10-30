@@ -63,28 +63,28 @@ And at the end of the constructor:
 ### Step 3: Make the gains tunable
 You'll try a lot of gains in this lab. Redeploying for every one would take forever, so make them **tunable** from Elastic ([Lab 1.1](lab1b-dashboard.md#step-5-change-the-speed-from-the-dashboard)).
 
-Add these fields **below `m_dash`** (they use it, so they have to come after it):
+Add these fields to the subsystem, below the others:
 
 ```java
     // Gains you can change in Elastic. They start at the values in Constants.
-    private final DoubleSupplier m_kP = m_dash.tunable("kP", kWheelConstants.P);
-    private final DoubleSupplier m_kI = m_dash.tunable("kI", kWheelConstants.I);
-    private final DoubleSupplier m_kD = m_dash.tunable("kD", kWheelConstants.D);
-    private final DoubleSupplier m_iZone = m_dash.tunable("IZone", kWheelConstants.IZone);
+    private final TunableDouble m_kP = Tunables.addDouble("Wheel/kP", kWheelConstants.P);
+    private final TunableDouble m_kI = Tunables.addDouble("Wheel/kI", kWheelConstants.I);
+    private final TunableDouble m_kD = Tunables.addDouble("Wheel/kD", kWheelConstants.D);
+    private final TunableDouble m_iZone = Tunables.addDouble("Wheel/IZone", kWheelConstants.IZone);
 ```
 
-Import `java.util.function.DoubleSupplier`. Then, at the top of `periodic()`, copy the dashboard's numbers into the controller every loop:
+Import `frc.robot.telemetry.TunableDouble` and `frc.robot.telemetry.Tunables`. Then, at the top of `periodic()`, copy the dashboard's numbers into the controller every loop:
 
 ```java
         // Use whatever gains are on the dashboard right now
-        m_pid.setPID(m_kP.getAsDouble(), m_kI.getAsDouble(), m_kD.getAsDouble());
-        m_pid.setIZone(m_iZone.getAsDouble());
+        m_pid.setPID(m_kP.get(), m_kI.get(), m_kD.get());
+        m_pid.setIZone(m_iZone.get());
 ```
 
-In Elastic, add **kP**, **kI**, **kD**, and **IZone** from the **Wheel** table as **Text Display** widgets, so you can type new values. Add a **Graph** with **Position (rot)** and **Target (rot)** together.
+In Elastic, add **kP**, **kI**, **kD**, and **IZone** from **Tunables → Wheel** as **Text Display** widgets, so you can type new values. Add a **Graph** with **Position (rot)** and **Target (rot)** from **Telemetry → Wheel** together.
 
 !!! info "In WPILib 2027"
-    These become `Tunables.addDouble("Wheel/kP", kWheelConstants.P)`, read with `.get()` ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).
+    This is already the 2027 API: in WPILib 2027, the same lines work with WPILib's own `Tunables` ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).
 
 ### Warm up in the simulator
 Before touching the real wheel, try the same idea in WPILib's turret simulator below. A turret is a lot like the test bed wheel: a motor turning something to an exact angle, with no gravity. It's running **PID only**.
@@ -143,7 +143,7 @@ Bind it on the wheel controller:
     m_wheelController.x().onTrue(m_wheel.turnPid(10));   // Attempts 3 to 5
 ```
 
-1. Make sure **kI** and **kD** are 0 in Elastic (`Wheel/kI` and `Wheel/kD`).
+1. Make sure **kI** and **kD** are 0 in Elastic (**Tunables → Wheel**).
 2. Run `turnPid(10)` three times with kP = 1.0. Record the results.
 3. Try kP = 0.3, then 3, then 10. For each, watch **Position** and **Target** on your Elastic graph.
 

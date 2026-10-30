@@ -7,7 +7,7 @@ In this lesson you'll build autonomous routines step by step: first a simple tim
 
 ## Read this
 - [Command Compositions](https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html)
-- [Lesson 6.1: A dropdown menu with `DashChooser`](../robot-code/06b-dashboards.md#a-dropdown-menu-dashchooser)
+- [Lesson 6.1: A dropdown menu with `Selectable`](../robot-code/06b-dashboards.md#a-dropdown-menu-selectable)
 
 ## Walkthrough
 
@@ -133,11 +133,11 @@ public Command driveAndIntake() {
 !!! tip "Write autos as named methods"
     Build each routine in its own method, like `scoreAndBackUp()`. Each call makes a **fresh** command object. Reusing one command object in two routines causes an error, because a command can only belong to one composition.
 
-### Let the drive team choose: DashChooser
-Different match strategies need different autos. A `DashChooser` ([Lesson 6.1](../robot-code/06b-dashboards.md#a-dropdown-menu-dashchooser)) puts a dropdown menu in Elastic:
+### Let the drive team choose: Selectable
+Different match strategies need different autos. A `Selectable` ([Lesson 6.1](../robot-code/06b-dashboards.md#a-dropdown-menu-selectable)) puts a dropdown menu in Elastic:
 
 ```java
-private final DashChooser<Command> autoChooser = new DashChooser<>("Auto");
+private final Selectable<Command> autoChooser = new Selectable<>();
 
 public RobotContainer() {
     // ...subsystems and default commands...
@@ -146,6 +146,7 @@ public RobotContainer() {
     autoChooser.add("Drive forward 2 m", drivetrain.driveDistance(2.0, 0.5));
     autoChooser.add("Score and back up", scoreAndBackUp());
     autoChooser.add("Drive and intake", driveAndIntake());
+    Tunables.publish("Auto", autoChooser);   // shows up as /Tunables/Auto
 
     configureBindings();
 }
@@ -155,7 +156,7 @@ public Command getAutonomousCommand() {
 }
 ```
 
-The drive team picks a routine in Elastic (the **Auto** table, shown as a **ComboBox Chooser**) before the match. Make **"Do nothing"** the default, so a robot whose drive team forgot to choose sits still instead of running a routine meant for a different starting spot.
+The drive team picks a routine in Elastic (**Tunables → Auto**, shown as a **ComboBox Chooser**) before the match. Make **"Do nothing"** the default, so a robot whose drive team forgot to choose sits still instead of running a routine meant for a different starting spot.
 
 ### Testing autos
 1. **In simulation first.** Watch the dashboard distance and command names. Does each step start and end when you expect?
@@ -170,7 +171,7 @@ The drive team picks a routine in Elastic (the **Auto** table, shown as a **Comb
 - [ ] Add `driveForSeconds` and run it in simulation (select **Autonomous**, then enable)
 - [ ] Add `driveDistance` and confirm on the dashboard that it stops near the target distance
 - [ ] Build `scoreAndBackUp()` and watch each step on the scheduler dashboard
-- [ ] Add a `DashChooser` with at least three options, with "Do nothing" as the default
+- [ ] Add a `Selectable` with at least three options, with "Do nothing" as the default
 - [ ] Build a routine that uses `deadline` to run the intake while driving
 - [ ] Challenge: write `turnDegrees(double degrees)` using the gyro from [Lesson 8](../robot-code/08-sensors.md), and use it to drive a square
 

@@ -146,7 +146,7 @@
 <p>Add the imports <code>CommandScheduler</code> and <code>SmartDashboard</code> if VS Code underlines them (click the lightbulb).</p>
 <div class="admonition info">
 <p class="admonition-title">Why <code>SmartDashboard</code> here?</p>
-<p>The scheduler isn't a single number. It's a <strong>Sendable</strong>, a WPILib object that describes itself to the dashboard. In 2026, Sendables still go on the dashboard with <code>SmartDashboard.putData</code>. Plain numbers and booleans always use <code>DashTable</code> (<a href="../robot-code/06b-dashboards.html#what-still-uses-smartdashboardputdata-in-2026">Lesson 6.1</a>).</p>
+<p>The scheduler isn't a single number. It's a <strong>Sendable</strong>, a WPILib object that describes itself to the dashboard. In 2026, Sendables still go on the dashboard with <code>SmartDashboard.putData</code>. Plain values always use the course's <code>Telemetry</code> library (<a href="../robot-code/06b-dashboards.html#what-still-uses-smartdashboardputdata-in-2026">Lesson 6.1</a>).</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title"><code>rightTrigger()</code> vs. <code>getRightTriggerAxis()</code></p>

@@ -5,7 +5,7 @@ In Lab 1 the motor spun, but you couldn't see how fast, or how much current it p
 
 In this lab you'll:
 
-- add a small helper class, `DashTable`, that sends values over **NetworkTables 4**
+- add the course's **telemetry library**, which sends values over **NetworkTables 4** using WPILib 2027's API
 - send the motor's speed, current, and output to **Elastic**
 - build an Elastic layout with graphs
 - change the motor's speed **from the dashboard**, without redeploying
@@ -19,140 +19,41 @@ In this lab you'll:
 
 ## Walkthrough
 
-### Step 1: Add `DashTable`
-1. In VS Code, right-click the `frc/robot` folder (the one with `Robot.java`), choose **New File**, and name it `DashTable.java`.
-2. Type in this class. It's the same one from [Lesson 6.1](../robot-code/06b-dashboards.md#a-helper-dashtable).
+### Step 1: Add the telemetry library
+The course has a small library for dashboards, in a folder called `telemetry`. It's a 2026 copy of the **Telemetry** and **Tunables** APIs that WPILib adds in 2027, with the same names, so everything you write in these labs already works the 2027 way ([Lesson 6.1](../robot-code/06b-dashboards.md#the-courses-telemetry-library-2027s-api-today)).
 
-```java
-package frc.robot;
+| File | What it's for |
+|---|---|
+| `Telemetry.java` | Where you start: `Telemetry.getTable("Brushless")` |
+| `TelemetryTable.java` | One folder of values: `table.log("Current (A)", amps)` |
+| `Tunables.java` | Numbers you change from the dashboard: `Tunables.addDouble(...)` |
+| `TunableDouble.java` | One tunable number: `speed.get()` |
+| `Selectable.java` | A dropdown menu (you'll use it in Lab 7) |
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.DoubleSupplier;
+You don't type these in. Copy them:
 
-import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.DoubleEntry;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringPublisher;
+1. In VS Code, right-click the `frc/robot` folder (the one with `Robot.java`), choose **New Folder**, and name it `telemetry`.
+2. Open the [**telemetry** folder on GitHub](https://github.com/Robojacks/frc-course/tree/main/library/telemetry).
+3. For each of the five files: click it, click the **Copy raw file** button, then in VS Code right-click your `telemetry` folder → **New File**, give it the **same name**, and paste.
+4. Check that each file's first line is `package frc.robot.telemetry;`.
 
-/**
- * One folder ("table") of values on the dashboard, sent with NetworkTables 4.
- *
- * <p>Each subsystem makes its own DashTable, named after the subsystem. Every value it logs
- * shows up in Elastic inside that folder. For example:
- *
- * <pre>
- *   DashTable dash = new DashTable("Wheel");
- *   dash.log("Position (rot)", 3.4);   // shows up in Elastic as /Wheel/Position (rot)
- * </pre>
- *
- * <p>In WPILib 2027, this class is replaced by the built-in Telemetry and Tunables APIs:
- * {@code new DashTable("Wheel")} becomes {@code Telemetry.getTable("Wheel")}, and
- * {@code tunable(...)} becomes {@code Tunables.addDouble(...)}.
- */
-public class DashTable {
-  // The NetworkTables folder this DashTable writes into, like /Wheel
-  private final NetworkTable m_table;
-
-  // One publisher per value, remembered by name so it's only created once.
-  // A Map is a lookup table: give it a key (the value's name), get back its publisher.
-  private final Map<String, DoublePublisher> m_numbers = new HashMap<>();
-  private final Map<String, BooleanPublisher> m_booleans = new HashMap<>();
-  private final Map<String, StringPublisher> m_strings = new HashMap<>();
-
-  // Tunable numbers use entries, which can both send a value AND read back changes from the dashboard
-  private final Map<String, DoubleEntry> m_tunables = new HashMap<>();
-
-  /**
-   * Creates a folder of dashboard values.
-   *
-   * @param tableName the folder's name in Elastic, usually the subsystem's name (like "Wheel")
-   */
-  public DashTable(String tableName) {
-    // getDefault() is the robot's one NetworkTables instance; getTable() picks the folder
-    m_table = NetworkTableInstance.getDefault().getTable(tableName);
-  }
-
-  /**
-   * Sends a number to the dashboard. Call it every loop (for example, in periodic()).
-   *
-   * @param key the value's name in Elastic. Put units in it, like "Height (m)".
-   * @param value the number to show
-   */
-  public void log(String key, double value) {
-    // computeIfAbsent: "find the publisher for this key; if there isn't one yet, make it
-    // with this code and remember it." So the first call creates the publisher,
-    // and every later call just reuses it and sends the new value.
-    m_numbers.computeIfAbsent(key, k -> m_table.getDoubleTopic(k).publish()).set(value);
-  }
-
-  /**
-   * Sends true or false to the dashboard. Show it as a Boolean Box in Elastic.
-   *
-   * @param key the value's name in Elastic, like "At Goal"
-   * @param value true or false
-   */
-  public void log(String key, boolean value) {
-    // Same pattern as the number version, with a BooleanPublisher
-    m_booleans.computeIfAbsent(key, k -> m_table.getBooleanTopic(k).publish()).set(value);
-  }
-
-  /**
-   * Sends text to the dashboard. Show it as a Text Display in Elastic.
-   *
-   * @param key the value's name in Elastic, like "Command"
-   * @param value the text to show
-   */
-  public void log(String key, String value) {
-    // Same pattern again, with a StringPublisher
-    m_strings.computeIfAbsent(key, k -> m_table.getStringTopic(k).publish()).set(value);
-  }
-
-  /**
-   * Makes a number you can change from the dashboard while the robot runs, like a PID gain.
-   *
-   * <p>Call this ONCE, when you create a field, and keep what it returns. Then call
-   * {@code getAsDouble()} on it whenever you need the current value.
-   *
-   * <p>The number goes back to defaultValue every time the robot code starts, so dashboard
-   * changes are NOT saved. When you find a good value, copy it into Constants.java.
-   *
-   * @param key the number's name in Elastic, like "kP"
-   * @param defaultValue the starting value, usually from Constants
-   * @return something you can ask for the current value at any time, with getAsDouble()
-   */
-  public DoubleSupplier tunable(String key, double defaultValue) {
-    DoubleEntry entry = m_tunables.computeIfAbsent(key, k -> {
-      // An entry is a publisher and a subscriber in one: it sends values and reads changes
-      DoubleEntry newEntry = m_table.getDoubleTopic(k).getEntry(defaultValue);
-      newEntry.set(defaultValue);   // put the starting value on the dashboard
-      return newEntry;
-    });
-    // entry::get is a method reference: "call entry.get() whenever someone asks for the value"
-    return entry::get;
-  }
-}
-```
-
-!!! tip "You'll use this in every lab"
-    `DashTable` is all you need for dashboards from now on. When the team moves to WPILib 2027, `DashTable` becomes the new `TelemetryTable`, and `tunable` becomes `Tunables.addDouble` ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).
+Then open `TelemetryTable.java` and read it. Every line is commented, and it uses exactly the publishers from [Lesson 6.1](../robot-code/06b-dashboards.md#publishing-a-value).
 
 ### Step 2: Send the motor's values
 Open `SpinBrushlessMotorSubsystem.java`.
 
-**1. Import `DashTable`** with the other imports:
+**1. Import the library** with the other imports:
 
 ```java
-import frc.robot.DashTable;
+import frc.robot.telemetry.Telemetry;
+import frc.robot.telemetry.TelemetryTable;
 ```
 
 **2. Add a field** below the motor:
 
 ```java
-  // Everything this subsystem sends shows up under "Brushless" on the dashboard
-  private final DashTable m_dash = new DashTable("Brushless");
+  // Everything this subsystem sends shows up in /Telemetry/Brushless on the dashboard
+  private final TelemetryTable m_telemetry = Telemetry.getTable("Brushless");
 ```
 
 **3. Add a `periodic()` method** at the bottom of the class, before the last `}`:
@@ -161,13 +62,13 @@ import frc.robot.DashTable;
   @Override
   public void periodic() {
     // Runs every 20 ms, enabled or not
-    m_dash.log("Velocity (RPM)", m_brushlessMotor.getEncoder().getVelocity());
-    m_dash.log("Current (A)", m_brushlessMotor.getOutputCurrent());
-    m_dash.log("Applied Output", m_brushlessMotor.getAppliedOutput());
-    m_dash.log("Temperature (C)", m_brushlessMotor.getMotorTemperature());
+    m_telemetry.log("Velocity (RPM)", m_brushlessMotor.getEncoder().getVelocity());
+    m_telemetry.log("Current (A)", m_brushlessMotor.getOutputCurrent());
+    m_telemetry.log("Applied Output", m_brushlessMotor.getAppliedOutput());
+    m_telemetry.log("Temperature (C)", m_brushlessMotor.getMotorTemperature());
 
     Command running = getCurrentCommand();
-    m_dash.log("Command", running == null ? "none" : running.getName());
+    m_telemetry.log("Command", running == null ? "none" : running.getName());
   }
 ```
 
@@ -192,7 +93,7 @@ If it stays red ("Network Tables: Disconnected"), check that the Driver Station 
 
 ### Step 4: Build a layout
 1. Make a new tab and name it **Test Bed**.
-2. Open Elastic's list of topics and find the **Brushless** table.
+2. Open Elastic's list of topics, then **Telemetry → Brushless**.
 3. Drag these onto the grid:
 
 | Value | Show it as | Why |
@@ -219,18 +120,19 @@ That jump in current at startup is why current limits matter: starting a motor t
 ### Step 5: Change the speed from the dashboard
 Right now the speed comes from `Constants`, so changing it means redeploying. Make it **tunable** instead.
 
-**1. In the subsystem**, add a field below `m_dash`:
+**1. In the subsystem**, add a field below `m_telemetry`:
 
 ```java
   // A speed you can change in Elastic. It starts at the value in Constants.
-  private final DoubleSupplier m_tunableSpeed =
-      m_dash.tunable("Tunable Speed", Constants.kBrushlessConstants.BrushlessMotorSpeed);
+  private final TunableDouble m_tunableSpeed =
+      Tunables.addDouble("Brushless/Tunable Speed", Constants.kBrushlessConstants.BrushlessMotorSpeed);
 ```
 
 And import it at the top:
 
 ```java
-import java.util.function.DoubleSupplier;
+import frc.robot.telemetry.TunableDouble;
+import frc.robot.telemetry.Tunables;
 ```
 
 **2. Add a command** below `spinMotorCommand`:
@@ -239,8 +141,8 @@ import java.util.function.DoubleSupplier;
   /** Spins the motor at whatever speed is on the dashboard, reading it every loop. */
   public Command spinAtTunableSpeedCommand() {
     return runEnd(
-        () -> setMotorSpeed(m_tunableSpeed.getAsDouble()),   // every loop while it runs
-        () -> setMotorSpeed(0.0)                              // once, when it ends
+        () -> setMotorSpeed(m_tunableSpeed.get()),   // every loop while it runs
+        () -> setMotorSpeed(0.0)                      // once, when it ends
     ).withName("Spin Tunable");
   }
 ```
@@ -254,7 +156,7 @@ Notice this uses `runEnd`, not `startEnd`. `startEnd` sets the speed **once**, s
   m_controller.b().whileTrue(m_spinBrushlessMotorSubsystem.spinAtTunableSpeedCommand());
 ```
 
-**4. Try it.** Deploy. In Elastic, drag **Tunable Speed** onto your tab as a **Number Slider** (or a Text Display you can edit). Hold B, then change the speed. The motor follows right away.
+**4. Try it.** Deploy. In Elastic, drag **Tunable Speed** (in **Tunables → Brushless**) onto your tab as a **Number Slider** (or a Text Display you can edit). Hold B, then change the speed. The motor follows right away.
 
 !!! warning "Keep tunable speeds small"
     A tunable lets anyone at the laptop change how the robot moves while it's enabled. Keep the test bed clear, and don't go above 1.0 or below -1.0. In real robot code, clamp tunable values with `MathUtil.clamp(value, -1, 1)`.
@@ -267,7 +169,7 @@ Notice this uses `runEnd`, not `startEnd`. `startEnd` sets the speed **once**, s
 
 ```bash
 git add .
-git commit -m "Lab 1.1: DashTable, Elastic layout, tunable speed"
+git commit -m "Lab 1.1: telemetry library, Elastic layout, tunable speed"
 ```
 
 Your layout file is now in Git, so a teammate can load the same dashboard.
@@ -277,10 +179,10 @@ Your layout file is now in Git, so a teammate can load the same dashboard.
 | Problem | Likely cause |
 |---|---|
 | Elastic stays red and says disconnected | The Driver Station isn't connected, or the IP mode isn't **Driver Station**. In simulation, use **localhost**. |
-| Connected, but there's no **Brushless** table | The new code isn't deployed, or `periodic()` is missing `@Override` or has a typo in its name |
+| Connected, but there's no **Telemetry → Brushless** folder | The new code isn't deployed, or `periodic()` is missing `@Override` or has a typo in its name |
 | Values show up but never change | `periodic()` isn't being called: check that the subsystem is created in `RobotContainer` |
 | Changing **Tunable Speed** does nothing | The command uses `startEnd` instead of `runEnd`, or B isn't bound |
-| Build error: cannot find symbol `DashTable` | `DashTable.java` is in the wrong folder, or its first line isn't `package frc.robot;` |
+| Build error: cannot find symbol `Telemetry` | The `telemetry` folder isn't inside `frc/robot`, a file is missing, or the import is missing |
 
 !!! example "Finished code"
     Stuck, or missed a lab? [**lab01b-dashboard**](https://github.com/Robojacks/frc-course/tree/main/examples/lab01b-dashboard) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
@@ -290,12 +192,12 @@ Your layout file is now in Git, so a teammate can load the same dashboard.
 - [ ] Hold A and watch the startup current jump. What's the highest number you see?
 - [ ] Add an **X** binding that spins at 1.0. Compare the startup current to 0.5.
 - [ ] Use the B button and **Tunable Speed** to find the slowest speed where the motor still turns reliably
-- [ ] Add `m_dash.log("At Speed", ...)` that's `true` when the velocity is above 2000 RPM. Show it as a **Boolean Box**.
+- [ ] Add `m_telemetry.log("At Speed", ...)` that's `true` when the velocity is above 2000 RPM. Show it as a **Boolean Box**.
 - [ ] Run the code in **simulation**, connect Elastic with **localhost**, and find the same values. Which ones still change in simulation, and which don't?
 
 ## Check yourself
-??? question "Where does `m_dash.log(\"Current (A)\", ...)` show up in Elastic?"
-    In the **Brushless** table, as `/Brushless/Current (A)`.
+??? question "Where does `m_telemetry.log(\"Current (A)\", ...)` show up in Elastic?"
+    In **Telemetry → Brushless**, as `/Telemetry/Brushless/Current (A)`.
 
 ??? question "Why does `spinAtTunableSpeedCommand` use `runEnd` instead of `startEnd`?"
     `runEnd` runs its first action every loop, so it reads the dashboard value 50 times a second. `startEnd` only sets the speed once, when the command starts.
@@ -306,5 +208,5 @@ Your layout file is now in Git, so a teammate can load the same dashboard.
 ??? question "Why does the current jump when the motor starts?"
     A motor that isn't moving yet pulls much more current than one that's already spinning. The current limit keeps that jump from tripping the breaker or browning out the robot.
 
-??? question "What will `DashTable` turn into when the team moves to WPILib 2027?"
-    `Telemetry.getTable(...)` for logging values, and `Tunables.addDouble(...)` for tunable numbers.
+??? question "What changes in this lab's code when the team moves to WPILib 2027?"
+    Only the imports. Delete the `telemetry` folder and import WPILib's `Telemetry`, `TelemetryTable`, `Tunables`, and `TunableDouble` instead. The rest stays the same.

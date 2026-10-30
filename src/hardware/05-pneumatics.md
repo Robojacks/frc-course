@@ -124,12 +124,12 @@ The compressor runs automatically by default whenever the robot is enabled and t
 
 ```java
 private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
-private final DashTable dash = new DashTable("Pneumatics");   // Lesson 6.1
+private final TelemetryTable telemetry = Telemetry.getTable("Pneumatics");   // Lesson 6.1
 
 @Override
 public void periodic() {
-    dash.log("Compressor Running", compressor.isEnabled());
-    dash.log("Pressure (psi)", compressor.getPressure());
+    telemetry.log("Compressor Running", compressor.isEnabled());
+    telemetry.log("Pressure (psi)", compressor.getPressure());
 }
 ```
 

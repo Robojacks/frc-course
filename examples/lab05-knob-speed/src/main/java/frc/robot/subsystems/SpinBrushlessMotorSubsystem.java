@@ -17,7 +17,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
-import frc.robot.DashTable;
+import frc.robot.telemetry.Telemetry;
+import frc.robot.telemetry.TelemetryTable;
+import frc.robot.telemetry.TunableDouble;
+import frc.robot.telemetry.Tunables;
 
 public class SpinBrushlessMotorSubsystem extends SubsystemBase {
   // Create the motor controller: CAN ID 8, brushless motor.
@@ -29,12 +32,12 @@ public class SpinBrushlessMotorSubsystem extends SubsystemBase {
   private final DigitalInput m_limitSwitch =
       new DigitalInput(Constants.kSensorConstants.LimitSwitchDio);
 
-  // Everything this subsystem sends shows up under "Brushless" on the dashboard
-  private final DashTable m_dash = new DashTable("Brushless");
+  // Everything this subsystem sends shows up in /Telemetry/Brushless on the dashboard
+  private final TelemetryTable m_telemetry = Telemetry.getTable("Brushless");
 
   // A speed you can change in Elastic. It starts at the value in Constants.
-  private final DoubleSupplier m_tunableSpeed =
-      m_dash.tunable("Tunable Speed", Constants.kBrushlessConstants.BrushlessMotorSpeed);
+  private final TunableDouble m_tunableSpeed =
+      Tunables.addDouble("Brushless/Tunable Speed", Constants.kBrushlessConstants.BrushlessMotorSpeed);
 
   public SpinBrushlessMotorSubsystem() {
     // Collect the settings we want in a config object
@@ -103,21 +106,21 @@ public class SpinBrushlessMotorSubsystem extends SubsystemBase {
   /** Spins the motor at whatever speed is on the dashboard, reading it every loop. */
   public Command spinAtTunableSpeedCommand() {
     return runEnd(
-        () -> setMotorSpeed(m_tunableSpeed.getAsDouble()),   // every loop while it runs
-        () -> setMotorSpeed(0.0)                              // once, when it ends
+        () -> setMotorSpeed(m_tunableSpeed.get()),   // every loop while it runs
+        () -> setMotorSpeed(0.0)                      // once, when it ends
     ).withName("Spin Tunable");
   }
 
   @Override
   public void periodic() {
     // Runs every 20 ms, enabled or not
-    m_dash.log("Velocity (RPM)", m_brushlessMotor.getEncoder().getVelocity());
-    m_dash.log("Current (A)", m_brushlessMotor.getOutputCurrent());
-    m_dash.log("Applied Output", m_brushlessMotor.getAppliedOutput());
-    m_dash.log("Temperature (C)", m_brushlessMotor.getMotorTemperature());
+    m_telemetry.log("Velocity (RPM)", m_brushlessMotor.getEncoder().getVelocity());
+    m_telemetry.log("Current (A)", m_brushlessMotor.getOutputCurrent());
+    m_telemetry.log("Applied Output", m_brushlessMotor.getAppliedOutput());
+    m_telemetry.log("Temperature (C)", m_brushlessMotor.getMotorTemperature());
 
     Command running = getCurrentCommand();
-    m_dash.log("Command", running == null ? "none" : running.getName());
-    m_dash.log("Limit Pressed", isLimitPressed());
+    m_telemetry.log("Command", running == null ? "none" : running.getName());
+    m_telemetry.log("Limit Pressed", isLimitPressed());
   }
 }

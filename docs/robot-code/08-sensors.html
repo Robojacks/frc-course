@@ -289,12 +289,12 @@ meters per motor rotation = 0.319 / 8 ≈ 0.0399
 <p>WPILib's <a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/java-units.html">Java Units Library</a> goes further, with types like <code>Distance</code> and <code>Angle</code> that make it a compile error to mix them up. Some vendor libraries use it directly.</p>
 <h3 id="check-sensors-before-you-trust-them">Check sensors before you trust them<a class="headerlink" href="#check-sensors-before-you-trust-them" title="Permanent link">#</a></h3>
 <p>Before writing any code that depends on a sensor, put it on the dashboard and check it by hand:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashTable</span><span class="w"> </span><span class="n">dash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashTable</span><span class="p">(</span><span class="s">"Arm"</span><span class="p">);</span><span class="w">   </span><span class="c1">// Lesson 6.1</span>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Arm"</span><span class="p">);</span><span class="w">   </span><span class="c1">// Lesson 6.1</span>
 
 <span class="nd">@Override</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Angle (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getAngleDegrees</span><span class="p">());</span>
-<span class="w">    </span><span class="n">dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Down Switch"</span><span class="p">,</span><span class="w"> </span><span class="n">isArmDown</span><span class="p">());</span>
+<span class="w">    </span><span class="n">telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Angle (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getAngleDegrees</span><span class="p">());</span>
+<span class="w">    </span><span class="n">telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Down Switch"</span><span class="p">,</span><span class="w"> </span><span class="n">isArmDown</span><span class="p">());</span>
 <span class="p">}</span>
 </code></pre></div>
 <ul>

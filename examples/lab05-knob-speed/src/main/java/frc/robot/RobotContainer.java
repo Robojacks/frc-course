@@ -16,6 +16,8 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.SpinBrushlessMotorSubsystem;
+import frc.robot.telemetry.Telemetry;
+import frc.robot.telemetry.TelemetryTable;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -39,7 +41,7 @@ public class RobotContainer {
       Constants.kSensorConstants.KnobTurns,
       0.0);   // offset: added to every reading
 
-  private final DashTable m_knobDash = new DashTable("Knob");
+  private final TelemetryTable m_knobTelemetry = Telemetry.getTable("Knob");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -101,8 +103,8 @@ public class RobotContainer {
 
   /** Called every loop from Robot.robotPeriodic(). */
   public void updateDashboard() {
-    m_knobDash.log("Turns", m_knob.get());
-    m_knobDash.log("Speed", knobToSpeed());
+    m_knobTelemetry.log("Turns", m_knob.get());
+    m_knobTelemetry.log("Speed", knobToSpeed());
   }
 
   /** Turns the knob position into a motor speed from -1 to 1. */

@@ -81,12 +81,13 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.DashTable;
+import frc.robot.telemetry.Telemetry;
+import frc.robot.telemetry.TelemetryTable;
 
 public class Intake extends SubsystemBase {
     private final PWMSparkMax motor = new PWMSparkMax(0);
     private final DigitalInput beamBreak = new DigitalInput(0);
-    private final DashTable dash = new DashTable("Intake");   // Lesson 6.1
+    private final TelemetryTable telemetry = Telemetry.getTable("Intake");   // Lesson 6.1
 
     /** True when a game piece is blocking the beam break sensor. */
     public boolean hasGamePiece() {
@@ -113,8 +114,8 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        dash.log("Has Piece", hasGamePiece());
-        dash.log("Output", motor.get());
+        telemetry.log("Has Piece", hasGamePiece());
+        telemetry.log("Output", motor.get());
     }
 }
 ```

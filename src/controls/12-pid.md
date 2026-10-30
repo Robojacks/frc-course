@@ -205,13 +205,14 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.DashTable;
+import frc.robot.telemetry.Telemetry;
+import frc.robot.telemetry.TelemetryTable;
 
 public class Arm extends SubsystemBase {
     private final PWMSparkMax motor = new PWMSparkMax(1);
     private final Encoder encoder = new Encoder(0, 1);
     private final PIDController pid = new PIDController(0.05, 0.0, 0.002);
-    private final DashTable dash = new DashTable("Arm");   // Lesson 6.1
+    private final TelemetryTable telemetry = Telemetry.getTable("Arm");   // Lesson 6.1
 
     public Arm() {
         encoder.setDistancePerPulse(ArmConstants.DEGREES_PER_PULSE);
@@ -242,10 +243,10 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic() {
-        dash.log("Angle", getAngleDegrees());
-        dash.log("Setpoint", pid.getSetpoint());
-        dash.log("Error", pid.getError());
-        dash.log("Output", motor.get());
+        telemetry.log("Angle", getAngleDegrees());
+        telemetry.log("Setpoint", pid.getSetpoint());
+        telemetry.log("Error", pid.getError());
+        telemetry.log("Output", motor.get());
     }
 }
 ```
@@ -269,17 +270,17 @@ The gains depend on your units. With degrees in and motor percent out, kP = 0.02
     Tune with the robot on blocks or with a low output limit, like the `clamp(..., -0.5, 0.5)` above, and keep a hand near the disable key. A badly tuned arm can slam into its hard stops hard enough to break something.
 
 ### Tuning live from the dashboard
-Rebuilding and redeploying for every gain change is slow. Make the gains **tunable** with `DashTable` ([Lesson 6.1](../robot-code/06b-dashboards.md)), and copy them into the controller every loop:
+Rebuilding and redeploying for every gain change is slow. Make the gains **tunable** with `Tunables` ([Lesson 6.1](../robot-code/06b-dashboards.md)), and copy them into the controller every loop:
 
 ```java
-private final DoubleSupplier kP = dash.tunable("kP", 0.05);
-private final DoubleSupplier kI = dash.tunable("kI", 0.0);
-private final DoubleSupplier kD = dash.tunable("kD", 0.002);
+private final TunableDouble kP = Tunables.addDouble("Arm/kP", 0.05);
+private final TunableDouble kI = Tunables.addDouble("Arm/kI", 0.0);
+private final TunableDouble kD = Tunables.addDouble("Arm/kD", 0.002);
 
 @Override
 public void periodic() {
-    pid.setPID(kP.getAsDouble(), kI.getAsDouble(), kD.getAsDouble());
-    // ...the dash.log lines from above...
+    pid.setPID(kP.get(), kI.get(), kD.get());
+    // ...the telemetry.log lines from above...
 }
 ```
 

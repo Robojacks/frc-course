@@ -3,8 +3,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.function.DoubleSupplier;
-
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -20,7 +18,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.kWheelConstants;
-import frc.robot.DashTable;
+import frc.robot.telemetry.Telemetry;
+import frc.robot.telemetry.TelemetryTable;
+import frc.robot.telemetry.TunableDouble;
+import frc.robot.telemetry.Tunables;
 
 public class WheelSubsystem extends SubsystemBase {
     private final SparkMax m_motor =
@@ -38,13 +39,13 @@ public class WheelSubsystem extends SubsystemBase {
     private double m_target = 0.0;     // where the current attempt is trying to stop
     private double m_lastVolts = 0.0;  // for the dashboard
 
-    private final DashTable m_dash = new DashTable("Wheel");
+    private final TelemetryTable m_telemetry = Telemetry.getTable("Wheel");
 
     // Gains you can change in Elastic. They start at the values in Constants.
-    private final DoubleSupplier m_kP = m_dash.tunable("kP", kWheelConstants.P);
-    private final DoubleSupplier m_kI = m_dash.tunable("kI", kWheelConstants.I);
-    private final DoubleSupplier m_kD = m_dash.tunable("kD", kWheelConstants.D);
-    private final DoubleSupplier m_iZone = m_dash.tunable("IZone", kWheelConstants.IZone);
+    private final TunableDouble m_kP = Tunables.addDouble("Wheel/kP", kWheelConstants.P);
+    private final TunableDouble m_kI = Tunables.addDouble("Wheel/kI", kWheelConstants.I);
+    private final TunableDouble m_kD = Tunables.addDouble("Wheel/kD", kWheelConstants.D);
+    private final TunableDouble m_iZone = Tunables.addDouble("Wheel/IZone", kWheelConstants.IZone);
 
     public WheelSubsystem() {
         SparkMaxConfig config = new SparkMaxConfig();
@@ -119,16 +120,16 @@ public class WheelSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // Use whatever gains are on the dashboard right now
-        m_pid.setPID(m_kP.getAsDouble(), m_kI.getAsDouble(), m_kD.getAsDouble());
-        m_pid.setIZone(m_iZone.getAsDouble());
+        m_pid.setPID(m_kP.get(), m_kI.get(), m_kD.get());
+        m_pid.setIZone(m_iZone.get());
 
-        m_dash.log("Position (rot)", getRotations());
-        m_dash.log("Target (rot)", m_target);
-        m_dash.log("Error (rot)", m_target - getRotations());
-        m_dash.log("Velocity (rot per s)", getRps());
-        m_dash.log("Output (V)", m_lastVolts);
-        m_dash.log("Current (A)", m_motor.getOutputCurrent());
-        m_dash.log("Raw Counts", m_encoder.getRaw());
-        m_dash.log("Cycles", m_encoder.get());
+        m_telemetry.log("Position (rot)", getRotations());
+        m_telemetry.log("Target (rot)", m_target);
+        m_telemetry.log("Error (rot)", m_target - getRotations());
+        m_telemetry.log("Velocity (rot per s)", getRps());
+        m_telemetry.log("Output (V)", m_lastVolts);
+        m_telemetry.log("Current (A)", m_motor.getOutputCurrent());
+        m_telemetry.log("Raw Counts", m_encoder.getRaw());
+        m_telemetry.log("Cycles", m_encoder.get());
     }
 }

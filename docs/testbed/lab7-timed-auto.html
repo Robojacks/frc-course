@@ -44,7 +44,7 @@
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html">Command Compositions</a></li>
-<li><a href="../robot-code/06b-dashboards.html#a-dropdown-menu-dashchooser">Lesson 6.1: A dropdown menu with <code>DashChooser</code></a></li>
+<li><a href="../robot-code/06b-dashboards.html#a-dropdown-menu-selectable">Lesson 6.1: A dropdown menu with <code>Selectable</code></a></li>
 </ul>
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
 <div class="admonition danger">
@@ -132,96 +132,25 @@
 <p>Nobody knows how long a 90° spin takes. Start with 0.5 seconds and adjust it until one turn looks like 90°. That guessing is the point of this lab.</p>
 </div>
 <h3 id="step-3-let-the-drive-team-pick">Step 3: Let the drive team pick<a class="headerlink" href="#step-3-let-the-drive-team-pick" title="Permanent link">#</a></h3>
-<p>A <strong><code>DashChooser</code></strong> puts a dropdown menu in Elastic, sent over NetworkTables like everything else (<a href="../robot-code/06b-dashboards.html#a-dropdown-menu-dashchooser">Lesson 6.1</a>).</p>
-<p>Create <code>DashChooser.java</code> in the <code>frc/robot</code> folder, next to <code>DashTable.java</code>, and type in this class:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.EnumSet</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.LinkedHashMap</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTable</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTableEvent</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTableInstance</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringArrayPublisher</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringPublisher</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringSubscriber</span><span class="p">;</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * A dropdown menu on the dashboard, sent with NetworkTables 4.</span>
-<span class="cm"> * Elastic shows it as a ComboBox Chooser. It works like WPILib 2027's Selectable.</span>
-<span class="cm"> */</span>
-<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DashChooser</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_options</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">LinkedHashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">m_defaultName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">""</span><span class="p">;</span>
-
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringPublisher</span><span class="w"> </span><span class="n">m_type</span><span class="p">;</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringArrayPublisher</span><span class="w"> </span><span class="n">m_optionNames</span><span class="p">;</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringPublisher</span><span class="w"> </span><span class="n">m_default</span><span class="p">;</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringPublisher</span><span class="w"> </span><span class="n">m_active</span><span class="p">;</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">StringSubscriber</span><span class="w"> </span><span class="n">m_selected</span><span class="p">;</span>
-
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">DashChooser</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">NetworkTableInstance</span><span class="w"> </span><span class="n">nt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NetworkTableInstance</span><span class="p">.</span><span class="na">getDefault</span><span class="p">();</span>
-<span class="w">    </span><span class="n">NetworkTable</span><span class="w"> </span><span class="n">table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">nt</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="n">tableName</span><span class="p">);</span>
-
-<span class="w">    </span><span class="c1">// ".type" tells Elastic which widget to show</span>
-<span class="w">    </span><span class="n">m_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="s">".type"</span><span class="p">).</span><span class="na">publish</span><span class="p">();</span>
-<span class="w">    </span><span class="n">m_type</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="s">"String Chooser"</span><span class="p">);</span>
-
-<span class="w">    </span><span class="n">m_optionNames</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringArrayTopic</span><span class="p">(</span><span class="s">"options"</span><span class="p">).</span><span class="na">publish</span><span class="p">();</span>
-<span class="w">    </span><span class="n">m_default</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="s">"default"</span><span class="p">).</span><span class="na">publish</span><span class="p">();</span>
-<span class="w">    </span><span class="n">m_active</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="s">"active"</span><span class="p">).</span><span class="na">publish</span><span class="p">();</span>
-
-<span class="w">    </span><span class="c1">// The dashboard writes the drive team's pick to "selected". The robot only reads it.</span>
-<span class="w">    </span><span class="n">m_selected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="s">"selected"</span><span class="p">).</span><span class="na">subscribe</span><span class="p">(</span><span class="s">""</span><span class="p">);</span>
-
-<span class="w">    </span><span class="c1">// Whenever the pick changes, report back which option the robot will really use</span>
-<span class="w">    </span><span class="n">nt</span><span class="p">.</span><span class="na">addListener</span><span class="p">(</span><span class="n">m_selected</span><span class="p">,</span><span class="w"> </span><span class="n">EnumSet</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">NetworkTableEvent</span><span class="p">.</span><span class="na">Kind</span><span class="p">.</span><span class="na">kValueAll</span><span class="p">),</span>
-<span class="w">        </span><span class="n">event</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_active</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">selectedName</span><span class="p">()));</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="cm">/** Adds an option and makes it the default: the one used if nobody picks. */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addDefault</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_defaultName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">name</span><span class="p">;</span>
-<span class="w">    </span><span class="n">m_default</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">name</span><span class="p">);</span>
-<span class="w">    </span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">);</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="cm">/** Adds an option to the menu. */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_options</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">);</span>
-<span class="w">    </span><span class="n">m_optionNames</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">m_options</span><span class="p">.</span><span class="na">keySet</span><span class="p">().</span><span class="na">toArray</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">String</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">));</span>
-<span class="w">    </span><span class="n">m_active</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">selectedName</span><span class="p">());</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="cm">/** The value for the option picked on the dashboard, or the default if nothing valid is picked. */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">T</span><span class="w"> </span><span class="nf">getSelected</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_options</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">selectedName</span><span class="p">());</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">selectedName</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_selected</span><span class="p">.</span><span class="na">get</span><span class="p">();</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_options</span><span class="p">.</span><span class="na">containsKey</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">m_defaultName</span><span class="p">;</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
+<p>A <strong><code>Selectable</code></strong> puts a dropdown menu in Elastic, sent over NetworkTables like everything else. It's part of the course's <code>telemetry</code> folder you copied in Lab 2, and it's the same as WPILib 2027's <code>Selectable</code> (<a href="../robot-code/06b-dashboards.html#a-dropdown-menu-selectable">Lesson 6.1</a>).</p>
+<p>Add a field to <code>RobotContainer</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;&gt;</span><span class="p">();</span>
 </code></pre></div>
-<p>Then add a field to <code>RobotContainer</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashChooser</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashChooser</span><span class="o">&lt;&gt;</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">);</span>
-</code></pre></div>
-<p>In the constructor, after <code>configureBindings()</code>:</p>
+<p>In the constructor, after <code>configureBindings()</code>, add the options and put the menu on the dashboard:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">addDefault</span><span class="p">(</span><span class="s">"Do nothing"</span><span class="p">,</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">none</span><span class="p">());</span>
 <span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Drive forward"</span><span class="p">,</span><span class="w"> </span><span class="n">driveForwardAuto</span><span class="p">());</span>
 <span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Square"</span><span class="p">,</span><span class="w"> </span><span class="n">squareAuto</span><span class="p">());</span>
+<span class="w">    </span><span class="n">Tunables</span><span class="p">.</span><span class="na">publish</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">,</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="p">);</span><span class="w">   </span><span class="c1">// shows up as /Tunables/Auto</span>
 </code></pre></div>
 <p>And make <code>getAutonomousCommand()</code> return the choice:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">getSelected</span><span class="p">();</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
+<p>Import <code>frc.robot.telemetry.Selectable</code> and <code>frc.robot.telemetry.Tunables</code>.</p>
 <div class="admonition info">
 <p class="admonition-title">Why not <code>SendableChooser</code>?</p>
-<p>You'll see <code>SendableChooser</code> in older code and examples. It only reaches the dashboard through <code>SmartDashboard.putData</code>, which is going away in WPILib 2027. <code>DashChooser</code> uses the same method names as 2027's <code>Selectable</code> (<code>addDefault</code>, <code>add</code>, <code>getSelected</code>), so moving to 2027 is a rename (<a href="../robot-code/06b-dashboards.html#moving-to-2027">Lesson 6.1</a>).</p>
+<p>You'll see <code>SendableChooser</code> in older code and examples. It only reaches the dashboard through <code>SmartDashboard.putData</code>, which is going away in WPILib 2027. <code>Selectable</code> is its 2027 replacement, and the same lines of code work in 2027 (<a href="../robot-code/06b-dashboards.html#moving-to-2027">Lesson 6.1</a>).</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Why \"Do nothing\" is the default</p>
@@ -229,7 +158,7 @@
 </div>
 <h3 id="step-4-run-it">Step 4: Run it<a class="headerlink" href="#step-4-run-it" title="Permanent link">#</a></h3>
 <ol>
-<li>Deploy. In Elastic, find the <strong>Auto</strong> table, drag it onto your tab (it shows up as a <strong>ComboBox Chooser</strong>), and pick <strong>Drive forward</strong>.</li>
+<li>Deploy. In Elastic, find <strong>Tunables → Auto</strong>, drag it onto your tab (it shows up as a <strong>ComboBox Chooser</strong>), and pick <strong>Drive forward</strong>.</li>
 <li>On blocks first: in the Driver Station, select <strong>Autonomous</strong>, say <strong>"Enabling!"</strong>, and enable. The wheels run for 2 seconds and stop.</li>
 <li>On the floor: put tape on the floor at the robot's front edge, and run it again. Mark where it stops.</li>
 <li>Run <strong>Square</strong> on blocks, then on the floor. Adjust the spin time in <code>squareSide()</code> until it looks close to a square.</li>

@@ -13,10 +13,10 @@ Both directions go through **NetworkTables**, WPILib's system for sharing data b
 
     - The **SmartDashboard and Shuffleboard apps** are removed in WPILib 2027. WPILib's advice is to use **Elastic** as the driver dashboard and **AdvantageScope** for debugging.
     - In the 2027 previews, the **`SmartDashboard` class itself** is replaced by new **Telemetry** and **Tunables** APIs, and `SendableChooser` is replaced by **`Selectable`**.
-    - **`SendableChooser`** only reaches the dashboard through `SmartDashboard.putData`, so this course uses its own NetworkTables chooser, `DashChooser`, instead.
+    - **`SendableChooser`** only reaches the dashboard through `SmartDashboard.putData`, so this course uses `Selectable` instead.
     - **NetworkTables 4 stays.** The new 2027 APIs are built on top of it.
 
-    So this course writes **2026** code with NetworkTables 4 directly, in a way that maps one-to-one onto the 2027 APIs. The end of this lesson shows exactly how.
+    So this course uses a small **2026 copy of the 2027 Telemetry and Tunables APIs**. The code you write now already looks like 2027 code.
 
 ## Read this
 - [What is NetworkTables](https://docs.wpilib.org/en/stable/docs/software/networktables/networktables-intro.html)
@@ -106,259 +106,106 @@ public void periodic() {
 
 When the robot restarts, the value goes back to `ArmConstants.kP`. **Dashboard edits are not saved.** When you find a good number, copy it into `Constants.java`.
 
-### A helper: `DashTable`
-Writing a field for every single value gets long. The labs use a small helper class, `DashTable`, that makes and keeps the publishers for you. You'll add it to the TestBed project in [Lab 1.1](../testbed/lab1b-dashboard.md).
+### The course's telemetry library: 2027's API, today
+Writing a separate publisher field for every value gets long. WPILib 2027 fixes that with two new APIs, **Telemetry** (for sending values) and **Tunables** (for numbers and menus you change from the dashboard). They're built on NetworkTables 4.
+
+This course uses a small **2026 copy** of those APIs, in a folder called [`telemetry`](https://github.com/Robojacks/frc-course/tree/main/library/telemetry). It has the **same class names, the same method names, and publishes to the same places** in NetworkTables as WPILib 2027. So the code you write now is already 2027 code: when the team moves to 2027, you delete the folder and change the imports.
+
+You don't type it in. In [Lab 1.1](../testbed/lab1b-dashboard.md) you'll copy the folder into your project.
+
+| Class | What it's for | Example |
+|---|---|---|
+| `Telemetry` | Where you start: get a table, or log a one-off value | `Telemetry.getTable("Arm")` |
+| `TelemetryTable` | One folder of values, usually one per subsystem | `telemetry.log("Angle (deg)", angle)` |
+| `Tunables` | Make a number you can change from the dashboard, or publish a menu | `Tunables.addDouble("Arm/kP", 0.05)` |
+| `TunableDouble` | A tunable number | `kP.get()` |
+| `Selectable` | A dropdown menu, like the auto chooser | `autoChooser.getSelected()` |
+
+**Using it in a subsystem:**
 
 ```java
-package frc.robot;
+import frc.robot.telemetry.Telemetry;
+import frc.robot.telemetry.TelemetryTable;
+import frc.robot.telemetry.TunableDouble;
+import frc.robot.telemetry.Tunables;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.DoubleSupplier;
+public class Arm extends SubsystemBase {
+    // Everything this subsystem sends goes in /Telemetry/Arm
+    private final TelemetryTable m_telemetry = Telemetry.getTable("Arm");
 
-import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.DoubleEntry;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringPublisher;
+    // A gain you can change in Elastic, at /Tunables/Arm/kP. Starts at the value in Constants.
+    private final TunableDouble m_kP = Tunables.addDouble("Arm/kP", ArmConstants.kP);
 
-/**
- * One folder ("table") of values on the dashboard, sent with NetworkTables 4.
- *
- * <p>Each subsystem makes its own DashTable, named after the subsystem. Every value it logs
- * shows up in Elastic inside that folder. For example:
- *
- * <pre>
- *   DashTable dash = new DashTable("Wheel");
- *   dash.log("Position (rot)", 3.4);   // shows up in Elastic as /Wheel/Position (rot)
- * </pre>
- *
- * <p>In WPILib 2027, this class is replaced by the built-in Telemetry and Tunables APIs:
- * {@code new DashTable("Wheel")} becomes {@code Telemetry.getTable("Wheel")}, and
- * {@code tunable(...)} becomes {@code Tunables.addDouble(...)}.
- */
-public class DashTable {
-  // The NetworkTables folder this DashTable writes into, like /Wheel
-  private final NetworkTable m_table;
+    @Override
+    public void periodic() {
+        m_telemetry.log("Angle (deg)", getAngleDegrees());
+        m_telemetry.log("Target (deg)", m_targetDegrees);
+        m_telemetry.log("Output (V)", m_lastVolts);
+        m_telemetry.log("At Target", atTarget());
 
-  // One publisher per value, remembered by name so it's only created once.
-  // A Map is a lookup table: give it a key (the value's name), get back its publisher.
-  private final Map<String, DoublePublisher> m_numbers = new HashMap<>();
-  private final Map<String, BooleanPublisher> m_booleans = new HashMap<>();
-  private final Map<String, StringPublisher> m_strings = new HashMap<>();
-
-  // Tunable numbers use entries, which can both send a value AND read back changes from the dashboard
-  private final Map<String, DoubleEntry> m_tunables = new HashMap<>();
-
-  /**
-   * Creates a folder of dashboard values.
-   *
-   * @param tableName the folder's name in Elastic, usually the subsystem's name (like "Wheel")
-   */
-  public DashTable(String tableName) {
-    // getDefault() is the robot's one NetworkTables instance; getTable() picks the folder
-    m_table = NetworkTableInstance.getDefault().getTable(tableName);
-  }
-
-  /**
-   * Sends a number to the dashboard. Call it every loop (for example, in periodic()).
-   *
-   * @param key the value's name in Elastic. Put units in it, like "Height (m)".
-   * @param value the number to show
-   */
-  public void log(String key, double value) {
-    // computeIfAbsent: "find the publisher for this key; if there isn't one yet, make it
-    // with this code and remember it." So the first call creates the publisher,
-    // and every later call just reuses it and sends the new value.
-    m_numbers.computeIfAbsent(key, k -> m_table.getDoubleTopic(k).publish()).set(value);
-  }
-
-  /**
-   * Sends true or false to the dashboard. Show it as a Boolean Box in Elastic.
-   *
-   * @param key the value's name in Elastic, like "At Goal"
-   * @param value true or false
-   */
-  public void log(String key, boolean value) {
-    // Same pattern as the number version, with a BooleanPublisher
-    m_booleans.computeIfAbsent(key, k -> m_table.getBooleanTopic(k).publish()).set(value);
-  }
-
-  /**
-   * Sends text to the dashboard. Show it as a Text Display in Elastic.
-   *
-   * @param key the value's name in Elastic, like "Command"
-   * @param value the text to show
-   */
-  public void log(String key, String value) {
-    // Same pattern again, with a StringPublisher
-    m_strings.computeIfAbsent(key, k -> m_table.getStringTopic(k).publish()).set(value);
-  }
-
-  /**
-   * Makes a number you can change from the dashboard while the robot runs, like a PID gain.
-   *
-   * <p>Call this ONCE, when you create a field, and keep what it returns. Then call
-   * {@code getAsDouble()} on it whenever you need the current value.
-   *
-   * <p>The number goes back to defaultValue every time the robot code starts, so dashboard
-   * changes are NOT saved. When you find a good value, copy it into Constants.java.
-   *
-   * @param key the number's name in Elastic, like "kP"
-   * @param defaultValue the starting value, usually from Constants
-   * @return something you can ask for the current value at any time, with getAsDouble()
-   */
-  public DoubleSupplier tunable(String key, double defaultValue) {
-    DoubleEntry entry = m_tunables.computeIfAbsent(key, k -> {
-      // An entry is a publisher and a subscriber in one: it sends values and reads changes
-      DoubleEntry newEntry = m_table.getDoubleTopic(k).getEntry(defaultValue);
-      newEntry.set(defaultValue);   // put the starting value on the dashboard
-      return newEntry;
-    });
-    // entry::get is a method reference: "call entry.get() whenever someone asks for the value"
-    return entry::get;
-  }
+        m_pid.setP(m_kP.get());   // use whatever kP is on the dashboard right now
+    }
 }
 ```
 
-| Code | What it means |
+| Line | What it does |
 |---|---|
-| `Map<String, DoublePublisher>` | A lookup table from each name to its publisher |
-| `computeIfAbsent(key, k -> ...)` | "Get the publisher for this name. If there isn't one yet, make it with this code and remember it." |
-| Three `log` methods with the same name | **Overloading**: Java picks the right one by the type you pass in |
-| `DoubleSupplier` and `entry::get` | `tunable` hands back something you can ask for the current value, any time, with `.getAsDouble()` |
+| `Telemetry.getTable("Arm")` | The **Arm** folder, inside `/Telemetry`. Keep it in a field. |
+| `m_telemetry.log(name, value)` | Sends a value: a number, `true`/`false`, or text. Call it every loop. |
+| `Tunables.addDouble("Arm/kP", ...)` | Makes a tunable number at `/Tunables/Arm/kP`. Call it once, in a field. |
+| `m_kP.get()` | The number on the dashboard right now |
 
-Using it in a subsystem:
+**What's inside `log`?** The same publishers you just learned, made once and kept in a `Map` (a lookup table from each name to its publisher):
 
 ```java
-private final DashTable m_dash = new DashTable("Arm");
-private final DoubleSupplier m_kP = m_dash.tunable("kP", ArmConstants.kP);
-
-@Override
-public void periodic() {
-    m_dash.log("Angle (deg)", getAngleDegrees());
-    m_dash.log("Target (deg)", m_targetDegrees);
-    m_dash.log("Output (V)", m_lastVolts);
-    m_dash.log("At Target", atTarget());
-    m_pid.setP(m_kP.getAsDouble());
+public void log(String name, double value) {
+    // The first call for a name creates its publisher; every later call reuses it
+    m_numbers.computeIfAbsent(name, n -> kNT.getDoubleTopic(topic(n)).publish()).set(value);
 }
 ```
 
-### A dropdown menu: `DashChooser`
-The drive team picks an autonomous routine from a dropdown on the dashboard before each match. Older code does this with `SendableChooser` and `SmartDashboard.putData`. This course uses a small class of its own, `DashChooser`, that sends the menu straight over NetworkTables 4. Its methods have the same names as WPILib 2027's `Selectable`, so moving to 2027 is a rename.
+`computeIfAbsent` means "find the publisher for this name; if there isn't one yet, make it with this code and remember it." Read the [full source](https://github.com/Robojacks/frc-course/tree/main/library/telemetry): every line is commented.
+
+**Structured values.** `log` also takes WPILib types like `Pose2d`, and sends them as **structs**, which AdvantageScope can draw on a field:
 
 ```java
-package frc.robot;
+m_telemetry.log("Pose", m_odometry.getPoseMeters());
+```
 
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
+**Tunable numbers reset.** A tunable goes back to its starting value every time the robot code starts. **Dashboard edits are not saved.** When you find a good number, copy it into `Constants.java`.
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEvent;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringArrayPublisher;
-import edu.wpi.first.networktables.StringPublisher;
-import edu.wpi.first.networktables.StringSubscriber;
+### A dropdown menu: `Selectable`
+The drive team picks an autonomous routine from a dropdown on the dashboard before each match. Older code does this with `SendableChooser` and `SmartDashboard.putData`. In 2027 that becomes **`Selectable`**, and the course library has it now:
 
-/**
- * A dropdown menu on the dashboard, sent with NetworkTables 4.
- * Elastic shows it as a ComboBox Chooser. It works like WPILib 2027's Selectable.
- */
-public class DashChooser<T> {
-  private final Map<String, T> m_options = new LinkedHashMap<>();
-  private String m_defaultName = "";
+```java
+private final Selectable<Command> m_autoChooser = new Selectable<>();
 
-  private final StringPublisher m_type;
-  private final StringArrayPublisher m_optionNames;
-  private final StringPublisher m_default;
-  private final StringPublisher m_active;
-  private final StringSubscriber m_selected;
+public RobotContainer() {
+    m_autoChooser.addDefault("Do nothing", Commands.none());
+    m_autoChooser.add("Drive forward", driveForwardAuto());
+    m_autoChooser.add("Square", squareAuto());
+    Tunables.publish("Auto", m_autoChooser);   // shows up as /Tunables/Auto
+}
 
-  public DashChooser(String tableName) {
-    NetworkTableInstance nt = NetworkTableInstance.getDefault();
-    NetworkTable table = nt.getTable(tableName);
-
-    // ".type" tells Elastic which widget to show
-    m_type = table.getStringTopic(".type").publish();
-    m_type.set("String Chooser");
-
-    m_optionNames = table.getStringArrayTopic("options").publish();
-    m_default = table.getStringTopic("default").publish();
-    m_active = table.getStringTopic("active").publish();
-
-    // The dashboard writes the drive team's pick to "selected". The robot only reads it.
-    m_selected = table.getStringTopic("selected").subscribe("");
-
-    // Whenever the pick changes, report back which option the robot will really use
-    nt.addListener(m_selected, EnumSet.of(NetworkTableEvent.Kind.kValueAll),
-        event -> m_active.set(selectedName()));
-  }
-
-  /** Adds an option and makes it the default: the one used if nobody picks. */
-  public void addDefault(String name, T value) {
-    m_defaultName = name;
-    m_default.set(name);
-    add(name, value);
-  }
-
-  /** Adds an option to the menu. */
-  public void add(String name, T value) {
-    m_options.put(name, value);
-    m_optionNames.set(m_options.keySet().toArray(new String[0]));
-    m_active.set(selectedName());
-  }
-
-  /** The value for the option picked on the dashboard, or the default if nothing valid is picked. */
-  public T getSelected() {
-    return m_options.get(selectedName());
-  }
-
-  private String selectedName() {
-    String name = m_selected.get();
-    return m_options.containsKey(name) ? name : m_defaultName;
-  }
+public Command getAutonomousCommand() {
+    return m_autoChooser.getSelected();
 }
 ```
 
-A menu is just a few topics in one table. Elastic reads them and shows a dropdown:
+A menu is just a few topics in one table. Elastic reads them and shows a **ComboBox Chooser**:
 
 | Topic | Who writes it | What it holds |
 |---|---|---|
-| `.type` | Robot | `"String Chooser"`, which tells Elastic to show a **ComboBox Chooser** |
+| `.type` | Robot | `"String Chooser"`, which tells Elastic to show a dropdown |
 | `options` | Robot | Every option's name, in order |
 | `default` | Robot | The option used if nobody picks |
 | `selected` | **Dashboard** | The option the drive team picked |
 | `active` | Robot | The option the robot will really use, so the dashboard can confirm it |
 
-| Code | What it means |
-|---|---|
-| `DashChooser<T>` | A **generic** class: `T` is the type of thing in the menu. `DashChooser<Command>` holds commands. |
-| `LinkedHashMap` | A map that remembers the order you added things, so the menu lists options in that order |
-| `nt.addListener(...)` | Runs the code at the end whenever `selected` changes, without waiting for the robot loop |
-| `m_options.containsKey(name) ? name : m_defaultName` | If the dashboard's pick isn't a real option (or nothing is picked yet), use the default |
-
-Using it in `RobotContainer`:
-
-```java
-private final DashChooser<Command> autoChooser = new DashChooser<>("Auto");
-
-public RobotContainer() {
-    autoChooser.addDefault("Do nothing", Commands.none());
-    autoChooser.add("Drive forward", driveForwardAuto());
-    autoChooser.add("Square", squareAuto());
-}
-
-public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
-}
-```
-
-In Elastic, find the **Auto** table and drag it onto your tab. It appears as a **ComboBox Chooser**.
+`Selectable<Command>` is a **generic** class: the part in `< >` is the type of thing in the menu.
 
 !!! tip "Add every option in the constructor"
-    Add all the options in `RobotContainer`'s constructor, before the robot is enabled, and don't add more later.
+    Add all the options in `RobotContainer`'s constructor, before the robot is enabled, then publish the menu.
 
 ### What to send
 For any mechanism, send these four kinds of values. With them, you can usually tell in seconds whether a problem is the sensor, the code, or the hardware ([Lesson 9](09-debugging.md)):
@@ -385,7 +232,7 @@ For any mechanism, send these four kinds of values. With them, you can usually t
 
 The bar at the bottom of Elastic shows **Network Tables: Disconnected** in red until it connects, then turns green and shows the robot's address. While it's disconnected, every widget is grayed out.
 
-**Add widgets:** open Elastic's list of topics, find your table (like **Wheel**), and drag a value onto the grid. Drag widgets to move them and drag their corners to resize. You can make several **tabs**, for example one for driving and one for each mechanism you're testing.
+**Add widgets:** open Elastic's list of topics. Values you log are under **Telemetry**, in a folder for each subsystem (like **Telemetry → Wheel**); tunable numbers and menus are under **Tunables**. Drag a value onto the grid. Drag widgets to move them and drag their corners to resize. You can make several **tabs**, for example one for driving and one for each mechanism you're testing.
 
 | Widget | Shows | Can change the value? |
 |---|---|---|
@@ -395,7 +242,7 @@ The bar at the bottom of Elastic shows **Network Tables: Disconnected** in red u
 | **Number Slider** | A number on a slider | Yes, by dragging |
 | **Boolean Box** | A color for true or false | No |
 | **Toggle Switch** / **Toggle Button** | A boolean | Yes, by clicking |
-| **ComboBox Chooser** | An autonomous chooser (`DashChooser`) | Yes, by picking an option |
+| **ComboBox Chooser** | An autonomous chooser (`Selectable`) | Yes, by picking an option |
 
 **Save your layout.** Elastic remembers the layout you build. To keep a copy for the team, export it from Elastic's file menu into your robot project and commit the file to Git.
 
@@ -410,31 +257,35 @@ SmartDashboard.putData(CommandScheduler.getInstance());   // the running command
 SmartDashboard.putData("Arm/Mechanism", mech);            // a Mechanism2d drawing
 ```
 
-This course uses `SmartDashboard` **only** for these. Plain numbers and booleans always go through `DashTable`, and the auto chooser uses `DashChooser`.
+This course uses `SmartDashboard` **only** for these. Plain values always go through `Telemetry`, tunable numbers through `Tunables`, and the auto chooser uses `Selectable`.
 
 ### Logging comes free
 Once you call `DataLogManager.start()` in `Robot`'s constructor, everything you publish to NetworkTables is also **recorded** to a log file on the roboRIO. After a match, open the log in **AdvantageScope** and replay every value ([Lesson 9](09-debugging.md)).
 
 ### Moving to 2027
-When the team moves to WPILib 2027, the changes are mostly renames. The 2027 APIs are still in preview, so the details may change before release:
+Because the course library copies WPILib 2027's API, moving to 2027 is short:
 
-| 2026 (this course) | 2027 preview |
+1. Delete the `telemetry` folder from the project.
+2. Change each `import frc.robot.telemetry...` line to WPILib's import for the same class. VS Code's lightbulb can do it for you.
+3. Build. The class names and method calls stay the same.
+
+Telemetry and tunable numbers are published to the same paths in 2027 (`/Telemetry/...` and `/Tunables/...`), so most Elastic widgets keep working. In 2027 the auto chooser gets a new type of table, so you may need to drag it onto your layout again.
+
+| 2026 (this course) | 2027 |
 |---|---|
-| `new DashTable("Wheel")` | `Telemetry.getTable("Wheel")` |
-| `m_dash.log("Position (rot)", x)` | `table.log("Position (rot)", x)` |
-| `m_dash.tunable("kP", 1.0)` and `.getAsDouble()` | `Tunables.addDouble("Wheel/kP", 1.0)` and `.get()` |
-| `new DashChooser<Command>("Auto")` | `new Selectable<Command>()`, then `Tunables.publish("Auto", chooser)` |
-| `chooser.addDefault(...)`, `chooser.add(...)`, `chooser.getSelected()` | The same three methods on `Selectable` |
+| `Telemetry.getTable("Wheel")`, `table.log(...)` | Same |
+| `Tunables.addDouble("Wheel/kP", 1.0)`, `kP.get()` | Same |
+| `new Selectable<>()`, `Tunables.publish("Auto", chooser)` | Same |
 | `SmartDashboard.putData("Field", field)` once | `Telemetry.log("Field", field)` every loop |
 
-In 2027, telemetry is published under `/Telemetry/` and tunables under `/Tunables/` by default, so you'll re-drag your Elastic widgets onto the new topics.
+The 2027 APIs were still in preview when this was written, so check WPILib's documentation for the final details: the [Telemetry design document](https://github.com/wpilibsuite/allwpilib/blob/main/telemetry/doc/telemetry.md) and the [Tunables design document](https://github.com/wpilibsuite/allwpilib/blob/main/tunables/doc/tunables.md).
 
 ## Try it
 In simulation (no robot needed):
 
-- [ ] Add `DashTable` to a project. In `robotPeriodic()`, log `Timer.getFPGATimestamp()` as `"Robot/Time (s)"`.
-- [ ] Run **WPILib: Simulate Robot Code**, open Elastic, set it to **localhost**, and find **Robot/Time (s)**. Show it as a Text Display, then as a Graph.
-- [ ] Add a tunable `"Robot/Multiplier"` starting at 1.0, and log the time times the multiplier. Change the multiplier in Elastic and watch the logged value change.
+- [ ] Copy the [`telemetry` folder](https://github.com/Robojacks/frc-course/tree/main/library/telemetry) into a project. In `robotPeriodic()`, log `Timer.getFPGATimestamp()` with `Telemetry.log("Robot/Time (s)", ...)`.
+- [ ] Run **WPILib: Simulate Robot Code**, open Elastic, set it to **localhost**, and find **Telemetry → Robot → Time (s)**. Show it as a Text Display, then as a Graph.
+- [ ] Add a tunable with `Tunables.addDouble("Robot/Multiplier", 1.0)`, and log the time times the multiplier. Change the multiplier in Elastic and watch the logged value change.
 - [ ] Restart the simulation. What happens to the multiplier you set?
 - [ ] Build a tab with your values, save the layout, and export it.
 
@@ -451,10 +302,16 @@ In simulation (no robot needed):
 ??? question "Elastic says \"Network Tables: Disconnected\" while you're running simulation. What should you check?"
     That the IP address mode is set to **localhost**, and that the simulation is actually running.
 
-??? question "Why does this course use `DashChooser` instead of `SendableChooser`?"
-    `SendableChooser` only reaches the dashboard through `SmartDashboard.putData`, which is going away. `DashChooser` sends the same menu over NetworkTables 4 directly, and its methods match 2027's `Selectable`.
+??? question "Why does this course use `Selectable` instead of `SendableChooser`?"
+    `SendableChooser` only reaches the dashboard through `SmartDashboard.putData`, which is going away. `Selectable` is the 2027 replacement; the course library has a 2026 copy that sends the same menu over NetworkTables 4.
 
-??? question "In a `DashChooser`, who writes `selected`, and who writes `active`?"
+??? question "Where does `Telemetry.getTable(\"Wheel\").log(\"Position (rot)\", x)` show up in NetworkTables?"
+    At `/Telemetry/Wheel/Position (rot)`. In Elastic, open **Telemetry**, then **Wheel**.
+
+??? question "What do you have to change in your code when the team moves to WPILib 2027?"
+    Delete the course's `telemetry` folder and change the imports to WPILib's. The class and method names stay the same.
+
+??? question "In a `Selectable` menu, who writes `selected`, and who writes `active`?"
     The dashboard writes `selected` when the drive team picks. The robot writes `active`: the option it will really use.
 
 ??? question "What happens to the SmartDashboard and Shuffleboard apps in 2027?"

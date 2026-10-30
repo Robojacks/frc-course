@@ -68,11 +68,11 @@ Import `edu.wpi.first.wpilibj.DigitalInput`. Then add a method that says what th
 Add it to `periodic()` so you can see it:
 
 ```java
-    m_dash.log("Limit Pressed", isLimitPressed());
+    m_telemetry.log("Limit Pressed", isLimitPressed());
 ```
 
 ### Step 3: Check it on the dashboard
-Deploy (the robot can stay **disabled**). In Elastic, find **Limit Pressed** in the **Brushless** table and show it as a **Boolean Box**.
+Deploy (the robot can stay **disabled**). In Elastic, find **Limit Pressed** in **Telemetry → Brushless** and show it as a **Boolean Box**.
 
 - [ ] Not touching the switch: shows **false**
 - [ ] Holding the switch down: shows **true**

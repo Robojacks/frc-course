@@ -65,21 +65,21 @@
 <h3 id="seeing-what-your-code-is-doing">Seeing what your code is doing<a class="headerlink" href="#seeing-what-your-code-is-doing" title="Permanent link">#</a></h3>
 <p>Your robot runs 50 loops a second, so you need a way to watch values change live.</p>
 <p><strong>Don't use <code>System.out.println</code> for live values.</strong> Fifty lines a second floods the console, and you can't read any of them.</p>
-<p><strong>Send values over NetworkTables.</strong> Each value updates in place on the dashboard. With the <code>DashTable</code> helper from <a href="06b-dashboards.html">Lesson 6.1</a>:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashTable</span><span class="w"> </span><span class="n">dash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashTable</span><span class="p">(</span><span class="s">"Arm"</span><span class="p">);</span>
+<p><strong>Send values over NetworkTables.</strong> Each value updates in place on the dashboard. With the course's telemetry library from <a href="06b-dashboards.html">Lesson 6.1</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Arm"</span><span class="p">);</span>
 
 <span class="nd">@Override</span>
 <span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Angle (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getAngleDegrees</span><span class="p">());</span>
-<span class="w">    </span><span class="n">dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Target (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">targetDegrees</span><span class="p">);</span>
-<span class="w">    </span><span class="n">dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Output (V)"</span><span class="p">,</span><span class="w"> </span><span class="n">lastVoltage</span><span class="p">);</span>
-<span class="w">    </span><span class="n">dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"At Target"</span><span class="p">,</span><span class="w"> </span><span class="n">atTarget</span><span class="p">());</span>
+<span class="w">    </span><span class="n">telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Angle (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getAngleDegrees</span><span class="p">());</span>
+<span class="w">    </span><span class="n">telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Target (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">targetDegrees</span><span class="p">);</span>
+<span class="w">    </span><span class="n">telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Output (V)"</span><span class="p">,</span><span class="w"> </span><span class="n">lastVoltage</span><span class="p">);</span>
+<span class="w">    </span><span class="n">telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"At Target"</span><span class="p">,</span><span class="w"> </span><span class="n">atTarget</span><span class="p">());</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>A subsystem's <code>periodic()</code> runs every loop, which makes it the right place for telemetry.</p>
 <div class="admonition tip">
 <p class="admonition-title">Name values like folders</p>
-<p>A <code>DashTable</code> named <code>"Arm"</code> groups every arm value under <strong>Arm</strong> on the dashboard, and <code>"Angle (deg)"</code>, and the unit in parentheses means nobody has to guess.</p>
+<p><code>Telemetry.getTable("Arm")</code> groups every arm value in an <strong>Arm</strong> folder on the dashboard, and the unit in <code>"Angle (deg)"</code> means nobody has to guess.</p>
 </div>
 <p><strong>What to publish for any mechanism:</strong></p>
 <table>
@@ -294,7 +294,7 @@
 </code></pre></div>
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add the four standard values (sensor, target, output, state) for a subsystem with <code>DashTable</code>, and watch them in Elastic (IP mode <strong>localhost</strong> in simulation)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add the four standard values (sensor, target, output, state) for a subsystem with <code>Telemetry</code>, and watch them in Elastic (IP mode <strong>localhost</strong> in simulation)</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>SmartDashboard.putData(CommandScheduler.getInstance())</code> and watch commands start and stop as you press buttons</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Open the <strong>ArmSimulation</strong> example, run it, and move the arm with the joystick. Find its <code>simulationPeriodic()</code>.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>DataLogManager.start()</code>, run in sim for a minute, then open the log in AdvantageScope</li>

@@ -9,7 +9,7 @@ In this lab you'll make the West Coast Drive drive a pattern by itself, and let 
 
 ## Read this
 - [Command Compositions](https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html)
-- [Lesson 6.1: A dropdown menu with `DashChooser`](../robot-code/06b-dashboards.md#a-dropdown-menu-dashchooser)
+- [Lesson 6.1: A dropdown menu with `Selectable`](../robot-code/06b-dashboards.md#a-dropdown-menu-selectable)
 
 ## Walkthrough
 
@@ -88,96 +88,21 @@ Import `edu.wpi.first.wpilibj2.command.Commands`.
     Nobody knows how long a 90° spin takes. Start with 0.5 seconds and adjust it until one turn looks like 90°. That guessing is the point of this lab.
 
 ### Step 3: Let the drive team pick
-A **`DashChooser`** puts a dropdown menu in Elastic, sent over NetworkTables like everything else ([Lesson 6.1](../robot-code/06b-dashboards.md#a-dropdown-menu-dashchooser)).
+A **`Selectable`** puts a dropdown menu in Elastic, sent over NetworkTables like everything else. It's part of the course's `telemetry` folder you copied in Lab 2, and it's the same as WPILib 2027's `Selectable` ([Lesson 6.1](../robot-code/06b-dashboards.md#a-dropdown-menu-selectable)).
 
-Create `DashChooser.java` in the `frc/robot` folder, next to `DashTable.java`, and type in this class:
-
-```java
-package frc.robot;
-
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEvent;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringArrayPublisher;
-import edu.wpi.first.networktables.StringPublisher;
-import edu.wpi.first.networktables.StringSubscriber;
-
-/**
- * A dropdown menu on the dashboard, sent with NetworkTables 4.
- * Elastic shows it as a ComboBox Chooser. It works like WPILib 2027's Selectable.
- */
-public class DashChooser<T> {
-  private final Map<String, T> m_options = new LinkedHashMap<>();
-  private String m_defaultName = "";
-
-  private final StringPublisher m_type;
-  private final StringArrayPublisher m_optionNames;
-  private final StringPublisher m_default;
-  private final StringPublisher m_active;
-  private final StringSubscriber m_selected;
-
-  public DashChooser(String tableName) {
-    NetworkTableInstance nt = NetworkTableInstance.getDefault();
-    NetworkTable table = nt.getTable(tableName);
-
-    // ".type" tells Elastic which widget to show
-    m_type = table.getStringTopic(".type").publish();
-    m_type.set("String Chooser");
-
-    m_optionNames = table.getStringArrayTopic("options").publish();
-    m_default = table.getStringTopic("default").publish();
-    m_active = table.getStringTopic("active").publish();
-
-    // The dashboard writes the drive team's pick to "selected". The robot only reads it.
-    m_selected = table.getStringTopic("selected").subscribe("");
-
-    // Whenever the pick changes, report back which option the robot will really use
-    nt.addListener(m_selected, EnumSet.of(NetworkTableEvent.Kind.kValueAll),
-        event -> m_active.set(selectedName()));
-  }
-
-  /** Adds an option and makes it the default: the one used if nobody picks. */
-  public void addDefault(String name, T value) {
-    m_defaultName = name;
-    m_default.set(name);
-    add(name, value);
-  }
-
-  /** Adds an option to the menu. */
-  public void add(String name, T value) {
-    m_options.put(name, value);
-    m_optionNames.set(m_options.keySet().toArray(new String[0]));
-    m_active.set(selectedName());
-  }
-
-  /** The value for the option picked on the dashboard, or the default if nothing valid is picked. */
-  public T getSelected() {
-    return m_options.get(selectedName());
-  }
-
-  private String selectedName() {
-    String name = m_selected.get();
-    return m_options.containsKey(name) ? name : m_defaultName;
-  }
-}
-```
-
-Then add a field to `RobotContainer`:
+Add a field to `RobotContainer`:
 
 ```java
-  private final DashChooser<Command> m_autoChooser = new DashChooser<>("Auto");
+  private final Selectable<Command> m_autoChooser = new Selectable<>();
 ```
 
-In the constructor, after `configureBindings()`:
+In the constructor, after `configureBindings()`, add the options and put the menu on the dashboard:
 
 ```java
     m_autoChooser.addDefault("Do nothing", Commands.none());
     m_autoChooser.add("Drive forward", driveForwardAuto());
     m_autoChooser.add("Square", squareAuto());
+    Tunables.publish("Auto", m_autoChooser);   // shows up as /Tunables/Auto
 ```
 
 And make `getAutonomousCommand()` return the choice:
@@ -188,14 +113,16 @@ And make `getAutonomousCommand()` return the choice:
   }
 ```
 
+Import `frc.robot.telemetry.Selectable` and `frc.robot.telemetry.Tunables`.
+
 !!! info "Why not `SendableChooser`?"
-    You'll see `SendableChooser` in older code and examples. It only reaches the dashboard through `SmartDashboard.putData`, which is going away in WPILib 2027. `DashChooser` uses the same method names as 2027's `Selectable` (`addDefault`, `add`, `getSelected`), so moving to 2027 is a rename ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).
+    You'll see `SendableChooser` in older code and examples. It only reaches the dashboard through `SmartDashboard.putData`, which is going away in WPILib 2027. `Selectable` is its 2027 replacement, and the same lines of code work in 2027 ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).
 
 !!! tip "Why \"Do nothing\" is the default"
     If the drive team forgets to pick, a robot that sits still is far better than one that runs a routine meant for a different starting spot and hits someone else's robot.
 
 ### Step 4: Run it
-1. Deploy. In Elastic, find the **Auto** table, drag it onto your tab (it shows up as a **ComboBox Chooser**), and pick **Drive forward**.
+1. Deploy. In Elastic, find **Tunables → Auto**, drag it onto your tab (it shows up as a **ComboBox Chooser**), and pick **Drive forward**.
 2. On blocks first: in the Driver Station, select **Autonomous**, say **"Enabling!"**, and enable. The wheels run for 2 seconds and stop.
 3. On the floor: put tape on the floor at the robot's front edge, and run it again. Mark where it stops.
 4. Run **Square** on blocks, then on the floor. Adjust the spin time in `squareSide()` until it looks close to a square.
