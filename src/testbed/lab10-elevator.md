@@ -71,6 +71,21 @@ That's exactly what you'll see on the real elevator, and why: gravity pulls the 
 
 The NEO is **brushless**, like Lab 1's, unlike the CIMs on the drivetrain. Check its CAN ID in the REV Hardware Client.
 
+**Wiring the elevator's encoder:** its cable ends in four 3-pin plugs. Only the **blue** and **yellow** plugs go to the WCD's roboRIO:
+
+![The Through Bore Encoder's cable: a white 6-pin JST plug at one end, and four black 3-pin Dupont plugs with blue, yellow, green, and white signal wires](../assets/photos/through-bore-cable.jpg)
+
+<p class="credit">The encoder end of the cable is the white JST plug (right). The four 3-pin Dupont plugs go to the roboRIO. Each has a red wire (5 V), a black wire (ground), and one colored signal wire.</p>
+
+| Plug (signal wire color) | Signal | Goes to |
+|---|---|---|
+| **Blue** | Channel **A** | DIO **0** |
+| **Yellow** | Channel **B** | DIO **1** |
+| **Green** | Index (once per turn) | Not used. Leave it unplugged and tape it out of the way. |
+| **White** | Absolute position | Not used in these labs. Leave it unplugged and tape it out of the way. |
+
+**Which way around?** Each roboRIO DIO port is three pins in a row, and the roboRIO has a label printed next to each row of pins: the ground symbol (⏚), **V** (5 V), and **S** (signal). Turn each plug so the **black** wire is on **ground** (⏚), the **red** wire is on **V**, and the **blue** or **yellow** wire is on **S**. Every plug on this cable has its own red and black, so each one powers itself; that's normal. The drive encoders from [Lab 8](lab8-navx-gyro.md) are already on DIO 2 to 5, so the elevator uses 0 and 1. ([Lesson 4.3](../hardware/04d-sensors.md#wiring-the-through-bore-encoder-to-the-roborio) has more.)
+
 ### The big idea: goal, setpoint, and holding against gravity
 A plain `PIDController` sees a big error the instant you pick a new height and shoves the carriage at it as hard as it can. A **`ProfiledPIDController`** plans the move first: speed up gently, cruise, slow down, arrive ([Lesson 14](../controls/14-profiles.md)).
 

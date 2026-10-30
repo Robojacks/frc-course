@@ -232,7 +232,33 @@ Compare its overshoot with the one-speed turn from Step 6.
     Two speeds work better than one. What about ten speeds, each a bit slower as the robot gets closer? Or a speed that shrinks **smoothly** with the distance left to turn? That idea has a name: it's the **P** in PID, and it's coming in [Lab 9](lab9-pid-wheel.md).
 
 ### Step 8: Add the drive encoders
-Add these to `kDriveConstants` in `Constants.java`, and add `import edu.wpi.first.math.util.Units;` at the top of the file:
+**First, wire them.** Each Through Bore Encoder's cable ends in four 3-pin plugs. Only the **blue** and **yellow** plugs go to the roboRIO:
+
+![The Through Bore Encoder's cable: a white 6-pin JST plug at one end, and four black 3-pin Dupont plugs with blue, yellow, green, and white signal wires](../assets/photos/through-bore-cable.jpg)
+
+<p class="credit">The encoder end of the cable is the white JST plug (right). The four 3-pin Dupont plugs go to the roboRIO. Each has a red wire (5 V), a black wire (ground), and one colored signal wire.</p>
+
+**Left gearbox encoder:**
+
+| Plug (signal wire color) | Signal | Goes to |
+|---|---|---|
+| **Blue** | Channel **A** | DIO **2** |
+| **Yellow** | Channel **B** | DIO **3** |
+| **Green** | Index (once per turn) | Not used. Leave it unplugged and tape it out of the way. |
+| **White** | Absolute position | Not used in these labs. Leave it unplugged and tape it out of the way. |
+
+**Right gearbox encoder:**
+
+| Plug (signal wire color) | Signal | Goes to |
+|---|---|---|
+| **Blue** | Channel **A** | DIO **4** |
+| **Yellow** | Channel **B** | DIO **5** |
+| **Green** | Index (once per turn) | Not used. Leave it unplugged and tape it out of the way. |
+| **White** | Absolute position | Not used in these labs. Leave it unplugged and tape it out of the way. |
+
+**Which way around?** Each roboRIO DIO port is three pins in a row, and the roboRIO has a label printed next to each row of pins: the ground symbol (⏚), **V** (5 V), and **S** (signal). Turn each plug so the **black** wire is on **ground** (⏚), the **red** wire is on **V**, and the **blue** or **yellow** wire is on **S**. Every plug on this cable has its own red and black, so each one powers itself; that's normal. Follow each cable back to its gearbox as you plug it in, so the left encoder doesn't end up on the right side's ports. ([Lesson 4.3](../hardware/04d-sensors.md#wiring-the-through-bore-encoder-to-the-roborio) has more.)
+
+**Then add the code.** Add these to `kDriveConstants` in `Constants.java`, and add `import edu.wpi.first.math.util.Units;` at the top of the file:
 
 ```java
     // Lab 8: Through Bore Encoders on each gearbox output shaft, wired to the roboRIO

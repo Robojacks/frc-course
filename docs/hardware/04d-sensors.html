@@ -339,7 +339,89 @@ GND ──┴────────▲────────┘
 </tr>
 </tbody>
 </table>
-<p><strong>Wiring:</strong> the encoder's cable carries power, ground, A, B, and the absolute signal. Channels A and B go to the signal pins of <strong>two</strong> DIO ports (like 0 and 1), with power and ground from one of them. REV sells cables and breakouts for this.</p>
+<h4 id="wiring-the-through-bore-encoder-to-the-roborio">Wiring the Through Bore Encoder to the roboRIO<a class="headerlink" href="#wiring-the-through-bore-encoder-to-the-roborio" title="Permanent link">#</a></h4>
+<p>The encoder has a small white <strong>6-pin JST</strong> socket. Its cable splits into <strong>four 3-pin Dupont plugs</strong>, one per signal, each with its own <strong>red</strong> (5 V) and <strong>black</strong> (ground) wire. The <strong>color of the third wire</strong> tells you which signal it is:</p>
+<p><img alt="The Through Bore Encoder's cable: a white 6-pin JST plug at one end, and four black 3-pin Dupont plugs with blue, yellow, green, and white signal wires" src="../assets/photos/through-bore-cable.jpg" /></p>
+<p class="credit">The encoder end of the cable is the white JST plug (right). The four 3-pin Dupont plugs go to the roboRIO. Each has a red wire (5 V), a black wire (ground), and one colored signal wire.</p>
+
+<table>
+<thead>
+<tr>
+<th>Plug (signal wire color)</th>
+<th>Signal</th>
+<th>Where it goes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Blue</strong></td>
+<td>Quadrature channel <strong>A</strong></td>
+<td>A DIO port, like <strong>0</strong></td>
+</tr>
+<tr>
+<td><strong>Yellow</strong></td>
+<td>Quadrature channel <strong>B</strong></td>
+<td>The next DIO port, like <strong>1</strong></td>
+</tr>
+<tr>
+<td><strong>Green</strong></td>
+<td>Index: one pulse per turn</td>
+<td>Not used in this course. Tape it out of the way.</td>
+</tr>
+<tr>
+<td><strong>White</strong></td>
+<td>Absolute position (a duty-cycle signal)</td>
+<td>Not used in this course. It's for reading the shaft's angle right after power-on, with WPILib's <code>DutyCycleEncoder</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Which way around?</strong> Each roboRIO DIO port is three pins in a row, and the roboRIO has a label printed next to each row of pins: the ground symbol (⏚), <strong>V</strong> (5 V), and <strong>S</strong> (signal). Turn each plug so the <strong>black</strong> wire is on <strong>ground</strong> (⏚), the <strong>red</strong> wire is on <strong>V</strong>, and the <strong>blue</strong> or <strong>yellow</strong> wire is on <strong>S</strong>. Every plug on this cable has its own red and black, so each one powers itself; that's normal.</p>
+<p>The two DIO port numbers become <code>EncoderChannelA</code> and <code>EncoderChannelB</code> in <code>Constants</code>. Which robot uses which ports:</p>
+<table>
+<thead>
+<tr>
+<th>Encoder</th>
+<th>Robot</th>
+<th>Blue (A)</th>
+<th>Yellow (B)</th>
+<th>Lab</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Test bed wheel</td>
+<td>Test bed</td>
+<td>DIO 0</td>
+<td>DIO 1</td>
+<td><a href="../testbed/lab6-encoder.html">Lab 6</a></td>
+</tr>
+<tr>
+<td>Left drive gearbox</td>
+<td>WCD</td>
+<td>DIO 2</td>
+<td>DIO 3</td>
+<td><a href="../testbed/lab8-navx-gyro.html">Lab 8</a></td>
+</tr>
+<tr>
+<td>Right drive gearbox</td>
+<td>WCD</td>
+<td>DIO 4</td>
+<td>DIO 5</td>
+<td><a href="../testbed/lab8-navx-gyro.html">Lab 8</a></td>
+</tr>
+<tr>
+<td>Elevator</td>
+<td>WCD</td>
+<td>DIO 0</td>
+<td>DIO 1</td>
+<td><a href="../testbed/lab10-elevator.html">Lab 10</a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Counting the wrong way?</p>
+<p>If the encoder counts <strong>down</strong> when the mechanism moves the way you call forward, you can either set its <code>...Inverted</code> constant to <code>true</code> in code, or swap the blue and yellow plugs. Pick one. Doing both puts it back where it started.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Cycles, not counts</p>
 <p>WPILib's <code>Encoder</code> class calls one full quadrature <strong>cycle</strong> a "pulse." The Through Bore is <strong>2048</strong> cycles per revolution. Using 8192 (the count with 4x decoding) makes every distance 4 times too small.</p>

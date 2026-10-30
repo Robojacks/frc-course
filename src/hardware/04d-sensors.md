@@ -135,7 +135,33 @@ The roboRIO counts these in hardware (its FPGA chip), so it never misses a count
 | Range | Unlimited turns |
 | So you must... | Start the mechanism in a known spot, like the elevator at the bottom ([Lab 10](../testbed/lab10-elevator.md)) |
 
-**Wiring:** the encoder's cable carries power, ground, A, B, and the absolute signal. Channels A and B go to the signal pins of **two** DIO ports (like 0 and 1), with power and ground from one of them. REV sells cables and breakouts for this.
+#### Wiring the Through Bore Encoder to the roboRIO
+The encoder has a small white **6-pin JST** socket. Its cable splits into **four 3-pin Dupont plugs**, one per signal, each with its own **red** (5 V) and **black** (ground) wire. The **color of the third wire** tells you which signal it is:
+
+![The Through Bore Encoder's cable: a white 6-pin JST plug at one end, and four black 3-pin Dupont plugs with blue, yellow, green, and white signal wires](../assets/photos/through-bore-cable.jpg)
+
+<p class="credit">The encoder end of the cable is the white JST plug (right). The four 3-pin Dupont plugs go to the roboRIO. Each has a red wire (5 V), a black wire (ground), and one colored signal wire.</p>
+
+| Plug (signal wire color) | Signal | Where it goes |
+|---|---|---|
+| **Blue** | Quadrature channel **A** | A DIO port, like **0** |
+| **Yellow** | Quadrature channel **B** | The next DIO port, like **1** |
+| **Green** | Index: one pulse per turn | Not used in this course. Tape it out of the way. |
+| **White** | Absolute position (a duty-cycle signal) | Not used in this course. It's for reading the shaft's angle right after power-on, with WPILib's `DutyCycleEncoder`. |
+
+**Which way around?** Each roboRIO DIO port is three pins in a row, and the roboRIO has a label printed next to each row of pins: the ground symbol (⏚), **V** (5 V), and **S** (signal). Turn each plug so the **black** wire is on **ground** (⏚), the **red** wire is on **V**, and the **blue** or **yellow** wire is on **S**. Every plug on this cable has its own red and black, so each one powers itself; that's normal.
+
+The two DIO port numbers become `EncoderChannelA` and `EncoderChannelB` in `Constants`. Which robot uses which ports:
+
+| Encoder | Robot | Blue (A) | Yellow (B) | Lab |
+|---|---|---|---|---|
+| Test bed wheel | Test bed | DIO 0 | DIO 1 | [Lab 6](../testbed/lab6-encoder.md) |
+| Left drive gearbox | WCD | DIO 2 | DIO 3 | [Lab 8](../testbed/lab8-navx-gyro.md) |
+| Right drive gearbox | WCD | DIO 4 | DIO 5 | [Lab 8](../testbed/lab8-navx-gyro.md) |
+| Elevator | WCD | DIO 0 | DIO 1 | [Lab 10](../testbed/lab10-elevator.md) |
+
+!!! tip "Counting the wrong way?"
+    If the encoder counts **down** when the mechanism moves the way you call forward, you can either set its `...Inverted` constant to `true` in code, or swap the blue and yellow plugs. Pick one. Doing both puts it back where it started.
 
 !!! warning "Cycles, not counts"
     WPILib's `Encoder` class calls one full quadrature **cycle** a "pulse." The Through Bore is **2048** cycles per revolution. Using 8192 (the count with 4x decoding) makes every distance 4 times too small.

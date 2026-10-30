@@ -367,7 +367,76 @@ try {
 <p>Two speeds work better than one. What about ten speeds, each a bit slower as the robot gets closer? Or a speed that shrinks <strong>smoothly</strong> with the distance left to turn? That idea has a name: it's the <strong>P</strong> in PID, and it's coming in <a href="lab9-pid-wheel.html">Lab 9</a>.</p>
 </div>
 <h3 id="step-8-add-the-drive-encoders">Step 8: Add the drive encoders<a class="headerlink" href="#step-8-add-the-drive-encoders" title="Permanent link">#</a></h3>
-<p>Add these to <code>kDriveConstants</code> in <code>Constants.java</code>, and add <code>import edu.wpi.first.math.util.Units;</code> at the top of the file:</p>
+<p><strong>First, wire them.</strong> Each Through Bore Encoder's cable ends in four 3-pin plugs. Only the <strong>blue</strong> and <strong>yellow</strong> plugs go to the roboRIO:</p>
+<p><img alt="The Through Bore Encoder's cable: a white 6-pin JST plug at one end, and four black 3-pin Dupont plugs with blue, yellow, green, and white signal wires" src="../assets/photos/through-bore-cable.jpg" /></p>
+<p class="credit">The encoder end of the cable is the white JST plug (right). The four 3-pin Dupont plugs go to the roboRIO. Each has a red wire (5 V), a black wire (ground), and one colored signal wire.</p>
+
+<p><strong>Left gearbox encoder:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Plug (signal wire color)</th>
+<th>Signal</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Blue</strong></td>
+<td>Channel <strong>A</strong></td>
+<td>DIO <strong>2</strong></td>
+</tr>
+<tr>
+<td><strong>Yellow</strong></td>
+<td>Channel <strong>B</strong></td>
+<td>DIO <strong>3</strong></td>
+</tr>
+<tr>
+<td><strong>Green</strong></td>
+<td>Index (once per turn)</td>
+<td>Not used. Leave it unplugged and tape it out of the way.</td>
+</tr>
+<tr>
+<td><strong>White</strong></td>
+<td>Absolute position</td>
+<td>Not used in these labs. Leave it unplugged and tape it out of the way.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Right gearbox encoder:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Plug (signal wire color)</th>
+<th>Signal</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Blue</strong></td>
+<td>Channel <strong>A</strong></td>
+<td>DIO <strong>4</strong></td>
+</tr>
+<tr>
+<td><strong>Yellow</strong></td>
+<td>Channel <strong>B</strong></td>
+<td>DIO <strong>5</strong></td>
+</tr>
+<tr>
+<td><strong>Green</strong></td>
+<td>Index (once per turn)</td>
+<td>Not used. Leave it unplugged and tape it out of the way.</td>
+</tr>
+<tr>
+<td><strong>White</strong></td>
+<td>Absolute position</td>
+<td>Not used in these labs. Leave it unplugged and tape it out of the way.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Which way around?</strong> Each roboRIO DIO port is three pins in a row, and the roboRIO has a label printed next to each row of pins: the ground symbol (⏚), <strong>V</strong> (5 V), and <strong>S</strong> (signal). Turn each plug so the <strong>black</strong> wire is on <strong>ground</strong> (⏚), the <strong>red</strong> wire is on <strong>V</strong>, and the <strong>blue</strong> or <strong>yellow</strong> wire is on <strong>S</strong>. Every plug on this cable has its own red and black, so each one powers itself; that's normal. Follow each cable back to its gearbox as you plug it in, so the left encoder doesn't end up on the right side's ports. (<a href="../hardware/04d-sensors.html#wiring-the-through-bore-encoder-to-the-roborio">Lesson 4.3</a> has more.)</p>
+<p><strong>Then add the code.</strong> Add these to <code>kDriveConstants</code> in <code>Constants.java</code>, and add <code>import edu.wpi.first.math.util.Units;</code> at the top of the file:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Lab 8: Through Bore Encoders on each gearbox output shaft, wired to the roboRIO</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LeftEncoderChannelA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">LeftEncoderChannelB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>

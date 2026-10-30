@@ -146,6 +146,42 @@ try {
 </tbody>
 </table>
 <p>The NEO is <strong>brushless</strong>, like Lab 1's, unlike the CIMs on the drivetrain. Check its CAN ID in the REV Hardware Client.</p>
+<p><strong>Wiring the elevator's encoder:</strong> its cable ends in four 3-pin plugs. Only the <strong>blue</strong> and <strong>yellow</strong> plugs go to the WCD's roboRIO:</p>
+<p><img alt="The Through Bore Encoder's cable: a white 6-pin JST plug at one end, and four black 3-pin Dupont plugs with blue, yellow, green, and white signal wires" src="../assets/photos/through-bore-cable.jpg" /></p>
+<p class="credit">The encoder end of the cable is the white JST plug (right). The four 3-pin Dupont plugs go to the roboRIO. Each has a red wire (5 V), a black wire (ground), and one colored signal wire.</p>
+
+<table>
+<thead>
+<tr>
+<th>Plug (signal wire color)</th>
+<th>Signal</th>
+<th>Goes to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Blue</strong></td>
+<td>Channel <strong>A</strong></td>
+<td>DIO <strong>0</strong></td>
+</tr>
+<tr>
+<td><strong>Yellow</strong></td>
+<td>Channel <strong>B</strong></td>
+<td>DIO <strong>1</strong></td>
+</tr>
+<tr>
+<td><strong>Green</strong></td>
+<td>Index (once per turn)</td>
+<td>Not used. Leave it unplugged and tape it out of the way.</td>
+</tr>
+<tr>
+<td><strong>White</strong></td>
+<td>Absolute position</td>
+<td>Not used in these labs. Leave it unplugged and tape it out of the way.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Which way around?</strong> Each roboRIO DIO port is three pins in a row, and the roboRIO has a label printed next to each row of pins: the ground symbol (⏚), <strong>V</strong> (5 V), and <strong>S</strong> (signal). Turn each plug so the <strong>black</strong> wire is on <strong>ground</strong> (⏚), the <strong>red</strong> wire is on <strong>V</strong>, and the <strong>blue</strong> or <strong>yellow</strong> wire is on <strong>S</strong>. Every plug on this cable has its own red and black, so each one powers itself; that's normal. The drive encoders from <a href="lab8-navx-gyro.html">Lab 8</a> are already on DIO 2 to 5, so the elevator uses 0 and 1. (<a href="../hardware/04d-sensors.html#wiring-the-through-bore-encoder-to-the-roborio">Lesson 4.3</a> has more.)</p>
 <h3 id="the-big-idea-goal-setpoint-and-holding-against-gravity">The big idea: goal, setpoint, and holding against gravity<a class="headerlink" href="#the-big-idea-goal-setpoint-and-holding-against-gravity" title="Permanent link">#</a></h3>
 <p>A plain <code>PIDController</code> sees a big error the instant you pick a new height and shoves the carriage at it as hard as it can. A <strong><code>ProfiledPIDController</code></strong> plans the move first: speed up gently, cruise, slow down, arrive (<a href="../controls/14-profiles.html">Lesson 14</a>).</p>
 <table>
