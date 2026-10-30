@@ -19,7 +19,7 @@ The **Lessons** tab teaches the ideas. The **Labs** tab is where you try them on
 | [Lab 7: Timed Autonomous](lab7-timed-auto.md) | WCD | Lab 6 | Drive a pattern on its own, picked from a dashboard menu |
 | [Lab 8: Turn with a Gyro](lab8-navx-gyro.md) | WCD | Lab 7 | Use the NavX2 to turn by angle instead of by time |
 | [Lab 9: PID on the Wheel](lab9-pid-wheel.md) | Test bed | Lab 8 and [Lesson 12](../controls/12-pid.md) | Turn exactly 10 times with P, then D, then I |
-| [Lab 10: Elevator Position Control](lab10-elevator.md) | WCD | Lab 9 | Move the elevator between presets and hold against gravity with PID |
+| [Lab 10: Elevator Position Control](lab10-elevator.md) | WCD | Lab 9 | Move the elevator between START, L2, and L3 with a ProfiledPIDController, in meters, and hold against gravity |
 
 Do them in order. Each lab adds **one** new idea. Labs on the test bed build up the **TestBed** project from Lab 0. Labs on the WCD build up the **WestCoastDrive** project from Lab 2. Commit your work to Git after each lab.
 

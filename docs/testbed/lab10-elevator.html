@@ -41,13 +41,16 @@
 <h1 id="lab-10-elevator-position-control">Lab 10: Elevator Position Control<a class="headerlink" href="#lab-10-elevator-position-control" title="Permanent link">#</a></h1>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>Elevators are on almost every FRC robot: lifting game pieces to score high, reaching shelves, climbing. Every one needs the same thing: <strong>go to an exact height, and stay there</strong>.</p>
-<p>In <a href="lab9-pid-wheel.html">Lab 9</a> you used PID to turn a wheel exactly 10 times. An elevator adds one big new problem: <strong>gravity</strong>. The wheel stopped when the motor stopped. An elevator falls. In this lab you'll use PID to move the WCD's elevator between heights and hold it there, and you'll see exactly how each of P, I, and D handles gravity.</p>
+<p>In <a href="lab9-pid-wheel.html">Lab 9</a> you used PID to turn a wheel exactly 10 times. An elevator adds one big new problem: <strong>gravity</strong>. The wheel stopped when the motor stopped. An elevator falls.</p>
+<p>In this lab you'll move the WCD's elevator between three preset heights (<strong>START</strong>, <strong>L2</strong>, and <strong>L3</strong>) and hold it there. You'll use a <strong><code>ProfiledPIDController</code></strong>: a PID controller that plans a smooth path to each new height instead of jumping at it. Everything is in <strong>meters</strong>, worked out from the sprocket that drives the elevator's chain. You'll see exactly how each of P, I, and D handles gravity.</p>
 <p><strong>Before you start:</strong> finish <a href="lab9-pid-wheel.html">Lab 9</a>. You'll add to the <strong>WestCoastDrive</strong> project from Labs 2, 7, and 8. Lessons <a href="../hardware/04b-motors.html">4.1</a> (the NEO) and <a href="../hardware/04d-sensors.html">4.3</a> (the Through Bore Encoder) cover this lab's hardware.</p>
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/pidcontroller.html">PID Control in WPILib</a></li>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a></li>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html">Tuning a Vertical Elevator with Motion Profiling</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/profiled-pidcontroller.html">Combining Motion Profiling and PID (ProfiledPIDController)</a></li>
+<li><a href="../controls/14-profiles.html">Lesson 14: Motion Profiles</a>, the <strong>goal vs. setpoint</strong> section</li>
 </ul>
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
 <div class="admonition danger">
@@ -88,7 +91,7 @@
 <p>Feedback-only control is <strong>not a good control scheme</strong> for vertical elevators, so don't be surprised if the simulator doesn't behave consistently, even with good gains. There's no perfect answer: gains around <strong>kP = 10, kI = 2.5, kD = 0</strong> work, but with overshoot and long settling times, and the elevator acts differently depending on the setpoint, overshooting near the top and undershooting near the bottom.</p>
 <p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html">Tuning a Vertical Elevator with Motion Profiling</a>, CC BY 4.0.</em></p>
 </div>
-<p>That's exactly what you'll see on the real elevator, and why: gravity pulls the same way no matter which direction the elevator is moving. Real robots usually add <strong>feedforward</strong> for gravity (<a href="../controls/13-feedforward.html">Lesson 13</a>). This lab sticks to PID so you can see what each of P, I, and D does on its own.</p>
+<p>That's exactly what you'll see on the real elevator, and why: gravity pulls the same way no matter which direction the elevator is moving. Real robots usually add <strong>feedforward</strong> for gravity (<a href="../controls/13-feedforward.html">Lesson 13</a>). This lab sticks to PID (following a motion profile) so you can see what each of P, I, and D does on its own.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find gains that reach a new height within a few seconds</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Notice how the elevator behaves going <strong>up</strong> vs. going <strong>down</strong></li>
@@ -110,7 +113,12 @@
 <td>REVLib <code>SparkMax</code></td>
 </tr>
 <tr>
-<td>REV Through Bore Encoder on the elevator's drive shaft</td>
+<td>Sprocket on the elevator's drive shaft, pulling the carriage's chain</td>
+<td></td>
+<td>Its <strong>pitch diameter</strong> sets meters per turn</td>
+</tr>
+<tr>
+<td>REV Through Bore Encoder on that same shaft</td>
 <td>The WCD roboRIO's DIO ports (channels A and B)</td>
 <td>WPILib <code>Encoder</code></td>
 </tr>
@@ -122,42 +130,96 @@
 </tbody>
 </table>
 <p>The NEO is <strong>brushless</strong>, like Lab 1's, unlike the CIMs on the drivetrain. Check its CAN ID in the REV Hardware Client.</p>
-<h3 id="the-big-idea-holding-against-gravity">The big idea: holding against gravity<a class="headerlink" href="#the-big-idea-holding-against-gravity" title="Permanent link">#</a></h3>
-<p>The wheel in Lab 9 only needed voltage while it was <strong>moving</strong>. The elevator needs voltage just to <strong>stand still</strong>, because gravity is always pulling the carriage down.</p>
-<p>That means the elevator's PID command can't end when it arrives, the way the wheel's did. If it ends, the motor stops pushing and the carriage falls. So this elevator works differently:</p>
+<h3 id="the-big-idea-goal-setpoint-and-holding-against-gravity">The big idea: goal, setpoint, and holding against gravity<a class="headerlink" href="#the-big-idea-goal-setpoint-and-holding-against-gravity" title="Permanent link">#</a></h3>
+<p>A plain <code>PIDController</code> sees a big error the instant you pick a new height and shoves the carriage at it as hard as it can. A <strong><code>ProfiledPIDController</code></strong> plans the move first: speed up gently, cruise, slow down, arrive (<a href="../controls/14-profiles.html">Lesson 14</a>).</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>What it is</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Goal</strong></td>
+<td>The preset you picked</td>
+<td>L2, 0.25 m</td>
+</tr>
+<tr>
+<td><strong>Setpoint</strong></td>
+<td>Where the profile says the carriage should be <strong>right now</strong>, on its way to the goal</td>
+<td>0.11 m, moving up at 0.25 m/s</td>
+</tr>
+<tr>
+<td><strong>Height</strong></td>
+<td>Where the encoder says the carriage actually is</td>
+<td>0.10 m</td>
+</tr>
+</tbody>
+</table>
+<p>Every 20 ms the setpoint takes a small step toward the goal, and PID only has to close the small gap between the setpoint and the height.</p>
+<p>The elevator also needs voltage just to <strong>stand still</strong>, because gravity is always pulling the carriage down. So the controller can never simply stop when it arrives. This elevator works like this:</p>
 <ul>
-<li>A <strong>hold</strong> command runs <strong>all the time</strong> as the default command, pushing toward a <strong>target height</strong>.</li>
-<li>Buttons don't move the elevator directly. They just <strong>change the target</strong>. The hold command does the moving.</li>
+<li>A <strong>hold</strong> command runs <strong>all the time</strong> as the default command, following the profile toward the goal and holding the goal once it gets there.</li>
+<li>A <strong>preset</strong> command sets a new goal, drives toward it, and <strong>finishes when it arrives</strong>. Then the hold command takes over and keeps holding that same goal.</li>
 </ul>
 <h3 id="step-1-constants">Step 1: Constants<a class="headerlink" href="#step-1-constants" title="Permanent link">#</a></h3>
-<p>Add this class inside <code>Constants</code> in the WestCoastDrive project. Fill in your CAN ID and DIO ports. You'll measure the other numbers in Steps 4 and 5.</p>
+<p>Add this class inside <code>Constants</code> in the WestCoastDrive project, and add <code>import edu.wpi.first.math.util.Units;</code> at the top of the file. Fill in your CAN ID, DIO ports, and your sprocket's pitch diameter. You'll find <code>MaxHeightMeters</code> in Step 5.</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">class</span> <span class="nc">kElevatorConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Motor</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">MotorCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">MotorInverted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">EncoderChannelA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">EncoderChannelB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">EncoderInverted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">EncoderCyclesPerRev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span><span class="w">     </span><span class="c1">// Through Bore: 2048 cycles (8192 counts)</span>
-
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MetersPerRotation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w">     </span><span class="c1">// you'll measure this in Step 4</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MinHeightMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">       </span><span class="c1">// bottom</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MaxHeightMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">       </span><span class="c1">// you'll measure this in Step 5</span>
-
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">CurrentLimit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">40</span><span class="p">;</span><span class="w">              </span><span class="c1">// amps</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MaxVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">4.0</span><span class="p">;</span><span class="w">              </span><span class="c1">// gentle while tuning</span>
 
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">P</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10.0</span><span class="p">;</span><span class="w">                    </span><span class="c1">// volts per meter of error</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">D</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">IZoneMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.05</span><span class="p">;</span><span class="w">          </span><span class="c1">// only build up I within 5 cm</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ToleranceMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.01</span><span class="p">;</span><span class="w">      </span><span class="c1">// within 1 cm counts as "there"</span>
+<span class="w">    </span><span class="c1">// Through Bore Encoder, on the same shaft as the sprocket</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">EncoderChannelA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">EncoderChannelB</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">EncoderInverted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">EncoderCyclesPerRev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2048</span><span class="p">;</span><span class="w">     </span><span class="c1">// NOT 8192: see below</span>
+
+<span class="w">    </span><span class="c1">// Sprocket: one turn moves the chain (and the carriage) one circumference</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">PitchDiameterInches</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.432</span><span class="p">;</span><span class="w"> </span><span class="c1">// from your sprocket's spec sheet</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">PitchDiameterMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="n">PitchDiameterInches</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MetersPerRevolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">PitchDiameterMeters</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">DistancePerPulse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MetersPerRevolution</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">EncoderCyclesPerRev</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Travel limits</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MinHeightMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">       </span><span class="c1">// bottom</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MaxHeightMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">       </span><span class="c1">// you'll measure this in Step 5</span>
+
+<span class="w">    </span><span class="c1">// Presets, in meters (pick your own in Step 6)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">StartMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.02</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">L2Meters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">L3Meters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.45</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// PID, in volts per meter of error</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10.0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ToleranceMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.006</span><span class="p">;</span><span class="w">     </span><span class="c1">// within 6 mm counts as "there"</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">IZoneMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.063</span><span class="p">;</span><span class="w">         </span><span class="c1">// only build up I within 6.3 cm</span>
+
+<span class="w">    </span><span class="c1">// Motion profile limits</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MaxVelocityMetersPerSecond</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MaxAccelerationMetersPerSecondSquared</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
-<p><code>MetersPerRotation</code> starts at <strong>1.0</strong> on purpose. Until you measure it, "height" on the dashboard will really be <strong>encoder rotations</strong>, which is exactly what you need for Step 4.</p>
+<p><strong>Where <code>DistancePerPulse</code> comes from.</strong> When the sprocket turns once, the chain moves one <strong>circumference</strong> of the sprocket, measured at its <strong>pitch diameter</strong> (the circle through the middle of the chain's pins, not the outside of the teeth):</p>
+<div class="highlight"><pre><span></span><code>meters per revolution = π × pitch diameter
+distance per pulse    = meters per revolution ÷ 2048
+</code></pre></div>
+<p>With a 1.432 in pitch diameter: π × 1.432 in = 4.50 in = <strong>0.114 m</strong> per turn. The sprocket's spec sheet lists its pitch diameter. If there's gearing between the encoder and the sprocket, divide by that ratio too.</p>
+<div class="admonition warning">
+<p class="admonition-title">2048, not 8192</p>
+<p>The Through Bore Encoder reports <strong>8192 counts</strong> per turn with 4X decoding, so it's tempting to divide by 8192. Don't. WPILib's <code>Encoder</code> already accounts for 4X decoding, and the WPILib docs say each "pulse" in <code>setDistancePerPulse</code> is always <strong>one full cycle (four edges)</strong>: 2048 for the Through Bore. Dividing by 8192 makes every height read <strong>4 times too small</strong>.</p>
+</div>
 <h3 id="step-2-the-elevator-subsystem">Step 2: The elevator subsystem<a class="headerlink" href="#step-2-the-elevator-subsystem" title="Permanent link">#</a></h3>
 <p>Create <code>subsystems/ElevatorSubsystem.java</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.PersistMode</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.ResetMode</span><span class="p">;</span>
@@ -167,7 +229,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.config.SparkMaxConfig</span><span class="p">;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.MathUtil</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.controller.PIDController</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.controller.ProfiledPIDController</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.trajectory.TrapezoidProfile</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.CounterBase.EncodingType</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.DriverStation</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.Encoder</span><span class="p">;</span>
@@ -178,6 +241,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.DashTable</span><span class="p">;</span>
 
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ElevatorSubsystem</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="cm">/** The heights the operator can pick. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">enum</span><span class="w"> </span><span class="n">Preset</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">START</span><span class="p">,</span><span class="w"> </span><span class="n">L2</span><span class="p">,</span><span class="w"> </span><span class="n">L3</span><span class="w"> </span><span class="p">}</span>
+
 <span class="w">  </span><span class="c1">// The NEO is BRUSHLESS (the drivetrain CIMs are brushed)</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SparkMax</span><span class="w"> </span><span class="n">m_motor</span><span class="w"> </span><span class="o">=</span>
 <span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MotorCanId</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushless</span><span class="p">);</span>
@@ -188,17 +254,25 @@
 <span class="w">      </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">EncoderInverted</span><span class="p">,</span>
 <span class="w">      </span><span class="n">EncodingType</span><span class="p">.</span><span class="na">k4X</span><span class="p">);</span>
 
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PIDController</span><span class="w"> </span><span class="n">m_pid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span>
-<span class="w">      </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">P</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">I</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">D</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// PID that follows a motion profile: it plans a smooth path to the goal,</span>
+<span class="w">  </span><span class="c1">// then uses PID to follow that path.</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">ProfiledPIDController</span><span class="w"> </span><span class="n">m_pid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ProfiledPIDController</span><span class="p">(</span>
+<span class="w">      </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kP</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kI</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kD</span><span class="p">,</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">Constraints</span><span class="p">(</span>
+<span class="w">          </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxVelocityMetersPerSecond</span><span class="p">,</span>
+<span class="w">          </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxAccelerationMetersPerSecondSquared</span><span class="p">));</span>
 
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_targetMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">   </span><span class="c1">// where the hold command is trying to be</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_lastVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">      </span><span class="c1">// for the dashboard</span>
 
-<span class="w">  </span><span class="c1">// Values go to the "Elevator" table in Elastic. The gains are tunable while you test.</span>
+<span class="w">  </span><span class="c1">// Values go to the "Elevator" table in Elastic. The gains and limits are tunable while you test.</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashTable</span><span class="w"> </span><span class="n">m_dash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashTable</span><span class="p">(</span><span class="s">"Elevator"</span><span class="p">);</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kP"</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">P</span><span class="p">);</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kI"</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">I</span><span class="p">);</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kD"</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">D</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kP"</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kP</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kI"</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kI</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kD"</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">kD</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_maxVelocity</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"Max Velocity (m per s)"</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxVelocityMetersPerSecond</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_maxAcceleration</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"Max Accel (m per s2)"</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxAccelerationMetersPerSecondSquared</span><span class="p">);</span>
 
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">ElevatorSubsystem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMaxConfig</span><span class="p">();</span>
@@ -208,20 +282,21 @@
 <span class="w">    </span><span class="n">m_motor</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
 
 <span class="w">    </span><span class="c1">// After this, getDistance() is in meters of elevator travel</span>
-<span class="w">    </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span>
-<span class="w">        </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MetersPerRotation</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">EncoderCyclesPerRev</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">setDistancePerPulse</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">DistancePerPulse</span><span class="p">);</span>
 <span class="w">    </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span><span class="w">   </span><span class="c1">// the elevator MUST start at the bottom: this is height 0</span>
 
 <span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setTolerance</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">ToleranceMeters</span><span class="p">);</span>
 <span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setIZone</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">IZoneMeters</span><span class="p">);</span>
+<span class="w">    </span><span class="n">holdHere</span><span class="p">();</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getHeightMeters</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">getDistance</span><span class="p">();</span>
 <span class="w">  </span><span class="p">}</span>
 
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">atTarget</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">atSetpoint</span><span class="p">();</span>
+<span class="w">  </span><span class="cm">/** True when the carriage has reached the GOAL, not just the profile's current step. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">atGoal</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">atGoal</span><span class="p">();</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="cm">/** Every voltage goes through here, so the soft limits can't be skipped. */</span>
@@ -237,67 +312,120 @@
 <span class="w">    </span><span class="n">m_motor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">volts</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
-<span class="w">  </span><span class="cm">/** One step of PID toward the target. */</span>
-<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">driveTowardTarget</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getHeightMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">m_targetMeters</span><span class="p">);</span>
+<span class="w">  </span><span class="cm">/** Starts a fresh profile from where the carriage is right now, with the goal right here. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">holdHere</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">reset</span><span class="p">(</span><span class="n">getHeightMeters</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setGoal</span><span class="p">(</span><span class="n">getHeightMeters</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Picks a new goal. The profile plans a smooth path from where the carriage is now. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setGoalMeters</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">meters</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">reset</span><span class="p">(</span><span class="n">getHeightMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">getRate</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setGoal</span><span class="p">(</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span>
+<span class="w">        </span><span class="n">meters</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MinHeightMeters</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxHeightMeters</span><span class="p">));</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">presetMeters</span><span class="p">(</span><span class="n">Preset</span><span class="w"> </span><span class="n">preset</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">switch</span><span class="w"> </span><span class="p">(</span><span class="n">preset</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">case</span><span class="w"> </span><span class="n">START</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">StartMeters</span><span class="p">;</span>
+<span class="w">      </span><span class="k">case</span><span class="w"> </span><span class="n">L2</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">L2Meters</span><span class="p">;</span>
+<span class="w">      </span><span class="k">case</span><span class="w"> </span><span class="n">L3</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">L3Meters</span><span class="p">;</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** One step: move the setpoint along the profile, then PID toward it. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">followProfile</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getHeightMeters</span><span class="p">());</span>
 <span class="w">    </span><span class="n">setVolts</span><span class="p">(</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span><span class="n">volts</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">));</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="c1">// ---------------------------------------------------------------- Commands</span>
 
-<span class="w">  </span><span class="cm">/** The default command: always push toward the target. Never ends. */</span>
+<span class="w">  </span><span class="cm">/** The default command: follow the profile to the goal, then hold it. Never ends. */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">holdCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">driveTowardTarget</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Hold"</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">followProfile</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Hold"</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
-<span class="w">  </span><span class="cm">/** Changes the target height. The hold command does the actual moving. */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">setTargetCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">meters</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="n">m_targetMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span>
-<span class="w">          </span><span class="n">meters</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MinHeightMeters</span><span class="p">,</span><span class="w"> </span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MaxHeightMeters</span><span class="p">);</span>
-<span class="w">      </span><span class="n">m_pid</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span>
-<span class="w">    </span><span class="p">}).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Target "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">meters</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" m"</span><span class="p">);</span>
+<span class="w">  </span><span class="cm">/** Sets a new goal and drives to it. Ends on arrival; then Hold keeps it there. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">goToPresetCommand</span><span class="p">(</span><span class="n">Preset</span><span class="w"> </span><span class="n">preset</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">followProfile</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">beforeStarting</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setGoalMeters</span><span class="p">(</span><span class="n">presetMeters</span><span class="p">(</span><span class="n">preset</span><span class="p">)))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">atGoal</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Elevator to "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">preset</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
-<span class="w">  </span><span class="cm">/** Manual control while held. When released, hold wherever the elevator is. */</span>
+<span class="w">  </span><span class="cm">/** Manual control while held. When released, hold wherever the carriage is. */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">manualCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runEnd</span><span class="p">(</span>
-<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setVolts</span><span class="p">(</span><span class="n">volts</span><span class="p">),</span>
-<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="n">m_targetMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHeightMeters</span><span class="p">();</span><span class="w">   </span><span class="c1">// hold here from now on</span>
-<span class="w">          </span><span class="n">m_pid</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span>
-<span class="w">        </span><span class="p">}).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Manual "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" V"</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runEnd</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setVolts</span><span class="p">(</span><span class="n">volts</span><span class="p">),</span><span class="w"> </span><span class="k">this</span><span class="p">::</span><span class="n">holdHere</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Manual "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" V"</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="cm">/** Call this height 0. Only use it when the elevator is all the way down. */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">zeroCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span>
-<span class="w">      </span><span class="n">m_targetMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">      </span><span class="n">holdHere</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}).</span><span class="na">ignoringDisable</span><span class="p">(</span><span class="kc">true</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Zero"</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="nd">@Override</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// While disabled, keep the target equal to the real height,</span>
+<span class="w">    </span><span class="c1">// While disabled, keep the profile and goal on the real height,</span>
 <span class="w">    </span><span class="c1">// so enabling never makes the elevator suddenly jump.</span>
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">DriverStation</span><span class="p">.</span><span class="na">isDisabled</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="n">m_targetMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHeightMeters</span><span class="p">();</span>
-<span class="w">      </span><span class="n">m_pid</span><span class="p">.</span><span class="na">reset</span><span class="p">();</span>
+<span class="w">      </span><span class="n">holdHere</span><span class="p">();</span>
 <span class="w">    </span><span class="p">}</span>
 
-<span class="w">    </span><span class="c1">// Use whatever gains are on the dashboard right now</span>
+<span class="w">    </span><span class="c1">// Use whatever gains and limits are on the dashboard right now</span>
 <span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setPID</span><span class="p">(</span><span class="n">m_kP</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="n">m_kI</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="n">m_kD</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setConstraints</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">TrapezoidProfile</span><span class="p">.</span><span class="na">Constraints</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_maxVelocity</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="n">m_maxAcceleration</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">()));</span>
 
 <span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Height (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">getHeightMeters</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Target (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_targetMeters</span><span class="p">);</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Error (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_targetMeters</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getHeightMeters</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Goal (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">getGoal</span><span class="p">().</span><span class="na">position</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Setpoint (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">getSetpoint</span><span class="p">().</span><span class="na">position</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Setpoint Velocity (m per s)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">getSetpoint</span><span class="p">().</span><span class="na">velocity</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Error (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_pid</span><span class="p">.</span><span class="na">getGoal</span><span class="p">().</span><span class="na">position</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getHeightMeters</span><span class="p">());</span>
 <span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Output (V)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_lastVolts</span><span class="p">);</span>
 <span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_motor</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"At Target"</span><span class="p">,</span><span class="w"> </span><span class="n">atTarget</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"At Goal"</span><span class="p">,</span><span class="w"> </span><span class="n">atGoal</span><span class="p">());</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>public enum Preset { START, L2, L3 }</code></td>
+<td>An <strong>enum</strong>: a type with a fixed list of values. A preset can only be one of these three, so a typo won't compile.</td>
+</tr>
+<tr>
+<td><code>m_pid.calculate(getHeightMeters())</code></td>
+<td>Moves the setpoint one 20 ms step along the profile, then returns PID's voltage to reach it</td>
+</tr>
+<tr>
+<td><code>m_pid.reset(position, velocity)</code></td>
+<td>Starts the profile from where the carriage <strong>really</strong> is, so it never plans from a stale spot</td>
+</tr>
+<tr>
+<td><code>.beforeStarting(...)</code></td>
+<td>Runs once, before the command's first loop: here, it picks the new goal</td>
+</tr>
+<tr>
+<td><code>.until(this::atGoal)</code></td>
+<td>Ends the preset command once the carriage reaches the goal. <code>atGoal()</code> checks the <strong>goal</strong>; <code>atSetpoint()</code> would only check the profile's current step.</td>
+</tr>
+<tr>
+<td><code>return switch (preset) { case START -&gt; ... }</code></td>
+<td>A <strong>switch expression</strong>: picks a value based on which preset it is</td>
+</tr>
+</tbody>
+</table>
 <p>Three safety features are built in:</p>
 <table>
 <thead>
@@ -312,12 +440,12 @@
 <td>Code that asks for a height above the top or below the bottom. The motor won't push past either end.</td>
 </tr>
 <tr>
-<td><strong>Target clamping</strong> in <code>setTargetCommand</code></td>
-<td>A typo like <code>setTargetCommand(5.0)</code> (5 meters!) just becomes "go to the top."</td>
+<td><strong>Goal clamping</strong> in <code>setGoalMeters</code></td>
+<td>A typo like <code>L3Meters = 4.5</code> (4.5 meters!) just becomes "go to the top."</td>
 </tr>
 <tr>
-<td><strong>Target follows height while disabled</strong></td>
-<td>Enabling with the target somewhere else, which would make the elevator lurch the instant you enable</td>
+<td><strong>Profile and goal follow the height while disabled</strong></td>
+<td>Enabling with an old goal, which would make the elevator lurch the instant you enable</td>
 </tr>
 </tbody>
 </table>
@@ -334,11 +462,11 @@
 <span class="w">    </span><span class="n">m_operator</span><span class="p">.</span><span class="na">povDown</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">m_elevator</span><span class="p">.</span><span class="na">manualCommand</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">));</span><span class="w">  </span><span class="c1">// manual down (gravity helps)</span>
 <span class="w">    </span><span class="n">m_operator</span><span class="p">.</span><span class="na">back</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_elevator</span><span class="p">.</span><span class="na">zeroCommand</span><span class="p">());</span>
 
-<span class="w">    </span><span class="c1">// Preset heights: you'll add these in Step 6</span>
+<span class="w">    </span><span class="c1">// Presets: you'll add these in Step 6</span>
 </code></pre></div>
 <p>Manual down uses less voltage than manual up, because gravity is already pulling the carriage down.</p>
-<h3 id="step-4-check-directions-and-measure-the-scale">Step 4: Check directions and measure the scale<a class="headerlink" href="#step-4-check-directions-and-measure-the-scale" title="Permanent link">#</a></h3>
-<p>Deploy with the elevator <strong>all the way down</strong>. <code>MetersPerRotation</code> is still 1.0, so <strong>Height</strong> on the dashboard shows encoder rotations.</p>
+<h3 id="step-4-check-directions-and-the-scale">Step 4: Check directions and the scale<a class="headerlink" href="#step-4-check-directions-and-the-scale" title="Permanent link">#</a></h3>
+<p>Deploy with the elevator <strong>all the way down</strong>. In Elastic, add <strong>Height (m)</strong> from the <strong>Elevator</strong> table.</p>
 <p><strong>Direction:</strong></p>
 <ol>
 <li>Enable. <strong>Hold D-pad up</strong> for a moment, gently.</li>
@@ -367,51 +495,60 @@
 </tbody>
 </table>
 <p>Don't continue until both directions are right.</p>
-<p><strong>Scale:</strong></p>
+<p><strong>Scale:</strong> check that the pitch diameter math matches the real elevator.</p>
 <ol>
 <li>Lower the elevator to the bottom and press <strong>Back</strong> (zero).</li>
 <li>Use D-pad up to raise it partway. Disable.</li>
-<li>Measure how far the carriage rose with a tape measure, in meters (or inches, then multiply by 0.0254).</li>
-<li>Read <strong>Height</strong> on the dashboard. That's the number of rotations.</li>
-<li><code>MetersPerRotation = meters raised ÷ rotations</code></li>
+<li>Measure how far the carriage rose with a tape measure, in meters (or inches × 0.0254).</li>
+<li>Compare it with <strong>Height</strong> on the dashboard. They should match within about a centimeter.</li>
 </ol>
-<p><strong>Example:</strong> the carriage rose 0.42 m and the dashboard shows 3.0 rotations. <code>MetersPerRotation</code> = 0.42 ÷ 3.0 = <strong>0.14</strong>.</p>
-<p>Put your number in <code>Constants</code>, deploy, and check: raise it again, and <strong>Height</strong> should now match the tape measure.</p>
-<div class="admonition info">
-<p class="admonition-title">Why measure instead of calculate?</p>
-<p>You can calculate it from the sprocket or spool size (a 22-tooth sprocket on #25 chain moves 22 × 0.25 in = 5.5 in per turn), but cascade rigging, gearing between the encoder and the sprocket, and stretch all change the real answer. Measuring catches all of it at once.</p>
-</div>
+<table>
+<thead>
+<tr>
+<th>What you see</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Height is about <strong>4 times too small</strong></td>
+<td><code>DistancePerPulse</code> divides by 8192 instead of 2048</td>
+</tr>
+<tr>
+<td>Height is off by some other steady ratio</td>
+<td>Wrong pitch diameter, gearing between the encoder and the sprocket, or a cascade elevator (where the top stage moves faster than the chain)</td>
+</tr>
+</tbody>
+</table>
+<p>If it's off and you can't find why, scale it from your measurement: change <code>MetersPerRevolution</code> to <code>MetersPerRevolution × (tape measure ÷ Height)</code>.</p>
 <h3 id="step-5-find-the-top">Step 5: Find the top<a class="headerlink" href="#step-5-find-the-top" title="Permanent link">#</a></h3>
 <p>Use D-pad up to raise the elevator <strong>slowly</strong> toward the top. Stop a few centimeters before the hard stop and read <strong>Height</strong>. Set <code>MaxHeightMeters</code> to that number, minus 2 to 3 cm of safety margin. Deploy.</p>
 <p>Now hold D-pad up near the top. The soft limit should stop the motor just below your max.</p>
 <h3 id="step-6-preset-heights">Step 6: Preset heights<a class="headerlink" href="#step-6-preset-heights" title="Permanent link">#</a></h3>
-<p>Pick three heights between 0 and your max. Add them to <code>kElevatorConstants</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">BottomMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.02</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">MiddleMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="p">;</span><span class="w">   </span><span class="c1">// use your own</span>
-<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">TopMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.45</span><span class="p">;</span><span class="w">      </span><span class="c1">// just under MaxHeightMeters</span>
+<p>Pick three heights between 0 and your max, and put them in <code>StartMeters</code>, <code>L2Meters</code>, and <code>L3Meters</code>. Then bind them. Add <code>import frc.robot.subsystems.ElevatorSubsystem.Preset;</code> at the top of <code>RobotContainer</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_operator</span><span class="p">.</span><span class="na">a</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_elevator</span><span class="p">.</span><span class="na">goToPresetCommand</span><span class="p">(</span><span class="n">Preset</span><span class="p">.</span><span class="na">START</span><span class="p">));</span>
+<span class="w">    </span><span class="n">m_operator</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_elevator</span><span class="p">.</span><span class="na">goToPresetCommand</span><span class="p">(</span><span class="n">Preset</span><span class="p">.</span><span class="na">L2</span><span class="p">));</span>
+<span class="w">    </span><span class="n">m_operator</span><span class="p">.</span><span class="na">y</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_elevator</span><span class="p">.</span><span class="na">goToPresetCommand</span><span class="p">(</span><span class="n">Preset</span><span class="p">.</span><span class="na">L3</span><span class="p">));</span>
 </code></pre></div>
-<p>Bind them:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_operator</span><span class="p">.</span><span class="na">a</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_elevator</span><span class="p">.</span><span class="na">setTargetCommand</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">BottomMeters</span><span class="p">));</span>
-<span class="w">    </span><span class="n">m_operator</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_elevator</span><span class="p">.</span><span class="na">setTargetCommand</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">MiddleMeters</span><span class="p">));</span>
-<span class="w">    </span><span class="n">m_operator</span><span class="p">.</span><span class="na">y</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_elevator</span><span class="p">.</span><span class="na">setTargetCommand</span><span class="p">(</span><span class="n">kElevatorConstants</span><span class="p">.</span><span class="na">TopMeters</span><span class="p">));</span>
-</code></pre></div>
+<p><strong>Set up Elastic for tuning:</strong> one <strong>Graph</strong> with <strong>Goal</strong>, <strong>Setpoint</strong>, and <strong>Height</strong> together, plus <strong>Text Display</strong> widgets for <strong>kP</strong>, <strong>kI</strong>, <strong>kD</strong>, <strong>Max Velocity</strong>, and <strong>Max Accel</strong>, and <strong>Error</strong> and <strong>Output (V)</strong>.</p>
+<p>Press <strong>B</strong>. Watch the graph: <strong>Goal</strong> jumps to L2, <strong>Setpoint</strong> ramps smoothly up to it, and <strong>Height</strong> follows the setpoint.</p>
 <h3 id="attempt-1-p-only-and-the-sag">Attempt 1: P only, and the sag<a class="headerlink" href="#attempt-1-p-only-and-the-sag" title="Permanent link">#</a></h3>
-<p>With <strong>I and D at 0</strong> and P = 10, press <strong>B</strong> (middle). Graph <strong>Height</strong> and <strong>Target</strong> together.</p>
-<p><strong>What you'll see:</strong> The elevator rises and settles <strong>below</strong> the target, and stays there. That gap is <strong>sag</strong>, and gravity causes it.</p>
+<p>With <strong>kI and kD at 0</strong> and kP = 10, press <strong>B</strong> (L2) and let it settle.</p>
+<p><strong>What you'll see:</strong> The carriage follows the setpoint a little <strong>below</strong> it the whole way up, then settles <strong>below</strong> the goal and stays there. That gap is <strong>sag</strong>, and gravity causes it.</p>
 <p>Here's why. To hold the carriage still, the motor needs some voltage, call it the <strong>hold voltage</strong>. P only makes voltage when there's error:</p>
-<div class="highlight"><pre><span></span><code>volts = P × error
+<div class="highlight"><pre><span></span><code>volts = kP × error
 </code></pre></div>
-<p>So the elevator sinks until the error is just big enough to make the hold voltage:</p>
-<div class="highlight"><pre><span></span><code>sag = hold voltage ÷ P
+<p>So the carriage sinks until the error is just big enough to make the hold voltage:</p>
+<div class="highlight"><pre><span></span><code>sag = hold voltage ÷ kP
 </code></pre></div>
 <p><strong>Measure it.</strong> Fill in this table, waiting for the elevator to settle each time:</p>
 <table>
 <thead>
 <tr>
-<th>P</th>
+<th>kP</th>
 <th>Sag (Error, m)</th>
 <th>Output (V) while holding</th>
-<th>P × sag</th>
+<th>kP × sag</th>
 </tr>
 </thead>
 <tbody>
@@ -438,33 +575,36 @@
 <p>The last column should come out about the <strong>same</strong> every time. That number is your elevator's hold voltage: what it costs to fight gravity.</p>
 <div class="admonition question">
 <p class="admonition-title">Think about it</p>
-<p>Doubling P cuts the sag in half. Why can't you just make P huge to get rid of the sag?</p>
+<p>Doubling kP cuts the sag in half. Why can't you just make kP huge to get rid of the sag?</p>
 </div>
 <h3 id="attempt-2-higher-p-and-the-bounce">Attempt 2: Higher P, and the bounce<a class="headerlink" href="#attempt-2-higher-p-and-the-bounce" title="Permanent link">#</a></h3>
-<p>Keep raising P (change <strong>kP</strong> in the <strong>Elevator</strong> table in Elastic). Move between presets <strong>A</strong>, <strong>B</strong>, and <strong>Y</strong>.</p>
-<p><strong>What you'll see:</strong> The sag shrinks, but the elevator starts to <strong>overshoot and bounce</strong> at each preset, and with very high P it may oscillate. Notice that moving <strong>down</strong> usually overshoots more than moving <strong>up</strong>: on the way down, gravity is helping the motor.</p>
-<p>Back P off to the highest value that doesn't bounce badly.</p>
+<p>Keep raising <strong>kP</strong> in Elastic. Move between presets <strong>A</strong>, <strong>B</strong>, and <strong>Y</strong>.</p>
+<p><strong>What you'll see:</strong> The sag shrinks. Because the profile slows the setpoint down before the goal, there's much less overshoot than a plain PID would have, but with very high kP the carriage starts to <strong>jitter or bounce</strong> around the setpoint. Moving <strong>down</strong> usually bounces more than moving up: on the way down, gravity is helping the motor.</p>
+<p>Back kP off to the highest value that doesn't bounce badly.</p>
 <h3 id="attempt-3-add-d-to-stop-the-bounce">Attempt 3: Add D to stop the bounce<a class="headerlink" href="#attempt-3-add-d-to-stop-the-bounce" title="Permanent link">#</a></h3>
-<p>Raise <strong>D</strong> in small steps (try 0.5, then 1.0, then 2.0) until the bounce settles. If the motor starts to buzz or jitter, D is too high.</p>
-<p>With D tamping down the bounce, you can usually raise P a bit more, which shrinks the sag further. But the sag never completely goes away.</p>
+<p>Raise <strong>kD</strong> in small steps (try 0.5, then 1.0, then 2.0) until the bounce settles. If the motor starts to buzz, kD is too high.</p>
+<p>With D tamping down the bounce, you can usually raise kP a bit more, which shrinks the sag further. But the sag never completely goes away.</p>
 <h3 id="attempt-4-add-i-to-get-rid-of-the-sag">Attempt 4: Add I to get rid of the sag<a class="headerlink" href="#attempt-4-add-i-to-get-rid-of-the-sag" title="Permanent link">#</a></h3>
-<p>This is where <strong>I</strong> earns its place. While the elevator sits below the target, the integral keeps adding up that error, so the voltage keeps rising until it's exactly the hold voltage, and the error goes to <strong>zero</strong>.</p>
+<p>This is where <strong>I</strong> earns its place. While the carriage sits below the goal, the integral keeps adding up that error, so the voltage keeps rising until it's exactly the hold voltage, and the error goes to <strong>zero</strong>.</p>
 <ol>
-<li>Set I small, like 2. Press <strong>B</strong>.</li>
-<li>Watch the graph: the elevator rises, settles a little low, then <strong>creeps up</strong> to the target over a second or two.</li>
+<li>Set kI small, like 2. Press <strong>B</strong>.</li>
+<li>Watch the graph: the carriage arrives a little low, then <strong>creeps up</strong> to the goal over a second or two.</li>
 <li>Watch <strong>Output (V)</strong> as it creeps. It climbs until it reaches about the hold voltage you measured in Attempt 1.</li>
-<li>Raise I until the creep is quick but doesn't overshoot. Too much I makes the elevator slowly swing above and below the target.</li>
+<li>Raise kI until the creep is quick but doesn't overshoot. Too much kI makes the carriage slowly swing above and below the goal.</li>
 </ol>
 <div class="admonition warning">
 <p class="admonition-title">Why the IZone matters here</p>
-<p>During a long move from bottom to top, the error is big the whole time. Without a limit, I would pile up a huge total on the way and fling the carriage past the top preset. <code>setIZone(0.05)</code> only lets I build up within 5 cm of the target, where it's needed for the last bit.</p>
+<p>During a long move from START to L3, the carriage trails the setpoint the whole way. Without a limit, I would pile up that error on the way and fling the carriage past L3. <code>setIZone(0.063)</code> only lets I build up within 6.3 cm, where it's needed for the last bit.</p>
 </div>
-<h3 id="attempt-5-put-it-all-together">Attempt 5: Put it all together<a class="headerlink" href="#attempt-5-put-it-all-together" title="Permanent link">#</a></h3>
-<p>With your best P, I, and D:</p>
+<h3 id="attempt-5-speed-up-the-profile">Attempt 5: Speed up the profile<a class="headerlink" href="#attempt-5-speed-up-the-profile" title="Permanent link">#</a></h3>
+<p>The profile limits are tunable too. Raise <strong>Max Velocity</strong> and <strong>Max Accel</strong> in Elastic a little at a time, and move between presets.</p>
+<p><strong>What you'll see:</strong> Moves get faster. Then, at some point, <strong>Height</strong> falls further and further behind <strong>Setpoint</strong> during the move, and overshoots at the end. That's the motor running out of power: the profile is asking for more than the elevator can do (or more than <code>MaxVolts</code> allows). Back the limits off to where Height stays close to Setpoint.</p>
+<h3 id="attempt-6-put-it-all-together">Attempt 6: Put it all together<a class="headerlink" href="#attempt-6-put-it-all-together" title="Permanent link">#</a></h3>
+<p>With your best gains and limits:</p>
 <ol>
-<li>Move bottom → top → middle → bottom. Every preset should arrive quickly, without much bounce, and settle exactly on target.</li>
-<li>Carefully set a light object (like a bag of small parts) on the carriage while it holds at the middle. Watch it dip, then watch I bring it back to the target. Remove it, and watch it recover the other way.</li>
-<li>Copy your gains into <code>Constants</code> (dashboard edits are lost on reboot).</li>
+<li>Move START → L3 → L2 → START. Every preset should arrive smoothly, without much bounce, and settle exactly on the goal.</li>
+<li>Carefully set a light object (like a bag of small parts) on the carriage while it holds at L2. Watch it dip, then watch I bring it back to the goal. Remove it, and watch it recover the other way.</li>
+<li>Copy your gains and limits into <code>Constants</code> (dashboard edits are lost on reboot).</li>
 </ol>
 <h3 id="scorecard">Scorecard<a class="headerlink" href="#scorecard" title="Permanent link">#</a></h3>
 <table>
@@ -499,6 +639,13 @@
 <td></td>
 <td></td>
 </tr>
+<tr>
+<td>P + I + D, faster profile</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <h3 id="commit">Commit<a class="headerlink" href="#commit" title="Permanent link">#</a></h3>
@@ -520,11 +667,23 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 </tr>
 <tr>
 <td>Elevator doesn't move when you press a preset</td>
-<td>The default hold command isn't set, or P is too small to overcome gravity</td>
+<td>kP is too small to overcome gravity, or the preset is outside the min/max limits</td>
+</tr>
+<tr>
+<td>Elevator falls a little after a preset command finishes</td>
+<td>The default hold command isn't set</td>
 </tr>
 <tr>
 <td>Elevator lurches the instant you enable</td>
 <td>The disabled check in <code>periodic()</code> is missing</td>
+</tr>
+<tr>
+<td>Every height is 4 times too small</td>
+<td><code>DistancePerPulse</code> divides by 8192 instead of 2048</td>
+</tr>
+<tr>
+<td>Height falls far behind Setpoint during moves</td>
+<td>Max Velocity or Max Accel is too high for the elevator</td>
 </tr>
 <tr>
 <td>Heights are all wrong after a restart</td>
@@ -536,36 +695,48 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 </tr>
 <tr>
 <td>Big overshoot on long moves only</td>
-<td>IZone is too big, or missing</td>
+<td>IZone is too big or missing, or the profile is too fast</td>
 </tr>
 </tbody>
 </table>
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Pass the direction check and measure <code>MetersPerRotation</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Work out <code>DistancePerPulse</code> from your sprocket's pitch diameter, and check it with a tape measure</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find the top and set a safe <code>MaxHeightMeters</code></li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Fill in the sag table for three values of P and find your hold voltage</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Tune P, then D, then I, and fill in the scorecard</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Tune P, then D, then I, then the profile limits, and fill in the scorecard</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Do the weight test with P only, then with P + I + D. What's different?</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a fourth preset on the right bumper</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make the WCD's <strong>auto</strong> raise the elevator to the middle, drive forward, then lower it. Use <code>m_elevator.setTargetCommand(...)</code> followed by <code>Commands.waitUntil(m_elevator::atTarget)</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a fourth preset, <code>L4</code>, to the enum, <code>presetMeters</code>, and the right bumper</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make the WCD's <strong>auto</strong> raise the elevator to L2, drive forward, then lower it to START. <code>goToPresetCommand</code> ends when it arrives, so you can chain it with <code>.andThen(...)</code>.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: if the elevator has a bottom limit switch, make it re-zero the encoder automatically whenever it's pressed (<a href="lab4-limit-switch.html">Lab 4</a>)</li>
 </ul>
 <h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
 <details class="question">
-<summary>Why can't the elevator's PID command end when it arrives, like the wheel's did?</summary>
-<p>The elevator needs voltage just to hold still against gravity. If the command ended, the motor would stop pushing and the carriage would fall.</p>
+<summary>What's the difference between the goal and the setpoint?</summary>
+<p>The goal is the preset you picked. The setpoint is where the profile says the carriage should be right now; it moves toward the goal a little every 20 ms.</p>
 </details>
 <details class="question">
-<summary>Why do the preset buttons only change the target instead of moving the elevator?</summary>
-<p>The hold command is always running as the default command and does all the moving. The buttons just tell it where to go, so there's only ever one thing controlling the motor.</p>
+<summary>The preset command ends when it arrives. Why doesn't the carriage fall?</summary>
+<p>The hold command is the default command, so it starts again as soon as the preset command ends, and keeps holding the same goal.</p>
 </details>
 <details class="question">
-<summary>With P only, why does the elevator settle below the target?</summary>
-<p>P only makes voltage when there's error. Holding the carriage up takes voltage, so the elevator sinks until the error is big enough to make it: sag = hold voltage ÷ P.</p>
+<summary>Why does <code>setGoalMeters</code> call <code>m_pid.reset(...)</code> first?</summary>
+<p>So the profile starts from where the carriage really is, moving at its real speed. Otherwise it could plan from an old position and make the carriage jump.</p>
 </details>
 <details class="question">
-<summary>The hold voltage is 0.8 V and P = 20. How much does the elevator sag with P only?</summary>
+<summary>Your sprocket's pitch diameter is 1.757 in. How far does the carriage move per turn?</summary>
+<p>π × 1.757 in ≈ 5.52 in ≈ <strong>0.140 m</strong></p>
+</details>
+<details class="question">
+<summary>Why is <code>DistancePerPulse</code> divided by 2048 and not 8192?</summary>
+<p>WPILib's <code>Encoder</code> already accounts for 4X decoding. <code>setDistancePerPulse</code> always wants distance per full cycle, and the Through Bore has 2048 cycles per turn.</p>
+</details>
+<details class="question">
+<summary>With P only, why does the elevator settle below the goal?</summary>
+<p>P only makes voltage when there's error. Holding the carriage up takes voltage, so the carriage sinks until the error is big enough to make it: sag = hold voltage ÷ kP.</p>
+</details>
+<details class="question">
+<summary>The hold voltage is 0.8 V and kP = 20. How much does the elevator sag with P only?</summary>
 <p>0.8 ÷ 20 = <strong>0.04 m</strong> (4 cm)</p>
 </details>
 <details class="question">
