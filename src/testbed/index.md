@@ -55,7 +55,7 @@ Labs 2, 7, 8, and 10 use the team's **West Coast Drive**, a six-wheel, skid stee
 
 ![The team's West Coast Drive chassis from above, with its electronics on the belly pan](../assets/photos/wcd-chassis.jpg)
 
-<p class="credit">The RoboJacks West Coast Drive chassis, before the elevator goes on. Front is at the top of the photo.</p>
+<p class="credit">The RoboJacks West Coast Drive chassis while it was still being assembled, before the rest of the motor controllers, the NavX2, and the elevator went on. Front is at the top of the photo.</p>
 
 !!! danger "WCD safety"
     Test new drive code **on blocks** first, with the wheels off the ground. On the floor, use a big open space, keep people out of the robot's path, and start at low speed. Keep hands out of the elevator, and never reach under a raised carriage.

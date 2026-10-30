@@ -45,7 +45,7 @@ flowchart LR
 
 ![The team's West Coast Drive chassis from above, with its electronics on the belly pan](../assets/photos/wcd-chassis.jpg)
 
-<p class="credit">The RoboJacks West Coast Drive chassis, before the elevator goes on. Front is at the top of the photo.</p>
+<p class="credit">The RoboJacks West Coast Drive chassis while it was still being assembled, before the rest of the motor controllers, the NavX2, and the elevator went on. Front is at the top of the photo.</p>
 
 Find each of these on the real chassis before you write any code:
 
