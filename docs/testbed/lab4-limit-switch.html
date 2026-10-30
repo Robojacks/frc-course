@@ -31,7 +31,7 @@
   <aside class="sidebar">
     <details class="sidebar-toggle" open>
       <summary>Labs menu</summary>
-      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html" class="current" aria-current="page">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html" class="current" aria-current="page">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
     </details>
   </aside>
   <main id="content" class="content">
@@ -103,10 +103,10 @@
 <p><code>isLimitPressed()</code> is much clearer than <code>getSwitch()</code>. Everywhere else in your code, <code>if (isLimitPressed())</code> reads like English and hides the "pressed is false" wiring detail in one place.</p>
 </div>
 <p>Add it to <code>periodic()</code> so you can see it:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putBoolean</span><span class="p">(</span><span class="s">"Brushless/Limit Pressed"</span><span class="p">,</span><span class="w"> </span><span class="n">isLimitPressed</span><span class="p">());</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Limit Pressed"</span><span class="p">,</span><span class="w"> </span><span class="n">isLimitPressed</span><span class="p">());</span>
 </code></pre></div>
 <h3 id="step-3-check-it-on-the-dashboard">Step 3: Check it on the dashboard<a class="headerlink" href="#step-3-check-it-on-the-dashboard" title="Permanent link">#</a></h3>
-<p>Deploy (the robot can stay <strong>disabled</strong>). Open the dashboard and find <strong>Brushless/Limit Pressed</strong>.</p>
+<p>Deploy (the robot can stay <strong>disabled</strong>). In Elastic, find <strong>Limit Pressed</strong> in the <strong>Brushless</strong> table and show it as a <strong>Boolean Box</strong>.</p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Not touching the switch: shows <strong>false</strong></li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Holding the switch down: shows <strong>true</strong></li>
@@ -184,7 +184,7 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 </table>
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Get <strong>Limit Pressed</strong> reading correctly on the dashboard</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Get <strong>Limit Pressed</strong> reading correctly in Elastic</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Spin until the switch is pressed with D-pad up</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Hold the switch, then tap D-pad up. Explain what happens with and without <code>.unless</code>.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Use the <strong>second</strong> limit switch on the test bed. Make D-pad down spin <strong>backward</strong> until it's pressed, like an elevator going down to its bottom switch.</li>

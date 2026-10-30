@@ -58,6 +58,12 @@ Open `RobotContainer.java` and add the knob as a field, next to the controller:
 
 Import `edu.wpi.first.wpilibj.AnalogPotentiometer`.
 
+Add a `DashTable` for the knob's values, below the knob:
+
+```java
+  private final DashTable m_knobDash = new DashTable("Knob");
+```
+
 !!! info "Why put the knob in RobotContainer?"
     The knob is a **control**, like the Xbox controller, not part of the motor's mechanism. Controls live in `RobotContainer`; mechanisms live in subsystems.
 
@@ -72,7 +78,7 @@ And add the method to `RobotContainer`:
 ```java
   /** Called every loop from Robot.robotPeriodic(). */
   public void updateDashboard() {
-    SmartDashboard.putNumber("Knob/Turns", m_knob.get());
+    m_knobDash.log("Turns", m_knob.get());
   }
 ```
 
@@ -142,7 +148,7 @@ Add this method to `RobotContainer`:
 Add the speed to `updateDashboard()` so you can watch it:
 
 ```java
-    SmartDashboard.putNumber("Knob/Speed", knobToSpeed());
+    m_knobDash.log("Speed", knobToSpeed());
 ```
 
 ### Step 5: Let the knob drive the motor

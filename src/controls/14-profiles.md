@@ -161,7 +161,7 @@ You give them the constraints and feedforward gains once, then just send a goal.
 - [ ] Open the **ArmSimulation** example project
 - [ ] Replace its controller with a `ProfiledPIDController` plus `ArmFeedforward`
 - [ ] Bind two buttons to two angles and tune it to move smoothly between them
-- [ ] Graph the goal, setpoint, and measured angle together in Glass or AdvantageScope
+- [ ] Graph the goal, setpoint, and measured angle together in Elastic or AdvantageScope
 - [ ] Remove the `.beforeStarting(...)` reset and see what happens on the first move. Then put it back.
 
 ## Check yourself

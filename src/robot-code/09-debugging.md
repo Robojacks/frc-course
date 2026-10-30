@@ -23,22 +23,24 @@ Your robot runs 50 loops a second, so you need a way to watch values change live
 
 **Don't use `System.out.println` for live values.** Fifty lines a second floods the console, and you can't read any of them.
 
-**Use NetworkTables through `SmartDashboard`.** It sends each value to the dashboard and updates it in place:
+**Send values over NetworkTables.** Each value updates in place on the dashboard. With the `DashTable` helper from [Lesson 6.1](06b-dashboards.md):
 
 ```java
+private final DashTable dash = new DashTable("Arm");
+
 @Override
 public void periodic() {
-    SmartDashboard.putNumber("Arm/Angle (deg)", getAngleDegrees());
-    SmartDashboard.putNumber("Arm/Target (deg)", targetDegrees);
-    SmartDashboard.putNumber("Arm/Output (V)", lastVoltage);
-    SmartDashboard.putBoolean("Arm/At Target", atTarget());
+    dash.log("Angle (deg)", getAngleDegrees());
+    dash.log("Target (deg)", targetDegrees);
+    dash.log("Output (V)", lastVoltage);
+    dash.log("At Target", atTarget());
 }
 ```
 
 A subsystem's `periodic()` runs every loop, which makes it the right place for telemetry.
 
 !!! tip "Name values like folders"
-    `"Arm/Angle (deg)"` groups every arm value under **Arm** on the dashboard, and the unit in parentheses means nobody has to guess.
+    A `DashTable` named `"Arm"` groups every arm value under **Arm** on the dashboard, and `"Angle (deg)"`, and the unit in parentheses means nobody has to guess.
 
 **What to publish for any mechanism:**
 
@@ -58,10 +60,12 @@ All of these read the same NetworkTables data, so you can switch freely:
 |---|---|
 | **Sim GUI** | Quick checks during simulation |
 | **Glass** | Plotting values live, viewing field and mechanism widgets |
-| **Elastic** | A clean driver dashboard for matches |
+| **Elastic** | The driver dashboard, and this course's everyday dashboard ([Lesson 6.1](06b-dashboards.md)) |
 | **AdvantageScope** | Graphs, 3D robot views, and replaying log files after a match |
 
-**Seeing commands on the dashboard:**
+SmartDashboard and Shuffleboard are removed in WPILib 2027, so this course doesn't use them.
+
+**Seeing commands on the dashboard** (Sendables still use `SmartDashboard.putData` in 2026):
 ```java
 SmartDashboard.putData(CommandScheduler.getInstance()); // what's running right now
 SmartDashboard.putData(intake);                         // which command owns the intake
@@ -179,14 +183,14 @@ public void periodic() {
 ```
 
 ## Try it
-- [ ] Add the four standard values (sensor, target, output, state) for a subsystem to the dashboard, and watch them in Sim GUI or Glass
+- [ ] Add the four standard values (sensor, target, output, state) for a subsystem with `DashTable`, and watch them in Elastic (IP mode **localhost** in simulation)
 - [ ] Add `SmartDashboard.putData(CommandScheduler.getInstance())` and watch commands start and stop as you press buttons
 - [ ] Open the **ArmSimulation** example, run it, and move the arm with the joystick. Find its `simulationPeriodic()`.
 - [ ] Add `DataLogManager.start()`, run in sim for a minute, then open the log in AdvantageScope
 - [ ] Break your intake on purpose (wrong PWM port), then walk the debugging process to find it. Which layer revealed it?
 
 ## Check yourself
-??? question "Why use SmartDashboard instead of `println` for live values?"
+??? question "Why send values over NetworkTables instead of using `println`?"
     It updates one value in place instead of printing 50 lines per second.
 
 ??? question "What four values should you publish for any mechanism?"

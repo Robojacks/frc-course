@@ -18,6 +18,7 @@
 | **Current limit** | A cap on how many amps a motor can draw, set in code | 4 |
 | **Deadband** | A small range around zero that's treated as exactly zero | 10 |
 | **Default command** | The command a subsystem runs when nothing else is using it | 7, 7.1 |
+| **Elastic** | The drag-and-drop driver dashboard that comes with WPILib | 6.1 |
 | **Encoder** | A sensor that measures shaft rotation | 8 |
 | **Error** | Setpoint minus measurement | 12 |
 | **Feedforward** | Predicting the needed output from a model of the mechanism | 13 |
@@ -32,11 +33,13 @@
 | **Measurement** | The value a sensor reports right now | 12 |
 | **Merge conflict** | Two changes to the same lines that Git can't combine automatically | 1 |
 | **Motion profile** | A planned smooth path of position and velocity over time | 14 |
-| **NetworkTables** | The system that sends values between the robot and dashboards | 9 |
+| **NetworkTables** | The system that sends values between the robot and dashboards | 6.1, 9 |
 | **Open loop** | Control without checking a sensor | 12 |
+| **Publisher** | A NetworkTables object that sends values on one topic | 6.1 |
 | **Pull request (PR)** | A request to merge a branch, with review | 15 |
 | **Requirement** | A command declaring that it uses a subsystem | 7.1 |
 | **roboRIO** | The robot's main computer, which runs your code | 4 |
+| **Sendable** | A WPILib object (like a chooser or the scheduler) that describes itself to a dashboard | 6.1 |
 | **Setpoint** | The value you want right now (target angle, target speed) | 12, 14 |
 | **Simulation** | Running robot code on your laptop with fake hardware | 0, 9 |
 | **Solenoid** | An electrically controlled air valve | 5 |
@@ -44,5 +47,7 @@
 | **Subsystem** | A class representing one robot mechanism and its hardware | 7 |
 | **SysId** | WPILib tool that measures feedforward constants from real tests | 13.1 |
 | **Teleop** | The driver-controlled part of a match | 10 |
+| **Topic** | One named value in NetworkTables, like `/Wheel/Position (rot)` | 6.1 |
 | **Trigger** | A condition (like a button) that starts or stops a command | 7, 7.1 |
+| **Tunable** | A number you can change from the dashboard while the robot runs | 6.1 |
 | **Unit test** | Code that automatically checks other code | 16 |

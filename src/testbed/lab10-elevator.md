@@ -122,11 +122,11 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.kElevatorConstants;
+import frc.robot.DashTable;
 
 public class ElevatorSubsystem extends SubsystemBase {
   // The NEO is BRUSHLESS (the drivetrain CIMs are brushed)
@@ -145,6 +145,12 @@ public class ElevatorSubsystem extends SubsystemBase {
   private double m_targetMeters = 0.0;   // where the hold command is trying to be
   private double m_lastVolts = 0.0;      // for the dashboard
 
+  // Values go to the "Elevator" table in Elastic. The gains are tunable while you test.
+  private final DashTable m_dash = new DashTable("Elevator");
+  private final DoubleSupplier m_kP = m_dash.tunable("kP", kElevatorConstants.P);
+  private final DoubleSupplier m_kI = m_dash.tunable("kI", kElevatorConstants.I);
+  private final DoubleSupplier m_kD = m_dash.tunable("kD", kElevatorConstants.D);
+
   public ElevatorSubsystem() {
     SparkMaxConfig config = new SparkMaxConfig();
     config.smartCurrentLimit(kElevatorConstants.CurrentLimit);
@@ -159,7 +165,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     m_pid.setTolerance(kElevatorConstants.ToleranceMeters);
     m_pid.setIZone(kElevatorConstants.IZoneMeters);
-    SmartDashboard.putData("Elevator/PID", m_pid);   // tune live
   }
 
   public double getHeightMeters() {
@@ -232,12 +237,15 @@ public class ElevatorSubsystem extends SubsystemBase {
       m_pid.reset();
     }
 
-    SmartDashboard.putNumber("Elevator/Height (m)", getHeightMeters());
-    SmartDashboard.putNumber("Elevator/Target (m)", m_targetMeters);
-    SmartDashboard.putNumber("Elevator/Error (m)", m_targetMeters - getHeightMeters());
-    SmartDashboard.putNumber("Elevator/Output (V)", m_lastVolts);
-    SmartDashboard.putNumber("Elevator/Current (A)", m_motor.getOutputCurrent());
-    SmartDashboard.putBoolean("Elevator/At Target", atTarget());
+    // Use whatever gains are on the dashboard right now
+    m_pid.setPID(m_kP.getAsDouble(), m_kI.getAsDouble(), m_kD.getAsDouble());
+
+    m_dash.log("Height (m)", getHeightMeters());
+    m_dash.log("Target (m)", m_targetMeters);
+    m_dash.log("Error (m)", m_targetMeters - getHeightMeters());
+    m_dash.log("Output (V)", m_lastVolts);
+    m_dash.log("Current (A)", m_motor.getOutputCurrent());
+    m_dash.log("At Target", atTarget());
   }
 }
 ```
@@ -357,7 +365,7 @@ The last column should come out about the **same** every time. That number is yo
     Doubling P cuts the sag in half. Why can't you just make P huge to get rid of the sag?
 
 ### Attempt 2: Higher P, and the bounce
-Keep raising P (change it on the dashboard, under `Elevator/PID`). Move between presets **A**, **B**, and **Y**.
+Keep raising P (change **kP** in the **Elevator** table in Elastic). Move between presets **A**, **B**, and **Y**.
 
 **What you'll see:** The sag shrinks, but the elevator starts to **overshoot and bounce** at each preset, and with very high P it may oscillate. Notice that moving **down** usually overshoots more than moving **up**: on the way down, gravity is helping the motor.
 

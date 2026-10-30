@@ -203,14 +203,15 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.DashTable;
 
 public class Arm extends SubsystemBase {
     private final PWMSparkMax motor = new PWMSparkMax(1);
     private final Encoder encoder = new Encoder(0, 1);
     private final PIDController pid = new PIDController(0.05, 0.0, 0.002);
+    private final DashTable dash = new DashTable("Arm");   // Lesson 6.1
 
     public Arm() {
         encoder.setDistancePerPulse(ArmConstants.DEGREES_PER_PULSE);
@@ -241,10 +242,10 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Arm/Angle", getAngleDegrees());
-        SmartDashboard.putNumber("Arm/Setpoint", pid.getSetpoint());
-        SmartDashboard.putNumber("Arm/Error", pid.getError());
-        SmartDashboard.putNumber("Arm/Output", motor.get());
+        dash.log("Angle", getAngleDegrees());
+        dash.log("Setpoint", pid.getSetpoint());
+        dash.log("Error", pid.getError());
+        dash.log("Output", motor.get());
     }
 }
 ```
@@ -268,13 +269,21 @@ The gains depend on your units. With degrees in and motor percent out, kP = 0.02
     Tune with the robot on blocks or with a low output limit, like the `clamp(..., -0.5, 0.5)` above, and keep a hand near the disable key. A badly tuned arm can slam into its hard stops hard enough to break something.
 
 ### Tuning live from the dashboard
-Rebuilding and redeploying for every gain change is slow. `PIDController` can be put on the dashboard so you can edit gains while the robot runs:
+Rebuilding and redeploying for every gain change is slow. Make the gains **tunable** with `DashTable` ([Lesson 6.1](../robot-code/06b-dashboards.md)), and copy them into the controller every loop:
 
 ```java
-SmartDashboard.putData("Arm/PID", pid);
+private final DoubleSupplier kP = dash.tunable("kP", 0.05);
+private final DoubleSupplier kI = dash.tunable("kI", 0.0);
+private final DoubleSupplier kD = dash.tunable("kD", 0.002);
+
+@Override
+public void periodic() {
+    pid.setPID(kP.getAsDouble(), kI.getAsDouble(), kD.getAsDouble());
+    // ...the dash.log lines from above...
+}
 ```
 
-Change kP, kI, and kD in Glass or Elastic and watch the response immediately. When you're happy, **copy the numbers into `Constants.java`**. Dashboard edits are lost when the robot restarts.
+Change kP, kI, and kD in Elastic (as **Text Display** widgets) and watch the response immediately. When you're happy, **copy the numbers into `Constants.java`**. Dashboard edits are lost when the robot restarts.
 
 ### On-controller PID
 Modern motor controllers (TalonFX, SPARK MAX, SPARK Flex) can run PID **on the controller itself**, at 1000 Hz instead of 50 Hz, using the motor's built-in encoder. Many teams use this for flywheels and arms. The ideas and tuning process are the same; only where the math runs is different. Learn it with WPILib's `PIDController` first, then read your vendor's docs.
@@ -305,7 +314,7 @@ This is WPILib's turret simulator, running **PID only**. Click a spot around the
 - [ ] Turn on **System Noise**. Does your tuning still work?
 - [ ] Try the [arm tuning simulator](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html) with **PID only**. Notice how hard it is to hold the arm level, and how it sags at some angles. Write down your best kP and kD. You'll compare in the next lesson.
 - [ ] In the **ArmSimulation** example project, replace its controller with your `goTo` and `hold` commands, bind them to two buttons, and tune them with the dashboard
-- [ ] Graph `Arm/Angle` and `Arm/Setpoint` together in Glass or AdvantageScope while you tune
+- [ ] Graph `Arm/Angle` and `Arm/Setpoint` together in one Elastic **Graph** widget while you tune
 
 ## Check yourself
 ??? question "In your own words, what do P, I, and D each do?"

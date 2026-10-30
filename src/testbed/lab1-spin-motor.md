@@ -74,7 +74,6 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -117,14 +116,6 @@ public class SpinBrushlessMotorSubsystem extends SubsystemBase {
         () -> setMotorSpeed(speed),   // runs once, when the command starts
         () -> setMotorSpeed(0.0)      // runs once, when the command ends
     ).withName("Spin Brushless");
-  }
-
-  @Override
-  public void periodic() {
-    // Runs every 20 ms. Send live values to the dashboard so you can see what the motor is doing.
-    SmartDashboard.putNumber("Brushless/Velocity (RPM)", m_brushlessMotor.getEncoder().getVelocity());
-    SmartDashboard.putNumber("Brushless/Current (A)", m_brushlessMotor.getOutputCurrent());
-    SmartDashboard.putNumber("Brushless/Applied Output", m_brushlessMotor.getAppliedOutput());
   }
 }
 ```
@@ -182,18 +173,7 @@ Read it out loud: *"While A is held, spin the brushless motor at the speed from 
 
 🎉 That's your code moving real hardware.
 
-### Step 6: Watch it on the dashboard
-Open **Glass** or **Elastic** (from the WPILib tools), connect to team 4674, and find the **Brushless** values. Hold A and watch:
-
-| Value | What you'll see |
-|---|---|
-| Velocity (RPM) | Climbs quickly, then levels off at a steady speed |
-| Current (A) | Jumps up as the motor starts, then drops once it's at speed |
-| Applied Output | 0.5 while A is held, 0 when released |
-
-That jump in current at startup is why current limits matter: starting a motor takes much more current than keeping it spinning.
-
-### Step 7: Commit
+### Step 6: Commit
 ```bash
 git add .
 git commit -m "Lab 1: spin brushless motor on A"
@@ -211,9 +191,9 @@ git commit -m "Lab 1: spin brushless motor on A"
 
 ## Try it
 - [ ] Spin the motor with A, and stop it by letting go
-- [ ] Change `BrushlessMotorSpeed` to 0.25, then 0.75. Deploy each time and watch the RPM on the dashboard.
+- [ ] Change `BrushlessMotorSpeed` to 0.25, then 0.75. Deploy each time. Can you hear the difference?
 - [ ] Add a **B** button that spins the motor **backward** at the same speed (hint: a negative speed)
-- [ ] Add an **X** button that spins it at full speed, 1.0. Watch the current. How high does it jump at the start?
+- [ ] Add an **X** button that spins it at full speed, 1.0
 - [ ] Change `IdleMode.kBrake` to `IdleMode.kCoast`. How is stopping different? Change it back.
 - [ ] **Break it on purpose:** change `spinMotorCommand` to use `runOnce(() -> setMotorSpeed(speed))` instead of `startEnd`. Hold A, then let go. What happens, and why? (Disable the robot to stop it.) Then change it back.
 
@@ -233,5 +213,5 @@ git commit -m "Lab 1: spin brushless motor on A"
 ??? question "In the 'break it on purpose' exercise, why did the motor keep spinning?"
     `runOnce` sets the speed once and then **finishes immediately**. When you release A, there's nothing left to cancel, so nothing sets the speed back to 0. The SPARK MAX keeps doing what it was last told until the robot is disabled.
 
-??? question "Why does the current jump when the motor starts?"
-    A motor that isn't moving yet pulls much more current than one that's already spinning. The current limit keeps that jump from tripping the breaker or browning out the robot.
+## Next
+In [Lab 1.1](lab1b-dashboard.md), you'll put the motor's speed and current on a dashboard and change its speed without redeploying.

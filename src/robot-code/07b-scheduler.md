@@ -210,11 +210,11 @@ When you combine commands, such as `a.andThen(b)`, the scheduler sees **one** co
 When the robot is disabled, the scheduler still runs every loop, but it **cancels** running commands, and it won't start new ones unless they're marked `.ignoringDisable(true)`. Use that for things that are safe when disabled, like LEDs or resetting a sensor.
 
 ### Seeing the scheduler work
-**On the dashboard.** Add this to `RobotContainer`, then open SmartDashboard, Shuffleboard, or Elastic:
+**On the dashboard.** Add this to `RobotContainer`, then open Elastic and find **Scheduler** in the **SmartDashboard** table:
 ```java
 SmartDashboard.putData(CommandScheduler.getInstance());
 ```
-It lists every running command, live. You can also put a subsystem on the dashboard (`SmartDashboard.putData(intake)`) to see which command currently owns it.
+It lists every running command, live. The scheduler is a **Sendable**, so in 2026 it still goes on the dashboard with `SmartDashboard.putData` ([Lesson 6.1](06b-dashboards.md#what-still-uses-smartdashboardputdata-in-2026)). You can also put a subsystem on the dashboard (`SmartDashboard.putData(intake)`) to see which command currently owns it.
 
 **In the console.** The scheduler can call your code whenever a command starts, gets interrupted, or finishes:
 ```java

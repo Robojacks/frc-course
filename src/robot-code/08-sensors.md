@@ -187,10 +187,12 @@ WPILib's [Java Units Library](https://docs.wpilib.org/en/stable/docs/software/ba
 Before writing any code that depends on a sensor, put it on the dashboard and check it by hand:
 
 ```java
+private final DashTable dash = new DashTable("Arm");   // Lesson 6.1
+
 @Override
 public void periodic() {
-    SmartDashboard.putNumber("Arm/Angle (deg)", getAngleDegrees());
-    SmartDashboard.putBoolean("Arm/Down Switch", isArmDown());
+    dash.log("Angle (deg)", getAngleDegrees());
+    dash.log("Down Switch", isArmDown());
 }
 ```
 

@@ -79,13 +79,14 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.DashTable;
 
 public class Intake extends SubsystemBase {
     private final PWMSparkMax motor = new PWMSparkMax(0);
     private final DigitalInput beamBreak = new DigitalInput(0);
+    private final DashTable dash = new DashTable("Intake");   // Lesson 6.1
 
     /** True when a game piece is blocking the beam break sensor. */
     public boolean hasGamePiece() {
@@ -112,8 +113,8 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Intake/Has Piece", hasGamePiece());
-        SmartDashboard.putNumber("Intake/Output", motor.get());
+        dash.log("Has Piece", hasGamePiece());
+        dash.log("Output", motor.get());
     }
 }
 ```

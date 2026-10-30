@@ -31,7 +31,7 @@
   <aside class="sidebar">
     <details class="sidebar-toggle" open>
       <summary>Labs menu</summary>
-      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html" class="current" aria-current="page">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html" class="current" aria-current="page">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
     </details>
   </aside>
   <main id="content" class="content">
@@ -145,11 +145,15 @@
 </code></pre></div>
 <p>Add the imports <code>CommandScheduler</code> and <code>SmartDashboard</code> if VS Code underlines them (click the lightbulb).</p>
 <div class="admonition info">
+<p class="admonition-title">Why <code>SmartDashboard</code> here?</p>
+<p>The scheduler isn't a single number. It's a <strong>Sendable</strong>, a WPILib object that describes itself to the dashboard. In 2026, Sendables still go on the dashboard with <code>SmartDashboard.putData</code>. Plain numbers and booleans always use <code>DashTable</code> (<a href="../robot-code/06b-dashboards.html#what-still-uses-smartdashboardputdata-in-2026">Lesson 6.1</a>).</p>
+</div>
+<div class="admonition info">
 <p class="admonition-title"><code>rightTrigger()</code> vs. <code>getRightTriggerAxis()</code></p>
 <p><code>rightTrigger()</code> is a <strong>button</strong>: it becomes true once you squeeze past halfway. <code>getRightTriggerAxis()</code> is a <strong>number</strong> from 0 to 1 that tells how far you're squeezing. The binding uses the button to start the command, and the command reads the number every loop.</p>
 </div>
 <h3 id="step-3-test-each-button-and-fill-in-the-table">Step 3: Test each button and fill in the table<a class="headerlink" href="#step-3-test-each-button-and-fill-in-the-table" title="Permanent link">#</a></h3>
-<p>Deploy, open the dashboard, find the <strong>Scheduler</strong> widget, and enable. Test <strong>one button at a time</strong>. For each, write down what you observe:</p>
+<p>Deploy, open Elastic, find <strong>Scheduler</strong> in the <strong>SmartDashboard</strong> table, drag it onto your tab, and enable. Test <strong>one button at a time</strong>. For each, write down what you observe:</p>
 <table>
 <thead>
 <tr>

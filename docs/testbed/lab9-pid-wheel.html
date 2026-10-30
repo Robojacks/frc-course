@@ -33,7 +33,7 @@
   <aside class="sidebar">
     <details class="sidebar-toggle" open>
       <summary>Labs menu</summary>
-      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html" class="current" aria-current="page">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html" class="current" aria-current="page">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
     </details>
   </aside>
   <main id="content" class="content">
@@ -115,9 +115,26 @@
 <p>And at the end of the constructor:</p>
 <div class="highlight"><pre><span></span><code><span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setTolerance</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">ToleranceRot</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">ToleranceRps</span><span class="p">);</span>
 <span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setIZone</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">IZone</span><span class="p">);</span><span class="w">       </span><span class="c1">// limits integral windup (Attempt 5)</span>
-<span class="w">        </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Wheel/PID"</span><span class="p">,</span><span class="w"> </span><span class="n">m_pid</span><span class="p">);</span><span class="w">  </span><span class="c1">// tune P, I, and D live from the dashboard</span>
 </code></pre></div>
-<p><code>SmartDashboard.putData("Wheel/PID", m_pid)</code> puts the gains on the dashboard, where you can <strong>edit them while the robot runs</strong>. No redeploying between tries.</p>
+<h3 id="step-3-make-the-gains-tunable">Step 3: Make the gains tunable<a class="headerlink" href="#step-3-make-the-gains-tunable" title="Permanent link">#</a></h3>
+<p>You'll try a lot of gains in this lab. Redeploying for every one would take forever, so make them <strong>tunable</strong> from Elastic (<a href="lab1b-dashboard.html#step-5-change-the-speed-from-the-dashboard">Lab 1.1</a>).</p>
+<p>Add these fields <strong>below <code>m_dash</code></strong> (they use it, so they have to come after it):</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Gains you can change in Elastic. They start at the values in Constants.</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kP"</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">P</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kI"</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">I</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kD"</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">D</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_iZone</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"IZone"</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">IZone</span><span class="p">);</span>
+</code></pre></div>
+<p>Import <code>java.util.function.DoubleSupplier</code>. Then, at the top of <code>periodic()</code>, copy the dashboard's numbers into the controller every loop:</p>
+<div class="highlight"><pre><span></span><code><span class="w">        </span><span class="c1">// Use whatever gains are on the dashboard right now</span>
+<span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setPID</span><span class="p">(</span><span class="n">m_kP</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="n">m_kI</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="n">m_kD</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">());</span>
+<span class="w">        </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setIZone</span><span class="p">(</span><span class="n">m_iZone</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">());</span>
+</code></pre></div>
+<p>In Elastic, add <strong>kP</strong>, <strong>kI</strong>, <strong>kD</strong>, and <strong>IZone</strong> from the <strong>Wheel</strong> table as <strong>Text Display</strong> widgets, so you can type new values. Add a <strong>Graph</strong> with <strong>Position (rot)</strong> and <strong>Target (rot)</strong> together.</p>
+<div class="admonition info">
+<p class="admonition-title">In WPILib 2027</p>
+<p>These become <code>Tunables.addDouble("Wheel/kP", kWheelConstants.P)</code>, read with <code>.get()</code> (<a href="../robot-code/06b-dashboards.html#moving-to-2027">Lesson 6.1</a>).</p>
+</div>
 <h3 id="warm-up-in-the-simulator">Warm up in the simulator<a class="headerlink" href="#warm-up-in-the-simulator" title="Permanent link">#</a></h3>
 <p>Before touching the real wheel, try the same idea in WPILib's turret simulator below. A turret is a lot like the test bed wheel: a motor turning something to an exact angle, with no gravity. It's running <strong>PID only</strong>.</p>
 <p>Click a spot around the circle to set a new angle.</p>
@@ -165,9 +182,9 @@
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_wheelController</span><span class="p">.</span><span class="na">x</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_wheel</span><span class="p">.</span><span class="na">turnPid</span><span class="p">(</span><span class="mi">10</span><span class="p">));</span><span class="w">   </span><span class="c1">// Attempts 3 to 5</span>
 </code></pre></div>
 <ol>
-<li>Make sure <strong>kI and kD are 0</strong> on the dashboard (<code>Wheel/PID</code>).</li>
+<li>Make sure <strong>kI</strong> and <strong>kD</strong> are 0 in Elastic (<code>Wheel/kI</code> and <code>Wheel/kD</code>).</li>
 <li>Run <code>turnPid(10)</code> three times with kP = 1.0. Record the results.</li>
-<li>Try kP = 0.3, then 3, then 10. For each, graph <strong>Position</strong> and <strong>Target</strong> together in Glass or AdvantageScope.</li>
+<li>Try kP = 0.3, then 3, then 10. For each, watch <strong>Position</strong> and <strong>Target</strong> on your Elastic graph.</li>
 </ol>
 <p><strong>What you'll see:</strong></p>
 <table>
@@ -220,7 +237,7 @@
 <div class="admonition warning">
 <p class="admonition-title">Integral windup, and why there's an IZone</p>
 <p>If I added up error the whole way from 0 to 10, it would build up a huge total during the move and fling the wheel past the target. That's <strong>integral windup</strong>.</p>
-<p><code>setIZone(0.5)</code> in the constructor fixes it: the integral only builds up when the wheel is within 0.5 rotations of the target, and resets to zero outside that. Try setting the IZone to 20 on the dashboard and watch what happens to the overshoot.</p>
+<p><code>setIZone(0.5)</code> in the constructor fixes it: the integral only builds up when the wheel is within 0.5 rotations of the target, and resets to zero outside that. Try setting <strong>IZone</strong> to 20 in Elastic and watch what happens to the overshoot.</p>
 </div>
 <p><strong>What you'll see:</strong> With P, I, and D tuned, the wheel moves quickly, slows smoothly, and finishes within the tolerance of 10, run after run, even with the cloth on it.</p>
 <h3 id="what-you-just-learned">What you just learned<a class="headerlink" href="#what-you-just-learned" title="Permanent link">#</a></h3>

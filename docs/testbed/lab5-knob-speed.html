@@ -31,7 +31,7 @@
   <aside class="sidebar">
     <details class="sidebar-toggle" open>
       <summary>Labs menu</summary>
-      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html" class="current" aria-current="page">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html" class="current" aria-current="page">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
     </details>
   </aside>
   <main id="content" class="content">
@@ -97,6 +97,9 @@
 <span class="w">      </span><span class="mf">0.0</span><span class="p">);</span><span class="w">   </span><span class="c1">// offset: added to every reading</span>
 </code></pre></div>
 <p>Import <code>edu.wpi.first.wpilibj.AnalogPotentiometer</code>.</p>
+<p>Add a <code>DashTable</code> for the knob's values, below the knob:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashTable</span><span class="w"> </span><span class="n">m_knobDash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashTable</span><span class="p">(</span><span class="s">"Knob"</span><span class="p">);</span>
+</code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Why put the knob in RobotContainer?</p>
 <p>The knob is a <strong>control</strong>, like the Xbox controller, not part of the motor's mechanism. Controls live in <code>RobotContainer</code>; mechanisms live in subsystems.</p>
@@ -107,7 +110,7 @@
 <p>And add the method to <code>RobotContainer</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Called every loop from Robot.robotPeriodic(). */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updateDashboard</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Knob/Turns"</span><span class="p">,</span><span class="w"> </span><span class="n">m_knob</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_knobDash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Turns"</span><span class="p">,</span><span class="w"> </span><span class="n">m_knob</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <h3 id="step-3-calibrate">Step 3: Calibrate<a class="headerlink" href="#step-3-calibrate" title="Permanent link">#</a></h3>
@@ -195,7 +198,7 @@ speed     = (turns - center) / halfRange
 </tbody>
 </table>
 <p>Add the speed to <code>updateDashboard()</code> so you can watch it:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Knob/Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">knobToSpeed</span><span class="p">());</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_knobDash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">knobToSpeed</span><span class="p">());</span>
 </code></pre></div>
 <h3 id="step-5-let-the-knob-drive-the-motor">Step 5: Let the knob drive the motor<a class="headerlink" href="#step-5-let-the-knob-drive-the-motor" title="Permanent link">#</a></h3>
 <p>You already wrote <code>spinWithSupplierCommand</code> in Lab 3. It reads a speed every loop, which is exactly what the knob needs. Bind it in <code>configureBindings()</code>:</p>

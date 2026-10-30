@@ -10,7 +10,8 @@ The **Lessons** tab teaches the ideas. The **Labs** tab is where you try them on
 |---|---|---|---|
 | [Lab 0: Set Up the TestBed Project](lab0-first-project.md) | Test bed | [Lesson 0](../foundations/00-setup.md) | Install the tools, create the **TestBed** project, deploy it, and see your code run |
 | [Lab 1: Spin a Brushless Motor](lab1-spin-motor.md) | Test bed | Lab 0 and a [Java course](../foundations/03-java.md#learn-java-first) | Write your first subsystem and command, and spin a motor with a button |
-| [Lab 2: Drive a West Coast Drive](lab2-west-coast-drive.md) | WCD | Lab 1 | Program four CIMs with leaders, followers, and skid steer controls |
+| [Lab 1.1: Put It on the Dashboard](lab1b-dashboard.md) | Test bed | Lab 1 and [Lesson 6.1](../robot-code/06b-dashboards.md) | Send values with NetworkTables, build an Elastic layout, and change the speed live |
+| [Lab 2: Drive a West Coast Drive](lab2-west-coast-drive.md) | WCD | Lab 1.1 | Program four CIMs with leaders, followers, and skid steer controls |
 | [Lab 3: Buttons and Triggers](lab3-buttons-triggers.md) | Test bed | Lab 2 | `whileTrue`, `onTrue`, toggles, timeouts, a throttle, and default commands |
 | [Lab 4: Stop at a Limit Switch](lab4-limit-switch.md) | Test bed | Lab 3 | Read your first sensor and stop the motor automatically |
 | [Lab 5: Control Speed with a Knob](lab5-knob-speed.md) | Test bed | Lab 4 | Read an analog sensor, calibrate it, and map it to a speed |
@@ -33,7 +34,7 @@ New to any of this hardware? [Lesson 4](../hardware/04-electronics.md) covers th
 | **Main breaker** and **battery** | Power on and off, and the emergency off switch |
 | **Two [SPARK MAX](../hardware/04c-spark-max.md) motor controllers** | Drive the motors, connected to the roboRIO over CAN. The brushless motor's is CAN ID 8. |
 | **[775pro](../hardware/04b-motors.md) motor with a gearbox and wheel** | The motor used in Labs 6 and 9 |
-| **[NEO](../hardware/04b-motors.md) brushless motor** | The motor used in Labs 1, 3, 4, and 5 |
+| **[NEO](../hardware/04b-motors.md) brushless motor** | The motor used in Labs 1, 1.1, 3, 4, and 5 |
 | **[REV Through Bore Encoder](../hardware/04d-sensors.md)** (quadrature) | Measures how far the wheel has turned (Labs 6 and 9) |
 | **[Limit switches](../hardware/04d-sensors.md)** | On/off sensors (Lab 4) |
 | **[10-turn potentiometer](../hardware/04d-sensors.md)** | A knob that reports its position as an analog voltage (Lab 5) |

@@ -97,11 +97,14 @@ Open `RobotContainer.java`. Keep Lab 1's **A** binding and add the rest in `conf
 
 Add the imports `CommandScheduler` and `SmartDashboard` if VS Code underlines them (click the lightbulb).
 
+!!! info "Why `SmartDashboard` here?"
+    The scheduler isn't a single number. It's a **Sendable**, a WPILib object that describes itself to the dashboard. In 2026, Sendables still go on the dashboard with `SmartDashboard.putData`. Plain numbers and booleans always use `DashTable` ([Lesson 6.1](../robot-code/06b-dashboards.md#what-still-uses-smartdashboardputdata-in-2026)).
+
 !!! info "`rightTrigger()` vs. `getRightTriggerAxis()`"
     `rightTrigger()` is a **button**: it becomes true once you squeeze past halfway. `getRightTriggerAxis()` is a **number** from 0 to 1 that tells how far you're squeezing. The binding uses the button to start the command, and the command reads the number every loop.
 
 ### Step 3: Test each button and fill in the table
-Deploy, open the dashboard, find the **Scheduler** widget, and enable. Test **one button at a time**. For each, write down what you observe:
+Deploy, open Elastic, find **Scheduler** in the **SmartDashboard** table, drag it onto your tab, and enable. Test **one button at a time**. For each, write down what you observe:
 
 | Button | Binding | What starts it? | What stops it? | Your notes |
 |---|---|---|---|---|

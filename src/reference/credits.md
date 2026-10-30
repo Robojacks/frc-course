@@ -36,6 +36,8 @@ The simulators also load a small script of our own, `pid-tune-fixes.js`, which m
 ## Other sources
 - Motor specifications: [REV Robotics NEO V1.1](https://docs.revrobotics.com/brushless/neo/v1.1); CIM and 775pro figures from [RobotPy's motor configurations](https://robotpy.readthedocs.io/projects/websim/en/latest/motor-configurations.html).
 - NavX2 API details: Studica's AHRS Java documentation.
+- Lesson 6.1's 2027 comparison is based on WPILib's Telemetry and Tunables design documents in [wpilibsuite/allwpilib](https://github.com/wpilibsuite/allwpilib) and the [Removed features](https://docs.wpilib.org/en/latest/docs/yearly-overview/removed-features.html) page. The 2027 APIs were still in preview when this was written.
+- Elastic connection modes and widget behavior: the [Elastic documentation](https://frc-elastic.gitbook.io/docs), by Team 353.
 
 ## Trademarks
 *FIRST*®, FIRST® Robotics Competition, and FRC® are trademarks of *FIRST*. REV, SPARK MAX, NEO, and Through Bore Encoder are trademarks of REV Robotics. NavX is a trademark of Kauai Labs / Studica. This course is made by FRC Team 4674 RoboJacks and isn't affiliated with or endorsed by any of them.

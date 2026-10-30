@@ -46,6 +46,7 @@ NAV = [
     ]),
     ("Robot Code", [
         ("6. How a Robot Program Runs", "robot-code/06-robot-program.md"),
+        ("6.1 Dashboards: NetworkTables and Elastic", "robot-code/06b-dashboards.md"),
         ("7. Command-Based Programming", "robot-code/07-command-based.md"),
         ("7.1 How the Command Scheduler Works", "robot-code/07b-scheduler.md"),
         ("8. Sensors & Units", "robot-code/08-sensors.md"),
@@ -84,6 +85,7 @@ LABS_NAV = [
         ("Overview", "testbed/index.md"),
         ("Lab 0: Set Up the TestBed Project", "testbed/lab0-first-project.md"),
         ("Lab 1: Spin a Brushless Motor", "testbed/lab1-spin-motor.md"),
+        ("Lab 1.1: Put It on the Dashboard", "testbed/lab1b-dashboard.md"),
         ("Lab 2: Drive a West Coast Drive", "testbed/lab2-west-coast-drive.md"),
         ("Lab 3: Buttons and Triggers", "testbed/lab3-buttons-triggers.md"),
         ("Lab 4: Stop at a Limit Switch", "testbed/lab4-limit-switch.md"),

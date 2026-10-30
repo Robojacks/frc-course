@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 1.1: Put It on the Dashboard | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html" class="current" aria-current="page">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-11-put-it-on-the-dashboard">Lab 1.1: Put It on the Dashboard<a class="headerlink" href="#lab-11-put-it-on-the-dashboard" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>In Lab 1 the motor spun, but you couldn't see how fast, or how much current it pulled. Every lab after this one depends on watching numbers change live: encoder positions, errors, PID outputs. And when you tune something, redeploying for every small change wastes a lot of robot time.</p>
+<p>In this lab you'll:</p>
+<ul>
+<li>add a small helper class, <code>DashTable</code>, that sends values over <strong>NetworkTables 4</strong></li>
+<li>send the motor's speed, current, and output to <strong>Elastic</strong></li>
+<li>build an Elastic layout with graphs</li>
+<li>change the motor's speed <strong>from the dashboard</strong>, without redeploying</li>
+</ul>
+<p><strong>Before you start:</strong> finish <a href="lab1-spin-motor.html">Lab 1</a>. You'll add to the same <strong>TestBed</strong> project. Read <a href="../robot-code/06b-dashboards.html">Lesson 6.1</a> first; it explains NetworkTables, Elastic, and why this course doesn't use <code>SmartDashboard.putNumber</code>.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/networktables/publish-and-subscribe.html">Publishing and Subscribing to a Topic</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/dashboards/elastic.html">Elastic</a></li>
+<li><a href="https://frc-elastic.gitbook.io/docs/getting-started/connecting-to-your-robot">Elastic: Connecting to your robot</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="step-1-add-dashtable">Step 1: Add <code>DashTable</code><a class="headerlink" href="#step-1-add-dashtable" title="Permanent link">#</a></h3>
+<ol>
+<li>In VS Code, right-click the <code>frc/robot</code> folder (the one with <code>Robot.java</code>), choose <strong>New File</strong>, and name it <code>DashTable.java</code>.</li>
+<li>Type in this class. It's the same one from <a href="../robot-code/06b-dashboards.html#a-helper-dashtable">Lesson 6.1</a>.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.HashMap</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.BooleanPublisher</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.DoubleEntry</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.DoublePublisher</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTable</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTableInstance</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringPublisher</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * One folder of values on the dashboard, sent with NetworkTables 4.</span>
+<span class="cm"> * new DashTable("Wheel").log("Position (rot)", 3.4) shows up in Elastic as /Wheel/Position (rot).</span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DashTable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">NetworkTable</span><span class="w"> </span><span class="n">m_table</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">DoublePublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_numbers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">BooleanPublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_booleans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">StringPublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_strings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">DoubleEntry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_tunables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">DashTable</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NetworkTableInstance</span><span class="p">.</span><span class="na">getDefault</span><span class="p">().</span><span class="na">getTable</span><span class="p">(</span><span class="n">tableName</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sends a number. The first call makes the publisher; later calls reuse it. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_numbers</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sends true or false. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_booleans</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getBooleanTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sends text. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_strings</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * A number you can change from the dashboard while the robot runs.</span>
+<span class="cm">   * It starts at defaultValue every time the robot code starts.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="nf">tunable</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">defaultValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">DoubleEntry</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_tunables</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">DoubleEntry</span><span class="w"> </span><span class="n">newEntry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">getEntry</span><span class="p">(</span><span class="n">defaultValue</span><span class="p">);</span>
+<span class="w">      </span><span class="n">newEntry</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">defaultValue</span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">newEntry</span><span class="p">;</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">entry</span><span class="p">::</span><span class="n">get</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">You'll use this in every lab</p>
+<p><code>DashTable</code> is all you need for dashboards from now on. When the team moves to WPILib 2027, <code>DashTable</code> becomes the new <code>TelemetryTable</code>, and <code>tunable</code> becomes <code>Tunables.addDouble</code> (<a href="../robot-code/06b-dashboards.html#moving-to-2027">Lesson 6.1</a>).</p>
+</div>
+<h3 id="step-2-send-the-motors-values">Step 2: Send the motor's values<a class="headerlink" href="#step-2-send-the-motors-values" title="Permanent link">#</a></h3>
+<p>Open <code>SpinBrushlessMotorSubsystem.java</code>.</p>
+<p><strong>1. Import <code>DashTable</code></strong> with the other imports:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.DashTable</span><span class="p">;</span>
+</code></pre></div>
+<p><strong>2. Add a field</strong> below the motor:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Everything this subsystem sends shows up under "Brushless" on the dashboard</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashTable</span><span class="w"> </span><span class="n">m_dash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashTable</span><span class="p">(</span><span class="s">"Brushless"</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>3. Add a <code>periodic()</code> method</strong> at the bottom of the class, before the last <code>}</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nd">@Override</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Runs every 20 ms, enabled or not</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Velocity (RPM)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getEncoder</span><span class="p">().</span><span class="na">getVelocity</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Applied Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Temperature (C)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getMotorTemperature</span><span class="p">());</span>
+
+<span class="w">    </span><span class="n">Command</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getCurrentCommand</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Command"</span><span class="p">,</span><span class="w"> </span><span class="n">running</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"none"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">running</span><span class="p">.</span><span class="na">getName</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it sends</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>getEncoder().getVelocity()</code></td>
+<td>The NEO's built-in encoder speed, in RPM</td>
+</tr>
+<tr>
+<td><code>getOutputCurrent()</code></td>
+<td>How many amps the motor is pulling right now</td>
+</tr>
+<tr>
+<td><code>getAppliedOutput()</code></td>
+<td>The output the SPARK MAX is actually applying, from -1 to 1</td>
+</tr>
+<tr>
+<td><code>getMotorTemperature()</code></td>
+<td>The NEO's temperature, in °C</td>
+</tr>
+<tr>
+<td><code>getCurrentCommand()</code></td>
+<td>The command that owns this subsystem right now, or <code>null</code> if none</td>
+</tr>
+</tbody>
+</table>
+<p><code>running == null ? "none" : running.getName()</code> is a <strong>ternary</strong>: "if nothing is running, send <code>none</code>; otherwise send the command's name."</p>
+<h3 id="step-3-open-elastic-and-connect">Step 3: Open Elastic and connect<a class="headerlink" href="#step-3-open-elastic-and-connect" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Build</strong> and <strong>Deploy</strong>. The robot can stay disabled.</li>
+<li>Open the Driver Station and connect to the test bed (the Communications light is green).</li>
+<li>In VS Code, press <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span>, run <strong>WPILib: Start Tool</strong>, and choose <strong>Elastic</strong>.</li>
+<li>Click the <strong>gear</strong> and set the IP address mode to <strong>Driver Station</strong>.</li>
+<li>Look at the bar at the bottom. It should turn green and show the roboRIO's address.</li>
+</ol>
+<p>If it stays red ("Network Tables: Disconnected"), check that the Driver Station is connected and that your code deployed.</p>
+<h3 id="step-4-build-a-layout">Step 4: Build a layout<a class="headerlink" href="#step-4-build-a-layout" title="Permanent link">#</a></h3>
+<ol>
+<li>Make a new tab and name it <strong>Test Bed</strong>.</li>
+<li>Open Elastic's list of topics and find the <strong>Brushless</strong> table.</li>
+<li>Drag these onto the grid:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Show it as</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Velocity (RPM)</strong></td>
+<td>Graph</td>
+<td>See it climb and level off</td>
+</tr>
+<tr>
+<td><strong>Current (A)</strong></td>
+<td>Graph</td>
+<td>See the jump at startup</td>
+</tr>
+<tr>
+<td><strong>Applied Output</strong></td>
+<td>Number Bar</td>
+<td>See the output at a glance</td>
+</tr>
+<tr>
+<td><strong>Temperature (C)</strong></td>
+<td>Text Display</td>
+<td>Keep an eye on heat</td>
+</tr>
+<tr>
+<td><strong>Command</strong></td>
+<td>Text Display</td>
+<td>See which command is running</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>Resize the graphs so they're easy to read.</li>
+</ol>
+<p>Now clear the area, say <strong>"Enabling!"</strong>, enable TeleOperated, and <strong>hold A</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>What you'll see</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Velocity (RPM)</td>
+<td>Climbs quickly, then levels off at a steady speed</td>
+</tr>
+<tr>
+<td>Current (A)</td>
+<td>Jumps up as the motor starts, then drops once it's at speed</td>
+</tr>
+<tr>
+<td>Applied Output</td>
+<td>0.5 while A is held, 0 when released</td>
+</tr>
+<tr>
+<td>Command</td>
+<td><code>Spin Brushless</code> while A is held, <code>none</code> when released</td>
+</tr>
+</tbody>
+</table>
+<p>That jump in current at startup is why current limits matter: starting a motor takes much more current than keeping it spinning.</p>
+<h3 id="step-5-change-the-speed-from-the-dashboard">Step 5: Change the speed from the dashboard<a class="headerlink" href="#step-5-change-the-speed-from-the-dashboard" title="Permanent link">#</a></h3>
+<p>Right now the speed comes from <code>Constants</code>, so changing it means redeploying. Make it <strong>tunable</strong> instead.</p>
+<p><strong>1. In the subsystem</strong>, add a field below <code>m_dash</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// A speed you can change in Elastic. It starts at the value in Constants.</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_tunableSpeed</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"Tunable Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">Constants</span><span class="p">.</span><span class="na">kBrushlessConstants</span><span class="p">.</span><span class="na">BrushlessMotorSpeed</span><span class="p">);</span>
+</code></pre></div>
+<p>And import it at the top:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
+</code></pre></div>
+<p><strong>2. Add a command</strong> below <code>spinMotorCommand</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Spins the motor at whatever speed is on the dashboard, reading it every loop. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinAtTunableSpeedCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runEnd</span><span class="p">(</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="n">m_tunableSpeed</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">()),</span><span class="w">   </span><span class="c1">// every loop while it runs</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">                              </span><span class="c1">// once, when it ends</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin Tunable"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>Notice this uses <code>runEnd</code>, not <code>startEnd</code>. <code>startEnd</code> sets the speed <strong>once</strong>, so a change on the dashboard wouldn't do anything until you pressed the button again. <code>runEnd</code> reads the dashboard <strong>every loop</strong>, so the motor follows your changes while you hold the button.</p>
+<p><strong>3. Bind it to B</strong> in <code>RobotContainer</code>'s <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Spin at the dashboard's speed while B is held</span>
+<span class="w">  </span><span class="n">m_controller</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinAtTunableSpeedCommand</span><span class="p">());</span>
+</code></pre></div>
+<p><strong>4. Try it.</strong> Deploy. In Elastic, drag <strong>Tunable Speed</strong> onto your tab as a <strong>Number Slider</strong> (or a Text Display you can edit). Hold B, then change the speed. The motor follows right away.</p>
+<div class="admonition warning">
+<p class="admonition-title">Keep tunable speeds small</p>
+<p>A tunable lets anyone at the laptop change how the robot moves while it's enabled. Keep the test bed clear, and don't go above 1.0 or below -1.0. In real robot code, clamp tunable values with <code>MathUtil.clamp(value, -1, 1)</code>.</p>
+</div>
+<p><strong>5. Restart the robot code</strong> (Driver Station → <strong>Restart Robot Code</strong>). <strong>Tunable Speed</strong> goes back to 0.5. Dashboard changes are never saved: when you find a speed you like, copy it into <code>Constants.java</code>.</p>
+<h3 id="step-6-save-your-layout-and-commit">Step 6: Save your layout and commit<a class="headerlink" href="#step-6-save-your-layout-and-commit" title="Permanent link">#</a></h3>
+<ol>
+<li>Save the layout in Elastic, then export it from Elastic's file menu into your <strong>TestBed</strong> project folder.</li>
+<li>Commit:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 1.1: DashTable, Elastic layout, tunable speed"</span>
+</code></pre></div>
+<p>Your layout file is now in Git, so a teammate can load the same dashboard.</p>
+<h3 id="when-it-doesnt-work">When it doesn't work<a class="headerlink" href="#when-it-doesnt-work" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Elastic stays red and says disconnected</td>
+<td>The Driver Station isn't connected, or the IP mode isn't <strong>Driver Station</strong>. In simulation, use <strong>localhost</strong>.</td>
+</tr>
+<tr>
+<td>Connected, but there's no <strong>Brushless</strong> table</td>
+<td>The new code isn't deployed, or <code>periodic()</code> is missing <code>@Override</code> or has a typo in its name</td>
+</tr>
+<tr>
+<td>Values show up but never change</td>
+<td><code>periodic()</code> isn't being called: check that the subsystem is created in <code>RobotContainer</code></td>
+</tr>
+<tr>
+<td>Changing <strong>Tunable Speed</strong> does nothing</td>
+<td>The command uses <code>startEnd</code> instead of <code>runEnd</code>, or B isn't bound</td>
+</tr>
+<tr>
+<td>Build error: cannot find symbol <code>DashTable</code></td>
+<td><code>DashTable.java</code> is in the wrong folder, or its first line isn't <code>package frc.robot;</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Get all five <strong>Brushless</strong> values showing in Elastic</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Hold A and watch the startup current jump. What's the highest number you see?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add an <strong>X</strong> binding that spins at 1.0. Compare the startup current to 0.5.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Use the B button and <strong>Tunable Speed</strong> to find the slowest speed where the motor still turns reliably</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>m_dash.log("At Speed", ...)</code> that's <code>true</code> when the velocity is above 2000 RPM. Show it as a <strong>Boolean Box</strong>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run the code in <strong>simulation</strong>, connect Elastic with <strong>localhost</strong>, and find the same values. Which ones still change in simulation, and which don't?</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Where does <code>m_dash.log(\"Current (A)\", ...)</code> show up in Elastic?</summary>
+<p>In the <strong>Brushless</strong> table, as <code>/Brushless/Current (A)</code>.</p>
+</details>
+<details class="question">
+<summary>Why does <code>spinAtTunableSpeedCommand</code> use <code>runEnd</code> instead of <code>startEnd</code>?</summary>
+<p><code>runEnd</code> runs its first action every loop, so it reads the dashboard value 50 times a second. <code>startEnd</code> only sets the speed once, when the command starts.</p>
+</details>
+<details class="question">
+<summary>You found a great speed with the slider, and then the robot rebooted. What happened, and what should you do?</summary>
+<p>Tunables start at their default every time the code starts, so the change was lost. Copy the number into <code>Constants.java</code> and deploy.</p>
+</details>
+<details class="question">
+<summary>Why does the current jump when the motor starts?</summary>
+<p>A motor that isn't moving yet pulls much more current than one that's already spinning. The current limit keeps that jump from tripping the breaker or browning out the robot.</p>
+</details>
+<details class="question">
+<summary>What will <code>DashTable</code> turn into when the team moves to WPILib 2027?</summary>
+<p><code>Telemetry.getTable(...)</code> for logging values, and <code>Tunables.addDouble(...)</code> for tunable numbers.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab1-spin-motor.html"><span>Previous</span>Lab 1: Spin a Brushless Motor</a><a class="pager-next" href="lab2-west-coast-drive.html"><span>Next</span>Lab 2: Drive a West Coast Drive</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+
+</body>
+</html>

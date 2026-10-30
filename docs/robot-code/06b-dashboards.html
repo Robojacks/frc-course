@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6.1 Dashboards: NetworkTables and Elastic | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+
+</head>
+<body id="top">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section" open><summary>Robot Code</summary><ul><li><a href="06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="06b-dashboards.html" class="current" aria-current="page">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="07-command-based.html">7. Command-Based Programming</a></li><li><a href="07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="61-dashboards-networktables-and-elastic">6.1 Dashboards: NetworkTables and Elastic<a class="headerlink" href="#61-dashboards-networktables-and-elastic" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Your robot code runs 50 times a second on a computer with no screen. To see what it's doing (sensor readings, targets, motor outputs, which command is running), you send values to a <strong>dashboard</strong> on the laptop. To tune it, you send numbers back the other way.</p>
+<p>Both directions go through <strong>NetworkTables</strong>, WPILib's system for sharing data between the robot and the laptop. This course uses:</p>
+<ul>
+<li><strong>NetworkTables 4 publishers</strong> in robot code, to send values</li>
+<li><strong>Elastic</strong>, a drag-and-drop dashboard that comes with WPILib, to see and change them</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Why this course doesn't use <code>SmartDashboard.putNumber</code></p>
+<p>Older code (and a lot of examples online) sends values with <code>SmartDashboard.putNumber(...)</code>. That still works in 2026, but it's on its way out:</p>
+<ul>
+<li>The <strong>SmartDashboard and Shuffleboard apps</strong> are removed in WPILib 2027. WPILib's advice is to use <strong>Elastic</strong> as the driver dashboard and <strong>AdvantageScope</strong> for debugging.</li>
+<li>In the 2027 previews, the <strong><code>SmartDashboard</code> class itself</strong> is replaced by new <strong>Telemetry</strong> and <strong>Tunables</strong> APIs, and <code>SendableChooser</code> is replaced by <strong><code>Selectable</code></strong>.</li>
+<li><strong>NetworkTables 4 stays.</strong> The new 2027 APIs are built on top of it.</li>
+</ul>
+<p>So this course writes <strong>2026</strong> code with NetworkTables 4 directly, in a way that maps one-to-one onto the 2027 APIs. The end of this lesson shows exactly how.</p>
+</div>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/networktables/networktables-intro.html">What is NetworkTables</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/networktables/publish-and-subscribe.html">Publishing and Subscribing to a Topic</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/dashboards/elastic.html">Elastic (WPILib docs)</a> and the <a href="https://frc-elastic.gitbook.io/docs">Elastic documentation</a></li>
+<li><a href="https://docs.wpilib.org/en/latest/docs/yearly-overview/removed-features.html">Removed features in 2027</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="how-networktables-works">How NetworkTables works<a class="headerlink" href="#how-networktables-works" title="Permanent link">#</a></h3>
+<p>The roboRIO runs a NetworkTables <strong>server</strong>. Dashboards and tools on the laptop connect to it as <strong>clients</strong>. Any of them can send values, and all of them see the same values.</p>
+<div class="mermaid">flowchart LR
+    R["roboRIO&lt;br/&gt;NetworkTables server&lt;br/&gt;(your robot code)"] &lt;--&gt; E[Elastic&lt;br/&gt;driver dashboard]
+    R &lt;--&gt; A[AdvantageScope&lt;br/&gt;graphs and logs]
+    R &lt;--&gt; G[Glass / Sim GUI]</div>
+<p>Each value lives on a <strong>topic</strong>. A topic has a name that looks like a file path, and a fixed type:</p>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Type</th>
+<th>Example value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/Wheel/Position (rot)</code></td>
+<td>double</td>
+<td><code>3.42</code></td>
+</tr>
+<tr>
+<td><code>/Wheel/At Target</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>/Elevator/kP</code></td>
+<td>double</td>
+<td><code>10.0</code></td>
+</tr>
+<tr>
+<td><code>/Auto/selected</code></td>
+<td>string</td>
+<td><code>"Square"</code></td>
+</tr>
+</tbody>
+</table>
+<p>The part before the last <code>/</code> is the <strong>table</strong>, like a folder. Group each subsystem's values in its own table, and put the units in the name so nobody has to guess.</p>
+<p>Code doesn't write to a topic directly. It creates a <strong>publisher</strong> to send values, or a <strong>subscriber</strong> to read them:</p>
+<table>
+<thead>
+<tr>
+<th>Object</th>
+<th>Direction</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Publisher</strong> (<code>DoublePublisher</code>, <code>BooleanPublisher</code>, ...)</td>
+<td>Robot → dashboard</td>
+<td>Showing sensor readings, targets, outputs</td>
+</tr>
+<tr>
+<td><strong>Subscriber</strong> (<code>DoubleSubscriber</code>, ...)</td>
+<td>Dashboard → robot</td>
+<td>Reading a value someone else sets</td>
+</tr>
+<tr>
+<td><strong>Entry</strong> (<code>DoubleEntry</code>, ...)</td>
+<td>Both</td>
+<td>A tunable number: the robot sets a starting value, and you change it from the dashboard</td>
+</tr>
+</tbody>
+</table>
+<h3 id="publishing-a-value">Publishing a value<a class="headerlink" href="#publishing-a-value" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.DoublePublisher</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTable</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTableInstance</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Arm</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// The "Arm" table, like a folder on the dashboard</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">NetworkTable</span><span class="w"> </span><span class="n">table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NetworkTableInstance</span><span class="p">.</span><span class="na">getDefault</span><span class="p">().</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Arm"</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Create each publisher ONCE, and keep it in a field</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoublePublisher</span><span class="w"> </span><span class="n">anglePub</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="s">"Angle (deg)"</span><span class="p">).</span><span class="na">publish</span><span class="p">();</span>
+
+<span class="w">    </span><span class="nd">@Override</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">anglePub</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">getAngleDegrees</span><span class="p">());</span><span class="w">   </span><span class="c1">// send the newest value, every loop</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NetworkTableInstance.getDefault()</code></td>
+<td>The robot's NetworkTables. You'll almost never need any other.</td>
+</tr>
+<tr>
+<td><code>.getTable("Arm")</code></td>
+<td>The <strong>Arm</strong> table. Every topic in it starts with <code>/Arm/</code>.</td>
+</tr>
+<tr>
+<td><code>.getDoubleTopic("Angle (deg)")</code></td>
+<td>The topic <code>/Arm/Angle (deg)</code>, which holds a <code>double</code></td>
+</tr>
+<tr>
+<td><code>.publish()</code></td>
+<td>Starts publishing. Keep the publisher in a field: publishing stops if it's closed.</td>
+</tr>
+<tr>
+<td><code>anglePub.set(...)</code></td>
+<td>Sends a new value. Call it every loop in <code>periodic()</code>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Make publishers once, set them every loop</p>
+<p>Create publishers as fields (or in the constructor), not inside <code>periodic()</code>. Creating a new one 50 times a second wastes memory and time.</p>
+</div>
+<h3 id="reading-a-value-tunable-numbers">Reading a value: tunable numbers<a class="headerlink" href="#reading-a-value-tunable-numbers" title="Permanent link">#</a></h3>
+<p>To change a number from the dashboard while the robot runs, use an <strong>entry</strong>: it publishes a starting value and also reads back whatever the dashboard writes.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.DoubleEntry</span><span class="p">;</span>
+
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleEntry</span><span class="w"> </span><span class="n">kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="s">"kP"</span><span class="p">).</span><span class="na">getEntry</span><span class="p">(</span><span class="n">ArmConstants</span><span class="p">.</span><span class="na">kP</span><span class="p">);</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="nf">Arm</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">kP</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">ArmConstants</span><span class="p">.</span><span class="na">kP</span><span class="p">);</span><span class="w">   </span><span class="c1">// put the starting value on the dashboard</span>
+<span class="p">}</span>
+
+<span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">pid</span><span class="p">.</span><span class="na">setP</span><span class="p">(</span><span class="n">kP</span><span class="p">.</span><span class="na">get</span><span class="p">());</span><span class="w">        </span><span class="c1">// use whatever is on the dashboard right now</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>When the robot restarts, the value goes back to <code>ArmConstants.kP</code>. <strong>Dashboard edits are not saved.</strong> When you find a good number, copy it into <code>Constants.java</code>.</p>
+<h3 id="a-helper-dashtable">A helper: <code>DashTable</code><a class="headerlink" href="#a-helper-dashtable" title="Permanent link">#</a></h3>
+<p>Writing a field for every single value gets long. The labs use a small helper class, <code>DashTable</code>, that makes and keeps the publishers for you. You'll add it to the TestBed project in <a href="../testbed/lab1b-dashboard.html">Lab 1.1</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.HashMap</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.function.DoubleSupplier</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.BooleanPublisher</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.DoubleEntry</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.DoublePublisher</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTable</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.NetworkTableInstance</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringPublisher</span><span class="p">;</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * One folder of values on the dashboard, sent with NetworkTables 4.</span>
+<span class="cm"> * new DashTable("Wheel").log("Position (rot)", 3.4) shows up in Elastic as /Wheel/Position (rot).</span>
+<span class="cm"> */</span>
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DashTable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">NetworkTable</span><span class="w"> </span><span class="n">m_table</span><span class="p">;</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">DoublePublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_numbers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">BooleanPublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_booleans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">StringPublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_strings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">DoubleEntry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_tunables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">DashTable</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NetworkTableInstance</span><span class="p">.</span><span class="na">getDefault</span><span class="p">().</span><span class="na">getTable</span><span class="p">(</span><span class="n">tableName</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sends a number. The first call makes the publisher; later calls reuse it. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_numbers</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sends true or false. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_booleans</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getBooleanTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sends text. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_strings</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * A number you can change from the dashboard while the robot runs.</span>
+<span class="cm">   * It starts at defaultValue every time the robot code starts.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="nf">tunable</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">defaultValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">DoubleEntry</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_tunables</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">DoubleEntry</span><span class="w"> </span><span class="n">newEntry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">getEntry</span><span class="p">(</span><span class="n">defaultValue</span><span class="p">);</span>
+<span class="w">      </span><span class="n">newEntry</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">defaultValue</span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">newEntry</span><span class="p">;</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">entry</span><span class="p">::</span><span class="n">get</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Map&lt;String, DoublePublisher&gt;</code></td>
+<td>A lookup table from each name to its publisher</td>
+</tr>
+<tr>
+<td><code>computeIfAbsent(key, k -&gt; ...)</code></td>
+<td>"Get the publisher for this name. If there isn't one yet, make it with this code and remember it."</td>
+</tr>
+<tr>
+<td>Three <code>log</code> methods with the same name</td>
+<td><strong>Overloading</strong>: Java picks the right one by the type you pass in</td>
+</tr>
+<tr>
+<td><code>DoubleSupplier</code> and <code>entry::get</code></td>
+<td><code>tunable</code> hands back something you can ask for the current value, any time, with <code>.getAsDouble()</code></td>
+</tr>
+</tbody>
+</table>
+<p>Using it in a subsystem:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DashTable</span><span class="w"> </span><span class="n">m_dash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DashTable</span><span class="p">(</span><span class="s">"Arm"</span><span class="p">);</span>
+<span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="n">m_kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_dash</span><span class="p">.</span><span class="na">tunable</span><span class="p">(</span><span class="s">"kP"</span><span class="p">,</span><span class="w"> </span><span class="n">ArmConstants</span><span class="p">.</span><span class="na">kP</span><span class="p">);</span>
+
+<span class="nd">@Override</span>
+<span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Angle (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">getAngleDegrees</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Target (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_targetDegrees</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Output (V)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_lastVolts</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_dash</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"At Target"</span><span class="p">,</span><span class="w"> </span><span class="n">atTarget</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_pid</span><span class="p">.</span><span class="na">setP</span><span class="p">(</span><span class="n">m_kP</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">());</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="what-to-send">What to send<a class="headerlink" href="#what-to-send" title="Permanent link">#</a></h3>
+<p>For any mechanism, send these four kinds of values. With them, you can usually tell in seconds whether a problem is the sensor, the code, or the hardware (<a href="09-debugging.html">Lesson 9</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The sensor reading (position, velocity)</td>
+<td>Is the sensor working and pointing the right way?</td>
+</tr>
+<tr>
+<td>The target</td>
+<td>Is the code asking for what you think?</td>
+</tr>
+<tr>
+<td>The output (percent or volts)</td>
+<td>Is the code actually commanding the motor?</td>
+</tr>
+<tr>
+<td>State (at target, has piece, at limit)</td>
+<td>Do your conditions flip when they should?</td>
+</tr>
+</tbody>
+</table>
+<h3 id="elastic">Elastic<a class="headerlink" href="#elastic" title="Permanent link">#</a></h3>
+<p><strong>Elastic</strong> is a dashboard made by Team 353, installed with WPILib. It's built for the driver station at competition, but it's just as good for testing.</p>
+<p><strong>Open it:</strong> in VS Code, press <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span>, run <strong>WPILib: Start Tool</strong>, and choose <strong>Elastic</strong>.</p>
+<p><strong>Connect it:</strong> click the <strong>gear</strong> (settings) and pick the IP address mode:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Use it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Driver Station</strong></td>
+<td>Connected to a real robot. Elastic gets the address from the Driver Station, so open the Driver Station first.</td>
+</tr>
+<tr>
+<td><strong>localhost</strong></td>
+<td>Running <strong>simulation</strong> on your own laptop</td>
+</tr>
+<tr>
+<td><strong>Team Number</strong> or <strong>roboRIO mDNS</strong></td>
+<td>Connecting without the Driver Station (these don't work in simulation)</td>
+</tr>
+</tbody>
+</table>
+<p>The bar at the bottom of Elastic shows <strong>Network Tables: Disconnected</strong> in red until it connects, then turns green and shows the robot's address. While it's disconnected, every widget is grayed out.</p>
+<p><strong>Add widgets:</strong> open Elastic's list of topics, find your table (like <strong>Wheel</strong>), and drag a value onto the grid. Drag widgets to move them and drag their corners to resize. You can make several <strong>tabs</strong>, for example one for driving and one for each mechanism you're testing.</p>
+<table>
+<thead>
+<tr>
+<th>Widget</th>
+<th>Shows</th>
+<th>Can change the value?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Text Display</strong></td>
+<td>A number, boolean, or text</td>
+<td>Yes. Edit it to send a new value. In its settings, turn on the submit button if you want one.</td>
+</tr>
+<tr>
+<td><strong>Graph</strong></td>
+<td>A number over time</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Number Bar</strong></td>
+<td>A number as a bar</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Number Slider</strong></td>
+<td>A number on a slider</td>
+<td>Yes, by dragging</td>
+</tr>
+<tr>
+<td><strong>Boolean Box</strong></td>
+<td>A color for true or false</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Toggle Switch</strong> / <strong>Toggle Button</strong></td>
+<td>A boolean</td>
+<td>Yes, by clicking</td>
+</tr>
+<tr>
+<td><strong>ComboBox Chooser</strong></td>
+<td>An autonomous chooser (<code>SendableChooser</code>)</td>
+<td>Yes, by picking an option</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Save your layout.</strong> Elastic remembers the layout you build. To keep a copy for the team, export it from Elastic's file menu into your robot project and commit the file to Git.</p>
+<div class="admonition tip">
+<p class="admonition-title">Graph your target and your measurement together</p>
+<p>Put the target and the sensor reading on <strong>one Graph</strong> widget. When you tune a controller in <a href="../controls/12-pid.html">Lesson 12</a>, the gap between the two lines is the error, and you can see overshoot and oscillation at a glance.</p>
+</div>
+<h3 id="what-still-uses-smartdashboardputdata-in-2026">What still uses <code>SmartDashboard.putData</code> in 2026<a class="headerlink" href="#what-still-uses-smartdashboardputdata-in-2026" title="Permanent link">#</a></h3>
+<p>Some WPILib objects aren't single numbers. They're <strong>Sendables</strong>: an autonomous chooser, the command scheduler, a <code>Field2d</code>, a <code>Mechanism2d</code>. In 2026, the way to put these on the dashboard is still <code>SmartDashboard.putData</code>. It sends them through NetworkTables 4 (under <code>/SmartDashboard/</code>), and Elastic shows them with special widgets.</p>
+<div class="highlight"><pre><span></span><code><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">,</span><span class="w"> </span><span class="n">autoChooser</span><span class="p">);</span><span class="w">              </span><span class="c1">// a ComboBox Chooser in Elastic</span>
+<span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span><span class="w">   </span><span class="c1">// the running commands</span>
+<span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Arm/Mechanism"</span><span class="p">,</span><span class="w"> </span><span class="n">mech</span><span class="p">);</span><span class="w">            </span><span class="c1">// a Mechanism2d drawing</span>
+</code></pre></div>
+<p>This course uses <code>SmartDashboard</code> <strong>only</strong> for these. Plain numbers and booleans always go through NetworkTables publishers.</p>
+<h3 id="logging-comes-free">Logging comes free<a class="headerlink" href="#logging-comes-free" title="Permanent link">#</a></h3>
+<p>Once you call <code>DataLogManager.start()</code> in <code>Robot</code>'s constructor, everything you publish to NetworkTables is also <strong>recorded</strong> to a log file on the roboRIO. After a match, open the log in <strong>AdvantageScope</strong> and replay every value (<a href="09-debugging.html">Lesson 9</a>).</p>
+<h3 id="moving-to-2027">Moving to 2027<a class="headerlink" href="#moving-to-2027" title="Permanent link">#</a></h3>
+<p>When the team moves to WPILib 2027, the changes are mostly renames. The 2027 APIs are still in preview, so the details may change before release:</p>
+<table>
+<thead>
+<tr>
+<th>2026 (this course)</th>
+<th>2027 preview</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>new DashTable("Wheel")</code></td>
+<td><code>Telemetry.getTable("Wheel")</code></td>
+</tr>
+<tr>
+<td><code>m_dash.log("Position (rot)", x)</code></td>
+<td><code>table.log("Position (rot)", x)</code></td>
+</tr>
+<tr>
+<td><code>m_dash.tunable("kP", 1.0)</code> and <code>.getAsDouble()</code></td>
+<td><code>Tunables.addDouble("Wheel/kP", 1.0)</code> and <code>.get()</code></td>
+</tr>
+<tr>
+<td><code>SendableChooser</code> with <code>SmartDashboard.putData("Auto", chooser)</code></td>
+<td><code>Selectable</code> with <code>Tunables.publish("Auto", chooser)</code></td>
+</tr>
+<tr>
+<td><code>SmartDashboard.putData("Field", field)</code> once</td>
+<td><code>Telemetry.log("Field", field)</code> every loop</td>
+</tr>
+</tbody>
+</table>
+<p>In 2027, telemetry is published under <code>/Telemetry/</code> and tunables under <code>/Tunables/</code> by default, so you'll re-drag your Elastic widgets onto the new topics.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<p>In simulation (no robot needed):</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>DashTable</code> to a project. In <code>robotPeriodic()</code>, log <code>Timer.getFPGATimestamp()</code> as <code>"Robot/Time (s)"</code>.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run <strong>WPILib: Simulate Robot Code</strong>, open Elastic, set it to <strong>localhost</strong>, and find <strong>Robot/Time (s)</strong>. Show it as a Text Display, then as a Graph.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a tunable <code>"Robot/Multiplier"</code> starting at 1.0, and log the time times the multiplier. Change the multiplier in Elastic and watch the logged value change.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Restart the simulation. What happens to the multiplier you set?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build a tab with your values, save the layout, and export it.</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What's the difference between a publisher and a subscriber?</summary>
+<p>A publisher sends values from your code to NetworkTables. A subscriber reads values that something else (like the dashboard) put there.</p>
+</details>
+<details class="question">
+<summary>Why create publishers once, in a field, instead of inside <code>periodic()</code>?</summary>
+<p><code>periodic()</code> runs 50 times a second. Making a new publisher every time wastes memory and time; making it once and calling <code>set()</code> every loop is cheap.</p>
+</details>
+<details class="question">
+<summary>You changed kP in Elastic and found a great value. Then the robot rebooted and it's gone. Why, and what should you do?</summary>
+<p>Tunables start at their default every time the code starts. Copy the value into <code>Constants.java</code> and deploy.</p>
+</details>
+<details class="question">
+<summary>Elastic says \"Network Tables: Disconnected\" while you're running simulation. What should you check?</summary>
+<p>That the IP address mode is set to <strong>localhost</strong>, and that the simulation is actually running.</p>
+</details>
+<details class="question">
+<summary>Why does this course still use <code>SmartDashboard.putData</code> for the auto chooser?</summary>
+<p>In 2026, Sendables like <code>SendableChooser</code> go to the dashboard through <code>SmartDashboard.putData</code>. In 2027 that becomes <code>Selectable</code> and <code>Tunables.publish</code>.</p>
+</details>
+<details class="question">
+<summary>What happens to the SmartDashboard and Shuffleboard apps in 2027?</summary>
+<p>They're removed. WPILib recommends Elastic for the driver dashboard and AdvantageScope for debugging.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="06-robot-program.html"><span>Previous</span>6. How a Robot Program Runs</a><a class="pager-next" href="07-command-based.html"><span>Next</span>7. Command-Based Programming</a></nav>
+  </main>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+</script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? "dark" : "default" });
+</script>
+</body>
+</html>

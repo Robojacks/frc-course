@@ -80,12 +80,12 @@ Add methods to read and reset the heading:
 ```
 
 ### Step 4: Show it on the dashboard
-Add to `periodic()`:
+Add to the drive subsystem's `periodic()`. These go in the **Drive** table, in a **Gyro** folder:
 
 ```java
-    SmartDashboard.putNumber("Gyro/Heading (deg)", getHeadingDegrees());
-    SmartDashboard.putBoolean("Gyro/Connected", m_gyro.isConnected());
-    SmartDashboard.putBoolean("Gyro/Calibrating", m_gyro.isCalibrating());
+    m_dash.log("Gyro/Heading (deg)", getHeadingDegrees());
+    m_dash.log("Gyro/Connected", m_gyro.isConnected());
+    m_dash.log("Gyro/Calibrating", m_gyro.isCalibrating());
 ```
 
 And bind a button to zero the heading, in `configureBindings()`:
@@ -140,8 +140,8 @@ Reading it:
 Add the debug values to `periodic()` so you can watch it:
 
 ```java
-    SmartDashboard.putNumber("Gyro/Turn Target (deg)", m_turnTarget);
-    SmartDashboard.putNumber("Gyro/Turn Error (deg)", m_turnTarget - getHeadingDegrees());
+    m_dash.log("Gyro/Turn Target (deg)", m_turnTarget);
+    m_dash.log("Gyro/Turn Error (deg)", m_turnTarget - getHeadingDegrees());
 ```
 
 Bind it to test, in `configureBindings()`:

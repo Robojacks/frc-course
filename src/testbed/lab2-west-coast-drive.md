@@ -9,7 +9,7 @@ The drivetrain is the most important mechanism on any robot: if it can't drive w
 - **Inversion:** why one side of the robot has to run "backward"
 - **Skid steer driving:** each joystick runs one side of the robot, just like the two levers on a skid steer loader
 
-**Before you start:** finish [Lab 1](lab1-spin-motor.md). [Lesson 10](../project/10-teleop.md) explains the drive code in more depth; read it before or after.
+**Before you start:** finish [Lab 1.1](lab1b-dashboard.md). [Lesson 10](../project/10-teleop.md) explains the drive code in more depth; read it before or after.
 
 ## Read this
 - [Using the WPILib Drive Classes](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html)
@@ -48,6 +48,8 @@ flowchart LR
 
 ### New project
 The WCD is its own robot with its own roboRIO, so it gets its own project. Repeat [Lab 0](lab0-first-project.md), Parts 2 to 4, but name the project **WestCoastDrive**. Remember to install **REVLib**.
+
+Then copy `DashTable.java` from your **TestBed** project ([Lab 1.1](lab1b-dashboard.md)) into the new project's `frc/robot` folder, next to `Robot.java`. Every subsystem uses it to send values to Elastic.
 
 ### Step 1: Check the SPARK MAXes
 1. Connect each SPARK MAX to your laptop over USB-C and open the **REV Hardware Client**.
@@ -111,11 +113,11 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.kDriveConstants;
+import frc.robot.DashTable;
 
 public class DriveSubsystem extends SubsystemBase {
   // Four SPARK MAXes, all BRUSHED, because CIMs are brushed motors.
@@ -132,6 +134,9 @@ public class DriveSubsystem extends SubsystemBase {
   // We only hand it the two leaders. The followers copy them.
   private final DifferentialDrive m_drive =
       new DifferentialDrive(m_leftLeader::set, m_rightLeader::set);
+
+  // Everything this subsystem sends shows up under "Drive" in Elastic
+  private final DashTable m_dash = new DashTable("Drive");
 
   public DriveSubsystem() {
     // Left leader: normal direction
@@ -177,13 +182,13 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Drive/Left Output", m_leftLeader.getAppliedOutput());
-    SmartDashboard.putNumber("Drive/Right Output", m_rightLeader.getAppliedOutput());
-    SmartDashboard.putNumber("Drive/Left Leader Current (A)", m_leftLeader.getOutputCurrent());
-    SmartDashboard.putNumber("Drive/Left Follower Current (A)", m_leftFollower.getOutputCurrent());
-    SmartDashboard.putNumber("Drive/Right Leader Current (A)", m_rightLeader.getOutputCurrent());
-    SmartDashboard.putNumber("Drive/Right Follower Current (A)", m_rightFollower.getOutputCurrent());
-    SmartDashboard.putNumber("Drive/Battery (V)", RobotController.getBatteryVoltage());
+    m_dash.log("Left Output", m_leftLeader.getAppliedOutput());
+    m_dash.log("Right Output", m_rightLeader.getAppliedOutput());
+    m_dash.log("Left Leader Current (A)", m_leftLeader.getOutputCurrent());
+    m_dash.log("Left Follower Current (A)", m_leftFollower.getOutputCurrent());
+    m_dash.log("Right Leader Current (A)", m_rightLeader.getOutputCurrent());
+    m_dash.log("Right Follower Current (A)", m_rightFollower.getOutputCurrent());
+    m_dash.log("Battery (V)", RobotController.getBatteryVoltage());
   }
 }
 ```
@@ -301,7 +306,7 @@ Once every row in Step 7 passes on blocks:
 1. Put the robot on the floor in a big open space, with nobody in front of it.
 2. Keep `MaxOutput` at 0.5.
 3. Drive slowly: forward, backward, gentle turns, then a figure eight.
-4. Watch the dashboard while you drive. Look at the **current** on each side when you start moving and when you turn in place.
+4. Watch Elastic while you drive (put the currents and battery voltage on **Graph** widgets). Look at the **current** on each side when you start moving and when you turn in place.
 
 Spinning in place usually pulls the most current, because the wheels have to skid sideways across the carpet, the same reason a skid steer tears up a lawn when it turns. Watch the **battery voltage** drop while you do it. That's where brownouts come from ([Lesson 4](../hardware/04-electronics.md)).
 

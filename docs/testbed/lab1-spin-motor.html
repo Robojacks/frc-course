@@ -31,7 +31,7 @@
   <aside class="sidebar">
     <details class="sidebar-toggle" open>
       <summary>Labs menu</summary>
-      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html" class="current" aria-current="page">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html" class="current" aria-current="page">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Turn with a Gyro</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li></ul></details></nav>
     </details>
   </aside>
   <main id="content" class="content">
@@ -119,7 +119,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.config.SparkBaseConfig.IdleMode</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">com.revrobotics.spark.config.SparkMaxConfig</span><span class="p">;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.SmartDashboard</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
 
@@ -162,14 +161,6 @@
 <span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="n">speed</span><span class="p">),</span><span class="w">   </span><span class="c1">// runs once, when the command starts</span>
 <span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">      </span><span class="c1">// runs once, when the command ends</span>
 <span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Spin Brushless"</span><span class="p">);</span>
-<span class="w">  </span><span class="p">}</span>
-
-<span class="w">  </span><span class="nd">@Override</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// Runs every 20 ms. Send live values to the dashboard so you can see what the motor is doing.</span>
-<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Brushless/Velocity (RPM)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getEncoder</span><span class="p">().</span><span class="na">getVelocity</span><span class="p">());</span>
-<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Brushless/Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
-<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putNumber</span><span class="p">(</span><span class="s">"Brushless/Applied Output"</span><span class="p">,</span><span class="w"> </span><span class="n">m_brushlessMotor</span><span class="p">.</span><span class="na">getAppliedOutput</span><span class="p">());</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -230,32 +221,7 @@
 <li><strong>Let go.</strong> The motor stops.</li>
 </ol>
 <p>🎉 That's your code moving real hardware.</p>
-<h3 id="step-6-watch-it-on-the-dashboard">Step 6: Watch it on the dashboard<a class="headerlink" href="#step-6-watch-it-on-the-dashboard" title="Permanent link">#</a></h3>
-<p>Open <strong>Glass</strong> or <strong>Elastic</strong> (from the WPILib tools), connect to team 4674, and find the <strong>Brushless</strong> values. Hold A and watch:</p>
-<table>
-<thead>
-<tr>
-<th>Value</th>
-<th>What you'll see</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Velocity (RPM)</td>
-<td>Climbs quickly, then levels off at a steady speed</td>
-</tr>
-<tr>
-<td>Current (A)</td>
-<td>Jumps up as the motor starts, then drops once it's at speed</td>
-</tr>
-<tr>
-<td>Applied Output</td>
-<td>0.5 while A is held, 0 when released</td>
-</tr>
-</tbody>
-</table>
-<p>That jump in current at startup is why current limits matter: starting a motor takes much more current than keeping it spinning.</p>
-<h3 id="step-7-commit">Step 7: Commit<a class="headerlink" href="#step-7-commit" title="Permanent link">#</a></h3>
+<h3 id="step-6-commit">Step 6: Commit<a class="headerlink" href="#step-6-commit" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
 git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 1: spin brushless motor on A"</span>
 </code></pre></div>
@@ -293,9 +259,9 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Spin the motor with A, and stop it by letting go</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change <code>BrushlessMotorSpeed</code> to 0.25, then 0.75. Deploy each time and watch the RPM on the dashboard.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change <code>BrushlessMotorSpeed</code> to 0.25, then 0.75. Deploy each time. Can you hear the difference?</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <strong>B</strong> button that spins the motor <strong>backward</strong> at the same speed (hint: a negative speed)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add an <strong>X</strong> button that spins it at full speed, 1.0. Watch the current. How high does it jump at the start?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add an <strong>X</strong> button that spins it at full speed, 1.0</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change <code>IdleMode.kBrake</code> to <code>IdleMode.kCoast</code>. How is stopping different? Change it back.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <strong>Break it on purpose:</strong> change <code>spinMotorCommand</code> to use <code>runOnce(() -&gt; setMotorSpeed(speed))</code> instead of <code>startEnd</code>. Hold A, then let go. What happens, and why? (Disable the robot to stop it.) Then change it back.</li>
 </ul>
@@ -320,12 +286,10 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <summary>In the 'break it on purpose' exercise, why did the motor keep spinning?</summary>
 <p><code>runOnce</code> sets the speed once and then <strong>finishes immediately</strong>. When you release A, there's nothing left to cancel, so nothing sets the speed back to 0. The SPARK MAX keeps doing what it was last told until the robot is disabled.</p>
 </details>
-<details class="question">
-<summary>Why does the current jump when the motor starts?</summary>
-<p>A motor that isn't moving yet pulls much more current than one that's already spinning. The current limit keeps that jump from tripping the breaker or browning out the robot.</p>
-</details>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">#</a></h2>
+<p>In <a href="lab1b-dashboard.html">Lab 1.1</a>, you'll put the motor's speed and current on a dashboard and change its speed without redeploying.</p>
     </article>
-    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab0-first-project.html"><span>Previous</span>Lab 0: Set Up the TestBed Project</a><a class="pager-next" href="lab2-west-coast-drive.html"><span>Next</span>Lab 2: Drive a West Coast Drive</a></nav>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab0-first-project.html"><span>Previous</span>Lab 0: Set Up the TestBed Project</a><a class="pager-next" href="lab1b-dashboard.html"><span>Next</span>Lab 1.1: Put It on the Dashboard</a></nav>
   </main>
 </div>
 <footer class="site-footer">

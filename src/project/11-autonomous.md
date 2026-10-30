@@ -146,7 +146,7 @@ public RobotContainer() {
     autoChooser.addOption("Drive forward 2 m", drivetrain.driveDistance(2.0, 0.5));
     autoChooser.addOption("Score and back up", scoreAndBackUp());
     autoChooser.addOption("Drive and intake", driveAndIntake());
-    SmartDashboard.putData("Auto", autoChooser);
+    SmartDashboard.putData("Auto", autoChooser);   // 2027: Selectable + Tunables.publish
 
     configureBindings();
 }

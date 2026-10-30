@@ -58,10 +58,33 @@ And at the end of the constructor:
 ```java
         m_pid.setTolerance(kWheelConstants.ToleranceRot, kWheelConstants.ToleranceRps);
         m_pid.setIZone(kWheelConstants.IZone);       // limits integral windup (Attempt 5)
-        SmartDashboard.putData("Wheel/PID", m_pid);  // tune P, I, and D live from the dashboard
 ```
 
-`SmartDashboard.putData("Wheel/PID", m_pid)` puts the gains on the dashboard, where you can **edit them while the robot runs**. No redeploying between tries.
+### Step 3: Make the gains tunable
+You'll try a lot of gains in this lab. Redeploying for every one would take forever, so make them **tunable** from Elastic ([Lab 1.1](lab1b-dashboard.md#step-5-change-the-speed-from-the-dashboard)).
+
+Add these fields **below `m_dash`** (they use it, so they have to come after it):
+
+```java
+    // Gains you can change in Elastic. They start at the values in Constants.
+    private final DoubleSupplier m_kP = m_dash.tunable("kP", kWheelConstants.P);
+    private final DoubleSupplier m_kI = m_dash.tunable("kI", kWheelConstants.I);
+    private final DoubleSupplier m_kD = m_dash.tunable("kD", kWheelConstants.D);
+    private final DoubleSupplier m_iZone = m_dash.tunable("IZone", kWheelConstants.IZone);
+```
+
+Import `java.util.function.DoubleSupplier`. Then, at the top of `periodic()`, copy the dashboard's numbers into the controller every loop:
+
+```java
+        // Use whatever gains are on the dashboard right now
+        m_pid.setPID(m_kP.getAsDouble(), m_kI.getAsDouble(), m_kD.getAsDouble());
+        m_pid.setIZone(m_iZone.getAsDouble());
+```
+
+In Elastic, add **kP**, **kI**, **kD**, and **IZone** from the **Wheel** table as **Text Display** widgets, so you can type new values. Add a **Graph** with **Position (rot)** and **Target (rot)** together.
+
+!!! info "In WPILib 2027"
+    These become `Tunables.addDouble("Wheel/kP", kWheelConstants.P)`, read with `.get()` ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).
 
 ### Warm up in the simulator
 Before touching the real wheel, try the same idea in WPILib's turret simulator below. A turret is a lot like the test bed wheel: a motor turning something to an exact angle, with no gravity. It's running **PID only**.
@@ -120,9 +143,9 @@ Bind it on the wheel controller:
     m_wheelController.x().onTrue(m_wheel.turnPid(10));   // Attempts 3 to 5
 ```
 
-1. Make sure **kI and kD are 0** on the dashboard (`Wheel/PID`).
+1. Make sure **kI** and **kD** are 0 in Elastic (`Wheel/kI` and `Wheel/kD`).
 2. Run `turnPid(10)` three times with kP = 1.0. Record the results.
-3. Try kP = 0.3, then 3, then 10. For each, graph **Position** and **Target** together in Glass or AdvantageScope.
+3. Try kP = 0.3, then 3, then 10. For each, watch **Position** and **Target** on your Elastic graph.
 
 **What you'll see:**
 
@@ -163,7 +186,7 @@ Still no new code. Keep your P and D from Attempt 4.
 !!! warning "Integral windup, and why there's an IZone"
     If I added up error the whole way from 0 to 10, it would build up a huge total during the move and fling the wheel past the target. That's **integral windup**.
 
-    `setIZone(0.5)` in the constructor fixes it: the integral only builds up when the wheel is within 0.5 rotations of the target, and resets to zero outside that. Try setting the IZone to 20 on the dashboard and watch what happens to the overshoot.
+    `setIZone(0.5)` in the constructor fixes it: the integral only builds up when the wheel is within 0.5 rotations of the target, and resets to zero outside that. Try setting **IZone** to 20 in Elastic and watch what happens to the overshoot.
 
 **What you'll see:** With P, I, and D tuned, the wheel moves quickly, slows smoothly, and finishes within the tolerance of 10, run after run, even with the cloth on it.
 

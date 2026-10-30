@@ -68,11 +68,11 @@ Import `edu.wpi.first.wpilibj.DigitalInput`. Then add a method that says what th
 Add it to `periodic()` so you can see it:
 
 ```java
-    SmartDashboard.putBoolean("Brushless/Limit Pressed", isLimitPressed());
+    m_dash.log("Limit Pressed", isLimitPressed());
 ```
 
 ### Step 3: Check it on the dashboard
-Deploy (the robot can stay **disabled**). Open the dashboard and find **Brushless/Limit Pressed**.
+Deploy (the robot can stay **disabled**). In Elastic, find **Limit Pressed** in the **Brushless** table and show it as a **Boolean Box**.
 
 - [ ] Not touching the switch: shows **false**
 - [ ] Holding the switch down: shows **true**
@@ -149,7 +149,7 @@ git commit -m "Lab 4: limit switch"
 | "Limit switch hit!" prints over and over | You used `whileTrue` instead of `onTrue`, or the switch is bouncing (see the last exercise) |
 
 ## Try it
-- [ ] Get **Limit Pressed** reading correctly on the dashboard
+- [ ] Get **Limit Pressed** reading correctly in Elastic
 - [ ] Spin until the switch is pressed with D-pad up
 - [ ] Hold the switch, then tap D-pad up. Explain what happens with and without `.unless`.
 - [ ] Use the **second** limit switch on the test bed. Make D-pad down spin **backward** until it's pressed, like an elevator going down to its bottom switch.

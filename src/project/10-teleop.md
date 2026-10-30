@@ -71,15 +71,16 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.DashTable;
 import frc.robot.Constants.DriveConstants;
 
 public class Drivetrain extends SubsystemBase {
     private final PWMSparkMax left = new PWMSparkMax(DriveConstants.LEFT_MOTOR_PORT);
     private final PWMSparkMax right = new PWMSparkMax(DriveConstants.RIGHT_MOTOR_PORT);
     private final DifferentialDrive drive = new DifferentialDrive(left, right);
+    private final DashTable dash = new DashTable("Drive");   // Lesson 6.1
 
     private final Encoder leftEncoder = new Encoder(
         DriveConstants.LEFT_ENCODER_PORTS[0], DriveConstants.LEFT_ENCODER_PORTS[1]);
@@ -114,10 +115,10 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Drive/Left (m)", leftEncoder.getDistance());
-        SmartDashboard.putNumber("Drive/Right (m)", rightEncoder.getDistance());
-        SmartDashboard.putNumber("Drive/Left Output", left.get());
-        SmartDashboard.putNumber("Drive/Right Output", right.get());
+        dash.log("Left (m)", leftEncoder.getDistance());
+        dash.log("Right (m)", rightEncoder.getDistance());
+        dash.log("Left Output", left.get());
+        dash.log("Right Output", right.get());
     }
 }
 ```

@@ -82,10 +82,10 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.kWheelConstants;
+import frc.robot.DashTable;
 
 public class WheelSubsystem extends SubsystemBase {
     private final SparkMax m_motor =
@@ -99,6 +99,8 @@ public class WheelSubsystem extends SubsystemBase {
 
     private double m_target = 0.0;     // where the current attempt is trying to stop
     private double m_lastVolts = 0.0;  // for the dashboard
+
+    private final DashTable m_dash = new DashTable("Wheel");
 
     public WheelSubsystem() {
         SparkMaxConfig config = new SparkMaxConfig();
@@ -139,12 +141,12 @@ public class WheelSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Wheel/Position (rot)", getRotations());
-        SmartDashboard.putNumber("Wheel/Target (rot)", m_target);
-        SmartDashboard.putNumber("Wheel/Error (rot)", m_target - getRotations());
-        SmartDashboard.putNumber("Wheel/Velocity (rot per s)", getRps());
-        SmartDashboard.putNumber("Wheel/Output (V)", m_lastVolts);
-        SmartDashboard.putNumber("Wheel/Current (A)", m_motor.getOutputCurrent());
+        m_dash.log("Position (rot)", getRotations());
+        m_dash.log("Target (rot)", m_target);
+        m_dash.log("Error (rot)", m_target - getRotations());
+        m_dash.log("Velocity (rot per s)", getRps());
+        m_dash.log("Output (V)", m_lastVolts);
+        m_dash.log("Current (A)", m_motor.getOutputCurrent());
     }
 }
 ```
@@ -180,8 +182,8 @@ Deploy, enable nothing yet, and open the dashboard.
 `m_encoder.getDistance()` already gives rotations. To see what it's built from, add two more lines to `periodic()`:
 
 ```java
-        SmartDashboard.putNumber("Wheel/Raw Counts", m_encoder.getRaw());
-        SmartDashboard.putNumber("Wheel/Cycles", m_encoder.get());
+        m_dash.log("Raw Counts", m_encoder.getRaw());
+        m_dash.log("Cycles", m_encoder.get());
 ```
 
 Zero the encoder and turn the wheel exactly once by hand. You should see about **8192** raw counts, about **2048** cycles, and **1.00** rotations. The `setDistancePerPulse(1.0 / 2048)` line is what turns cycles into rotations.

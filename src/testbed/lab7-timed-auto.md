@@ -113,11 +113,14 @@ And make `getAutonomousCommand()` return the choice:
 
 Import `SendableChooser` and `SmartDashboard` if needed.
 
+!!! info "Choosers are the exception"
+    A `SendableChooser` is a **Sendable**, so in 2026 it goes on the dashboard with `SmartDashboard.putData`. In WPILib 2027 it's replaced by `Selectable` and `Tunables.publish("Auto", chooser)` ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).
+
 !!! tip "Why \"Do nothing\" is the default"
     If the drive team forgets to pick, a robot that sits still is far better than one that runs a routine meant for a different starting spot and hits someone else's robot.
 
 ### Step 4: Run it
-1. Deploy. On the dashboard, find **Auto** and pick **Drive forward**.
+1. Deploy. In Elastic, find **Auto** in the **SmartDashboard** table, drag it onto your tab as a **ComboBox Chooser**, and pick **Drive forward**.
 2. On blocks first: in the Driver Station, select **Autonomous**, say **"Enabling!"**, and enable. The wheels run for 2 seconds and stop.
 3. On the floor: put tape on the floor at the robot's front edge, and run it again. Mark where it stops.
 4. Run **Square** on blocks, then on the floor. Adjust the spin time in `squareSide()` until it looks close to a square.
