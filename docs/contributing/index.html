@@ -46,24 +46,21 @@
     <article>
 <h1 id="how-to-contribute">How to Contribute<a class="headerlink" href="#how-to-contribute" title="Permanent link">#</a></h1>
 <p>This site is plain HTML. Lessons are written in Markdown in the <code>src/</code> folder, and a small Python script, <code>build.py</code>, turns them into the HTML pages in <code>docs/</code>. GitHub Pages serves <code>docs/</code> directly, so there's no server and nothing to deploy by hand.</p>
-<p>A second script, <code>build_gitbook.py</code>, makes the GitBook version of the same lessons in <code>book/</code>. GitBook reads it straight from the repo.</p>
 <h2 id="quick-edits">Quick edits<a class="headerlink" href="#quick-edits" title="Permanent link">#</a></h2>
 <ol>
 <li>Edit the lesson's Markdown file in <code>src/</code>.</li>
-<li>Run <code>python build.py</code> and <code>python build_gitbook.py --site-url https://robojacks.github.io/frc-course</code>.</li>
-<li>Commit the <code>src/</code> change <strong>and</strong> the rebuilt <code>docs/</code> and <code>book/</code> files, and open a pull request.</li>
+<li>Run <code>python build.py</code>.</li>
+<li>Commit the <code>src/</code> change <strong>and</strong> the rebuilt <code>docs/</code> files, and open a pull request.</li>
 </ol>
 <div class="admonition warning">
-<p class="admonition-title">Don't edit <code>docs/</code>, <code>book/</code>, or pages in GitBook directly</p>
-<p>The build scripts regenerate everything in <code>docs/</code> and <code>book/</code> from <code>src/</code>, so hand edits there (including edits made in GitBook's editor) get overwritten the next time anyone builds.</p>
+<p class="admonition-title">Don't edit files in <code>docs/</code> directly</p>
+<p><code>build.py</code> regenerates everything in <code>docs/</code> from <code>src/</code>, so hand edits there get overwritten the next time anyone builds.</p>
 </div>
 <h2 id="working-locally">Working locally<a class="headerlink" href="#working-locally" title="Permanent link">#</a></h2>
 <p><div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Robojacks/frc-course.git
 <span class="nb">cd</span><span class="w"> </span>frc-course
 pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
-npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>@mermaid-js/mermaid-cli<span class="w">   </span><span class="c1"># once, for the GitBook diagrams</span>
 python<span class="w"> </span>build.py
-python<span class="w"> </span>build_gitbook.py<span class="w"> </span>--site-url<span class="w"> </span>https://robojacks.github.io/frc-course
 </code></pre></div>
 Then open <code>docs/index.html</code> in your browser. Rebuild and refresh after each change.</p>
 <h2 id="adding-a-lesson">Adding a lesson<a class="headerlink" href="#adding-a-lesson" title="Permanent link">#</a></h2>

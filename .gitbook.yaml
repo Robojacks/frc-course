@@ -1,6 +1,0 @@
-# GitBook reads the course from book/ (built by build_gitbook.py from src/).
-root: ./book/
-
-structure:
-  readme: README.md
-  summary: SUMMARY.md
