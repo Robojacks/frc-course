@@ -274,7 +274,7 @@
 <div class="admonition wpilib">
 <p class="admonition-title">From the WPILib docs: CAN wiring and termination</p>
 <p>CAN is generally wired with <strong>yellow</strong> and <strong>green</strong> wire, with yellow as CAN-High and green as CAN-Low. Many devices use the same colors to show how the wires plug in.</p>
-<p>A CAN network must be <strong>terminated</strong> with a 120 Ω resistor at each end. The roboRIO and the power distribution panel (PDP) have these built in, so the recommended layout starts the chain at the <strong>roboRIO</strong>, ends it at the <strong>PDP</strong>, and puts every other CAN device in between. The PDP ships with its termination jumper <strong>on</strong>; leave it that way.</p>
+<p>A CAN network must be <strong>terminated</strong> with a 120 Ω resistor at each end. The roboRIO and the power distribution panel (PDP) have these built in, so the recommended layout starts the chain at the <strong>roboRIO</strong>, ends it at the <strong>PDP</strong>, and puts every other CAN device in between. The PDP ships with its termination jumper <strong>on</strong>; leave it that way. A REV <strong>Power Distribution Hub</strong> (PDH) has a termination switch instead, labeled <strong>TERM</strong>, next to its CAN terminals: make sure it's <strong>ON</strong> when the PDH is at the end of the chain.</p>
 <p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/can-wiring-basics.html">CAN Wiring Basics</a>, CC BY 4.0.</em></p>
 </div>
 <ul>

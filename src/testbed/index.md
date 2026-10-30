@@ -51,6 +51,11 @@ Labs 2, 7, 8, and 10 use the team's **West Coast Drive**, a six-wheel, skid stee
 | Wheels | 3 per side, chained together, with the center wheels slightly lower |
 | Gyro | **[NavX2](../hardware/04d-sensors.md)** on the roboRIO's MXP port (Lab 8) |
 | Elevator | A **NEO** on a SPARK MAX in brushless mode, with a **REV Through Bore Encoder** on the roboRIO's DIO ports (Lab 10) |
+| Radio | Labeled **4674-6**. The Driver Station connects through it. |
+
+![The team's West Coast Drive chassis from above, with its electronics on the belly pan](../assets/photos/wcd-chassis.jpg)
+
+<p class="credit">The RoboJacks West Coast Drive chassis, before the elevator goes on. Front is at the top of the photo.</p>
 
 !!! danger "WCD safety"
     Test new drive code **on blocks** first, with the wheels off the ground. On the floor, use a big open space, keep people out of the robot's path, and start at low speed. Keep hands out of the elevator, and never reach under a raised carriage.

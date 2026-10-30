@@ -270,6 +270,7 @@ def build():
         shutil.copy(ASSETS / f, OUT / "assets" / f)
     # Diagrams, screenshots, and PID simulators adapted from the WPILib docs (CC BY 4.0)
     shutil.copytree(ASSETS / "wpilib", OUT / "assets" / "wpilib")
+    shutil.copytree(ASSETS / "photos", OUT / "assets" / "photos")
     light = HtmlFormatter(style="friendly").get_style_defs(".highlight")
     dark = HtmlFormatter(style="monokai").get_style_defs(".highlight")
     (OUT / "assets" / "code.css").write_text(

@@ -43,6 +43,24 @@ flowchart LR
 | Breakers | 40 A, one per motor |
 | Controller | An Xbox controller on the Driver Station laptop |
 
+![The team's West Coast Drive chassis from above, with its electronics on the belly pan](../assets/photos/wcd-chassis.jpg)
+
+<p class="credit">The RoboJacks West Coast Drive chassis, before the elevator goes on. Front is at the top of the photo.</p>
+
+Find each of these on the real chassis before you write any code:
+
+| In the photo | What it is |
+|---|---|
+| Gray box near the top | The **roboRIO**, where your code runs |
+| Four black motors in the middle | The **drive motors**, two on each side, each pair driving one gearbox |
+| Chains along the left and right edges | Connect each gearbox to that side's three wheels, so all three turn together |
+| Black and red board at the bottom | The **Power Distribution Hub**, with one breaker per motor |
+| White box labeled **4674-6** | The **radio**: the Driver Station connects to the robot through it |
+| Breaker with a red button, bottom right | The **main breaker**: press the red button to turn off all power |
+| White box labeled **SPARK MAX** | A **SPARK MAX** motor controller |
+
+Trace the wires from one motor to its SPARK MAX, and from the SPARK MAX to its breaker on the Power Distribution Hub. Knowing which controller drives which motor makes Step 1 much easier.
+
 !!! danger "CIMs are brushed motors"
     Every SPARK MAX in this lab must be set up as `MotorType.kBrushed`. The wrong motor type can damage the motor and the controller. This is the opposite of Lab 1's NEO, so read that line twice.
 

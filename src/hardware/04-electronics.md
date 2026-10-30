@@ -135,7 +135,7 @@ Most motor controllers talk to the roboRIO over **CAN**, a two-wire daisy chain 
 !!! wpilib "From the WPILib docs: CAN wiring and termination"
     CAN is generally wired with **yellow** and **green** wire, with yellow as CAN-High and green as CAN-Low. Many devices use the same colors to show how the wires plug in.
 
-    A CAN network must be **terminated** with a 120 Ω resistor at each end. The roboRIO and the power distribution panel (PDP) have these built in, so the recommended layout starts the chain at the **roboRIO**, ends it at the **PDP**, and puts every other CAN device in between. The PDP ships with its termination jumper **on**; leave it that way.
+    A CAN network must be **terminated** with a 120 Ω resistor at each end. The roboRIO and the power distribution panel (PDP) have these built in, so the recommended layout starts the chain at the **roboRIO**, ends it at the **PDP**, and puts every other CAN device in between. The PDP ships with its termination jumper **on**; leave it that way. A REV **Power Distribution Hub** (PDH) has a termination switch instead, labeled **TERM**, next to its CAN terminals: make sure it's **ON** when the PDH is at the end of the chain.
 
     *Adapted from [CAN Wiring Basics](https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/can-wiring-basics.html), CC BY 4.0.*
 
