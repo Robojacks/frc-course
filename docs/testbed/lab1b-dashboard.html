@@ -73,45 +73,99 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.networktables.StringPublisher</span><span class="p">;</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * One folder of values on the dashboard, sent with NetworkTables 4.</span>
-<span class="cm"> * new DashTable("Wheel").log("Position (rot)", 3.4) shows up in Elastic as /Wheel/Position (rot).</span>
+<span class="cm"> * One folder ("table") of values on the dashboard, sent with NetworkTables 4.</span>
+<span class="cm"> *</span>
+<span class="cm"> * &lt;p&gt;Each subsystem makes its own DashTable, named after the subsystem. Every value it logs</span>
+<span class="cm"> * shows up in Elastic inside that folder. For example:</span>
+<span class="cm"> *</span>
+<span class="cm"> * &lt;pre&gt;</span>
+<span class="cm"> *   DashTable dash = new DashTable("Wheel");</span>
+<span class="cm"> *   dash.log("Position (rot)", 3.4);   // shows up in Elastic as /Wheel/Position (rot)</span>
+<span class="cm"> * &lt;/pre&gt;</span>
+<span class="cm"> *</span>
+<span class="cm"> * &lt;p&gt;In WPILib 2027, this class is replaced by the built-in Telemetry and Tunables APIs:</span>
+<span class="cm"> * {@code new DashTable("Wheel")} becomes {@code Telemetry.getTable("Wheel")}, and</span>
+<span class="cm"> * {@code tunable(...)} becomes {@code Tunables.addDouble(...)}.</span>
 <span class="cm"> */</span>
 <span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DashTable</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// The NetworkTables folder this DashTable writes into, like /Wheel</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">NetworkTable</span><span class="w"> </span><span class="n">m_table</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// One publisher per value, remembered by name so it's only created once.</span>
+<span class="w">  </span><span class="c1">// A Map is a lookup table: give it a key (the value's name), get back its publisher.</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">DoublePublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_numbers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">BooleanPublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_booleans</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">StringPublisher</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_strings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Tunable numbers use entries, which can both send a value AND read back changes from the dashboard</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">DoubleEntry</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_tunables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span>
 
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Creates a folder of dashboard values.</span>
+<span class="cm">   *</span>
+<span class="cm">   * @param tableName the folder's name in Elastic, usually the subsystem's name (like "Wheel")</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">DashTable</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">tableName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// getDefault() is the robot's one NetworkTables instance; getTable() picks the folder</span>
 <span class="w">    </span><span class="n">m_table</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NetworkTableInstance</span><span class="p">.</span><span class="na">getDefault</span><span class="p">().</span><span class="na">getTable</span><span class="p">(</span><span class="n">tableName</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
-<span class="w">  </span><span class="cm">/** Sends a number. The first call makes the publisher; later calls reuse it. */</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Sends a number to the dashboard. Call it every loop (for example, in periodic()).</span>
+<span class="cm">   *</span>
+<span class="cm">   * @param key the value's name in Elastic. Put units in it, like "Height (m)".</span>
+<span class="cm">   * @param value the number to show</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// computeIfAbsent: "find the publisher for this key; if there isn't one yet, make it</span>
+<span class="w">    </span><span class="c1">// with this code and remember it." So the first call creates the publisher,</span>
+<span class="w">    </span><span class="c1">// and every later call just reuses it and sends the new value.</span>
 <span class="w">    </span><span class="n">m_numbers</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
-<span class="w">  </span><span class="cm">/** Sends true or false. */</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Sends true or false to the dashboard. Show it as a Boolean Box in Elastic.</span>
+<span class="cm">   *</span>
+<span class="cm">   * @param key the value's name in Elastic, like "At Goal"</span>
+<span class="cm">   * @param value true or false</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Same pattern as the number version, with a BooleanPublisher</span>
 <span class="w">    </span><span class="n">m_booleans</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getBooleanTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
-<span class="w">  </span><span class="cm">/** Sends text. */</span>
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Sends text to the dashboard. Show it as a Text Display in Elastic.</span>
+<span class="cm">   *</span>
+<span class="cm">   * @param key the value's name in Elastic, like "Command"</span>
+<span class="cm">   * @param value the text to show</span>
+<span class="cm">   */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Same pattern again, with a StringPublisher</span>
 <span class="w">    </span><span class="n">m_strings</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getStringTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">publish</span><span class="p">()).</span><span class="na">set</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 
 <span class="w">  </span><span class="cm">/**</span>
-<span class="cm">   * A number you can change from the dashboard while the robot runs.</span>
-<span class="cm">   * It starts at defaultValue every time the robot code starts.</span>
+<span class="cm">   * Makes a number you can change from the dashboard while the robot runs, like a PID gain.</span>
+<span class="cm">   *</span>
+<span class="cm">   * &lt;p&gt;Call this ONCE, when you create a field, and keep what it returns. Then call</span>
+<span class="cm">   * {@code getAsDouble()} on it whenever you need the current value.</span>
+<span class="cm">   *</span>
+<span class="cm">   * &lt;p&gt;The number goes back to defaultValue every time the robot code starts, so dashboard</span>
+<span class="cm">   * changes are NOT saved. When you find a good value, copy it into Constants.java.</span>
+<span class="cm">   *</span>
+<span class="cm">   * @param key the number's name in Elastic, like "kP"</span>
+<span class="cm">   * @param defaultValue the starting value, usually from Constants</span>
+<span class="cm">   * @return something you can ask for the current value at any time, with getAsDouble()</span>
 <span class="cm">   */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">DoubleSupplier</span><span class="w"> </span><span class="nf">tunable</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">defaultValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">DoubleEntry</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_tunables</span><span class="p">.</span><span class="na">computeIfAbsent</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// An entry is a publisher and a subscriber in one: it sends values and reads changes</span>
 <span class="w">      </span><span class="n">DoubleEntry</span><span class="w"> </span><span class="n">newEntry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_table</span><span class="p">.</span><span class="na">getDoubleTopic</span><span class="p">(</span><span class="n">k</span><span class="p">).</span><span class="na">getEntry</span><span class="p">(</span><span class="n">defaultValue</span><span class="p">);</span>
-<span class="w">      </span><span class="n">newEntry</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">defaultValue</span><span class="p">);</span>
+<span class="w">      </span><span class="n">newEntry</span><span class="p">.</span><span class="na">set</span><span class="p">(</span><span class="n">defaultValue</span><span class="p">);</span><span class="w">   </span><span class="c1">// put the starting value on the dashboard</span>
 <span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">newEntry</span><span class="p">;</span>
 <span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="c1">// entry::get is a method reference: "call entry.get() whenever someone asks for the value"</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">entry</span><span class="p">::</span><span class="n">get</span><span class="p">;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
