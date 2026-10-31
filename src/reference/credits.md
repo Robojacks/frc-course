@@ -59,7 +59,7 @@ Lessons 18–20 teach libraries made by other teams and projects. Their licenses
 | [PhotonVision](https://github.com/PhotonVision/photonvision) (coprocessor software) | [GNU GPL v3](https://github.com/PhotonVision/photonvision/blob/main/LICENSE) | [CC BY 4.0](https://github.com/PhotonVision/photonvision/blob/main/docs/LICENSE) |
 | [NMRC code camp level 2 (2026)](https://github.com/ironmosquitos5653/nmrc-codecamp-level2-rev-2026) | No license file (only the WPILib and AdvantageKit template licenses) | — |
 
-This course doesn't copy text from the PathPlanner or PhotonVision documentation; it links to them. Lesson 18's vision subsystem follows the code camp example's approach but is written for this course.
+[Lesson 19.1](../going-further/19b-pathplanner-app.md) adapts steps from the PathPlanner documentation and uses its screenshots (the `assets/pathplanner` folder), © Michael Jansen, under the [MIT License](../assets/pathplanner/LICENSE.txt), whose notice is included with them. The course doesn't copy text from the PhotonVision documentation; it links to it. Lesson 18's vision subsystem follows the code camp example's approach but is written for this course.
 
 ## Other sources
 - Motor specifications: [REV Robotics NEO V1.1](https://docs.revrobotics.com/brushless/neo/v1.1); CIM and 775pro figures from [RobotPy's motor configurations](https://robotpy.readthedocs.io/projects/websim/en/latest/motor-configurations.html).

@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>19.1 Using the PathPlanner App | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<script>
+// Apply the saved light/dark choice before the page draws, so it never flashes the wrong theme.
+try {
+  var savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) {}
+</script>
+
+</head>
+<body id="top" data-root="../">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
+      <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <span class="theme-track"><span class="theme-knob"></span></span>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="19b-pathplanner-app.html" class="current" aria-current="page">19.1 Using the PathPlanner App</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="191-using-the-pathplanner-app">19.1 Using the PathPlanner App<a class="headerlink" href="#191-using-the-pathplanner-app" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p><a href="19-pathplanner.html">Lesson 19</a> set up the robot side: odometry, speeds, and <code>AutoBuilder</code>. This lesson is the other half, the <strong>PathPlanner app</strong> on your laptop, where you draw the paths and build the autos the robot follows.</p>
+<p>Everything you do in the app is saved as files inside your robot project. Deploy the code and the robot has the new autos. No Java changes needed.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://pathplanner.dev/gui-getting-started.html">PathPlanner GUI: Getting Started</a></li>
+<li><a href="https://pathplanner.dev/gui-editing-paths-and-autos.html">Editing Paths and Autos</a></li>
+<li><a href="https://pathplanner.dev/robot-config.html">Robot Config</a></li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Screenshots</p>
+<p>The screenshots on this page are from the PathPlanner documentation, © Michael Jansen, used under the <a href="../assets/pathplanner/LICENSE.txt">MIT License</a>. They show a swerve robot on an older field, so your field picture and robot outline will look different. The buttons are the same.</p>
+</div>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="step-1-install-and-open-your-project">Step 1: Install and open your project<a class="headerlink" href="#step-1-install-and-open-your-project" title="Permanent link">#</a></h3>
+<ol>
+<li>Install PathPlanner from the <strong>Microsoft Store</strong> (it updates itself), or download it from the <a href="https://github.com/mjansen4857/pathplanner/releases">PathPlanner releases page</a> for Mac and Linux.</li>
+<li>Open it and click <strong>Open Robot Project</strong>.</li>
+<li>Pick the <strong>root folder</strong> of your robot project: the <strong>WestCoastDrive</strong> folder, the one with <code>build.gradle</code> in it. Not <code>src</code>, not <code>deploy</code>.</li>
+</ol>
+<p>PathPlanner creates <code>src/main/deploy/pathplanner/</code>, with <code>paths/</code> and <code>autos/</code> folders and a <code>settings.json</code>. Commit these to Git like code. They <strong>are</strong> the autos.</p>
+<p>The main screen is the <strong>project browser</strong>: paths on the left, autos on the right.</p>
+<p><img alt="PathPlanner's project browser: path cards on the left, auto cards on the right, with + buttons at the top of each side" src="../assets/pathplanner/project_page.png" /></p>
+<p class="credit">The project browser. From the <a href="https://pathplanner.dev/gui-project-browser.html">PathPlanner docs</a>, © Michael Jansen (MIT).</p>
+
+<table>
+<thead>
+<tr>
+<th>To</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Make a new path or auto</td>
+<td>The <strong>+</strong> button at the top of that side</td>
+</tr>
+<tr>
+<td>Open one</td>
+<td>Click its card</td>
+</tr>
+<tr>
+<td>Rename one</td>
+<td>Click its name on the card</td>
+</tr>
+<tr>
+<td>Duplicate or delete</td>
+<td>The <strong>⋮</strong> menu on the card</td>
+</tr>
+<tr>
+<td>Get back to the browser</td>
+<td>The <strong>←</strong> arrow, top left</td>
+</tr>
+<tr>
+<td>Switch projects, open <strong>Settings</strong></td>
+<td>The <strong>☰</strong> menu, top left</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-2-settings-for-a-tank-drive">Step 2: Settings for a tank drive<a class="headerlink" href="#step-2-settings-for-a-tank-drive" title="Permanent link">#</a></h3>
+<p>Open <strong>☰ → Settings</strong>. It has two tabs, and both matter.</p>
+<p><strong>App Settings tab:</strong></p>
+<p><img alt="PathPlanner's App Settings: default constraints, field image, roboRIO IP, and the Holonomic Mode and Hot Reload buttons" src="../assets/pathplanner/app_settings.png" /></p>
+<p class="credit">App Settings. From the <a href="https://pathplanner.dev/gui-settings.html">PathPlanner docs</a>, © Michael Jansen (MIT).</p>
+
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>What to set</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Holonomic Mode</strong></td>
+<td><strong>Turn it OFF.</strong> The WCD can't drive sideways. With it on, PathPlanner draws paths the robot can't follow.</td>
+</tr>
+<tr>
+<td><strong>Default Constraints</strong></td>
+<td>Start slow: <strong>1.0 m/s</strong> and <strong>1.0 m/s²</strong>, and about <strong>180 °/s</strong> and <strong>360 °/s²</strong> for turning. New paths use these. Raise them once paths work.</td>
+</tr>
+<tr>
+<td><strong>Nominal Voltage</strong></td>
+<td>12. Lower it (say 11) if other mechanisms will be running during auto and pulling the battery down.</td>
+</tr>
+<tr>
+<td><strong>Field Image</strong></td>
+<td>This season's field</td>
+</tr>
+<tr>
+<td><strong>roboRIO IP</strong></td>
+<td><code>10.46.74.2</code>, for team 4674. Used by the Telemetry page.</td>
+</tr>
+<tr>
+<td><strong>Hot Reload</strong></td>
+<td>Leave <strong>off</strong> for now (see Step 8)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Robot Config tab:</strong></p>
+<p><img alt="PathPlanner's Robot Config: mass, MOI, bumpers, wheel radius, drive gearing, true max speed, wheel COF, drive motor, current limit" src="../assets/pathplanner/robot_config_settings.png" /></p>
+<p class="credit">Robot Config, shown in holonomic mode. With Holonomic Mode off, it asks for Trackwidth instead of module offsets. From the <a href="https://pathplanner.dev/robot-config.html">PathPlanner docs</a>, © Michael Jansen (MIT).</p>
+
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>WCD value</th>
+<th>How to get it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Robot Mass (kg)</strong></td>
+<td>Weigh it</td>
+<td>With bumpers and battery. Pounds ÷ 2.205 = kg.</td>
+</tr>
+<tr>
+<td><strong>Robot MOI (kg·m²)</strong></td>
+<td>Estimate</td>
+<td>Rough: mass × (length² + width²) ÷ 12, using the frame's length and width in meters. Better: from SysId (see the PathPlanner docs).</td>
+</tr>
+<tr>
+<td><strong>Trackwidth (m)</strong></td>
+<td>Effective track width</td>
+<td>From <a href="../testbed/lab11-odometry.html#step-9-calibrate">Lab 11, Step 9</a></td>
+</tr>
+<tr>
+<td><strong>Bumper Width / Length (m)</strong></td>
+<td>Measure</td>
+<td>Only for drawing the robot in the app</td>
+</tr>
+<tr>
+<td><strong>Wheel Radius (m)</strong></td>
+<td>0.0762</td>
+<td>Half of a 6 in wheel. Use your calibrated diameter ÷ 2 if it's different.</td>
+</tr>
+<tr>
+<td><strong>Drive Gearing</strong></td>
+<td>Your gearbox ratio</td>
+<td>Motor turns per wheel turn, a number bigger than 1 (like 8.45)</td>
+</tr>
+<tr>
+<td><strong>True Max Drive Speed (m/s)</strong></td>
+<td>Measure</td>
+<td>Full stick, straight line, fresh battery: read the top speed from <code>getRate()</code>. Can't measure yet? Use about 85% of the free speed.</td>
+</tr>
+<tr>
+<td><strong>Wheel COF</strong></td>
+<td>1.2</td>
+<td>A common starting value for treaded wheels on carpet. Lower it if wheels slip in turns.</td>
+</tr>
+<tr>
+<td><strong>Drive Motor</strong></td>
+<td><strong>CIM</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Drive Current Limit (A)</strong></td>
+<td><code>CurrentLimit</code> from Constants</td>
+<td>Per motor</td>
+</tr>
+<tr>
+<td><strong>Motors per side</strong> (if shown)</td>
+<td>2</td>
+<td>Two CIMs per gearbox</td>
+</tr>
+</tbody>
+</table>
+<p>Close Settings. Everything is saved to <code>settings.json</code>, which <code>RobotConfig.fromGUISettings()</code> reads on the robot.</p>
+<div class="admonition warning">
+<p class="admonition-title">Keep it honest</p>
+<p>PathPlanner plans every path from these numbers. A wrong mass, gearing, or max speed makes every path track a little wrong, and it looks exactly like bad PID tuning. Update the config when the robot changes.</p>
+</div>
+<h3 id="step-3-draw-your-first-path">Step 3: Draw your first path<a class="headerlink" href="#step-3-draw-your-first-path" title="Permanent link">#</a></h3>
+<p>Click <strong>+</strong> on the <strong>Paths</strong> side and name it <code>Forward 2m</code>. The path editor opens: the field on the left, the path's settings on the right.</p>
+<p><img alt="The path editor: a path drawn on the field from a green start point to a red end point, with Waypoints, Event Markers, Global Constraints, and other sections on the right" src="../assets/pathplanner/path_editor.png" /></p>
+<p class="credit">The path editor. From the <a href="https://pathplanner.dev/gui-editing-paths-and-autos.html">PathPlanner docs</a>, © Michael Jansen (MIT).</p>
+
+<p>The <strong>green</strong> dot is the start, the <strong>red</strong> dot is the end. The line between them is the path. Its dots change from red (slow) to green (fast) to show the robot's speed.</p>
+<table>
+<thead>
+<tr>
+<th>To</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Move a point</td>
+<td>Drag it</td>
+</tr>
+<tr>
+<td>Add a waypoint at the end</td>
+<td>Double-click on the field</td>
+</tr>
+<tr>
+<td>Change the curve's direction at a point</td>
+<td>Drag the small <strong>control point</strong> next to it. Its direction is the robot's heading there; its distance from the point is how wide the curve is.</td>
+</tr>
+<tr>
+<td>Type exact numbers</td>
+<td>Open <strong>Waypoints</strong> on the right. Each waypoint has X, Y (meters), and Heading (degrees).</td>
+</tr>
+<tr>
+<td>Zoom</td>
+<td>Scroll on the field</td>
+</tr>
+<tr>
+<td>Undo / redo</td>
+<td>Ctrl+Z / Ctrl+Y</td>
+</tr>
+</tbody>
+</table>
+<p>For <code>Forward 2m</code>, open <strong>Waypoints</strong> and type:</p>
+<table>
+<thead>
+<tr>
+<th>Waypoint</th>
+<th>X (m)</th>
+<th>Y (m)</th>
+<th>Heading (°)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Start</td>
+<td>2.0</td>
+<td>4.0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>End</td>
+<td>4.0</td>
+<td>4.0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>The play bar under the field shows a robot driving the path. The time at the top right is how long it should take.</p>
+<h3 id="step-4-the-other-path-settings">Step 4: The other path settings<a class="headerlink" href="#step-4-the-other-path-settings" title="Permanent link">#</a></h3>
+<p>Open each section on the right:</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>What it does</th>
+<th>For the WCD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Global Constraints</strong></td>
+<td>Max speed and acceleration for this path</td>
+<td>Leave <strong>Use Default Constraints</strong> checked to start</td>
+</tr>
+<tr>
+<td><strong>Starting State</strong> / <strong>Final State</strong></td>
+<td>Speed at the start and end. 0 m/s means start or stop still.</td>
+<td>Leave at 0 for now. A non-zero final speed lets one path flow into the next without stopping.</td>
+</tr>
+<tr>
+<td><strong>Event Markers</strong></td>
+<td>Run a named command at a spot along the path, while driving (Step 6)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Constraint Zones</strong></td>
+<td>Slow down in part of the path, like a tight turn</td>
+<td>Try one on an S-curve</td>
+</tr>
+<tr>
+<td><strong>Reversed</strong></td>
+<td>Drive this path <strong>backward</strong></td>
+<td>Check it for paths that back away from a goal</td>
+</tr>
+<tr>
+<td><strong>Path Optimizer</strong></td>
+<td>Reshapes the curve to make it faster</td>
+<td>Fun to try; check the result looks sensible</td>
+</tr>
+<tr>
+<td>Rotation Targets, Point Towards Zones</td>
+<td>Holonomic only</td>
+<td>Hidden with Holonomic Mode off</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Tank drives can't turn in place mid-path</p>
+<p>A WCD follows the curve like a car, always facing where it's going. Every waypoint's heading is the direction of travel there. To end up facing the other way, draw a wide U-turn, or end one path, back up with a <strong>Reversed</strong> path, and drive forward on the next.</p>
+</div>
+<h3 id="step-5-build-an-auto">Step 5: Build an auto<a class="headerlink" href="#step-5-build-an-auto" title="Permanent link">#</a></h3>
+<p>Click <strong>←</strong> to go back, then <strong>+</strong> on the <strong>Autos</strong> side. Name it <code>Two Paths</code>.</p>
+<p><img alt="The auto editor: a sequential group with Path 1 and Path 2, a Reset Odometry checkbox, and the robot's route drawn on the field" src="../assets/pathplanner/auto_editor.png" /></p>
+<p class="credit">The auto editor. From the <a href="https://pathplanner.dev/gui-editing-paths-and-autos.html">PathPlanner docs</a>, © Michael Jansen (MIT).</p>
+
+<p>An auto is a <strong>sequential group</strong>: commands that run one after another, like <code>andThen</code> in <a href="../project/11-autonomous.html">Lesson 11</a>.</p>
+<ol>
+<li>Click <strong>+</strong> next to <strong>Sequential Group</strong> and pick <strong>Follow Path</strong>. Choose <code>Forward 2m</code>.</li>
+<li>Click <strong>+</strong> again and add a <strong>Wait</strong> of 1 second.</li>
+<li>Draw a second path that starts <strong>exactly</strong> where the first one ends, and add it after the wait.</li>
+<li>Leave <strong>Reset Odometry</strong> checked.</li>
+</ol>
+<p>Drag the <strong>═</strong> handles to reorder. The play bar shows the whole auto, and the time at the top is the total.</p>
+<table>
+<thead>
+<tr>
+<th>You can add</th>
+<th>It does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Follow Path</strong></td>
+<td>Drive one path</td>
+</tr>
+<tr>
+<td><strong>Named Command</strong></td>
+<td>Run a command registered in robot code (<a href="19-pathplanner.html#step-6-named-commands">Lesson 19, Step 6</a>)</td>
+</tr>
+<tr>
+<td><strong>Wait</strong></td>
+<td>Pause for some seconds</td>
+</tr>
+<tr>
+<td><strong>Sequential / Parallel / Deadline / Race Group</strong></td>
+<td>Nest commands, with the same rules as WPILib's command groups</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">Where does the robot start?</p>
+<p>With <strong>Reset Odometry</strong> checked, the auto starts by setting the robot's pose to the <strong>start of its first path</strong>. So the robot must really be there when the auto begins. In the shop, put a tape mark on the floor and treat it as that spot. At competition, line the robot up exactly where the first path begins.</p>
+<p>One path ending and the next starting must line up too. If they don't, the robot jumps to catch up. Use <strong>linked waypoints</strong> (the link button in a waypoint's settings) to tie them together so moving one moves both.</p>
+</div>
+<h3 id="step-6-run-a-mechanism-during-an-auto">Step 6: Run a mechanism during an auto<a class="headerlink" href="#step-6-run-a-mechanism-during-an-auto" title="Permanent link">#</a></h3>
+<p>In robot code, named commands are registered with <code>NamedCommands.registerCommand("Elevator to L2", ...)</code> (<a href="19-pathplanner.html#step-6-named-commands">Lesson 19, Step 6</a>). In the app:</p>
+<ul>
+<li><strong>Between paths:</strong> add a <strong>Named Command</strong> to the auto's sequential group, and type or pick <code>Elevator to L2</code>.</li>
+<li><strong>While driving:</strong> in a path, open <strong>Event Markers → +</strong>. Drag its slider to where along the path it should start, then pick the named command in its command list. Check <strong>Zoned Event</strong> to give it an end point too.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Press Enter</p>
+<p>When you type a new named command name, press <strong>Enter</strong> or it isn't saved. The name must match the robot code <strong>exactly</strong>, including capitals and spaces.</p>
+</div>
+<p>Commands started by an event marker are stopped when the path ends. For something that should keep going, put it in the auto between paths instead, or in a <strong>Parallel</strong> or <strong>Deadline</strong> group with the next path.</p>
+<h3 id="step-7-deploy-and-run">Step 7: Deploy and run<a class="headerlink" href="#step-7-deploy-and-run" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Save</strong> happens automatically. Check that <code>src/main/deploy/pathplanner/autos/Two Paths.auto</code> exists.</li>
+<li>Deploy the robot code. The deploy folder goes to the roboRIO with it.</li>
+<li>In Elastic, pick <strong>PP: Two Paths</strong> from the <strong>Auto</strong> menu (<a href="19-pathplanner.html#step-7-pick-an-auto-in-elastic">Lesson 19, Step 7</a>).</li>
+<li>Put the robot on the tape mark and run autonomous.</li>
+</ol>
+<h3 id="step-8-watch-it-live">Step 8: Watch it live<a class="headerlink" href="#step-8-watch-it-live" title="Permanent link">#</a></h3>
+<p><strong>☰ → Telemetry</strong> shows a live view while the robot follows a path, using the roboRIO IP from Settings.</p>
+<p><img alt="PathPlanner's telemetry page: the path, the target pose in grey and the real pose in white, and graphs of velocity, angular velocity, and path inaccuracy" src="../assets/pathplanner/telemetry.png" /></p>
+<p class="credit">The telemetry page. From the <a href="https://pathplanner.dev/gui-telemetry.html">PathPlanner docs</a>, © Michael Jansen (MIT).</p>
+
+<p>The <strong>grey</strong> robot is where the path wants the robot to be; the <strong>white</strong> robot is where odometry says it is. The bottom graph, <strong>path inaccuracy</strong>, is how far apart they are. Use the table in <a href="19-pathplanner.html#step-9-run-it-and-watch">Lesson 19, Step 9</a> to work out why.</p>
+<p><strong>Hot Reload</strong> (in App Settings) sends path changes to the robot as soon as you save, with no redeploy. It's great for tuning in the shop.</p>
+<div class="admonition danger">
+<p class="admonition-title">Turn Hot Reload off at competition</p>
+<p>With Hot Reload on, dragging a point on your laptop in the pits changes the auto on the robot. PathPlanner's own docs say it three times: <strong>disable it at competition.</strong></p>
+</div>
+<h3 id="step-9-commit">Step 9: Commit<a class="headerlink" href="#step-9-commit" title="Permanent link">#</a></h3>
+<p><div class="highlight"><pre><span></span><code>git add .
+git commit -m "PathPlanner settings and first autos"
+</code></pre></div>
+Path and auto files are text, so Git shows exactly what changed in a path.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set up App Settings and Robot Config for the WCD, with Holonomic Mode off</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Draw <code>Forward 2m</code> with exact waypoints and run it</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Draw an S-curve, then add a constraint zone that slows the tightest part</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build a two-path auto with a wait in the middle, using linked waypoints where the paths meet</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add an event marker that raises the elevator while driving</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Use a <strong>Reversed</strong> path to back away, then drive forward on the next path</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Watch a run on the Telemetry page and note the biggest path inaccuracy</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Where does PathPlanner save paths and autos, and why commit them?</summary>
+<p>In <code>src/main/deploy/pathplanner/</code> in the robot project. They're deployed with the code and are the autos, so they belong in Git like code.</p>
+</details>
+<details class="question">
+<summary>Why turn Holonomic Mode off for the WCD?</summary>
+<p>Holonomic mode assumes the robot can drive sideways and turn independently. A tank drive can't, so it couldn't follow those paths.</p>
+</details>
+<details class="question">
+<summary>With Reset Odometry checked, where does the robot think it starts?</summary>
+<p>At the start of the auto's first path. The robot must really be there.</p>
+</details>
+<details class="question">
+<summary>An event marker starts the intake, but the intake stops at the end of the path. Why?</summary>
+<p>Commands started by event markers are stopped when their path ends. Run it in the auto between paths, or in a group with the next path.</p>
+</details>
+<details class="question">
+<summary>Why turn off Hot Reload at competition?</summary>
+<p>With it on, a change saved on the laptop goes straight to the robot. One accidental drag in the pits changes the match auto.</p>
+</details>
+<p class="credit">Steps and screenshots are adapted from the <a href="https://pathplanner.dev/">PathPlanner documentation</a>, © Michael Jansen, under the <a href="../assets/pathplanner/LICENSE.txt">MIT License</a>, rewritten for a differential drive.</p>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="19-pathplanner.html"><span>Previous</span>19. Autos with PathPlanner</a><a class="pager-next" href="20-logging.html"><span>Next</span>20. Logs, AdvantageScope &amp; AdvantageKit</a></nav>
+  </main>
+</div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+
+// Light/dark switch. With no saved choice, the site follows the device's setting.
+(function () {
+  var root = document.documentElement;
+  var toggle = document.querySelector(".theme-toggle");
+  var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() {
+    var chosen = root.getAttribute("data-theme");
+    return chosen ? chosen === "dark" : systemDark.matches;
+  }
+  function show() {
+    toggle.setAttribute("aria-checked", isDark() ? "true" : "false");
+  }
+  toggle.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  systemDark.addEventListener("change", function () {
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  show();
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+
+</body>
+</html>

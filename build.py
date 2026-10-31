@@ -71,6 +71,7 @@ NAV = [
         ("17. Poses and Odometry", "going-further/17-odometry.md"),
         ("18. Vision: AprilTags and PhotonVision", "going-further/18-vision.md"),
         ("19. Autos with PathPlanner", "going-further/19-pathplanner.md"),
+        ("19.1 Using the PathPlanner App", "going-further/19b-pathplanner-app.md"),
         ("20. Logs, AdvantageScope & AdvantageKit", "going-further/20-logging.md"),
         ("21. Swerve Drive", "going-further/21-swerve.md"),
     ]),
@@ -381,6 +382,8 @@ def build():
     # Diagrams, screenshots, and PID simulators adapted from the WPILib docs (CC BY 4.0)
     shutil.copytree(ASSETS / "wpilib", OUT / "assets" / "wpilib")
     shutil.copytree(ASSETS / "photos", OUT / "assets" / "photos")
+    # Screenshots from the PathPlanner docs (MIT), with their license
+    shutil.copytree(ASSETS / "pathplanner", OUT / "assets" / "pathplanner")
     # Code colors: light by default; dark when the switch says dark, or when the
     # device is in dark mode and the switch hasn't been set to light.
     light = HtmlFormatter(style="friendly").get_style_defs(".highlight")

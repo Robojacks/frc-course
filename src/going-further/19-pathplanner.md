@@ -21,6 +21,9 @@ PathPlanner needs to know where the robot is, so it builds on odometry from [Les
     | **PathPlanner app** | MIT | Free to install and use. |
     | **PathPlanner documentation** (pathplanner.dev) | MIT (same repository) | You may copy and adapt it if you keep the copyright and license notice. |
 
+!!! tip "Two lessons"
+    This lesson is the robot code. [Lesson 19.1](19b-pathplanner-app.md) is the PathPlanner **app**: settings, drawing paths, building autos, and live telemetry. Do the steps in this order: 1–4 here, then 19.1, then 6–9 here.
+
 ## Walkthrough
 
 ### The two halves
@@ -122,24 +125,9 @@ Then three methods:
     Put the robot on blocks and call `driveRobotRelative(new ChassisSpeeds(1.0, 0, 0))` from a button with `run(...)`. Both encoder rates should read about 1.0 m/s. If one side reads negative, or the speed is way off, fix that first: PathPlanner can't follow a path with a drivetrain that can't hold a speed.
 
 ### Step 3: Tell PathPlanner about the robot
-Open the PathPlanner app, open your robot project folder, and go to **Settings**. Fill in **Robot Config**:
+Open the PathPlanner app, open the **WestCoastDrive** project folder, and fill in **Settings**: turn **Holonomic Mode off**, then fill in **Robot Config** (mass, MOI, effective track width, wheel radius, gearing, true max speed, wheel COF, **CIM** motors, current limit). [Lesson 19.1, Step 2](19b-pathplanner-app.md#step-2-settings-for-a-tank-drive) walks through every field with the WCD's values.
 
-| Setting | WCD value |
-|---|---|
-| Drive mode | **Differential** (not holonomic) |
-| Robot mass | Weigh it, with bumpers and battery |
-| Trackwidth | Your effective track width from Lab 11 |
-| Wheel radius | Half of `WheelDiameterMeters` |
-| Drive gearing | Your gearbox ratio (motor turns per wheel turn) |
-| True max drive speed | Measure: full voltage, straight line, read `getRate()` |
-| Wheel COF | 1.2 is a common starting value for treaded wheels on carpet |
-| Drive motor | **CIM**, **2** per side |
-| Drive current limit | The `CurrentLimit` from Constants |
-
-PathPlanner saves this to `src/main/deploy/pathplanner/settings.json`, and the robot reads it with `RobotConfig.fromGUISettings()`.
-
-!!! warning "Keep the robot config honest"
-    PathPlanner uses these numbers to predict how the robot will move. A mass from last year's robot, or a wrong max speed, makes every path track a little wrong, and it looks exactly like bad tuning. Update the config when the robot changes.
+PathPlanner saves this to `src/main/deploy/pathplanner/settings.json`, and the robot reads it with `RobotConfig.fromGUISettings()` in the next step.
 
 ### Step 4: Configure AutoBuilder
 At the end of the `DriveSubsystem` constructor:
@@ -165,17 +153,11 @@ At the end of the `DriveSubsystem` constructor:
 
 `PPLTVController` is the controller for **differential** drives. It watches how far the robot is from the path (ahead, behind, to the side, wrong heading) and adjusts the speeds to get back on. Swerve robots use `PPHolonomicDriveController` instead.
 
-### Step 5: Draw a path
-In the app:
-
-1. **Paths → +** to make a path. Drag the start and end points. Drag the round handles to bend the curve.
-2. Set **Global Constraints** low for the first test: 1.0 m/s and 1.0 m/s².
-3. **Autos → +** to make an auto. Set its starting pose to where the robot will start, then add your path.
-
-Draw a simple first auto: 2 m straight ahead. Then an S-curve. Then something that ends back where it started.
+### Step 5: Draw a path and build an auto
+Follow [Lesson 19.1](19b-pathplanner-app.md), Steps 3–5: draw a 2 m straight path, then build an auto from it. Start with slow constraints (1.0 m/s and 1.0 m/s²). Then try an S-curve, and something that ends back where it started.
 
 !!! info "Starting pose"
-    PathPlanner autos reset odometry to the auto's starting pose when they begin, so the robot must really be there. In the shop, put a tape mark on the floor and treat it as that spot.
+    With **Reset Odometry** checked on the auto, it begins by setting the robot's pose to the start of its first path, so the robot must really be there. In the shop, put a tape mark on the floor and treat it as that spot.
 
 ### Step 6: Named commands
 To run a mechanism during an auto, register it by name **before** building any autos. In `RobotContainer`'s constructor, first thing after the subsystems exist:
