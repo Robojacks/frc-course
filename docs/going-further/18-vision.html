@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>18. Vision: AprilTags and Limelight | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<script>
+// Apply the saved light/dark choice before the page draws, so it never flashes the wrong theme.
+try {
+  var savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) {}
+</script>
+
+</head>
+<body id="top" data-root="../">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
+      <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <span class="theme-track"><span class="theme-knob"></span></span>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html" class="current" aria-current="page">18. Vision: AprilTags and Limelight</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="18-vision-apriltags-and-the-limelight">18. Vision: AprilTags and the Limelight<a class="headerlink" href="#18-vision-apriltags-and-the-limelight" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Odometry from <a href="17-odometry.html">Lesson 17</a> is smooth and fast, but it drifts, and it only knows where the robot is if you told it where it started. A camera that can see the field fixes both problems.</p>
+<p>Every FRC field has <strong>AprilTags</strong>: square black-and-white markers, each with a number, mounted at known spots. When a camera sees a tag, it can work out exactly where the camera must be to see the tag at that size and angle. Since WPILib knows where every tag is on the field, that tells the robot where <strong>it</strong> is.</p>
+<p>This lesson covers how that works, how to read a <strong>Limelight</strong> camera, and how to <strong>fuse</strong> its measurements with odometry so the pose is both smooth and correct.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html">AprilTag Introduction (WPILib)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html">Pose Estimators (WPILib)</a></li>
+<li><a href="https://docs.limelightvision.io/">Limelight documentation</a>, especially "Robot Localization with MegaTag2"</li>
+<li><a href="https://docs.photonvision.org/">PhotonVision documentation</a>, if your team uses PhotonVision instead</li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="vision-hardware">Vision hardware<a class="headerlink" href="#vision-hardware" title="Permanent link">#</a></h3>
+<p>A vision camera for FRC is a camera plus a small computer that finds tags in every frame and sends the results to the roboRIO over NetworkTables.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Limelight</strong></td>
+<td>All-in-one camera and computer. Plug in power and Ethernet, configure it in a web page. Used in this lesson.</td>
+</tr>
+<tr>
+<td><strong>PhotonVision</strong></td>
+<td>Free software that runs on a coprocessor (Orange Pi and similar) with USB cameras. More setup, cheaper, more cameras. Same ideas, different library (<code>PhotonPoseEstimator</code>).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="two-ways-to-use-a-tag">Two ways to use a tag<a class="headerlink" href="#two-ways-to-use-a-tag" title="Permanent link">#</a></h3>
+<p><strong>1. Aim at it.</strong> The simplest use: "how far left or right of the crosshair is the tag?" The Limelight sends these over NetworkTables:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tv</code></td>
+<td>1 if the camera sees a valid target, 0 if not</td>
+</tr>
+<tr>
+<td><code>tx</code></td>
+<td>Horizontal angle from the crosshair to the target, in degrees. <strong>Positive = target is to the right.</strong></td>
+</tr>
+<tr>
+<td><code>ty</code></td>
+<td>Vertical angle from the crosshair to the target, in degrees. Positive = target is above.</td>
+</tr>
+<tr>
+<td><code>ta</code></td>
+<td>How much of the image the target fills, 0–100%. Bigger = closer.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">tx is backwards from WPILib</p>
+<p>WPILib counts <strong>counterclockwise (left)</strong> as positive. A positive <code>tx</code> means the robot must turn <strong>right</strong> (clockwise) to face the target. Hold a tag to the right of the camera and check the sign on your Limelight before trusting any code.</p>
+</div>
+<p><strong>2. Locate the robot.</strong> The useful one. The camera sees one or more tags, looks up where they are on this year's field, and works out the <strong>robot's</strong> pose on the field. This is called <strong>localization</strong>. The Limelight calls its version <strong>MegaTag</strong>.</p>
+<h3 id="what-the-camera-needs-to-know">What the camera needs to know<a class="headerlink" href="#what-the-camera-needs-to-know" title="Permanent link">#</a></h3>
+<p>For localization to work, set these in the Limelight's web interface:</p>
+<ol>
+<li><strong>Pipeline:</strong> AprilTag, with <strong>Full 3D</strong> targeting.</li>
+<li><strong>Field map:</strong> this season's AprilTag layout (Limelight ships with it).</li>
+<li><strong>Camera pose in robot space:</strong> where the camera is on the robot, measured from the <strong>center of the robot at floor level</strong>: meters forward, meters left (or right), meters up, and its pitch, yaw, and roll. If this is wrong, every pose the camera reports is wrong by the same amount.</li>
+</ol>
+<p>Measure carefully and double-check with the robot sitting at a known spot: the web interface draws the robot on a field map.</p>
+<h3 id="megatag2">MegaTag2<a class="headerlink" href="#megatag2" title="Permanent link">#</a></h3>
+<p><strong>MegaTag2</strong> is Limelight's best localization mode. You send it the robot's heading from the gyro every loop, and it uses that to solve the rest of the pose. Because it doesn't have to guess the heading from the tag's shape, it's much more stable, especially with one tag far away.</p>
+<p><code>LimelightHelpers</code> is a single Java file from Limelight that reads and writes all the NetworkTables values for you. Download <code>LimelightHelpers.java</code> from the <a href="https://docs.limelightvision.io/">Limelight docs</a> and put it in <code>src/main/java/frc/robot/</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Tell the Limelight which way the robot is facing (degrees, WPILib convention)</span>
+<span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">SetRobotOrientation</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">,</span><span class="w"> </span><span class="n">heading</span><span class="p">.</span><span class="na">getDegrees</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="c1">// Ask for the robot's pose, in WPILib's field coordinates (origin on the blue side)</span>
+<span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">PoseEstimate</span><span class="w"> </span><span class="n">estimate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getBotPoseEstimate_wpiBlue_MegaTag2</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">);</span>
+</code></pre></div>
+<p><code>"limelight"</code> is the camera's name, set in its web interface. With two cameras, give them different names.</p>
+<p>A <code>PoseEstimate</code> has:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pose</code></td>
+<td>The robot's <code>Pose2d</code> on the field</td>
+</tr>
+<tr>
+<td><code>timestampSeconds</code></td>
+<td>When the picture was taken (not when it arrived)</td>
+</tr>
+<tr>
+<td><code>tagCount</code></td>
+<td>How many tags it used. 0 means no answer.</td>
+</tr>
+<tr>
+<td><code>avgTagDist</code></td>
+<td>Average distance to the tags, in meters</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fusing-vision-with-odometry">Fusing vision with odometry<a class="headerlink" href="#fusing-vision-with-odometry" title="Permanent link">#</a></h3>
+<p>You could just <strong>replace</strong> the odometry pose with the camera's whenever a tag is visible. Don't. Vision is noisy, so the robot would jitter, and a single bad frame would teleport it.</p>
+<p>Instead, WPILib's <strong>pose estimator</strong> blends them. It runs odometry every loop, like before, and when a vision measurement arrives it nudges the pose part of the way toward it. How far it nudges depends on how much you trust each one.</p>
+<div class="mermaid">flowchart LR
+  E[Encoders] --&gt; PE[DifferentialDrivePoseEstimator]
+  G[NavX2 heading] --&gt; PE
+  G --&gt; L[Limelight MegaTag2]
+  L -- "pose + timestamp&lt;br/&gt;(only if it passes the checks)" --&gt; PE
+  PE --&gt; P[Fused Pose2d]</div>
+<p>For the West Coast Drive, swap <code>DifferentialDriveOdometry</code> from <a href="../testbed/lab11-odometry.html">Lab 11</a> for <code>DifferentialDrivePoseEstimator</code>. It needs one extra thing, the drivetrain's <strong>kinematics</strong> (its track width):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.VecBuilder</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.kinematics.DifferentialDriveKinematics</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Track width: how far apart the left and right wheels are</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DifferentialDriveKinematics</span><span class="w"> </span><span class="n">m_kinematics</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDriveKinematics</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">TrackWidthMeters</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Odometry plus vision (replaces DifferentialDriveOdometry from Lab 11)</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DifferentialDrivePoseEstimator</span><span class="w"> </span><span class="n">m_poseEstimator</span><span class="p">;</span>
+</code></pre></div>
+<p>In the constructor:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_poseEstimator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDrivePoseEstimator</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_kinematics</span><span class="p">,</span>
+<span class="w">        </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">getLeftMeters</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">getRightMeters</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">Pose2d</span><span class="p">.</span><span class="na">kZero</span><span class="p">,</span>
+<span class="w">        </span><span class="n">VecBuilder</span><span class="p">.</span><span class="na">fill</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">degreesToRadians</span><span class="p">(</span><span class="mi">5</span><span class="p">)),</span><span class="w">   </span><span class="c1">// how much to trust odometry (x m, y m, heading rad)</span>
+<span class="w">        </span><span class="n">VecBuilder</span><span class="p">.</span><span class="na">fill</span><span class="p">(</span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="mi">9999999</span><span class="p">));</span><span class="w">                      </span><span class="c1">// how much to trust vision (x m, y m, heading rad)</span>
+</code></pre></div>
+<h3 id="standard-deviations-how-much-to-trust-each-source">Standard deviations: how much to trust each source<a class="headerlink" href="#standard-deviations-how-much-to-trust-each-source" title="Permanent link">#</a></h3>
+<p>Those two <code>VecBuilder.fill(...)</code> lines are <strong>standard deviations</strong>: roughly "how wrong is this source, usually?" Smaller numbers mean more trust.</p>
+<ul>
+<li><strong>Odometry:</strong> about 5 cm and 5° of uncertainty per step.</li>
+<li><strong>Vision:</strong> about 70 cm in X and Y. The heading is set to a huge number (9999999), meaning "never use vision's heading." With MegaTag2, the camera's heading came <strong>from the gyro</strong> in the first place, so feeding it back in would be circular.</li>
+</ul>
+<p>You'll tune these later by watching the pose in AdvantageScope (<a href="20-logging.html">Lesson 20</a>). A good start: trust vision more (smaller numbers) when it sees two or more tags close up, and less (bigger numbers) for one far-away tag.</p>
+<h3 id="updating-every-loop">Updating every loop<a class="headerlink" href="#updating-every-loop" title="Permanent link">#</a></h3>
+<p><code>periodic()</code> now does three things: odometry, then send the heading to the camera, then vision.</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nd">@Override</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 1. Odometry, every loop, same as Lab 11</span>
+<span class="w">    </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">update</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">());</span>
+
+<span class="w">    </span><span class="c1">// 2. Send the heading to the Limelight for MegaTag2</span>
+<span class="w">    </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">SetRobotOrientation</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">,</span>
+<span class="w">        </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">getEstimatedPosition</span><span class="p">().</span><span class="na">getRotation</span><span class="p">().</span><span class="na">getDegrees</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 3. Vision, only when it's trustworthy</span>
+<span class="w">    </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">PoseEstimate</span><span class="w"> </span><span class="n">estimate</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getBotPoseEstimate_wpiBlue_MegaTag2</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">boolean</span><span class="w"> </span><span class="n">useVision</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">estimate</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">        </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">estimate</span><span class="p">.</span><span class="na">tagCount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w">                  </span><span class="c1">// it actually saw a tag</span>
+<span class="w">        </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRate</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">360</span><span class="p">;</span><span class="w">      </span><span class="c1">// not spinning fast (pictures blur)</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">useVision</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">addVisionMeasurement</span><span class="p">(</span><span class="n">estimate</span><span class="p">.</span><span class="na">pose</span><span class="p">,</span><span class="w"> </span><span class="n">estimate</span><span class="p">.</span><span class="na">timestampSeconds</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">m_field</span><span class="p">.</span><span class="na">setRobotPose</span><span class="p">(</span><span class="n">getPose</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Vision/Used"</span><span class="p">,</span><span class="w"> </span><span class="n">useVision</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Vision/Tag Count"</span><span class="p">,</span><span class="w"> </span><span class="n">estimate</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">estimate</span><span class="p">.</span><span class="na">tagCount</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// ... the rest of your telemetry</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Pose2d</span><span class="w"> </span><span class="nf">getPose</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">getEstimatedPosition</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p><code>resetPoseCommand()</code> from Lab 11 becomes <code>m_poseEstimator.resetPosition(...)</code> with the same arguments.</p>
+<div class="admonition info">
+<p class="admonition-title">Why pass the timestamp?</p>
+<p>A picture takes time to process, so by the time the answer reaches the roboRIO the robot has moved. The pose estimator remembers recent odometry, goes back to the moment the picture was taken, applies the correction there, and replays the movement since. That's why <code>timestampSeconds</code> matters.</p>
+</div>
+<h3 id="rejecting-bad-measurements">Rejecting bad measurements<a class="headerlink" href="#rejecting-bad-measurements" title="Permanent link">#</a></h3>
+<p>A few bad frames can drag the pose somewhere silly. Common checks before <code>addVisionMeasurement</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Reject when</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tagCount == 0</code></td>
+<td>No tags, no answer</td>
+</tr>
+<tr>
+<td>The robot is spinning fast</td>
+<td>Motion blur, and the heading sent to the camera is out of date</td>
+</tr>
+<tr>
+<td>One tag, far away (<code>avgTagDist</code> above about 4 m)</td>
+<td>A small pixel error becomes a big pose error</td>
+</tr>
+<tr>
+<td>The pose is off the field, or far from odometry right after a reset</td>
+<td>Something is wrong (reflections, a wrong tag map)</td>
+</tr>
+</tbody>
+</table>
+<p>Log whether each measurement was used, like <code>Vision/Used</code> above. When the pose jumps during a match, the log will tell you which frame did it.</p>
+<h3 id="aiming-with-tx">Aiming with tx<a class="headerlink" href="#aiming-with-tx" title="Permanent link">#</a></h3>
+<p>For simple aiming (turn to face a tag) you don't need the pose at all. Turn by <code>tx</code> with a P controller from <a href="../controls/12-pid.html">Lesson 12</a>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Turns in place to face the tag the Limelight sees. Ends when lined up. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">aimAtTagCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PIDController</span><span class="w"> </span><span class="n">aim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">   </span><span class="c1">// output per degree of error</span>
+<span class="w">    </span><span class="n">aim</span><span class="p">.</span><span class="na">setTolerance</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span><span class="w">                                </span><span class="c1">// within 1 degree is lined up</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="kt">double</span><span class="w"> </span><span class="n">tx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getTX</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">);</span>
+<span class="w">          </span><span class="c1">// tx is positive when the tag is to the right. Turning right means left forward, right backward.</span>
+<span class="w">          </span><span class="kt">double</span><span class="w"> </span><span class="n">turn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getTV</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="o">-</span><span class="n">aim</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">          </span><span class="n">m_drive</span><span class="p">.</span><span class="na">tankDrive</span><span class="p">(</span><span class="n">turn</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">turn</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getTV</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">aim</span><span class="p">.</span><span class="na">atSetpoint</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Aim at Tag"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p><code>aim.calculate(tx, 0.0)</code> is negative when <code>tx</code> is positive (the tag is right), so <code>turn</code> is positive and the left side drives forward: the robot turns right. Check it on the robot with the wheels off the ground first.</p>
+<h3 id="is-the-cameras-pose-any-good">Is the camera's pose any good?<a class="headerlink" href="#is-the-cameras-pose-any-good" title="Permanent link">#</a></h3>
+<p>Before fusing, test the camera alone. Park the robot at a spot you've measured on the field (or in front of a tag in the shop), then compare:</p>
+<table>
+<thead>
+<tr>
+<th>Real pose (measured)</th>
+<th>Camera pose</th>
+<th>Error</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>If the error is the same in every spot, the <strong>camera mount measurements</strong> are off. If it gets worse with distance, recalibrate the camera (the Limelight web interface has a calibration tool) and reject far-away single tags.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> With the Limelight pointed at a tag, move the tag left and right and watch the sign of <code>tx</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Measure the camera's position on the robot and enter it in the web interface</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Park the robot at a known spot and compare the camera's pose with reality</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Swap Lab 11's odometry for <code>DifferentialDrivePoseEstimator</code> and fuse MegaTag2 measurements</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Push the robot by hand so odometry is wrong, then point the camera at a tag. Watch the pose slide back.</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Why not just use the camera's pose whenever it sees a tag?</summary>
+<p>Vision is noisy and sometimes wrong. Snapping to it makes the pose jitter, and one bad frame teleports the robot. The pose estimator blends it in gradually.</p>
+</details>
+<details class="question">
+<summary>What does a smaller standard deviation mean?</summary>
+<p>More trust. The estimator moves the pose further toward a source with a small standard deviation.</p>
+</details>
+<details class="question">
+<summary>Why is the vision heading's standard deviation 9999999 with MegaTag2?</summary>
+<p>MegaTag2 gets its heading from the gyro you sent it. Using it again would just feed the gyro back to itself, so vision is only trusted for X and Y.</p>
+</details>
+<details class="question">
+<summary>Why does <code>addVisionMeasurement</code> need a timestamp?</summary>
+<p>The picture was taken a little while ago. The estimator applies the correction at the moment the picture was taken, then replays the movement since.</p>
+</details>
+<details class="question">
+<summary>The camera's pose is always 20 cm too far left, everywhere on the field. What's wrong?</summary>
+<p>The camera's mounting position on the robot is entered wrong. A consistent offset points to the mount measurements.</p>
+</details>
+<p class="credit">Parts of this lesson are adapted from the Limelight, Fused Pose Estimation, and Pose Estimation Calibration lessons of <a href="https://github.com/itkan-robotics/mantik">Mantik</a> by Itkan Robotics (CC BY 4.0). MegaTag2 usage follows Limelight's documentation and <code>LimelightHelpers</code>.</p>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="17-odometry.html"><span>Previous</span>17. Poses and Odometry</a><a class="pager-next" href="19-pathplanner.html"><span>Next</span>19. Autos with PathPlanner</a></nav>
+  </main>
+</div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+
+// Light/dark switch. With no saved choice, the site follows the device's setting.
+(function () {
+  var root = document.documentElement;
+  var toggle = document.querySelector(".theme-toggle");
+  var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() {
+    var chosen = root.getAttribute("data-theme");
+    return chosen ? chosen === "dark" : systemDark.matches;
+  }
+  function show() {
+    toggle.setAttribute("aria-checked", isDark() ? "true" : "false");
+  }
+  toggle.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  systemDark.addEventListener("change", function () {
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  show();
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const diagrams = [...document.querySelectorAll(".mermaid")];
+diagrams.forEach((d) => { d.dataset.source = d.textContent; });   // keep the source to redraw later
+function isDark() {
+  const chosen = document.documentElement.getAttribute("data-theme");
+  return chosen ? chosen === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+async function draw() {
+  mermaid.initialize({ startOnLoad: false, theme: isDark() ? "dark" : "default" });
+  diagrams.forEach((d) => { d.removeAttribute("data-processed"); d.textContent = d.dataset.source; });
+  await mermaid.run({ nodes: diagrams });
+}
+draw();
+document.addEventListener("themechange", draw);   // redraw diagrams when the light/dark switch flips
+</script>
+</body>
+</html>

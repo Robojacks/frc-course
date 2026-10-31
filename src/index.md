@@ -1,6 +1,6 @@
 # RoboJacks FRC Programming
 
-A hands-on tutorial course for high school FRC students. It starts with installing the tools and ends with PID, feedforward, SysId, and motion profiles: the same control techniques top teams use.
+A hands-on tutorial course for high school FRC students. It starts with installing the tools and goes through PID, feedforward, SysId, and motion profiles, then odometry, vision, PathPlanner, logging, and swerve: the same techniques top teams use.
 
 You don't need any programming experience to start. You don't need a robot for most of it, either. Nearly every exercise runs in simulation on your laptop.
 
@@ -42,6 +42,7 @@ flowchart LR
     C --> D[Drivetrain Project<br/>10–11]
     D --> E[Controls<br/>12–14]
     D --> F[Team Workflow<br/>15–16]
+    E --> G[Going Further<br/>17–21]
 ```
 
 | Part | Lessons | You'll be able to... |
@@ -52,6 +53,7 @@ flowchart LR
 | **Drivetrain Project** | 10–11 | Build a driveable robot with good controls and distance-based autonomous routines |
 | **Controls** | 12–14 | Tune PID, add feedforward, characterize mechanisms with SysId, use motion profiles |
 | **Team Workflow** | 15–16 | Work on a shared codebase with branches, reviews, unit tests, and CI |
+| **Going Further** | 17–21 | Track the robot's pose with odometry and AprilTag vision, follow PathPlanner paths, debug matches from logs, and understand swerve |
 
 ## Test bed labs
 Labs are hands-on exercises on the team's **test bed**, a board with a roboRIO, SPARK MAX controllers, motors, and sensors. They have their own **Labs** tab at the top of every page. Each one goes with a lesson:
@@ -62,6 +64,7 @@ Labs are hands-on exercises on the team's **test bed**, a board with a roboRIO, 
 | 3–6 | Buttons, limit switches, a knob, and an encoder: one new sensor or idea per lab |
 | 7–8 | Autonomous on the WCD, then turning with the NavX2 gyro |
 | 9–10 | PID: turn a wheel exactly 10 times, then hold an elevator against gravity |
+| 11 | Odometry: watch the WCD move on a field map |
 
 See the [Labs overview](testbed/index.md) for the full list and when to do each one.
 
@@ -71,7 +74,7 @@ See the [Labs overview](testbed/index.md) for the full list and when to do each 
 |---|---|
 | Have never programmed | An interactive Java course first ([Coddy](https://coddy.tech/landing/java) or [Codecademy](https://www.codecademy.com/learn/learn-java)), then [Lesson 0](foundations/00-setup.md) |
 | Know Java from a class | Skim the [Java Reference](foundations/03-java.md), then [Lesson 6](robot-code/06-robot-program.md) |
-| Already write robot code | [Lesson 7.1](robot-code/07b-scheduler.md), then [Controls](controls/12-pid.md) |
+| Already write robot code | [Lesson 7.1](robot-code/07b-scheduler.md), then [Controls](controls/12-pid.md) and [Going Further](going-further/17-odometry.md) |
 
 ## Time
 Plan on about one lesson per meeting for most people, after the Java course. The Controls lessons usually take two or three meetings each. Don't rush the exercises. They're where the learning happens.

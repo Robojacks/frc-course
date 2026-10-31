@@ -67,6 +67,13 @@ NAV = [
         ("15. Branches, PRs & Code Review", "workflow/15-team-process.md"),
         ("16. Unit Testing & CI", "workflow/16-unit-testing.md"),
     ]),
+    ("Going Further", [
+        ("17. Poses and Odometry", "going-further/17-odometry.md"),
+        ("18. Vision: AprilTags and Limelight", "going-further/18-vision.md"),
+        ("19. Autos with PathPlanner", "going-further/19-pathplanner.md"),
+        ("20. Logs, AdvantageScope & AdvantageKit", "going-further/20-logging.md"),
+        ("21. Swerve Drive", "going-further/21-swerve.md"),
+    ]),
     ("Reference", [
         ("Where to Go Next", "reference/next-steps.md"),
         ("Glossary", "reference/glossary.md"),
@@ -96,6 +103,7 @@ LABS_NAV = [
         ("Lab 8: Gyro Turns and Encoder Distances", "testbed/lab8-navx-gyro.md"),
         ("Lab 9: PID on the Wheel", "testbed/lab9-pid-wheel.md"),
         ("Lab 10: Elevator Position Control", "testbed/lab10-elevator.md"),
+        ("Lab 11: Track the Robot on the Field", "testbed/lab11-odometry.md"),
     ]),
 ]
 

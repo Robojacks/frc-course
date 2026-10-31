@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>21. Swerve Drive | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<script>
+// Apply the saved light/dark choice before the page draws, so it never flashes the wrong theme.
+try {
+  var savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) {}
+</script>
+
+</head>
+<body id="top" data-root="../">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
+      <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <span class="theme-track"><span class="theme-knob"></span></span>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and Limelight</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html" class="current" aria-current="page">21. Swerve Drive</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="21-swerve-drive">21. Swerve Drive<a class="headerlink" href="#21-swerve-drive" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>The West Coast Drive can go forward, backward, and turn. To move sideways it has to turn, drive, and turn back. A defender who knows that can pin it against a wall.</p>
+<p>A <strong>swerve drive</strong> has four wheels that each <strong>steer</strong> on their own. Point all four wheels sideways and the robot slides sideways. Point them in a circle and it spins in place. Do both at once and it can drive across the field in a straight line <strong>while</strong> spinning to face a goal. Most competitive FRC robots now drive swerve.</p>
+<p>You won't write swerve from scratch: teams start from a vendor template. This lesson explains what the template is doing, using everything from Lessons 12–19, so you can read it, tune it, and fix it.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html">Swerve Drive Kinematics (WPILib)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-odometry.html">Swerve Drive Odometry (WPILib)</a></li>
+<li>Your module's template: <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html">CTRE Tuner X Swerve Generator</a> (Kraken/Falcon + CANcoder), <a href="https://github.com/REVrobotics/MAXSwerve-Java-Template">REV MAXSwerve template</a> (NEO/Vortex), or <a href="https://github.com/BroncBotz3481/YAGSL">YAGSL</a> (many combinations)</li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="whats-in-a-swerve-module">What's in a swerve module<a class="headerlink" href="#whats-in-a-swerve-module" title="Permanent link">#</a></h3>
+<p>Each corner of the robot is a <strong>module</strong> with:</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Job</th>
+<th>Control</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Drive motor</strong></td>
+<td>Spins the wheel</td>
+<td><strong>Velocity</strong> control: feedforward + PID (<a href="../controls/12-pid.html">Lessons 12–13</a>)</td>
+</tr>
+<tr>
+<td><strong>Steer motor</strong> (azimuth)</td>
+<td>Turns the wheel to point a direction</td>
+<td><strong>Position</strong> control: PID</td>
+</tr>
+<tr>
+<td><strong>Absolute encoder</strong> (CANcoder, or a Through Bore in absolute mode)</td>
+<td>Knows which way the wheel points, even right after power-on</td>
+<td>Read by the steer controller</td>
+</tr>
+</tbody>
+</table>
+<p>So a swerve drive is just <strong>four velocity controllers and four position controllers</strong>, working together. Every idea in it is one you've already used.</p>
+<h3 id="holonomic-driving">Holonomic driving<a class="headerlink" href="#holonomic-driving" title="Permanent link">#</a></h3>
+<p>A tank drive takes two numbers: left and right. A swerve drive takes three, as a <code>ChassisSpeeds</code> (from <a href="19-pathplanner.html">Lesson 19</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Meaning</th>
+<th>Tank drive?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vx</code></td>
+<td>Forward speed (m/s)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>vy</code></td>
+<td>Sideways speed, left is positive (m/s)</td>
+<td><strong>Always 0</strong></td>
+</tr>
+<tr>
+<td><code>omega</code></td>
+<td>Turning speed, counterclockwise is positive (rad/s)</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>A drivetrain that can do all three independently is called <strong>holonomic</strong>.</p>
+<h3 id="kinematics-robot-speed-four-wheel-states">Kinematics: robot speed → four wheel states<a class="headerlink" href="#kinematics-robot-speed-four-wheel-states" title="Permanent link">#</a></h3>
+<p><code>SwerveDriveKinematics</code> needs to know where each module is, measured from the <strong>center</strong> of the robot (+X forward, +Y left):</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Module positions from the center of the robot, in meters. Order: FL, FR, BL, BR.</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SwerveDriveKinematics</span><span class="w"> </span><span class="n">m_kinematics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SwerveDriveKinematics</span><span class="p">(</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="mf">0.28</span><span class="p">,</span><span class="w"> </span><span class="mf">0.28</span><span class="p">),</span><span class="w">     </span><span class="c1">// front left</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="mf">0.28</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.28</span><span class="p">),</span><span class="w">    </span><span class="c1">// front right</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="o">-</span><span class="mf">0.28</span><span class="p">,</span><span class="w"> </span><span class="mf">0.28</span><span class="p">),</span><span class="w">    </span><span class="c1">// back left</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="o">-</span><span class="mf">0.28</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mf">0.28</span><span class="p">));</span><span class="w">  </span><span class="c1">// back right</span>
+</code></pre></div>
+<p>Give it a <code>ChassisSpeeds</code> and it returns four <code>SwerveModuleState</code>s: a speed and an angle for each wheel.</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Drives the robot. x and y in m/s, turn in rad/s. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">drive</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">xSpeed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ySpeed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">turnSpeed</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">fieldRelative</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">ChassisSpeeds</span><span class="w"> </span><span class="n">speeds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ChassisSpeeds</span><span class="p">(</span><span class="n">xSpeed</span><span class="p">,</span><span class="w"> </span><span class="n">ySpeed</span><span class="p">,</span><span class="w"> </span><span class="n">turnSpeed</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fieldRelative</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// Joystick "forward" means "away from the driver", whichever way the robot faces</span>
+<span class="w">      </span><span class="n">speeds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChassisSpeeds</span><span class="p">.</span><span class="na">fromFieldRelativeSpeeds</span><span class="p">(</span><span class="n">speeds</span><span class="p">,</span><span class="w"> </span><span class="n">getHeading</span><span class="p">());</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// Correct for the robot turning during the 20 ms step, so it doesn't drift sideways while spinning</span>
+<span class="w">    </span><span class="n">speeds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChassisSpeeds</span><span class="p">.</span><span class="na">discretize</span><span class="p">(</span><span class="n">speeds</span><span class="p">,</span><span class="w"> </span><span class="mf">0.02</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">SwerveModuleState</span><span class="o">[]</span><span class="w"> </span><span class="n">states</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_kinematics</span><span class="p">.</span><span class="na">toSwerveModuleStates</span><span class="p">(</span><span class="n">speeds</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// If any wheel would have to go faster than it can, slow all four down by the same ratio</span>
+<span class="w">    </span><span class="n">SwerveDriveKinematics</span><span class="p">.</span><span class="na">desaturateWheelSpeeds</span><span class="p">(</span><span class="n">states</span><span class="p">,</span><span class="w"> </span><span class="n">kMaxSpeedMetersPerSecond</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">m_modules</span><span class="o">[</span><span class="n">i</span><span class="o">]</span><span class="p">.</span><span class="na">setDesiredState</span><span class="p">(</span><span class="n">states</span><span class="o">[</span><span class="n">i</span><span class="o">]</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>The order <strong>FL, FR, BL, BR</strong> must be the same everywhere: in the kinematics, the module array, and the odometry. Swap two and the robot drives confidently in the wrong direction.</p>
+<h3 id="field-relative-driving">Field-relative driving<a class="headerlink" href="#field-relative-driving" title="Permanent link">#</a></h3>
+<p><strong>Robot-relative:</strong> pushing the stick forward drives toward the robot's front. Hard to drive once the robot has turned around.</p>
+<p><strong>Field-relative:</strong> pushing the stick forward drives <strong>away from the driver</strong>, no matter which way the robot faces. <code>fromFieldRelativeSpeeds</code> uses the gyro heading to rotate the joystick's direction into the robot's frame. Almost every team drives field-relative.</p>
+<div class="admonition warning">
+<p class="admonition-title">Red alliance</p>
+<p>WPILib's field +X points away from the <strong>blue</strong> wall. On red, "away from the driver" is −X, so field-relative driving must add 180° to the heading (or flip the joystick) when the alliance is red. Templates handle this; check it on yours before a red match.</p>
+</div>
+<h3 id="inside-one-module">Inside one module<a class="headerlink" href="#inside-one-module" title="Permanent link">#</a></h3>
+<p>Each module turns its desired state into two motor commands:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Point the wheel and spin it at the requested state. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setDesiredState</span><span class="p">(</span><span class="n">SwerveModuleState</span><span class="w"> </span><span class="n">desired</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Rotation2d</span><span class="w"> </span><span class="n">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getSteerAngle</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Never turn the wheel more than 90°: spinning the wheel backward is the same as turning it 180°</span>
+<span class="w">    </span><span class="n">desired</span><span class="p">.</span><span class="na">optimize</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Slow the wheel down while it's still turning toward the right direction</span>
+<span class="w">    </span><span class="n">desired</span><span class="p">.</span><span class="na">cosineScale</span><span class="p">(</span><span class="n">current</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Drive motor: velocity control (feedforward + PID), like Lesson 19's tank drive</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">driveVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_driveFeedforward</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">desired</span><span class="p">.</span><span class="na">speedMetersPerSecond</span><span class="p">)</span>
+<span class="w">        </span><span class="o">+</span><span class="w"> </span><span class="n">m_drivePID</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getDriveVelocity</span><span class="p">(),</span><span class="w"> </span><span class="n">desired</span><span class="p">.</span><span class="na">speedMetersPerSecond</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Steer motor: position control. Continuous input makes -179° and +179° neighbors.</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">steerVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_steerPID</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">current</span><span class="p">.</span><span class="na">getRadians</span><span class="p">(),</span><span class="w"> </span><span class="n">desired</span><span class="p">.</span><span class="na">angle</span><span class="p">.</span><span class="na">getRadians</span><span class="p">());</span>
+
+<span class="w">    </span><span class="n">m_driveMotor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">driveVolts</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_steerMotor</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">steerVolts</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>optimize</code></td>
+<td>If the wheel points at 0° and you ask for 170°, it's faster to point it at −10° and spin backward. The wheel never has to turn more than 90°.</td>
+</tr>
+<tr>
+<td><code>cosineScale</code></td>
+<td>While the wheel is still 60° from where it should point, driving it at full speed would push the robot the wrong way. Scaling by the cosine of the error makes it wait.</td>
+</tr>
+<tr>
+<td>Continuous input</td>
+<td><code>m_steerPID.enableContinuousInput(-Math.PI, Math.PI)</code> tells the PID that the angle wraps around, so it goes the short way from 179° to −179° (2°), not the long way (358°).</td>
+</tr>
+</tbody>
+</table>
+<p>Real templates usually run both loops <strong>on the motor controller</strong> (Phoenix 6 or REVLib closed-loop control) instead of on the roboRIO, because it's faster. The ideas are the same.</p>
+<h3 id="absolute-encoder-offsets">Absolute encoder offsets<a class="headerlink" href="#absolute-encoder-offsets" title="Permanent link">#</a></h3>
+<p>Every steer encoder reads some angle when the wheel points straight ahead, and it's different for every module. That reading is the module's <strong>offset</strong>. Get it wrong and that wheel points the wrong way, and the robot fights itself.</p>
+<p>Templates have a procedure for this: point all four wheels straight ahead (bevel gears all facing the same side), then read and save the offsets. CTRE's Tuner X generator does it for you. Redo it any time a module is taken apart or swapped.</p>
+<h3 id="odometry-and-the-rest">Odometry and the rest<a class="headerlink" href="#odometry-and-the-rest" title="Permanent link">#</a></h3>
+<p>Swerve odometry works like the WCD's (<a href="17-odometry.html">Lesson 17</a>), with one difference: each module reports how far it rolled <strong>and</strong> which way it pointed, as a <code>SwerveModulePosition</code>. <code>SwerveDrivePoseEstimator</code> replaces <code>DifferentialDrivePoseEstimator</code> for vision (<a href="18-vision.html">Lesson 18</a>). For PathPlanner (<a href="19-pathplanner.html">Lesson 19</a>), set <strong>Holonomic</strong> mode in the app and use <code>PPHolonomicDriveController</code> instead of <code>PPLTVController</code>. Holonomic paths can turn the robot independently of the direction it's driving.</p>
+<p>In AdvantageScope's <strong>Swerve</strong> tab (<a href="20-logging.html">Lesson 20</a>), log the desired and measured <code>SwerveModuleState[]</code> and you'll see four arrows: what each module was told to do and what it actually did.</p>
+<h3 id="getting-started-on-a-real-swerve">Getting started on a real swerve<a class="headerlink" href="#getting-started-on-a-real-swerve" title="Permanent link">#</a></h3>
+<ol>
+<li><strong>Pick the template</strong> for your modules (see "Read this").</li>
+<li><strong>Enter the hardware:</strong> CAN IDs, gear ratios, wheel diameter, module positions.</li>
+<li><strong>Set the encoder offsets</strong> with the wheels pointing straight.</li>
+<li><strong>Check with the robot on blocks:</strong> push forward on the stick, and all four wheels should point forward and spin forward. Then left, then rotate. Fix one thing at a time.</li>
+<li><strong>Tune</strong> the steer PID first (snappy, no wobble), then the drive feedforward (SysId) and PID.</li>
+<li><strong>Measure</strong> the real max speed and put it in the template and in PathPlanner's robot config.</li>
+</ol>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> On paper: the robot drives forward at 1 m/s with no turning. What angle and speed does each module get?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> On paper: the robot spins in place counterclockwise. Which way does each wheel point?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Open a swerve template for your team's modules and find the kinematics, <code>optimize</code>, and the encoder offsets</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run a template in simulation and drive it field-relative with an Xbox controller</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What does 'holonomic' mean?</summary>
+<p>The robot can move forward, sideways, and turn, all independently and at the same time.</p>
+</details>
+<details class="question">
+<summary>Why does <code>optimize</code> never turn a wheel more than 90°?</summary>
+<p>Pointing the wheel 180° the other way and spinning it backward moves the robot the same way. So any turn over 90° can be replaced by a smaller turn plus reversing the wheel.</p>
+</details>
+<details class="question">
+<summary>What's the difference between robot-relative and field-relative driving?</summary>
+<p>Robot-relative: the stick's forward is the robot's front. Field-relative: the stick's forward is away from the driver, whichever way the robot faces. Field-relative needs the gyro.</p>
+</details>
+<details class="question">
+<summary>One wheel always points 30° off from the others. What's the first thing to check?</summary>
+<p>That module's absolute encoder offset.</p>
+</details>
+<details class="question">
+<summary>A swerve module is two motors. What kind of control does each use?</summary>
+<p>The drive motor uses velocity control; the steer motor uses position control.</p>
+</details>
+<p class="credit">Parts of this lesson are adapted from the Swerve Drive Example and Odometry lessons of <a href="https://github.com/itkan-robotics/mantik">Mantik</a> by Itkan Robotics (CC BY 4.0).</p>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="20-logging.html"><span>Previous</span>20. Logs, AdvantageScope &amp; AdvantageKit</a><a class="pager-next" href="../reference/next-steps.html"><span>Next</span>Where to Go Next</a></nav>
+  </main>
+</div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+
+// Light/dark switch. With no saved choice, the site follows the device's setting.
+(function () {
+  var root = document.documentElement;
+  var toggle = document.querySelector(".theme-toggle");
+  var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() {
+    var chosen = root.getAttribute("data-theme");
+    return chosen ? chosen === "dark" : systemDark.matches;
+  }
+  function show() {
+    toggle.setAttribute("aria-checked", isDark() ? "true" : "false");
+  }
+  toggle.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  systemDark.addEventListener("change", function () {
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  show();
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+
+</body>
+</html>

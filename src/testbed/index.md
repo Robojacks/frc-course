@@ -20,6 +20,7 @@ The **Lessons** tab teaches the ideas. The **Labs** tab is where you try them on
 | [Lab 8: Gyro Turns and Encoder Distances](lab8-navx-gyro.md) | WCD | Lab 7 | Turn by angle with the NavX2, drive exact distances with the drive encoders, and close the square |
 | [Lab 9: PID on the Wheel](lab9-pid-wheel.md) | Test bed | Lab 8 and [Lesson 12](../controls/12-pid.md) | Turn exactly 10 times with P, then D, then I |
 | [Lab 10: Elevator Position Control](lab10-elevator.md) | WCD | Lab 9 | Move the elevator between START, L2, and L3 with a ProfiledPIDController, in meters, and hold against gravity |
+| [Lab 11: Track the Robot on the Field](lab11-odometry.md) | WCD | Lab 10 and [Lesson 17](../going-further/17-odometry.md) | Add odometry, watch the robot move on a field map in Elastic, and calibrate it against a tape measure |
 
 Do them in order. Each lab adds **one** new idea. Every lab has **finished code** on GitHub, in the [examples folder](https://github.com/Robojacks/frc-course/tree/main/examples): a complete project you can open and deploy if you get stuck.
 

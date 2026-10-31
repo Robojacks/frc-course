@@ -33,12 +33,29 @@ Everything adapted from the WPILib docs is marked where it appears:
 
 The simulators also load a small script of our own, `pid-tune-fixes.js`, which makes their graphs keep drawing when the simulator is taller than the screen (on phones). It doesn't change how the simulations behave.
 
+## Mantik, by Itkan Robotics
+Lessons 17–21 and Lab 11 are partly **adapted from** [Mantik](https://github.com/itkan-robotics/mantik), an FRC programming course by Itkan Robotics. Mantik's lesson text is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/); its code is BSD-3-Clause.
+
+**Changes made:** the lessons were rewritten for beginners in this course's format, and the examples were rewritten for the RoboJacks West Coast Drive (Through Bore Encoders on the roboRIO, NavX2, CIMs), WPILib 2026, and the course's telemetry library. Some sections were added (calibration steps for the WCD, differential-drive PathPlanner setup, red-alliance notes); a few statements were corrected against vendor documentation. Each adapted page ends with a credit line.
+
+| In this course | Adapted from (Mantik) |
+|---|---|
+| [Lesson 17: Poses and Odometry](../going-further/17-odometry.md) | Introduction to Pose Estimation; Odometry |
+| [Lesson 18: Vision](../going-further/18-vision.md) | Limelight; Fused Pose Estimation; Pose Estimation Calibration |
+| [Lesson 19: PathPlanner](../going-further/19-pathplanner.md) | PathPlanner: Visual Autonomous Routines |
+| [Lesson 20: Logs, AdvantageScope & AdvantageKit](../going-further/20-logging.md) | AdvantageScope; AdvantageKit; Hardware Abstraction with IO Layers |
+| [Lesson 21: Swerve Drive](../going-further/21-swerve.md) | Swerve Drive Example; Odometry |
+| [Lab 11: Odometry](../testbed/lab11-odometry.md) | Odometry; Pose Estimation Calibration |
+
+The site's search box was inspired by Mantik's site search; it's written for this course and doesn't use Mantik's code.
+
 ## Other sources
 - Motor specifications: [REV Robotics NEO V1.1](https://docs.revrobotics.com/brushless/neo/v1.1); CIM and 775pro figures from [RobotPy's motor configurations](https://robotpy.readthedocs.io/projects/websim/en/latest/motor-configurations.html).
 - NavX2 API details: Studica's AHRS Java documentation.
 - The course's [telemetry library](https://github.com/Robojacks/frc-course/tree/main/library/telemetry) copies the class and method names of WPILib 2027's Telemetry and Tunables APIs, from their design documents. The code is written for this course.
 - Lesson 6.1's 2027 comparison is based on WPILib's Telemetry and Tunables design documents in [wpilibsuite/allwpilib](https://github.com/wpilibsuite/allwpilib) and the [Removed features](https://docs.wpilib.org/en/latest/docs/yearly-overview/removed-features.html) page. The 2027 APIs were still in preview when this was written.
+- PathPlannerLib API details: the [PathPlanner](https://github.com/mjansen4857/pathplanner) source and documentation (2026 release). Limelight MegaTag2 usage: Limelight's documentation and `LimelightHelpers`.
 - Elastic connection modes and widget behavior: the [Elastic documentation](https://frc-elastic.gitbook.io/docs), by Team 353.
 
 ## Trademarks
-*FIRST*®, FIRST® Robotics Competition, and FRC® are trademarks of *FIRST*. REV, SPARK MAX, NEO, and Through Bore Encoder are trademarks of REV Robotics. NavX is a trademark of Kauai Labs / Studica. This course is made by FRC Team 4674 RoboJacks and isn't affiliated with or endorsed by any of them.
+*FIRST*®, FIRST® Robotics Competition, and FRC® are trademarks of *FIRST*. REV, SPARK MAX, NEO, and Through Bore Encoder are trademarks of REV Robotics. NavX is a trademark of Kauai Labs / Studica. Limelight is a trademark of Limelight Vision. This course is made by FRC Team 4674 RoboJacks and isn't affiliated with or endorsed by any of them.

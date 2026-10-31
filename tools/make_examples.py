@@ -722,6 +722,27 @@ public class RobotContainer {{
                   "subsystems/ElevatorSubsystem.java": elevator})
     yield "lab10-elevator", "Lab 10", "lab10-elevator.md", dict(files), ["REVLib", "Studica"]
 
+    # ---- Lab 11: odometry and the field map
+    l11 = lab_text("lab11-odometry.md")
+    drive = add_imports(drive, "edu.wpi.first.math.geometry.Pose2d",
+                        "edu.wpi.first.math.kinematics.DifferentialDriveOdometry",
+                        "edu.wpi.first.wpilibj.smartdashboard.Field2d",
+                        "edu.wpi.first.wpilibj.smartdashboard.SmartDashboard")
+    drive = edit(drive, "  private double m_turnTarget = 0.0;",
+                 java_block(l11, "private final DifferentialDriveOdometry m_odometry;") + "\n", where="before")
+    drive = edit(drive, "    m_rightEncoder.setDistancePerPulse(metersPerPulse);\n",
+                 "\n" + java_block(l11, "m_odometry = new DifferentialDriveOdometry("))
+    drive = edit(drive, "  public void periodic() {\n", java_block(l11, "m_odometry.update(m_gyro") + "\n")
+    drive = edit(drive, '    m_telemetry.log("Encoders/Heading Estimate (deg)", getEncoderHeadingDegrees());\n',
+                 "\n" + java_block(l11, "Pose2d pose = getPose();"))
+    drive = edit(drive, "\n  @Override\n  public void periodic()",
+                 "\n" + java_block(l11, "public Pose2d getPose()"), where="before")
+    container = edit(container, "    m_controller.back().onTrue(m_driveSubsystem.zeroHeadingCommand());\n", "", where="replace")
+    container = edit(container, "    m_controller.start().onTrue(m_driveSubsystem.resetEncodersCommand());\n",
+                     java_block(l11, "resetPoseCommand());"), where="replace")
+    files.update({"RobotContainer.java": container, "subsystems/DriveSubsystem.java": drive})
+    yield "lab11-odometry", "Lab 11", "lab11-odometry.md", dict(files), ["REVLib", "Studica"]
+
 
 # --------------------------------------------------------------------------- writing projects
 

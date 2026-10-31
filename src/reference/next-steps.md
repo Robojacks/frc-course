@@ -1,18 +1,18 @@
 # Where to Go Next
 
-Once you're comfortable with Lessons 0–16, these are the topics most teams tackle next. They're listed roughly in the order teams usually learn them, with the best place to start for each.
+Once you're comfortable with Lessons 0–16, these are the topics most teams tackle next. Lessons 17–21 (**Going Further**) cover the first five. They're listed roughly in the order teams usually learn them, with the best place to start for each.
 
 ## Odometry and pose estimation
 **Odometry** tracks where the robot is on the field by combining wheel encoders and the gyro. It's the foundation for path following and auto-aiming.
 
-- Start: [Kinematics and Odometry](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/index.html)
-- Then: add a `Field2d` to the dashboard to see the robot's estimated position move as it drives
+- Start: [Lesson 17](../going-further/17-odometry.md) and [Lab 11](../testbed/lab11-odometry.md), then WPILib's [Kinematics and Odometry](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/index.html)
 - Next level: **pose estimation**, which corrects odometry drift with camera measurements of AprilTags. See [State-Space and Pose Estimators](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/index.html).
 
 ## Swerve drive
 Most competitive teams now drive swerve: each wheel steers and drives independently, so the robot can move in any direction while turning.
 
-- Start: the swerve kinematics and odometry pages in the WPILib kinematics section above
+- Start: [Lesson 21](../going-further/21-swerve.md)
+- Then: the swerve kinematics and odometry pages in the WPILib kinematics section above
 - Then: your swerve module vendor's docs, and their example code
 - Many teams start from a generated template, such as CTRE's swerve project generator in Phoenix Tuner, rather than writing swerve from scratch
 
@@ -21,6 +21,7 @@ Everything from Lessons 10–14 still applies: a swerve module is a drive motor 
 ## Vision
 Cameras let the robot see AprilTags (to know where it is) and game pieces (to aim or drive to them).
 
+- Start: [Lesson 18](../going-further/18-vision.md)
 - [PhotonVision](https://docs.photonvision.org/)
 - [Limelight](https://docs.limelightvision.io/)
 - [AprilTag introduction (WPILib)](https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html)
@@ -28,6 +29,7 @@ Cameras let the robot see AprilTags (to know where it is) and game pieces (to ai
 ## Path following
 Instead of "drive 2 meters, turn 90°," draw a smooth path on a field diagram and let the robot follow it.
 
+- Start: [Lesson 19](../going-further/19-pathplanner.md)
 - [PathPlanner](https://pathplanner.dev/): the most widely used tool, with a path editor, auto builder, and on-the-fly pathfinding
 - [Choreo](https://choreo.autos/): generates time-optimal paths
 
@@ -36,6 +38,7 @@ Instead of "drive 2 meters, turn 90°," draw a smooth path on a field diagram an
 - [ReCalc](https://www.reca.lc/): estimate gear ratios, speeds, and feedforward gains before the mechanism is built
 
 ## Logging and replay
+- Start: [Lesson 20](../going-further/20-logging.md)
 - [AdvantageKit](https://docs.advantagekit.org/): logs every input so you can replay a match and re-run your code against it
 - [AdvantageScope](https://docs.advantagescope.org/): graphs, 3D field views, and log analysis
 

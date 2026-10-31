@@ -58,6 +58,7 @@ try {
 <details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="project/10-teleop.html">10. Teleop</a></li><li><a href="project/11-autonomous.html">11. Autonomous</a></li></ul></details>
 <details class="nav-section"><summary>Controls</summary><ul><li><a href="controls/12-pid.html">12. PID Feedback</a></li><li><a href="controls/13-feedforward.html">13. Feedforward</a></li><li><a href="controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
 <details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Going Further</summary><ul><li><a href="going-further/17-odometry.html">17. Poses and Odometry</a></li><li><a href="going-further/18-vision.html">18. Vision: AprilTags and Limelight</a></li><li><a href="going-further/19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="going-further/20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="going-further/21-swerve.html">21. Swerve Drive</a></li></ul></details>
 <details class="nav-section"><summary>Reference</summary><ul><li><a href="reference/next-steps.html">Where to Go Next</a></li><li><a href="reference/glossary.html">Glossary</a></li><li><a href="reference/resources.html">Resources</a></li><li><a href="reference/credits.html">Credits</a></li></ul></details>
 <details class="nav-section"><summary>Contributing</summary><ul><li><a href="contributing/index.html">How to Contribute</a></li><li><a href="contributing/lesson-template.html">Lesson Template</a></li><li><a href="contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
     </details>
@@ -65,7 +66,7 @@ try {
   <main id="content" class="content">
     <article>
 <h1 id="robojacks-frc-programming">RoboJacks FRC Programming<a class="headerlink" href="#robojacks-frc-programming" title="Permanent link">#</a></h1>
-<p>A hands-on tutorial course for high school FRC students. It starts with installing the tools and ends with PID, feedforward, SysId, and motion profiles: the same control techniques top teams use.</p>
+<p>A hands-on tutorial course for high school FRC students. It starts with installing the tools and goes through PID, feedforward, SysId, and motion profiles, then odometry, vision, PathPlanner, logging, and swerve: the same techniques top teams use.</p>
 <p>You don't need any programming experience to start. You don't need a robot for most of it, either. Nearly every exercise runs in simulation on your laptop.</p>
 <p><a class="cta" href="testbed/index.html">🔧 Go to the Test Bed Labs</a></p>
 <p>Two tabs at the top of every page switch between the <strong>Lessons</strong> and the <strong>Labs</strong>.</p>
@@ -119,7 +120,8 @@ try {
     B --&gt; C[Robot Code&lt;br/&gt;6–9]
     C --&gt; D[Drivetrain Project&lt;br/&gt;10–11]
     D --&gt; E[Controls&lt;br/&gt;12–14]
-    D --&gt; F[Team Workflow&lt;br/&gt;15–16]</div>
+    D --&gt; F[Team Workflow&lt;br/&gt;15–16]
+    E --&gt; G[Going Further&lt;br/&gt;17–21]</div>
 <table>
 <thead>
 <tr>
@@ -159,6 +161,11 @@ try {
 <td>15–16</td>
 <td>Work on a shared codebase with branches, reviews, unit tests, and CI</td>
 </tr>
+<tr>
+<td><strong>Going Further</strong></td>
+<td>17–21</td>
+<td>Track the robot's pose with odometry and AprilTag vision, follow PathPlanner paths, debug matches from logs, and understand swerve</td>
+</tr>
 </tbody>
 </table>
 <h2 id="test-bed-labs">Test bed labs<a class="headerlink" href="#test-bed-labs" title="Permanent link">#</a></h2>
@@ -187,6 +194,10 @@ try {
 <td>9–10</td>
 <td>PID: turn a wheel exactly 10 times, then hold an elevator against gravity</td>
 </tr>
+<tr>
+<td>11</td>
+<td>Odometry: watch the WCD move on a field map</td>
+</tr>
 </tbody>
 </table>
 <p>See the <a href="testbed/index.html">Labs overview</a> for the full list and when to do each one.</p>
@@ -209,7 +220,7 @@ try {
 </tr>
 <tr>
 <td>Already write robot code</td>
-<td><a href="robot-code/07b-scheduler.html">Lesson 7.1</a>, then <a href="controls/12-pid.html">Controls</a></td>
+<td><a href="robot-code/07b-scheduler.html">Lesson 7.1</a>, then <a href="controls/12-pid.html">Controls</a> and <a href="going-further/17-odometry.html">Going Further</a></td>
 </tr>
 </tbody>
 </table>

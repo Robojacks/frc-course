@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>17. Poses and Odometry | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<script>
+// Apply the saved light/dark choice before the page draws, so it never flashes the wrong theme.
+try {
+  var savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) {}
+</script>
+
+</head>
+<body id="top" data-root="../">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
+      <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <span class="theme-track"><span class="theme-knob"></span></span>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html" class="current" aria-current="page">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and Limelight</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="17-where-is-the-robot-poses-and-odometry">17. Where Is the Robot? Poses and Odometry<a class="headerlink" href="#17-where-is-the-robot-poses-and-odometry" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>So far the robot has only known things about itself: how fast a wheel spins, how far it has rolled, which way it's facing. To score in autonomous, line up on a goal, or follow a path, it needs to know where it is <strong>on the field</strong>.</p>
+<p>That's called the robot's <strong>pose</strong>, and keeping track of it is called <strong>pose estimation</strong>. This lesson covers how WPILib describes a pose and how <strong>odometry</strong> tracks it from the encoders and gyro you already have. <a href="18-vision.html">Lesson 18</a> adds cameras to correct it.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html">Coordinate System (WPILib)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/index.html">Kinematics and Odometry (WPILib)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/differential-drive-odometry.html">Differential Drive Odometry (WPILib)</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="what-a-pose-is">What a pose is<a class="headerlink" href="#what-a-pose-is" title="Permanent link">#</a></h3>
+<p>A pose is three numbers:</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Meaning</th>
+<th>Units</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>X</strong></td>
+<td>How far along the field's long side</td>
+<td>meters</td>
+</tr>
+<tr>
+<td><strong>Y</strong></td>
+<td>How far along the field's short side</td>
+<td>meters</td>
+</tr>
+<tr>
+<td><strong>Heading</strong> (θ)</td>
+<td>Which way the robot's front points</td>
+<td>degrees or radians</td>
+</tr>
+</tbody>
+</table>
+<p>WPILib stores them in a <code>Pose2d</code>, which is a <code>Translation2d</code> (X and Y) plus a <code>Rotation2d</code> (heading):</p>
+<div class="highlight"><pre><span></span><code><span class="n">Pose2d</span><span class="w"> </span><span class="n">pose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Pose2d</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">fromDegrees</span><span class="p">(</span><span class="mi">45</span><span class="p">));</span>
+
+<span class="n">pose</span><span class="p">.</span><span class="na">getX</span><span class="p">();</span><span class="w">                         </span><span class="c1">// 2.0 meters</span>
+<span class="n">pose</span><span class="p">.</span><span class="na">getY</span><span class="p">();</span><span class="w">                         </span><span class="c1">// 3.0 meters</span>
+<span class="n">pose</span><span class="p">.</span><span class="na">getRotation</span><span class="p">().</span><span class="na">getDegrees</span><span class="p">();</span><span class="w">     </span><span class="c1">// 45.0</span>
+<span class="n">pose</span><span class="p">.</span><span class="na">getTranslation</span><span class="p">();</span><span class="w">               </span><span class="c1">// just the (2.0, 3.0) part</span>
+</code></pre></div>
+<p>A few things you can do with poses:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// How far apart are two poses? (straight-line distance in meters)</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">meters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pose</span><span class="p">.</span><span class="na">getTranslation</span><span class="p">().</span><span class="na">getDistance</span><span class="p">(</span><span class="n">target</span><span class="p">.</span><span class="na">getTranslation</span><span class="p">());</span>
+
+<span class="c1">// How far do I still have to turn to face the target's heading?</span>
+<span class="n">Rotation2d</span><span class="w"> </span><span class="n">turnLeft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">target</span><span class="p">.</span><span class="na">getRotation</span><span class="p">().</span><span class="na">minus</span><span class="p">(</span><span class="n">pose</span><span class="p">.</span><span class="na">getRotation</span><span class="p">());</span>
+
+<span class="c1">// Where would I be after driving 1 m forward from here? (forward = the robot's own front)</span>
+<span class="n">Pose2d</span><span class="w"> </span><span class="n">ahead</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pose</span><span class="p">.</span><span class="na">transformBy</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Transform2d</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">kZero</span><span class="p">));</span>
+</code></pre></div>
+<h3 id="the-fields-coordinates">The field's coordinates<a class="headerlink" href="#the-fields-coordinates" title="Permanent link">#</a></h3>
+<p>WPILib uses one coordinate system for the whole field, called the <strong>field frame</strong>, and it's the same for both alliances:</p>
+<ul>
+<li><strong>(0, 0)</strong> is the corner on the <strong>blue</strong> alliance wall, on the right as the blue drivers look at the field.</li>
+<li><strong>+X</strong> points away from the blue wall, toward the red wall.</li>
+<li><strong>+Y</strong> points to the left, as seen from the blue driver station.</li>
+<li><strong>Heading 0°</strong> faces +X (toward red). Turning <strong>counterclockwise</strong> (left, seen from above) makes it go <strong>up</strong>.</li>
+</ul>
+<p>That last rule is the same one the gyro followed in <a href="../testbed/lab8-navx-gyro.html">Lab 8</a>. WPILib uses "counterclockwise is positive" everywhere.</p>
+<div class="admonition info">
+<p class="admonition-title">Red alliance</p>
+<p>The origin always stays on the blue side. A red robot just starts at a big X, near the red wall. PathPlanner (<a href="19-pathplanner.html">Lesson 19</a>) can flip blue paths to the red side for you, so you only draw them once.</p>
+</div>
+<p>There's also the <strong>robot frame</strong>: +X straight out the robot's front, +Y out its left side. Camera positions ("15 cm forward of center, 30 cm up") are written in the robot frame.</p>
+<h3 id="three-ways-to-know-the-pose">Three ways to know the pose<a class="headerlink" href="#three-ways-to-know-the-pose" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>How</th>
+<th>Good</th>
+<th>Bad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Odometry</strong></td>
+<td>Add up wheel distances and gyro heading every loop</td>
+<td>Fast (every 20 ms), always available, smooth</td>
+<td><strong>Drifts</strong>: small errors add up and nothing removes them</td>
+</tr>
+<tr>
+<td><strong>Vision</strong></td>
+<td>A camera sees AprilTags on the field and works out where it must be</td>
+<td>Absolute: no drift, can fix a wrong start</td>
+<td>Only when tags are in view; noisy; slower</td>
+</tr>
+<tr>
+<td><strong>Fusion</strong></td>
+<td>Run odometry all the time and nudge it toward vision when vision is good</td>
+<td>Smooth <em>and</em> doesn't drift</td>
+<td>More code and tuning</td>
+</tr>
+</tbody>
+</table>
+<p>Competition robots use fusion. It starts with good odometry, so that's first.</p>
+<h3 id="how-odometry-works">How odometry works<a class="headerlink" href="#how-odometry-works" title="Permanent link">#</a></h3>
+<p>Every 20 ms, odometry asks the sensors two questions:</p>
+<ol>
+<li><strong>How far did the robot roll since last loop?</strong> The average of the left and right encoder changes.</li>
+<li><strong>Which way was it facing?</strong> The gyro heading.</li>
+</ol>
+<p>A step of 1 cm while facing 0° adds 1 cm to X. The same step facing 90° adds 1 cm to Y. Add up 50 of those steps a second and you have a running position. This is <strong>dead reckoning</strong>, the same way sailors navigated before GPS.</p>
+<div class="mermaid">flowchart LR
+  E[Encoders&lt;br/&gt;left and right meters] --&gt; O[DifferentialDriveOdometry&lt;br/&gt;update every 20 ms]
+  G[NavX2 gyro&lt;br/&gt;heading] --&gt; O
+  O --&gt; P[Pose2d&lt;br/&gt;X, Y, heading]
+  P --&gt; F[Field map in Elastic]
+  P --&gt; A[Autos and path following]</div>
+<p>WPILib does the math in <code>DifferentialDriveOdometry</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Once, in the constructor: remember the starting readings</span>
+<span class="n">m_odometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDriveOdometry</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">());</span>
+
+<span class="c1">// Every loop, in periodic(): add this loop's step</span>
+<span class="n">m_odometry</span><span class="p">.</span><span class="na">update</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">());</span>
+
+<span class="c1">// Any time: where are we?</span>
+<span class="n">Pose2d</span><span class="w"> </span><span class="n">pose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_odometry</span><span class="p">.</span><span class="na">getPoseMeters</span><span class="p">();</span>
+</code></pre></div>
+<p><a href="../testbed/lab11-odometry.html">Lab 11</a> adds exactly this to the West Coast Drive.</p>
+<div class="admonition tip">
+<p class="admonition-title">Why the heading comes from the gyro</p>
+<p>You saw in Lab 8 that a skid-steer's encoders overcount turns because the wheels slide sideways. <code>DifferentialDriveOdometry</code> only uses the encoders for <strong>how far</strong>, and takes <strong>which way</strong> from the gyro.</p>
+</div>
+<h3 id="resetting-the-pose">Resetting the pose<a class="headerlink" href="#resetting-the-pose" title="Permanent link">#</a></h3>
+<p>Odometry starts wherever you tell it to, (0, 0, 0°) by default. To move it:</p>
+<div class="highlight"><pre><span></span><code><span class="n">m_odometry</span><span class="p">.</span><span class="na">resetPosition</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">newPose</span><span class="p">);</span>
+</code></pre></div>
+<p>You always pass the sensors' <strong>current</strong> readings, because odometry measures changes from them. You don't reset the encoders or gyro themselves. If a sensor reading suddenly jumps (because you reset it), odometry thinks the robot moved.</p>
+<p>At the start of autonomous, teams reset the pose to where the robot really starts on the field, such as "touching the blue wall, 4.0 m from the right side, facing red." PathPlanner autos do this for you.</p>
+<h3 id="why-odometry-drifts">Why odometry drifts<a class="headerlink" href="#why-odometry-drifts" title="Permanent link">#</a></h3>
+<p>Every error gets added to the pose and stays there:</p>
+<table>
+<thead>
+<tr>
+<th>Cause</th>
+<th>What happens</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wheel diameter is a little off</td>
+<td>Every meter is a little too long or short</td>
+<td>Calibrate with a tape measure (Lab 11, Step 9)</td>
+</tr>
+<tr>
+<td>Wheels slip (hard acceleration, pushing matches, carpet seams)</td>
+<td>Encoders count rolling that didn't move the robot</td>
+<td>Gentle acceleration; vision</td>
+</tr>
+<tr>
+<td>Robot bumped while sitting still</td>
+<td>Robot moved; encoders didn't turn</td>
+<td>Vision</td>
+</tr>
+<tr>
+<td>Gyro drifts</td>
+<td>Heading slowly creeps</td>
+<td>Keep the robot still while the NavX calibrates; vision</td>
+</tr>
+</tbody>
+</table>
+<p>A well-calibrated drivetrain is usually within a few centimeters after a short auto, and off by much more after a full match of pushing. That's why vision matters.</p>
+<h3 id="swerve-odometry">Swerve odometry<a class="headerlink" href="#swerve-odometry" title="Permanent link">#</a></h3>
+<p>Swerve robots use the same idea with <code>SwerveDriveOdometry</code>. Instead of two encoder distances, each of the four modules reports how far it rolled <strong>and</strong> which way it was pointing. <a href="21-swerve.html">Lesson 21</a> covers swerve.</p>
+<h3 id="seeing-the-pose">Seeing the pose<a class="headerlink" href="#seeing-the-pose" title="Permanent link">#</a></h3>
+<p>Two ways to look at the pose:</p>
+<ul>
+<li><strong>Elastic</strong>: a <code>Field2d</code> (sent with <code>SmartDashboard.putData</code>) shows the robot on a field picture. Good for drivers and quick checks.</li>
+<li><strong>AdvantageScope</strong>: log the <code>Pose2d</code> and drag it onto the 2D or 3D field. You can replay a whole match afterward. See <a href="20-logging.html">Lesson 20</a>.</li>
+</ul>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Do <a href="../testbed/lab11-odometry.html">Lab 11</a></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> On paper: the robot is at (2, 1) facing 90°. It drives 1 m forward. What's its new pose?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> On paper: the robot faces 30° and the target faces 120°. How far, and which way, must it turn?</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>The robot is at (2, 1) facing 90° and drives 1 m forward. Where is it?</summary>
+<p>(2, 2), still facing 90°. Facing 90° means facing +Y.</p>
+</details>
+<details class="question">
+<summary>Which corner of the field is (0, 0)?</summary>
+<p>The corner on the blue alliance wall, on the blue drivers' right. +X points toward the red wall and +Y to the blue drivers' left.</p>
+</details>
+<details class="question">
+<summary>Why does odometry drift?</summary>
+<p>It adds up small steps, and every small error (slip, a wrong wheel diameter, a bump) is added in and never removed.</p>
+</details>
+<details class="question">
+<summary>Why pass the sensors' current readings to <code>resetPosition</code> instead of zeroing the sensors?</summary>
+<p>Odometry tracks changes in the readings. Zeroing a sensor makes its reading jump, which odometry sees as sudden movement.</p>
+</details>
+<details class="question">
+<summary>Odometry vs. vision: which is fast and smooth, and which never drifts?</summary>
+<p>Odometry is fast and smooth. Vision doesn't drift. Fusion combines both.</p>
+</details>
+<p class="credit">Parts of this lesson are adapted from the Introduction to Pose Estimation and Odometry lessons of <a href="https://github.com/itkan-robotics/mantik">Mantik</a> by Itkan Robotics (CC BY 4.0).</p>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../workflow/16-unit-testing.html"><span>Previous</span>16. Unit Testing &amp; CI</a><a class="pager-next" href="18-vision.html"><span>Next</span>18. Vision: AprilTags and Limelight</a></nav>
+  </main>
+</div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+
+// Light/dark switch. With no saved choice, the site follows the device's setting.
+(function () {
+  var root = document.documentElement;
+  var toggle = document.querySelector(".theme-toggle");
+  var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() {
+    var chosen = root.getAttribute("data-theme");
+    return chosen ? chosen === "dark" : systemDark.matches;
+  }
+  function show() {
+    toggle.setAttribute("aria-checked", isDark() ? "true" : "false");
+  }
+  toggle.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  systemDark.addEventListener("change", function () {
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  show();
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+<script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+const diagrams = [...document.querySelectorAll(".mermaid")];
+diagrams.forEach((d) => { d.dataset.source = d.textContent; });   // keep the source to redraw later
+function isDark() {
+  const chosen = document.documentElement.getAttribute("data-theme");
+  return chosen ? chosen === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+async function draw() {
+  mermaid.initialize({ startOnLoad: false, theme: isDark() ? "dark" : "default" });
+  diagrams.forEach((d) => { d.removeAttribute("data-processed"); d.textContent = d.dataset.source; });
+  await mermaid.run({ nodes: diagrams });
+}
+draw();
+document.addEventListener("themechange", draw);   // redraw diagrams when the light/dark switch flips
+</script>
+</body>
+</html>

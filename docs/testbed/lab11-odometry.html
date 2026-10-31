@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab 11: Track the Robot on the Field | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<script>
+// Apply the saved light/dark choice before the page draws, so it never flashes the wrong theme.
+try {
+  var savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) {}
+</script>
+
+</head>
+<body id="top" data-root="../">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
+      <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <span class="theme-track"><span class="theme-knob"></span></span>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab" href="../index.html">Lessons</a><a class="tab current" aria-current="true" href="index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Labs menu</summary>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Gyro Turns and Encoder Distances</a></li><li><a href="lab9-pid-wheel.html">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li><li><a href="lab11-odometry.html" class="current" aria-current="page">Lab 11: Track the Robot on the Field</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="lab-11-track-the-robot-on-the-field-odometry">Lab 11: Track the Robot on the Field (Odometry)<a class="headerlink" href="#lab-11-track-the-robot-on-the-field-odometry" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>In <a href="lab8-navx-gyro.html">Lab 8</a>, the robot learned two things: how far each side has rolled (the encoders) and which way it's facing (the NavX2). Each answer is useful on its own. Put together, they answer a much bigger question: <strong>where is the robot on the field?</strong></p>
+<p>That's <strong>odometry</strong>. Every 20 ms, the robot asks "how far did I just roll, and which way was I facing?" and adds that small step to its position. Do that 50 times a second and you get a running estimate of the robot's <strong>pose</strong>: its X and Y position in meters, and its heading.</p>
+<p>In this lab you'll add odometry to the West Coast Drive, watch a little robot move on a field map in Elastic as you drive, and calibrate it until the map matches the floor. Path following (<a href="../going-further/19-pathplanner.html">Lesson 19</a>) and vision (<a href="../going-further/18-vision.html">Lesson 18</a>) both start from the pose you build here.</p>
+<p><strong>Before you start:</strong> finish <a href="lab8-navx-gyro.html">Lab 8</a>, including the encoders (Steps 8–12). Read <a href="../going-further/17-odometry.html">Lesson 17</a> first. You'll add to the same <strong>WestCoastDrive</strong> project.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="../going-further/17-odometry.html">Lesson 17: Where Is the Robot?</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/differential-drive-odometry.html">Differential Drive Odometry (WPILib)</a></li>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/dashboards/glass/field2d-widget.html">Field2d Widget (WPILib)</a></li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="what-youll-build">What you'll build<a class="headerlink" href="#what-youll-build" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Piece</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DifferentialDriveOdometry</code></td>
+<td>WPILib's class that turns encoder distances and gyro heading into a pose</td>
+</tr>
+<tr>
+<td><code>getPose()</code></td>
+<td>Returns where the robot thinks it is</td>
+</tr>
+<tr>
+<td><code>resetPoseCommand()</code></td>
+<td>Puts the robot back at (0, 0), facing 0°</td>
+</tr>
+<tr>
+<td><code>Field2d</code></td>
+<td>A field map in Elastic with the robot drawn on it</td>
+</tr>
+</tbody>
+</table>
+<p>The robot starts at <strong>(0, 0) facing 0°</strong>, wherever you set it down. Driving forward makes X go up. Driving to the robot's left makes Y go up. Turning left makes the heading go up, the same as the gyro in Lab 8.</p>
+<h3 id="step-1-measure-the-track-width">Step 1: Measure the track width<a class="headerlink" href="#step-1-measure-the-track-width" title="Permanent link">#</a></h3>
+<p>Odometry needs one new measurement: the <strong>track width</strong>, the distance between the left wheels and the right wheels, measured <strong>center of wheel to center of wheel</strong>, in meters.</p>
+<p>Lab 8 already has a placeholder for it in <code>Constants.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">TrackWidthMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.6</span><span class="p">;</span>
+</code></pre></div>
+<p>Measure your chassis with a tape measure and put the real number in. You'll fine-tune it in Step 9.</p>
+<div class="admonition info">
+<p class="admonition-title">Why does odometry need the track width if heading comes from the gyro?</p>
+<p><code>DifferentialDriveOdometry</code> takes its heading from the gyro, not the encoders, so the track width doesn't change its answer. You'll still need the measured number for path following in <a href="../going-further/19-pathplanner.html">Lesson 19</a>, and Step 9 uses it to check the encoders. Measuring it now means it's right when you need it.</p>
+</div>
+<h3 id="step-2-add-the-odometry-and-the-field">Step 2: Add the odometry and the field<a class="headerlink" href="#step-2-add-the-odometry-and-the-field" title="Permanent link">#</a></h3>
+<p>Open <code>DriveSubsystem.java</code>. Add these imports at the top with the others:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.geometry.Pose2d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.kinematics.DifferentialDriveOdometry</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.Field2d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.SmartDashboard</span><span class="p">;</span>
+</code></pre></div>
+<p>Then add two fields below the encoders:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Odometry: adds up encoder distances and gyro headings into a position on the field (Lab 11)</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DifferentialDriveOdometry</span><span class="w"> </span><span class="n">m_odometry</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// A field map for Elastic, with the robot drawn where odometry thinks it is</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Field2d</span><span class="w"> </span><span class="n">m_field</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Field2d</span><span class="p">();</span>
+</code></pre></div>
+<p><code>m_odometry</code> is <code>final</code> but not set yet. Java lets you set a <code>final</code> field once, in the constructor. You'll do that next, because odometry needs the encoders to be set up first.</p>
+<h3 id="step-3-create-the-odometry-in-the-constructor">Step 3: Create the odometry in the constructor<a class="headerlink" href="#step-3-create-the-odometry-in-the-constructor" title="Permanent link">#</a></h3>
+<p>At the <strong>end</strong> of the constructor, after the two <code>setDistancePerPulse</code> lines, add:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Start odometry at (0, 0) facing 0°, using the sensors' current readings as the starting point</span>
+<span class="w">    </span><span class="n">m_odometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDriveOdometry</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">getLeftMeters</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">getRightMeters</span><span class="p">());</span>
+
+<span class="w">    </span><span class="c1">// Show the field map in Elastic (it appears under SmartDashboard/Field)</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Field"</span><span class="p">,</span><span class="w"> </span><span class="n">m_field</span><span class="p">);</span>
+</code></pre></div>
+<p>Odometry remembers these first readings. From then on, it only cares how much they <strong>change</strong>. That's why it doesn't matter whether the encoders read 0 or 3.7 at startup.</p>
+<div class="admonition note">
+<p class="admonition-title">Why <code>SmartDashboard.putData</code>?</p>
+<p>A <code>Field2d</code> is a <strong>Sendable</strong>, not a single number, so it still goes through <code>SmartDashboard.putData</code> in 2026. <a href="../robot-code/06b-dashboards.html">Lesson 6.1</a> explains why. It's sent over NetworkTables 4 like everything else.</p>
+</div>
+<h3 id="step-4-update-it-every-loop">Step 4: Update it every loop<a class="headerlink" href="#step-4-update-it-every-loop" title="Permanent link">#</a></h3>
+<p>In <code>periodic()</code>, add these lines at the <strong>top</strong>, before the telemetry lines:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Odometry: add this loop's small step to the robot's position</span>
+<span class="w">    </span><span class="n">m_odometry</span><span class="p">.</span><span class="na">update</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_field</span><span class="p">.</span><span class="na">setRobotPose</span><span class="p">(</span><span class="n">getPose</span><span class="p">());</span>
+</code></pre></div>
+<p>And at the bottom of <code>periodic()</code>, with the other telemetry:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">Pose2d</span><span class="w"> </span><span class="n">pose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getPose</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Odometry/X (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">pose</span><span class="p">.</span><span class="na">getX</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Odometry/Y (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">pose</span><span class="p">.</span><span class="na">getY</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Odometry/Heading (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">pose</span><span class="p">.</span><span class="na">getRotation</span><span class="p">().</span><span class="na">getDegrees</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Odometry/Pose"</span><span class="p">,</span><span class="w"> </span><span class="n">pose</span><span class="p">);</span><span class="w">   </span><span class="c1">// the whole pose, for AdvantageScope</span>
+</code></pre></div>
+<p><code>periodic()</code> runs every 20 ms whether or not a command is running, so odometry never misses a step.</p>
+<h3 id="step-5-read-and-reset-the-pose">Step 5: Read and reset the pose<a class="headerlink" href="#step-5-read-and-reset-the-pose" title="Permanent link">#</a></h3>
+<p>Add these two methods above <code>periodic()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Where odometry thinks the robot is: X and Y in meters, and heading. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Pose2d</span><span class="w"> </span><span class="nf">getPose</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_odometry</span><span class="p">.</span><span class="na">getPoseMeters</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Tells odometry the robot is at (0, 0) facing 0°, right where it is now.</span>
+<span class="cm">   * The encoders and gyro aren't touched. Works while disabled.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">resetPoseCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_odometry</span><span class="p">.</span><span class="na">resetPosition</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">Pose2d</span><span class="p">.</span><span class="na">kZero</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">ignoringDisable</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Reset Pose"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p><code>resetPosition</code> needs the sensors' <strong>current</strong> readings so it knows the new starting point. <code>Pose2d.kZero</code> is (0, 0) facing 0°.</p>
+<h3 id="step-6-change-the-reset-buttons">Step 6: Change the reset buttons<a class="headerlink" href="#step-6-change-the-reset-buttons" title="Permanent link">#</a></h3>
+<p>In Lab 8, <strong>Back</strong> zeroed the gyro and <strong>Start</strong> reset the encoders. Both of those now cause trouble: if a sensor reading suddenly jumps to 0, odometry thinks the robot just moved or spun, and the robot on the field map jumps.</p>
+<p><code>resetPoseCommand()</code> doesn't touch the sensors, so use it instead. In <code>RobotContainer.java</code>, find these two lines in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">back</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">zeroHeadingCommand</span><span class="p">());</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">start</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">resetEncodersCommand</span><span class="p">());</span>
+</code></pre></div>
+<p>Delete both and put this one in their place:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Start: "the robot is at (0, 0) facing 0°" (Lab 11)</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">start</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">.</span><span class="na">resetPoseCommand</span><span class="p">());</span>
+</code></pre></div>
+<p>The turn and distance commands from Lab 8 still work. They measure from wherever the sensors are when they start, so they never needed the sensors at 0.</p>
+<h3 id="step-7-put-the-field-in-elastic">Step 7: Put the field in Elastic<a class="headerlink" href="#step-7-put-the-field-in-elastic" title="Permanent link">#</a></h3>
+<p>Deploy, then open Elastic.</p>
+<ol>
+<li>Right-click an empty spot → <strong>Add Widget</strong>, or open the widget list.</li>
+<li>Find <strong>SmartDashboard → Field</strong> and drag it onto the layout. Elastic shows it as a <strong>Field</strong> widget: a picture of this year's field with a robot on it.</li>
+<li>Make the widget big. Turn on the robot outline if it's off.</li>
+</ol>
+<p>Also add <strong>Telemetry → Drive → Odometry → X (m)</strong>, <strong>Y (m)</strong>, and <strong>Heading (deg)</strong> as text displays, so you can see the numbers.</p>
+<p>With the robot <strong>disabled</strong>, push it by hand. The robot on the map should move the same way. Press <strong>Start</strong> and it jumps back to the corner.</p>
+<div class="admonition info">
+<p class="admonition-title">Why is the robot in the corner?</p>
+<p>(0, 0) on the field map is the bottom-left corner, on the blue alliance wall. Your robot is really in the shop, so it starts in that corner. In <a href="../going-further/18-vision.html">Lesson 18</a>, cameras tell the robot where it really is on the field.</p>
+</div>
+<h3 id="step-8-check-the-directions">Step 8: Check the directions<a class="headerlink" href="#step-8-check-the-directions" title="Permanent link">#</a></h3>
+<p>Enable and drive gently. Check each one:</p>
+<table>
+<thead>
+<tr>
+<th>Do this</th>
+<th>X</th>
+<th>Y</th>
+<th>Heading</th>
+<th>On the map</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Drive forward 1 m</td>
+<td>goes <strong>up</strong> about 1.0</td>
+<td>stays near 0</td>
+<td>stays near 0</td>
+<td>moves right (away from the blue wall)</td>
+</tr>
+<tr>
+<td>Turn left 90° (press <strong>X</strong>)</td>
+<td>stays</td>
+<td>stays</td>
+<td>goes <strong>up</strong> to about 90</td>
+<td>turns to face the top of the map</td>
+</tr>
+<tr>
+<td>Then drive forward 1 m</td>
+<td>stays</td>
+<td>goes <strong>up</strong> about 1.0</td>
+<td>stays near 90</td>
+<td>moves up</td>
+</tr>
+</tbody>
+</table>
+<p>If something goes the wrong way:</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Driving forward makes X go <strong>down</strong></td>
+<td>Both encoders count backward. Flip <code>LeftEncoderInverted</code> and <code>RightEncoderInverted</code> in Constants.</td>
+</tr>
+<tr>
+<td>Driving straight makes the robot curve on the map</td>
+<td>One encoder counts backward. Check each one alone (Lab 8, Step 9) and flip that one.</td>
+</tr>
+<tr>
+<td>Turning left makes the heading go <strong>down</strong></td>
+<td>You're using <code>getAngle()</code> somewhere. Use <code>getRotation2d()</code> everywhere, as in Lab 8.</td>
+</tr>
+<tr>
+<td>The map doesn't move at all</td>
+<td>Check <code>m_odometry.update(...)</code> is in <code>periodic()</code>, and that the field widget is <strong>SmartDashboard/Field</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-9-calibrate">Step 9: Calibrate<a class="headerlink" href="#step-9-calibrate" title="Permanent link">#</a></h3>
+<p>Odometry is only as good as its numbers. Two quick tests find most problems.</p>
+<p><strong>Wheel diameter (straight line).</strong> Put tape on the floor, line the robot up on it, and press <strong>Start</strong>. Drive straight for about 3 m and stop. Measure how far the robot really went with a tape measure.</p>
+<table>
+<thead>
+<tr>
+<th>Real distance (m)</th>
+<th>Odometry X (m)</th>
+<th>Ratio (real ÷ X)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>If the ratio isn't close to 1.00, multiply <code>WheelDiameterMeters</code> by it. A 6 in wheel squishes under a heavy robot, so the "real" diameter is often a little smaller than 6 in. Run the test again until odometry is within about 2 cm of the tape.</p>
+<p><strong>Track width (spin in place).</strong> This checks <code>TrackWidthMeters</code> against the gyro, which you trust for turns. Press <strong>Start</strong>, then spin the robot in place to the left exactly <strong>5 full turns</strong> (watch the gyro heading reach about 1800°). Read <strong>Encoders/Left (m)</strong> and <strong>Encoders/Right (m)</strong> from Lab 8 before and after.</p>
+<p><strong>effective track width = (Δ right − Δ left) ÷ (turns × 2π)</strong></p>
+<p>For 5 turns, divide by 5 × 2π ≈ <strong>31.42</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Δ Left (m)</th>
+<th>Δ Right (m)</th>
+<th>Effective track width (m)</th>
+<th>Tape-measured track width (m)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>On a skid-steer like the WCD, the effective number usually comes out <strong>bigger</strong> than the tape measure, because the wheels slide sideways while turning (you saw this in Lab 8, Step 11). Path following works better with the effective number, so write both down. You'll use the effective one in <a href="../going-further/19-pathplanner.html">Lesson 19</a>.</p>
+<h3 id="step-10-drive-the-sensor-square">Step 10: Drive the sensor square<a class="headerlink" href="#step-10-drive-the-sensor-square" title="Permanent link">#</a></h3>
+<p>Select <strong>Square</strong> in the <strong>Auto</strong> dropdown (since Lab 8 it drives by the encoders and gyro), set the robot on a tape mark, press <strong>Start</strong>, and run autonomous.</p>
+<p>When it finishes, the robot should be back near (0, 0) on the map. Fill in:</p>
+<table>
+<thead>
+<tr>
+<th>Run</th>
+<th>Final X (m)</th>
+<th>Final Y (m)</th>
+<th>Final heading (°)</th>
+<th>Real distance from the tape mark (cm)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Compare the map with the floor. If odometry says (0.02, 0.01) but the robot is 15 cm from the mark, odometry has drifted: the wheels slipped, and the encoders counted rolling that didn't move the robot.</p>
+<h3 id="step-11-commit">Step 11: Commit<a class="headerlink" href="#step-11-commit" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>git add .
+git commit -m "Lab 11: odometry and field map"
+</code></pre></div>
+<h3 id="when-it-doesnt-work">When it doesn't work<a class="headerlink" href="#when-it-doesnt-work" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Robot on the map jumps when you press Back</td>
+<td>You still have the old zero-heading binding. Step 6.</td>
+</tr>
+<tr>
+<td>Pose slowly spins while the robot sits still</td>
+<td>The NavX was moved while calibrating. Power-cycle with the robot still (Lab 8, Step 1).</td>
+</tr>
+<tr>
+<td>X is about twice (or half) the real distance</td>
+<td><code>EncoderCyclesPerRev</code> is wrong. It's 2048 for the Through Bore Encoder.</td>
+</tr>
+<tr>
+<td>Pose drifts sideways after hard turns</td>
+<td>Normal for skid-steer wheels sliding. Calibrate (Step 9), and drive turns gently. Vision fixes this for real in <a href="../going-further/18-vision.html">Lesson 18</a>.</td>
+</tr>
+<tr>
+<td><code>variable m_odometry might not have been initialized</code></td>
+<td>The <code>m_odometry = new ...</code> line from Step 3 isn't in the constructor.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="piece-by-piece">Piece by piece<a class="headerlink" href="#piece-by-piece" title="Permanent link">#</a></h2>
+<p><div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DifferentialDriveOdometry</span><span class="w"> </span><span class="n">m_odometry</span><span class="p">;</span>
+</code></pre></div>
+The odometry object. It's declared here but built in the constructor, after the encoders know their distance per pulse.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">m_odometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDriveOdometry</span><span class="p">(</span>
+<span class="w">    </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span>
+<span class="w">    </span><span class="n">getLeftMeters</span><span class="p">(),</span>
+<span class="w">    </span><span class="n">getRightMeters</span><span class="p">());</span>
+</code></pre></div>
+Gives odometry its starting readings. It starts at the pose <code>(0, 0, 0°)</code> unless you pass a fourth argument with a different starting pose.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">m_odometry</span><span class="p">.</span><span class="na">update</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">());</span>
+</code></pre></div>
+The heart of odometry. It compares these readings with last loop's. The change in the <strong>average</strong> encoder distance says how far the robot rolled; the <strong>gyro</strong> says which way it was facing. It adds that step to the pose.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">m_field</span><span class="p">.</span><span class="na">setRobotPose</span><span class="p">(</span><span class="n">getPose</span><span class="p">());</span>
+</code></pre></div>
+Moves the robot on Elastic's field map to match.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Odometry/Pose"</span><span class="p">,</span><span class="w"> </span><span class="n">pose</span><span class="p">);</span>
+</code></pre></div>
+Sends the whole <code>Pose2d</code> as one value. Elastic can't graph it, but AdvantageScope can draw it on a 2D or 3D field. See <a href="../going-further/20-logging.html">Lesson 20</a>.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">m_odometry</span><span class="p">.</span><span class="na">resetPosition</span><span class="p">(</span>
+<span class="w">    </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">Pose2d</span><span class="p">.</span><span class="na">kZero</span><span class="p">)</span>
+</code></pre></div>
+"Whatever the sensors read right now, call this spot (0, 0) facing 0°." Odometry stores the readings as the new starting point.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Watch the robot on the field map while pushing the robot by hand</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Check all three rows of the direction table in Step 8</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Calibrate the wheel diameter until a 3 m drive is within 2 cm</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Measure the effective track width and compare it with the tape-measure number</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run the sensor square 3 times and fill in the table</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Drive a figure eight in teleop and come back to the start mark. How far off is odometry?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: add <code>resetPoseCommand(Pose2d pose)</code> that sets any pose, and start the robot at (2, 4) facing 180°</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: write <code>driveToXCommand(double x)</code> that drives until the pose's X reaches a value</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What three numbers make up a pose?</summary>
+<p>X and Y position (meters) and the heading (which way the robot faces).</p>
+</details>
+<details class="question">
+<summary>Why does differential drive odometry take its heading from the gyro instead of the encoders?</summary>
+<p>The wheels slide sideways when a skid-steer turns, so the encoders say it turned more than it really did. The gyro measures the real rotation.</p>
+</details>
+<details class="question">
+<summary>Why does pressing the old Back button (zero gyro) make the robot jump on the map?</summary>
+<p>Odometry compares each reading with the last one. A gyro that suddenly reads 0 looks like the robot spun instantly, so the pose spins too.</p>
+</details>
+<details class="question">
+<summary>Why must <code>m_odometry.update(...)</code> be in <code>periodic()</code>?</summary>
+<p>Odometry adds up small steps. <code>periodic()</code> runs every loop, even when no command is running. Skipping loops means missing steps.</p>
+</details>
+<details class="question">
+<summary>Odometry says the robot is back at the start, but it's 15 cm away. Why?</summary>
+<p>Odometry drifts. Wheel slip, a slightly wrong wheel diameter, and bumps all add small errors, and nothing corrects them. Vision is what corrects drift.</p>
+</details>
+<p class="credit">Parts of this lab are adapted from the Odometry and Pose Estimation Calibration lessons of <a href="https://github.com/itkan-robotics/mantik">Mantik</a> by Itkan Robotics (CC BY 4.0), rewritten for the RoboJacks West Coast Drive.</p>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab10-elevator.html"><span>Previous</span>Lab 10: Elevator Position Control</a></nav>
+  </main>
+</div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+
+// Light/dark switch. With no saved choice, the site follows the device's setting.
+(function () {
+  var root = document.documentElement;
+  var toggle = document.querySelector(".theme-toggle");
+  var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() {
+    var chosen = root.getAttribute("data-theme");
+    return chosen ? chosen === "dark" : systemDark.matches;
+  }
+  function show() {
+    toggle.setAttribute("aria-checked", isDark() ? "true" : "false");
+  }
+  toggle.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  systemDark.addEventListener("change", function () {
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  show();
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+
+</body>
+</html>

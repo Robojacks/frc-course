@@ -58,6 +58,7 @@ try {
 <details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
 <details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
 <details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Going Further</summary><ul><li><a href="../going-further/17-odometry.html">17. Poses and Odometry</a></li><li><a href="../going-further/18-vision.html">18. Vision: AprilTags and Limelight</a></li><li><a href="../going-further/19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="../going-further/20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="../going-further/21-swerve.html">21. Swerve Drive</a></li></ul></details>
 <details class="nav-section" open><summary>Reference</summary><ul><li><a href="next-steps.html" class="current" aria-current="page">Where to Go Next</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="resources.html">Resources</a></li><li><a href="credits.html">Credits</a></li></ul></details>
 <details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
     </details>
@@ -65,18 +66,18 @@ try {
   <main id="content" class="content">
     <article>
 <h1 id="where-to-go-next">Where to Go Next<a class="headerlink" href="#where-to-go-next" title="Permanent link">#</a></h1>
-<p>Once you're comfortable with Lessons 0–16, these are the topics most teams tackle next. They're listed roughly in the order teams usually learn them, with the best place to start for each.</p>
+<p>Once you're comfortable with Lessons 0–16, these are the topics most teams tackle next. Lessons 17–21 (<strong>Going Further</strong>) cover the first five. They're listed roughly in the order teams usually learn them, with the best place to start for each.</p>
 <h2 id="odometry-and-pose-estimation">Odometry and pose estimation<a class="headerlink" href="#odometry-and-pose-estimation" title="Permanent link">#</a></h2>
 <p><strong>Odometry</strong> tracks where the robot is on the field by combining wheel encoders and the gyro. It's the foundation for path following and auto-aiming.</p>
 <ul>
-<li>Start: <a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/index.html">Kinematics and Odometry</a></li>
-<li>Then: add a <code>Field2d</code> to the dashboard to see the robot's estimated position move as it drives</li>
+<li>Start: <a href="../going-further/17-odometry.html">Lesson 17</a> and <a href="../testbed/lab11-odometry.html">Lab 11</a>, then WPILib's <a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/index.html">Kinematics and Odometry</a></li>
 <li>Next level: <strong>pose estimation</strong>, which corrects odometry drift with camera measurements of AprilTags. See <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/index.html">State-Space and Pose Estimators</a>.</li>
 </ul>
 <h2 id="swerve-drive">Swerve drive<a class="headerlink" href="#swerve-drive" title="Permanent link">#</a></h2>
 <p>Most competitive teams now drive swerve: each wheel steers and drives independently, so the robot can move in any direction while turning.</p>
 <ul>
-<li>Start: the swerve kinematics and odometry pages in the WPILib kinematics section above</li>
+<li>Start: <a href="../going-further/21-swerve.html">Lesson 21</a></li>
+<li>Then: the swerve kinematics and odometry pages in the WPILib kinematics section above</li>
 <li>Then: your swerve module vendor's docs, and their example code</li>
 <li>Many teams start from a generated template, such as CTRE's swerve project generator in Phoenix Tuner, rather than writing swerve from scratch</li>
 </ul>
@@ -84,6 +85,7 @@ try {
 <h2 id="vision">Vision<a class="headerlink" href="#vision" title="Permanent link">#</a></h2>
 <p>Cameras let the robot see AprilTags (to know where it is) and game pieces (to aim or drive to them).</p>
 <ul>
+<li>Start: <a href="../going-further/18-vision.html">Lesson 18</a></li>
 <li><a href="https://docs.photonvision.org/">PhotonVision</a></li>
 <li><a href="https://docs.limelightvision.io/">Limelight</a></li>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html">AprilTag introduction (WPILib)</a></li>
@@ -91,6 +93,7 @@ try {
 <h2 id="path-following">Path following<a class="headerlink" href="#path-following" title="Permanent link">#</a></h2>
 <p>Instead of "drive 2 meters, turn 90°," draw a smooth path on a field diagram and let the robot follow it.</p>
 <ul>
+<li>Start: <a href="../going-further/19-pathplanner.html">Lesson 19</a></li>
 <li><a href="https://pathplanner.dev/">PathPlanner</a>: the most widely used tool, with a path editor, auto builder, and on-the-fly pathfinding</li>
 <li><a href="https://choreo.autos/">Choreo</a>: generates time-optimal paths</li>
 </ul>
@@ -101,6 +104,7 @@ try {
 </ul>
 <h2 id="logging-and-replay">Logging and replay<a class="headerlink" href="#logging-and-replay" title="Permanent link">#</a></h2>
 <ul>
+<li>Start: <a href="../going-further/20-logging.html">Lesson 20</a></li>
 <li><a href="https://docs.advantagekit.org/">AdvantageKit</a>: logs every input so you can replay a match and re-run your code against it</li>
 <li><a href="https://docs.advantagescope.org/">AdvantageScope</a>: graphs, 3D field views, and log analysis</li>
 </ul>
@@ -115,7 +119,7 @@ try {
 <p>Many top teams publish their robot code on GitHub, and some write up their software design each season. Reading a championship robot's code after finishing this course is one of the best ways to level up. Pick one mechanism and figure out how they did it.</p>
 </div>
     </article>
-    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../workflow/16-unit-testing.html"><span>Previous</span>16. Unit Testing &amp; CI</a><a class="pager-next" href="glossary.html"><span>Next</span>Glossary</a></nav>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../going-further/21-swerve.html"><span>Previous</span>21. Swerve Drive</a><a class="pager-next" href="glossary.html"><span>Next</span>Glossary</a></nav>
   </main>
 </div>
 <div class="search-panel" hidden>
