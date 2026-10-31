@@ -23,7 +23,6 @@ Cameras let the robot see AprilTags (to know where it is) and game pieces (to ai
 
 - Start: [Lesson 18](../going-further/18-vision.md)
 - [PhotonVision](https://docs.photonvision.org/)
-- [Limelight](https://docs.limelightvision.io/)
 - [AprilTag introduction (WPILib)](https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html)
 
 ## Path following

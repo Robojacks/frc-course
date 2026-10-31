@@ -58,7 +58,7 @@ try {
 <details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
 <details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
 <details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
-<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and Limelight</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="20-logging.html" class="current" aria-current="page">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li></ul></details>
+<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="20-logging.html" class="current" aria-current="page">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li></ul></details>
 <details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
 <details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
     </details>
@@ -193,13 +193,13 @@ try {
 <li>Drag <code>Telemetry/Drive/Odometry/Pose</code> onto it. It appears as a robot.</li>
 <li>Drag <code>/PathPlanner/activePath</code> on too, as a <strong>Trajectory</strong>, during an auto. Now you can see exactly where the robot left the path.</li>
 </ol>
-<p>With vision (<a href="18-vision.html">Lesson 18</a>), log the camera's pose too (<code>m_telemetry.log("Vision/Pose", estimate.pose)</code>) and drag it on as a <strong>Ghost</strong>. You'll see the camera's guess and the fused pose side by side.</p>
+<p>With vision (<a href="18-vision.html">Lesson 18</a>), the vision subsystem logs each camera's pose as <code>Telemetry/Vision/Front/Pose</code>. Drag it on as a <strong>Ghost</strong>. You'll see the camera's guess and the fused pose side by side.</p>
 <h3 id="name-things-so-you-can-find-them">Name things so you can find them<a class="headerlink" href="#name-things-so-you-can-find-them" title="Permanent link">#</a></h3>
 <p>A value nobody can find during a match might as well not exist.</p>
 <ul>
 <li>Start every name with the subsystem: <code>Elevator/...</code>, <code>Drive/...</code>. The library's <code>Telemetry.getTable("Elevator")</code> does this for you.</li>
 <li>Put the <strong>units</strong> in the name: <code>Height (m)</code>, <code>Heading (deg)</code>.</li>
-<li>Log <strong>why</strong>, not only <strong>what</strong>: a boolean like <code>Vision/Used</code>, or the name of the current preset, explains the jumps in the graphs.</li>
+<li>Log <strong>why</strong>, not only <strong>what</strong>: a count like <code>Vision/Front/Measurements Used</code>, or the name of the current preset, explains the jumps in the graphs.</li>
 </ul>
 <h3 id="which-code-was-on-the-robot">Which code was on the robot?<a class="headerlink" href="#which-code-was-on-the-robot" title="Permanent link">#</a></h3>
 <p>When a log shows something strange, the first question is "what code was running?" WPILib can stamp the code version into every log. Add the <strong>gversion</strong> plugin to the <code>plugins</code> block of <code>build.gradle</code>; on every build it writes the git commit into a generated <code>BuildConstants.java</code>. Then log it once at startup:</p>

@@ -41,7 +41,7 @@ Lessons 17–21 and Lab 11 are partly **adapted from** [Mantik](https://github.c
 | In this course | Adapted from (Mantik) |
 |---|---|
 | [Lesson 17: Poses and Odometry](../going-further/17-odometry.md) | Introduction to Pose Estimation; Odometry |
-| [Lesson 18: Vision](../going-further/18-vision.md) | Limelight; Fused Pose Estimation; Pose Estimation Calibration |
+| [Lesson 18: Vision](../going-further/18-vision.md) | Fused Pose Estimation; Pose Estimation Calibration (rewritten for PhotonVision) |
 | [Lesson 19: PathPlanner](../going-further/19-pathplanner.md) | PathPlanner: Visual Autonomous Routines |
 | [Lesson 20: Logs, AdvantageScope & AdvantageKit](../going-further/20-logging.md) | AdvantageScope; AdvantageKit; Hardware Abstraction with IO Layers |
 | [Lesson 21: Swerve Drive](../going-further/21-swerve.md) | Swerve Drive Example; Odometry |
@@ -54,8 +54,9 @@ The site's search box was inspired by Mantik's site search; it's written for thi
 - NavX2 API details: Studica's AHRS Java documentation.
 - The course's [telemetry library](https://github.com/Robojacks/frc-course/tree/main/library/telemetry) copies the class and method names of WPILib 2027's Telemetry and Tunables APIs, from their design documents. The code is written for this course.
 - Lesson 6.1's 2027 comparison is based on WPILib's Telemetry and Tunables design documents in [wpilibsuite/allwpilib](https://github.com/wpilibsuite/allwpilib) and the [Removed features](https://docs.wpilib.org/en/latest/docs/yearly-overview/removed-features.html) page. The 2027 APIs were still in preview when this was written.
-- PathPlannerLib API details: the [PathPlanner](https://github.com/mjansen4857/pathplanner) source and documentation (2026 release). Limelight MegaTag2 usage: Limelight's documentation and `LimelightHelpers`.
+- PathPlannerLib API details: the [PathPlanner](https://github.com/mjansen4857/pathplanner) source and documentation (2026 release). PhotonLib API details: the [PhotonVision](https://github.com/PhotonVision/photonvision) source (v2026.3.4).
+- Lesson 18's vision subsystem follows [PhotonVisionSubsystem.java](https://github.com/ironmosquitos5653/nmrc-codecamp-level2-rev-2026/blob/main/src/main/java/frc/robot/subsystems/PhotonVisionSubsystem.java) from the NMRC code camp (level 2, 2026), adapted for a differential drive.
 - Elastic connection modes and widget behavior: the [Elastic documentation](https://frc-elastic.gitbook.io/docs), by Team 353.
 
 ## Trademarks
-*FIRST*®, FIRST® Robotics Competition, and FRC® are trademarks of *FIRST*. REV, SPARK MAX, NEO, and Through Bore Encoder are trademarks of REV Robotics. NavX is a trademark of Kauai Labs / Studica. Limelight is a trademark of Limelight Vision. This course is made by FRC Team 4674 RoboJacks and isn't affiliated with or endorsed by any of them.
+*FIRST*®, FIRST® Robotics Competition, and FRC® are trademarks of *FIRST*. REV, SPARK MAX, NEO, and Through Bore Encoder are trademarks of REV Robotics. NavX is a trademark of Kauai Labs / Studica. This course is made by FRC Team 4674 RoboJacks and isn't affiliated with or endorsed by any of them.

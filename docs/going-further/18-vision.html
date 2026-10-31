@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>18. Vision: AprilTags and Limelight | RoboJacks 4674</title>
+<title>18. Vision: AprilTags and PhotonVision | RoboJacks 4674</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
@@ -58,247 +58,356 @@ try {
 <details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
 <details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
 <details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
-<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html" class="current" aria-current="page">18. Vision: AprilTags and Limelight</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li></ul></details>
+<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html" class="current" aria-current="page">18. Vision: AprilTags and PhotonVision</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li></ul></details>
 <details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
 <details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
     </details>
   </aside>
   <main id="content" class="content">
     <article>
-<h1 id="18-vision-apriltags-and-the-limelight">18. Vision: AprilTags and the Limelight<a class="headerlink" href="#18-vision-apriltags-and-the-limelight" title="Permanent link">#</a></h1>
+<h1 id="18-vision-apriltags-and-photonvision">18. Vision: AprilTags and PhotonVision<a class="headerlink" href="#18-vision-apriltags-and-photonvision" title="Permanent link">#</a></h1>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>Odometry from <a href="17-odometry.html">Lesson 17</a> is smooth and fast, but it drifts, and it only knows where the robot is if you told it where it started. A camera that can see the field fixes both problems.</p>
-<p>Every FRC field has <strong>AprilTags</strong>: square black-and-white markers, each with a number, mounted at known spots. When a camera sees a tag, it can work out exactly where the camera must be to see the tag at that size and angle. Since WPILib knows where every tag is on the field, that tells the robot where <strong>it</strong> is.</p>
-<p>This lesson covers how that works, how to read a <strong>Limelight</strong> camera, and how to <strong>fuse</strong> its measurements with odometry so the pose is both smooth and correct.</p>
+<p>Every FRC field has <strong>AprilTags</strong>: square black-and-white markers, each with a number, mounted at known spots. When a camera sees a tag, it can work out exactly where the camera must be to see the tag at that size and angle. WPILib knows where every tag is on the field, so that tells the robot where <strong>it</strong> is.</p>
+<p>RoboJacks uses <strong>PhotonVision</strong>. This lesson covers how it works, how to read it from robot code, and how to <strong>fuse</strong> its measurements with odometry so the pose is both smooth and correct.</p>
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/vision-processing/apriltag/apriltag-intro.html">AprilTag Introduction (WPILib)</a></li>
+<li><a href="https://docs.photonvision.org/">PhotonVision documentation</a>, especially "Installation", "Camera Calibration", and "PhotonLib"</li>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html">Pose Estimators (WPILib)</a></li>
-<li><a href="https://docs.limelightvision.io/">Limelight documentation</a>, especially "Robot Localization with MegaTag2"</li>
-<li><a href="https://docs.photonvision.org/">PhotonVision documentation</a>, if your team uses PhotonVision instead</li>
+<li><a href="https://github.com/ironmosquitos5653/nmrc-codecamp-level2-rev-2026/blob/main/src/main/java/frc/robot/subsystems/PhotonVisionSubsystem.java">Example: PhotonVisionSubsystem.java</a>, from the NMRC code camp (level 2, 2026). This lesson follows its approach.</li>
 </ul>
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
-<h3 id="vision-hardware">Vision hardware<a class="headerlink" href="#vision-hardware" title="Permanent link">#</a></h3>
-<p>A vision camera for FRC is a camera plus a small computer that finds tags in every frame and sends the results to the roboRIO over NetworkTables.</p>
+<h3 id="the-two-halves">The two halves<a class="headerlink" href="#the-two-halves" title="Permanent link">#</a></h3>
 <table>
 <thead>
 <tr>
-<th>Option</th>
-<th>What it is</th>
+<th>Part</th>
+<th>Runs on</th>
+<th>What it does</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Limelight</strong></td>
-<td>All-in-one camera and computer. Plug in power and Ethernet, configure it in a web page. Used in this lesson.</td>
+<td><strong>PhotonVision</strong></td>
+<td>A <strong>coprocessor</strong> (a small computer like an Orange Pi 5) with one or more USB cameras</td>
+<td>Finds AprilTags in every frame, works out where each tag is relative to the camera, and sends the results over NetworkTables</td>
 </tr>
 <tr>
-<td><strong>PhotonVision</strong></td>
-<td>Free software that runs on a coprocessor (Orange Pi and similar) with USB cameras. More setup, cheaper, more cameras. Same ideas, different library (<code>PhotonPoseEstimator</code>).</td>
+<td><strong>PhotonLib</strong> (vendor library)</td>
+<td>The roboRIO</td>
+<td>Reads those results in your robot code</td>
 </tr>
 </tbody>
 </table>
-<h3 id="two-ways-to-use-a-tag">Two ways to use a tag<a class="headerlink" href="#two-ways-to-use-a-tag" title="Permanent link">#</a></h3>
-<p><strong>1. Aim at it.</strong> The simplest use: "how far left or right of the crosshair is the tag?" The Limelight sends these over NetworkTables:</p>
+<p>The coprocessor plugs into the robot's network switch or radio, like the roboRIO. The roboRIO does none of the image processing. It only reads the answers.</p>
+<h3 id="setting-up-photonvision">Setting up PhotonVision<a class="headerlink" href="#setting-up-photonvision" title="Permanent link">#</a></h3>
+<p>On a laptop connected to the robot's network, open the PhotonVision web page (<code>http://photonvision.local:5800</code>, or the coprocessor's IP address on port 5800). Then:</p>
+<ol>
+<li><strong>Settings:</strong> enter team number <strong>4674</strong>, so PhotonVision finds the roboRIO.</li>
+<li><strong>Cameras:</strong> give each camera a <strong>nickname</strong>, like <code>frontCamera</code>. Robot code finds the camera by this name, so it must match exactly.</li>
+<li><strong>Calibrate</strong> each camera at the resolution you'll use (Cameras tab → calibration with a printed chessboard). Without calibration, PhotonVision can't measure distance, and 3D results are wrong.</li>
+<li><strong>Pipeline:</strong> set the pipeline type to <strong>AprilTag</strong>, tag family <strong>36h11</strong>, and turn on <strong>3D</strong> mode.</li>
+<li>Point the camera at a tag. The dashboard should outline it and show its ID.</li>
+</ol>
+<p>Install PhotonLib in VS Code: <strong>WPILib: Manage Vendor Libraries → Install new libraries (online)</strong> and pick <strong>PhotonLib</strong>, or paste the JSON link from the PhotonVision docs. The PhotonLib version should match the version of PhotonVision on the coprocessor.</p>
+<h3 id="what-photonvision-tells-you">What PhotonVision tells you<a class="headerlink" href="#what-photonvision-tells-you" title="Permanent link">#</a></h3>
+<p>Each camera sends a <strong>pipeline result</strong> for every frame. A result can hold several <strong>tracked targets</strong>, one per tag it sees:</p>
 <table>
 <thead>
 <tr>
-<th>Key</th>
+<th>Method</th>
 <th>Meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>tv</code></td>
-<td>1 if the camera sees a valid target, 0 if not</td>
+<td><code>result.hasTargets()</code></td>
+<td>Did this frame see any tags?</td>
 </tr>
 <tr>
-<td><code>tx</code></td>
-<td>Horizontal angle from the crosshair to the target, in degrees. <strong>Positive = target is to the right.</strong></td>
+<td><code>result.getBestTarget()</code></td>
+<td>The best tag in this frame</td>
 </tr>
 <tr>
-<td><code>ty</code></td>
-<td>Vertical angle from the crosshair to the target, in degrees. Positive = target is above.</td>
+<td><code>result.getTimestampSeconds()</code></td>
+<td>When the picture was <strong>taken</strong></td>
 </tr>
 <tr>
-<td><code>ta</code></td>
-<td>How much of the image the target fills, 0–100%. Bigger = closer.</td>
+<td><code>target.getFiducialId()</code></td>
+<td>The tag's number</td>
+</tr>
+<tr>
+<td><code>target.getYaw()</code></td>
+<td>How far left or right of center the tag is, in degrees</td>
+</tr>
+<tr>
+<td><code>target.getBestCameraToTarget()</code></td>
+<td>Where the tag is in 3D, relative to the camera</td>
+</tr>
+<tr>
+<td><code>target.getPoseAmbiguity()</code></td>
+<td>How sure PhotonVision is about that 3D answer: 0 is sure, above about 0.2 is a guess</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition warning">
-<p class="admonition-title">tx is backwards from WPILib</p>
-<p>WPILib counts <strong>counterclockwise (left)</strong> as positive. A positive <code>tx</code> means the robot must turn <strong>right</strong> (clockwise) to face the target. Hold a tag to the right of the camera and check the sign on your Limelight before trusting any code.</p>
+<p class="admonition-title">Check the sign of yaw on your camera</p>
+<p>PhotonVision's own code comments disagree about whether a tag to the <strong>right</strong> gives a positive or negative yaw. In practice, PhotonVision's aiming examples treat <strong>right as positive</strong>, which is the opposite of WPILib's counterclockwise-positive rule. Hold a tag to the right of the camera and look at the yaw on the PhotonVision dashboard before you trust any aiming code.</p>
 </div>
-<p><strong>2. Locate the robot.</strong> The useful one. The camera sees one or more tags, looks up where they are on this year's field, and works out the <strong>robot's</strong> pose on the field. This is called <strong>localization</strong>. The Limelight calls its version <strong>MegaTag</strong>.</p>
-<h3 id="what-the-camera-needs-to-know">What the camera needs to know<a class="headerlink" href="#what-the-camera-needs-to-know" title="Permanent link">#</a></h3>
-<p>For localization to work, set these in the Limelight's web interface:</p>
-<ol>
-<li><strong>Pipeline:</strong> AprilTag, with <strong>Full 3D</strong> targeting.</li>
-<li><strong>Field map:</strong> this season's AprilTag layout (Limelight ships with it).</li>
-<li><strong>Camera pose in robot space:</strong> where the camera is on the robot, measured from the <strong>center of the robot at floor level</strong>: meters forward, meters left (or right), meters up, and its pitch, yaw, and roll. If this is wrong, every pose the camera reports is wrong by the same amount.</li>
-</ol>
-<p>Measure carefully and double-check with the robot sitting at a known spot: the web interface draws the robot on a field map.</p>
-<h3 id="megatag2">MegaTag2<a class="headerlink" href="#megatag2" title="Permanent link">#</a></h3>
-<p><strong>MegaTag2</strong> is Limelight's best localization mode. You send it the robot's heading from the gyro every loop, and it uses that to solve the rest of the pose. Because it doesn't have to guess the heading from the tag's shape, it's much more stable, especially with one tag far away.</p>
-<p><code>LimelightHelpers</code> is a single Java file from Limelight that reads and writes all the NetworkTables values for you. Download <code>LimelightHelpers.java</code> from the <a href="https://docs.limelightvision.io/">Limelight docs</a> and put it in <code>src/main/java/frc/robot/</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// Tell the Limelight which way the robot is facing (degrees, WPILib convention)</span>
-<span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">SetRobotOrientation</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">,</span><span class="w"> </span><span class="n">heading</span><span class="p">.</span><span class="na">getDegrees</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-
-<span class="c1">// Ask for the robot's pose, in WPILib's field coordinates (origin on the blue side)</span>
-<span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">PoseEstimate</span><span class="w"> </span><span class="n">estimate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getBotPoseEstimate_wpiBlue_MegaTag2</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">);</span>
+<h3 id="where-the-camera-is-on-the-robot">Where the camera is on the robot<a class="headerlink" href="#where-the-camera-is-on-the-robot" title="Permanent link">#</a></h3>
+<p>To turn "where the tag is relative to the <strong>camera</strong>" into "where the <strong>robot</strong> is on the field," the code needs to know where the camera is mounted. That's a <code>Transform3d</code>, measured from the <strong>center of the robot at floor level</strong>, using the robot frame (+X forward, +Y left, +Z up):</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Where the front camera is mounted: 14 in forward, centered left-right, 8 in up,</span>
+<span class="w">  </span><span class="c1">// tilted up 10 degrees, facing straight ahead. Measure your real robot!</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Transform3d</span><span class="w"> </span><span class="n">m_robotToFrontCamera</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Transform3d</span><span class="p">(</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">Translation3d</span><span class="p">(</span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mi">14</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mi">8</span><span class="p">)),</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">Rotation3d</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">degreesToRadians</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
 </code></pre></div>
-<p><code>"limelight"</code> is the camera's name, set in its web interface. With two cameras, give them different names.</p>
-<p>A <code>PoseEstimate</code> has:</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>pose</code></td>
-<td>The robot's <code>Pose2d</code> on the field</td>
-</tr>
-<tr>
-<td><code>timestampSeconds</code></td>
-<td>When the picture was taken (not when it arrived)</td>
-</tr>
-<tr>
-<td><code>tagCount</code></td>
-<td>How many tags it used. 0 means no answer.</td>
-</tr>
-<tr>
-<td><code>avgTagDist</code></td>
-<td>Average distance to the tags, in meters</td>
-</tr>
-</tbody>
-</table>
+<p>The <code>Rotation3d</code> is roll, pitch, yaw, in radians. In WPILib's robot frame, <strong>negative pitch tilts the camera up</strong>. Yaw turns the camera left (positive) or right (negative), like the codecamp example's two cameras angled 15° outward.</p>
+<p>If this transform is wrong, every pose the camera produces is wrong by the same amount. Measure it carefully, then check it: park the robot at a measured spot and compare the camera's pose with reality.</p>
+<h3 id="from-one-tag-to-the-robots-pose">From one tag to the robot's pose<a class="headerlink" href="#from-one-tag-to-the-robots-pose" title="Permanent link">#</a></h3>
+<p>PhotonLib's <code>PhotonUtils.estimateFieldToRobotAprilTag</code> does the geometry. It needs three things:</p>
+<ol>
+<li><strong>Camera to tag</strong>: what the camera measured (<code>target.getBestCameraToTarget()</code>)</li>
+<li><strong>Tag on the field</strong>: looked up by ID in WPILib's <code>AprilTagFieldLayout</code> for this season</li>
+<li><strong>Camera to robot</strong>: the mounting transform, flipped around (<code>m_robotToFrontCamera.inverse()</code>)</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="n">Pose2d</span><span class="w"> </span><span class="n">robotPose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PhotonUtils</span><span class="p">.</span><span class="na">estimateFieldToRobotAprilTag</span><span class="p">(</span>
+<span class="w">    </span><span class="n">target</span><span class="p">.</span><span class="na">getBestCameraToTarget</span><span class="p">(),</span><span class="w">         </span><span class="c1">// where the tag is, seen from the camera</span>
+<span class="w">    </span><span class="n">tagPose</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w">                          </span><span class="c1">// where the tag is on the field</span>
+<span class="w">    </span><span class="n">m_robotToFrontCamera</span><span class="p">.</span><span class="na">inverse</span><span class="p">())</span><span class="w">         </span><span class="c1">// where the robot is, seen from the camera</span>
+<span class="w">    </span><span class="p">.</span><span class="na">toPose2d</span><span class="p">();</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Which field layout?</p>
+<p>The 2026 game has two field layouts, because some events use welded field elements and some use AndyMark's: <code>AprilTagFields.k2026RebuiltWelded</code> (WPILib's default) and <code>AprilTagFields.k2026RebuiltAndymark</code>. The tags sit in slightly different places. Use the one your event uses; the codecamp example uses AndyMark.</p>
+</div>
 <h3 id="fusing-vision-with-odometry">Fusing vision with odometry<a class="headerlink" href="#fusing-vision-with-odometry" title="Permanent link">#</a></h3>
-<p>You could just <strong>replace</strong> the odometry pose with the camera's whenever a tag is visible. Don't. Vision is noisy, so the robot would jitter, and a single bad frame would teleport it.</p>
-<p>Instead, WPILib's <strong>pose estimator</strong> blends them. It runs odometry every loop, like before, and when a vision measurement arrives it nudges the pose part of the way toward it. How far it nudges depends on how much you trust each one.</p>
+<p>You could just <strong>replace</strong> the odometry pose with the camera's whenever it sees a tag. Don't. Vision is noisy, so the robot would jitter, and one bad frame would teleport it.</p>
+<p>Instead, WPILib's <strong>pose estimator</strong> blends them. It runs odometry every loop, like before, and when a vision measurement arrives it nudges the pose part of the way toward it. How far depends on how much you trust each one.</p>
 <div class="mermaid">flowchart LR
-  E[Encoders] --&gt; PE[DifferentialDrivePoseEstimator]
-  G[NavX2 heading] --&gt; PE
-  G --&gt; L[Limelight MegaTag2]
-  L -- "pose + timestamp&lt;br/&gt;(only if it passes the checks)" --&gt; PE
+  C[Camera on coprocessor&lt;br/&gt;PhotonVision] -- "tag results&lt;br/&gt;over NetworkTables" --&gt; V[VisionSubsystem&lt;br/&gt;tag → robot pose,&lt;br/&gt;reject bad ones]
+  V -- "pose, timestamp,&lt;br/&gt;trust" --&gt; PE[DifferentialDrivePoseEstimator&lt;br/&gt;in DriveSubsystem]
+  E[Encoders] --&gt; PE
+  G[NavX2] --&gt; PE
   PE --&gt; P[Fused Pose2d]</div>
-<p>For the West Coast Drive, swap <code>DifferentialDriveOdometry</code> from <a href="../testbed/lab11-odometry.html">Lab 11</a> for <code>DifferentialDrivePoseEstimator</code>. It needs one extra thing, the drivetrain's <strong>kinematics</strong> (its track width):</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.VecBuilder</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator</span><span class="p">;</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.kinematics.DifferentialDriveKinematics</span><span class="p">;</span>
-
-<span class="w">  </span><span class="c1">// Track width: how far apart the left and right wheels are</span>
+<h3 id="step-1-a-pose-estimator-in-the-drive-subsystem">Step 1: A pose estimator in the drive subsystem<a class="headerlink" href="#step-1-a-pose-estimator-in-the-drive-subsystem" title="Permanent link">#</a></h3>
+<p>In the WCD's <code>DriveSubsystem</code>, swap <code>DifferentialDriveOdometry</code> from <a href="../testbed/lab11-odometry.html">Lab 11</a> for <code>DifferentialDrivePoseEstimator</code>. It needs one extra thing, the drivetrain's <strong>kinematics</strong> (its track width):</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// Track width: how far apart the left and right wheels are</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DifferentialDriveKinematics</span><span class="w"> </span><span class="n">m_kinematics</span><span class="w"> </span><span class="o">=</span>
 <span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDriveKinematics</span><span class="p">(</span><span class="n">kDriveConstants</span><span class="p">.</span><span class="na">TrackWidthMeters</span><span class="p">);</span>
 
 <span class="w">  </span><span class="c1">// Odometry plus vision (replaces DifferentialDriveOdometry from Lab 11)</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DifferentialDrivePoseEstimator</span><span class="w"> </span><span class="n">m_poseEstimator</span><span class="p">;</span>
 </code></pre></div>
-<p>In the constructor:</p>
+<p>In the constructor, where Lab 11 created the odometry:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_poseEstimator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DifferentialDrivePoseEstimator</span><span class="p">(</span>
 <span class="w">        </span><span class="n">m_kinematics</span><span class="p">,</span>
 <span class="w">        </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span>
 <span class="w">        </span><span class="n">getLeftMeters</span><span class="p">(),</span>
 <span class="w">        </span><span class="n">getRightMeters</span><span class="p">(),</span>
-<span class="w">        </span><span class="n">Pose2d</span><span class="p">.</span><span class="na">kZero</span><span class="p">,</span>
-<span class="w">        </span><span class="n">VecBuilder</span><span class="p">.</span><span class="na">fill</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">degreesToRadians</span><span class="p">(</span><span class="mi">5</span><span class="p">)),</span><span class="w">   </span><span class="c1">// how much to trust odometry (x m, y m, heading rad)</span>
-<span class="w">        </span><span class="n">VecBuilder</span><span class="p">.</span><span class="na">fill</span><span class="p">(</span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w"> </span><span class="mi">9999999</span><span class="p">));</span><span class="w">                      </span><span class="c1">// how much to trust vision (x m, y m, heading rad)</span>
+<span class="w">        </span><span class="n">Pose2d</span><span class="p">.</span><span class="na">kZero</span><span class="p">);</span>
 </code></pre></div>
-<h3 id="standard-deviations-how-much-to-trust-each-source">Standard deviations: how much to trust each source<a class="headerlink" href="#standard-deviations-how-much-to-trust-each-source" title="Permanent link">#</a></h3>
-<p>Those two <code>VecBuilder.fill(...)</code> lines are <strong>standard deviations</strong>: roughly "how wrong is this source, usually?" Smaller numbers mean more trust.</p>
-<ul>
-<li><strong>Odometry:</strong> about 5 cm and 5° of uncertainty per step.</li>
-<li><strong>Vision:</strong> about 70 cm in X and Y. The heading is set to a huge number (9999999), meaning "never use vision's heading." With MegaTag2, the camera's heading came <strong>from the gyro</strong> in the first place, so feeding it back in would be circular.</li>
-</ul>
-<p>You'll tune these later by watching the pose in AdvantageScope (<a href="20-logging.html">Lesson 20</a>). A good start: trust vision more (smaller numbers) when it sees two or more tags close up, and less (bigger numbers) for one far-away tag.</p>
-<h3 id="updating-every-loop">Updating every loop<a class="headerlink" href="#updating-every-loop" title="Permanent link">#</a></h3>
-<p><code>periodic()</code> now does three things: odometry, then send the heading to the camera, then vision.</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nd">@Override</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// 1. Odometry, every loop, same as Lab 11</span>
-<span class="w">    </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">update</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getLeftMeters</span><span class="p">(),</span><span class="w"> </span><span class="n">getRightMeters</span><span class="p">());</span>
-
-<span class="w">    </span><span class="c1">// 2. Send the heading to the Limelight for MegaTag2</span>
-<span class="w">    </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">SetRobotOrientation</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">,</span>
-<span class="w">        </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">getEstimatedPosition</span><span class="p">().</span><span class="na">getRotation</span><span class="p">().</span><span class="na">getDegrees</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
-
-<span class="w">    </span><span class="c1">// 3. Vision, only when it's trustworthy</span>
-<span class="w">    </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">PoseEstimate</span><span class="w"> </span><span class="n">estimate</span><span class="w"> </span><span class="o">=</span>
-<span class="w">        </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getBotPoseEstimate_wpiBlue_MegaTag2</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">boolean</span><span class="w"> </span><span class="n">useVision</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">estimate</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span>
-<span class="w">        </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">estimate</span><span class="p">.</span><span class="na">tagCount</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w">                  </span><span class="c1">// it actually saw a tag</span>
-<span class="w">        </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRate</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">360</span><span class="p">;</span><span class="w">      </span><span class="c1">// not spinning fast (pictures blur)</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">useVision</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">addVisionMeasurement</span><span class="p">(</span><span class="n">estimate</span><span class="p">.</span><span class="na">pose</span><span class="p">,</span><span class="w"> </span><span class="n">estimate</span><span class="p">.</span><span class="na">timestampSeconds</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-
-<span class="w">    </span><span class="n">m_field</span><span class="p">.</span><span class="na">setRobotPose</span><span class="p">(</span><span class="n">getPose</span><span class="p">());</span>
-<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Vision/Used"</span><span class="p">,</span><span class="w"> </span><span class="n">useVision</span><span class="p">);</span>
-<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Vision/Tag Count"</span><span class="p">,</span><span class="w"> </span><span class="n">estimate</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">estimate</span><span class="p">.</span><span class="na">tagCount</span><span class="p">);</span>
-<span class="w">    </span><span class="c1">// ... the rest of your telemetry</span>
-<span class="w">  </span><span class="p">}</span>
-
+<p>Then use it everywhere Lab 11 used <code>m_odometry</code>, and add one method the vision subsystem will call:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Where the robot is: odometry, corrected by vision. */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Pose2d</span><span class="w"> </span><span class="nf">getPose</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">getEstimatedPosition</span><span class="p">();</span>
 <span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Hands the pose estimator a pose from a camera.</span>
+<span class="cm">   * stdDevs says how much to trust it: (x meters, y meters, heading radians). Smaller = more trust.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addVisionMeasurement</span><span class="p">(</span><span class="n">Pose2d</span><span class="w"> </span><span class="n">visionPose</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">timestampSeconds</span><span class="p">,</span><span class="w"> </span><span class="n">Matrix</span><span class="o">&lt;</span><span class="n">N3</span><span class="p">,</span><span class="w"> </span><span class="n">N1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">stdDevs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">addVisionMeasurement</span><span class="p">(</span><span class="n">visionPose</span><span class="p">,</span><span class="w"> </span><span class="n">timestampSeconds</span><span class="p">,</span><span class="w"> </span><span class="n">stdDevs</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
-<p><code>resetPoseCommand()</code> from Lab 11 becomes <code>m_poseEstimator.resetPosition(...)</code> with the same arguments.</p>
-<div class="admonition info">
-<p class="admonition-title">Why pass the timestamp?</p>
-<p>A picture takes time to process, so by the time the answer reaches the roboRIO the robot has moved. The pose estimator remembers recent odometry, goes back to the moment the picture was taken, applies the correction there, and replays the movement since. That's why <code>timestampSeconds</code> matters.</p>
+<p>In <code>periodic()</code>, <code>m_odometry.update(...)</code> becomes <code>m_poseEstimator.update(...)</code> with the same arguments, and <code>resetPoseCommand()</code> calls <code>m_poseEstimator.resetPosition(...)</code> with the same arguments.</p>
+<h3 id="step-2-the-vision-subsystem">Step 2: The vision subsystem<a class="headerlink" href="#step-2-the-vision-subsystem" title="Permanent link">#</a></h3>
+<p>Vision gets its own subsystem. It reads every camera, turns good tag sightings into robot poses, and hands them to the drive subsystem.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Optional</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.photonvision.PhotonCamera</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.photonvision.PhotonUtils</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.photonvision.targeting.PhotonPipelineResult</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.photonvision.targeting.PhotonTrackedTarget</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.apriltag.AprilTagFieldLayout</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.apriltag.AprilTagFields</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.VecBuilder</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.geometry.Pose2d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.geometry.Pose3d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.geometry.Rotation3d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.geometry.Transform3d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.geometry.Translation3d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.util.Units</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Telemetry</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.TelemetryTable</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">VisionSubsystem</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Ignore a tag when PhotonVision is less sure than this about its 3D pose (0 = sure)</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kMaxAmbiguity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.15</span><span class="p">;</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DriveSubsystem</span><span class="w"> </span><span class="n">m_drive</span><span class="p">;</span><span class="w">   </span><span class="c1">// vision measurements go to its pose estimator</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Vision"</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Where every AprilTag is on this season's field</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">AprilTagFieldLayout</span><span class="w"> </span><span class="n">m_fieldLayout</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="n">AprilTagFieldLayout</span><span class="p">.</span><span class="na">loadField</span><span class="p">(</span><span class="n">AprilTagFields</span><span class="p">.</span><span class="na">k2026RebuiltWelded</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// The camera, by its nickname in the PhotonVision web page</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PhotonCamera</span><span class="w"> </span><span class="n">m_frontCamera</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PhotonCamera</span><span class="p">(</span><span class="s">"frontCamera"</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Where the front camera is mounted. Measure your real robot!</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Transform3d</span><span class="w"> </span><span class="n">m_robotToFrontCamera</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Transform3d</span><span class="p">(</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">Translation3d</span><span class="p">(</span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mi">14</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mi">8</span><span class="p">)),</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">Rotation3d</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">degreesToRadians</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+
+<span class="w">  </span><span class="c1">// The newest frame from the front camera, for aiming (it may have no targets)</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">PhotonPipelineResult</span><span class="w"> </span><span class="n">m_latestFront</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PhotonPipelineResult</span><span class="p">();</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">VisionSubsystem</span><span class="p">(</span><span class="n">DriveSubsystem</span><span class="w"> </span><span class="n">drive</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_drive</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">drive</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="nd">@Override</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PhotonPipelineResult</span><span class="w"> </span><span class="n">newest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">updateCamera</span><span class="p">(</span><span class="s">"Front"</span><span class="p">,</span><span class="w"> </span><span class="n">m_frontCamera</span><span class="p">,</span><span class="w"> </span><span class="n">m_robotToFrontCamera</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">newest</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">m_latestFront</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">newest</span><span class="p">;</span><span class="w">   </span><span class="c1">// keep the newest frame for aiming</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// A second camera is one more line: updateCamera("Back", m_backCamera, m_robotToBackCamera);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Reads every new frame from one camera and sends good robot poses to the drive subsystem.</span>
+<span class="cm">   * Returns the newest frame, or null if there were no new frames.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">PhotonPipelineResult</span><span class="w"> </span><span class="nf">updateCamera</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">PhotonCamera</span><span class="w"> </span><span class="n">camera</span><span class="p">,</span><span class="w"> </span><span class="n">Transform3d</span><span class="w"> </span><span class="n">robotToCamera</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="n">PhotonPipelineResult</span><span class="w"> </span><span class="n">newest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">PhotonPipelineResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="na">getAllUnreadResults</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">newest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">.</span><span class="na">hasTargets</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">continue</span><span class="p">;</span><span class="w">   </span><span class="c1">// no tags in this frame</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="n">PhotonTrackedTarget</span><span class="w"> </span><span class="n">target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="na">getBestTarget</span><span class="p">();</span>
+
+<span class="w">      </span><span class="c1">// Where is this tag on the field? (Empty if it's not one of this year's tags.)</span>
+<span class="w">      </span><span class="n">Optional</span><span class="o">&lt;</span><span class="n">Pose3d</span><span class="o">&gt;</span><span class="w"> </span><span class="n">tagPose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_fieldLayout</span><span class="p">.</span><span class="na">getTagPose</span><span class="p">(</span><span class="n">target</span><span class="p">.</span><span class="na">getFiducialId</span><span class="p">());</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tagPose</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">target</span><span class="p">.</span><span class="na">getPoseAmbiguity</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">kMaxAmbiguity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">continue</span><span class="p">;</span><span class="w">   </span><span class="c1">// unknown tag, or PhotonVision isn't sure: skip it</span>
+<span class="w">      </span><span class="p">}</span>
+
+<span class="w">      </span><span class="c1">// Tag seen from the camera + tag on the field + camera on the robot = robot on the field</span>
+<span class="w">      </span><span class="n">Pose2d</span><span class="w"> </span><span class="n">robotPose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PhotonUtils</span><span class="p">.</span><span class="na">estimateFieldToRobotAprilTag</span><span class="p">(</span>
+<span class="w">          </span><span class="n">target</span><span class="p">.</span><span class="na">getBestCameraToTarget</span><span class="p">(),</span><span class="w"> </span><span class="n">tagPose</span><span class="p">.</span><span class="na">get</span><span class="p">(),</span><span class="w"> </span><span class="n">robotToCamera</span><span class="p">.</span><span class="na">inverse</span><span class="p">())</span>
+<span class="w">          </span><span class="p">.</span><span class="na">toPose2d</span><span class="p">();</span>
+
+<span class="w">      </span><span class="c1">// Trust it less the farther away the tag is: about 0.1 at 1.2 m, 0.6 at 3 m, 1.1 at 4 m</span>
+<span class="w">      </span><span class="kt">double</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PhotonUtils</span><span class="p">.</span><span class="na">getDistanceToPose</span><span class="p">(</span><span class="n">robotPose</span><span class="p">,</span><span class="w"> </span><span class="n">tagPose</span><span class="p">.</span><span class="na">get</span><span class="p">().</span><span class="na">toPose2d</span><span class="p">());</span>
+<span class="w">      </span><span class="kt">double</span><span class="w"> </span><span class="n">stdDev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.07</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+
+<span class="w">      </span><span class="n">m_drive</span><span class="p">.</span><span class="na">addVisionMeasurement</span><span class="p">(</span><span class="n">robotPose</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="na">getTimestampSeconds</span><span class="p">(),</span>
+<span class="w">          </span><span class="n">VecBuilder</span><span class="p">.</span><span class="na">fill</span><span class="p">(</span><span class="n">stdDev</span><span class="p">,</span><span class="w"> </span><span class="n">stdDev</span><span class="p">,</span><span class="w"> </span><span class="n">stdDev</span><span class="p">));</span>
+
+<span class="w">      </span><span class="n">used</span><span class="o">++</span><span class="p">;</span>
+<span class="w">      </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/Pose"</span><span class="p">,</span><span class="w"> </span><span class="n">robotPose</span><span class="p">);</span><span class="w">           </span><span class="c1">// for AdvantageScope's field view</span>
+<span class="w">      </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/Tag ID"</span><span class="p">,</span><span class="w"> </span><span class="n">target</span><span class="p">.</span><span class="na">getFiducialId</span><span class="p">());</span>
+<span class="w">      </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/Distance (m)"</span><span class="p">,</span><span class="w"> </span><span class="n">distance</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/Connected"</span><span class="p">,</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="na">isConnected</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"/Measurements Used"</span><span class="p">,</span><span class="w"> </span><span class="n">used</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">newest</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>In <code>RobotContainer</code>, create it <strong>after</strong> the drive subsystem, and hand it the drive:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">VisionSubsystem</span><span class="w"> </span><span class="n">m_vision</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">VisionSubsystem</span><span class="p">(</span><span class="n">m_driveSubsystem</span><span class="p">);</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Store the drive subsystem!</p>
+<p>The constructor must save <code>drive</code> into <code>m_drive</code>. If it doesn't, <code>m_drive</code> stays <code>null</code>, and the robot code crashes with a <code>NullPointerException</code> the first time a camera sees a tag. That only happens when a tag is in view, so it's easy to miss in the shop. (The codecamp example's constructor has this exact bug: it takes <code>driveSubsystem</code> but never saves it.)</p>
 </div>
-<h3 id="rejecting-bad-measurements">Rejecting bad measurements<a class="headerlink" href="#rejecting-bad-measurements" title="Permanent link">#</a></h3>
-<p>A few bad frames can drag the pose somewhere silly. Common checks before <code>addVisionMeasurement</code>:</p>
+<h3 id="piece-by-piece">Piece by piece<a class="headerlink" href="#piece-by-piece" title="Permanent link">#</a></h3>
+<p><div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">PhotonPipelineResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">camera</span><span class="p">.</span><span class="na">getAllUnreadResults</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+</code></pre></div>
+The camera may have sent several frames since the last loop. <code>getAllUnreadResults()</code> returns every one we haven't read yet, so no measurement is wasted or used twice.</p>
+<p><div class="highlight"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">tagPose</span><span class="p">.</span><span class="na">isEmpty</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">target</span><span class="p">.</span><span class="na">getPoseAmbiguity</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">kMaxAmbiguity</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">continue</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+Skips tags that aren't on this year's field and tags PhotonVision isn't sure about. A single flat tag can look almost the same from two different angles; <strong>ambiguity</strong> measures how close those two answers are. <code>continue</code> jumps to the next frame.</p>
+<p><div class="highlight"><pre><span></span><code><span class="kt">double</span><span class="w"> </span><span class="n">stdDev</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.07</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">distance</span><span class="p">;</span>
+</code></pre></div>
+This is the <strong>standard deviation</strong>: roughly "how wrong is this measurement, usually?" Smaller means more trust. A tag 1 m away is measured precisely; a tag 5 m away is a few pixels across and much less precise. Squaring the distance makes trust drop fast as tags get farther away.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">m_drive</span><span class="p">.</span><span class="na">addVisionMeasurement</span><span class="p">(</span><span class="n">robotPose</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="na">getTimestampSeconds</span><span class="p">(),</span><span class="w"> </span><span class="n">VecBuilder</span><span class="p">.</span><span class="na">fill</span><span class="p">(</span><span class="n">stdDev</span><span class="p">,</span><span class="w"> </span><span class="n">stdDev</span><span class="p">,</span><span class="w"> </span><span class="n">stdDev</span><span class="p">));</span>
+</code></pre></div>
+Hands the pose to the estimator with <strong>when the picture was taken</strong>, not when it arrived. The estimator remembers recent odometry, goes back to that moment, applies the correction there, and replays the movement since. The three numbers are the trust for X, Y, and heading.</p>
+<h3 id="tuning-the-trust">Tuning the trust<a class="headerlink" href="#tuning-the-trust" title="Permanent link">#</a></h3>
+<p>The <code>0.07 * distance²</code> rule is a starting point. Watch the fused pose in AdvantageScope (<a href="20-logging.html">Lesson 20</a>) with the camera's pose (<code>Vision/Front/Pose</code>) drawn next to it:</p>
 <table>
 <thead>
 <tr>
-<th>Reject when</th>
-<th>Why</th>
+<th>You see</th>
+<th>Change</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>tagCount == 0</code></td>
-<td>No tags, no answer</td>
+<td>The pose jitters while the robot sits still in front of a tag</td>
+<td>Trust vision less: raise 0.07</td>
 </tr>
 <tr>
-<td>The robot is spinning fast</td>
-<td>Motion blur, and the heading sent to the camera is out of date</td>
+<td>The pose is slow to snap back after you push the robot</td>
+<td>Trust vision more: lower 0.07</td>
 </tr>
 <tr>
-<td>One tag, far away (<code>avgTagDist</code> above about 4 m)</td>
-<td>A small pixel error becomes a big pose error</td>
+<td>Far-away tags drag the pose around</td>
+<td>Skip tags beyond about 4 m</td>
 </tr>
 <tr>
-<td>The pose is off the field, or far from odometry right after a reset</td>
-<td>Something is wrong (reflections, a wrong tag map)</td>
+<td>The heading jumps when a tag comes into view</td>
+<td>Trust vision's heading less than the NavX's, for example <code>VecBuilder.fill(stdDev, stdDev, stdDev * 5)</code></td>
 </tr>
 </tbody>
 </table>
-<p>Log whether each measurement was used, like <code>Vision/Used</code> above. When the pose jumps during a match, the log will tell you which frame did it.</p>
-<h3 id="aiming-with-tx">Aiming with tx<a class="headerlink" href="#aiming-with-tx" title="Permanent link">#</a></h3>
-<p>For simple aiming (turn to face a tag) you don't need the pose at all. Turn by <code>tx</code> with a P controller from <a href="../controls/12-pid.html">Lesson 12</a>:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Turns in place to face the tag the Limelight sees. Ends when lined up. */</span>
+<h3 id="aiming-at-a-tag">Aiming at a tag<a class="headerlink" href="#aiming-at-a-tag" title="Permanent link">#</a></h3>
+<p>For simple aiming (turn to face a tag) you don't need the pose at all. Turn by the target's <strong>yaw</strong> with a P controller from <a href="../controls/12-pid.html">Lesson 12</a>. This goes in <code>VisionSubsystem</code> or in a command that uses both subsystems:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Turns the robot in place to face the tag the front camera sees. Ends when lined up. */</span>
 <span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">aimAtTagCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">PIDController</span><span class="w"> </span><span class="n">aim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">   </span><span class="c1">// output per degree of error</span>
-<span class="w">    </span><span class="n">aim</span><span class="p">.</span><span class="na">setTolerance</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span><span class="w">                                </span><span class="c1">// within 1 degree is lined up</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="kt">double</span><span class="w"> </span><span class="n">tx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getTX</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">);</span>
-<span class="w">          </span><span class="c1">// tx is positive when the tag is to the right. Turning right means left forward, right backward.</span>
-<span class="w">          </span><span class="kt">double</span><span class="w"> </span><span class="n">turn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getTV</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">)</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="o">-</span><span class="n">aim</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
-<span class="w">          </span><span class="n">m_drive</span><span class="p">.</span><span class="na">tankDrive</span><span class="p">(</span><span class="n">turn</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">turn</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span>
+<span class="w">    </span><span class="n">aim</span><span class="p">.</span><span class="na">setTolerance</span><span class="p">(</span><span class="mf">1.0</span><span class="p">);</span><span class="w">                                </span><span class="c1">// within 1 degree counts as lined up</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="n">PhotonPipelineResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_latestFront</span><span class="p">;</span>
+<span class="w">          </span><span class="kt">double</span><span class="w"> </span><span class="n">turn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">          </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">hasTargets</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Yaw is positive when the tag is to the RIGHT (check yours!). Turning right = left side forward.</span>
+<span class="w">            </span><span class="n">turn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">aim</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="na">getBestTarget</span><span class="p">().</span><span class="na">getYaw</span><span class="p">(),</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">          </span><span class="p">}</span>
+<span class="w">          </span><span class="n">m_drive</span><span class="p">.</span><span class="na">tankDriveVolts</span><span class="p">(</span><span class="n">turn</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">12.0</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">turn</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">12.0</span><span class="p">);</span>
 <span class="w">        </span><span class="p">})</span>
-<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">LimelightHelpers</span><span class="p">.</span><span class="na">getTV</span><span class="p">(</span><span class="s">"limelight"</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">aim</span><span class="p">.</span><span class="na">atSetpoint</span><span class="p">())</span>
-<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(</span><span class="n">aim</span><span class="p">::</span><span class="n">atSetpoint</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_drive</span><span class="p">.</span><span class="na">tankDriveVolts</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
 <span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Aim at Tag"</span><span class="p">);</span>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
-<p><code>aim.calculate(tx, 0.0)</code> is negative when <code>tx</code> is positive (the tag is right), so <code>turn</code> is positive and the left side drives forward: the robot turns right. Check it on the robot with the wheels off the ground first.</p>
+<p><code>aim.calculate(yaw, 0.0)</code> is negative when the yaw is positive (tag to the right), so <code>turn</code> is positive and the left side drives forward: the robot turns right. If your yaw sign turns out the other way, remove the minus sign. Test with the wheels off the ground first.</p>
+<p>This uses a new <code>DriveSubsystem</code> method, because <code>aimAtTagCommand</code> lives outside it:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Drives each side at a voltage. Keeps DifferentialDrive's safety timer fed. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">tankDriveVolts</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">leftVolts</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">rightVolts</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_leftLeader</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">leftVolts</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_rightLeader</span><span class="p">.</span><span class="na">setVoltage</span><span class="p">(</span><span class="n">rightVolts</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_drive</span><span class="p">.</span><span class="na">feed</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>Why <code>m_latestFront</code> instead of asking the camera? <code>getAllUnreadResults()</code> hands each frame out only <strong>once</strong>. If the aim command read frames itself, <code>periodic()</code> would miss them and the pose estimator would lose those measurements. So <code>periodic()</code> reads every frame and keeps the newest one for aiming. (PhotonLib's older <code>getLatestResult()</code> is deprecated and will be removed.)</p>
 <h3 id="is-the-cameras-pose-any-good">Is the camera's pose any good?<a class="headerlink" href="#is-the-cameras-pose-any-good" title="Permanent link">#</a></h3>
-<p>Before fusing, test the camera alone. Park the robot at a spot you've measured on the field (or in front of a tag in the shop), then compare:</p>
+<p>Before fusing, test the camera alone. Park the robot at a spot you've measured (in the shop, measure from a tag taped to the wall), then compare <code>Vision/Front/Pose</code> with reality:</p>
 <table>
 <thead>
 <tr>
@@ -315,14 +424,21 @@ try {
 </tr>
 </tbody>
 </table>
-<p>If the error is the same in every spot, the <strong>camera mount measurements</strong> are off. If it gets worse with distance, recalibrate the camera (the Limelight web interface has a calibration tool) and reject far-away single tags.</p>
+<p>If the error is the same everywhere, the <strong>camera mount transform</strong> is off. If it gets worse with distance, <strong>recalibrate</strong> the camera and skip far-away tags.</p>
+<h3 id="going-further">Going further<a class="headerlink" href="#going-further" title="Permanent link">#</a></h3>
+<ul>
+<li><strong><code>PhotonPoseEstimator</code></strong> does the tag-to-robot math for you, and can combine <strong>several tags in one frame</strong> (multi-tag), which is much more accurate than one tag. Turn on multi-tag in the PhotonVision pipeline settings and see the PhotonLib docs.</li>
+<li><strong>Simulation:</strong> PhotonLib's <code>VisionSystemSim</code> and <code>PhotonCameraSim</code> fake a camera in the WPILib simulator, so you can test vision code without a robot.</li>
+</ul>
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> With the Limelight pointed at a tag, move the tag left and right and watch the sign of <code>tx</code></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Measure the camera's position on the robot and enter it in the web interface</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Park the robot at a known spot and compare the camera's pose with reality</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Swap Lab 11's odometry for <code>DifferentialDrivePoseEstimator</code> and fuse MegaTag2 measurements</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set up the coprocessor: team number, camera nickname, calibration, AprilTag pipeline in 3D mode</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Hold a tag to the left and right of the camera and write down the sign of the yaw</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Measure the camera's mounting transform on the robot</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>VisionSubsystem</code> and swap Lab 11's odometry for <code>DifferentialDrivePoseEstimator</code></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Park the robot at a measured spot and compare the camera's pose with reality</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Push the robot by hand so odometry is wrong, then point the camera at a tag. Watch the pose slide back.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: add a second camera, angled out to the side like the codecamp robot</li>
 </ul>
 <h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
 <details class="question">
@@ -331,21 +447,29 @@ try {
 </details>
 <details class="question">
 <summary>What does a smaller standard deviation mean?</summary>
-<p>More trust. The estimator moves the pose further toward a source with a small standard deviation.</p>
+<p>More trust. The estimator moves the pose further toward a measurement with a small standard deviation.</p>
 </details>
 <details class="question">
-<summary>Why is the vision heading's standard deviation 9999999 with MegaTag2?</summary>
-<p>MegaTag2 gets its heading from the gyro you sent it. Using it again would just feed the gyro back to itself, so vision is only trusted for X and Y.</p>
+<summary>Why does the standard deviation grow with distance squared?</summary>
+<p>Far-away tags are only a few pixels across, so a tiny pixel error becomes a big pose error. Trust should drop quickly with distance.</p>
 </details>
 <details class="question">
-<summary>Why does <code>addVisionMeasurement</code> need a timestamp?</summary>
+<summary>Why skip targets with high pose ambiguity?</summary>
+<p>A single tag can look almost the same from two different spots. High ambiguity means PhotonVision can't tell which spot is right, so the pose could be badly wrong.</p>
+</details>
+<details class="question">
+<summary>Why does <code>addVisionMeasurement</code> need the picture's timestamp?</summary>
 <p>The picture was taken a little while ago. The estimator applies the correction at the moment the picture was taken, then replays the movement since.</p>
 </details>
 <details class="question">
 <summary>The camera's pose is always 20 cm too far left, everywhere on the field. What's wrong?</summary>
-<p>The camera's mounting position on the robot is entered wrong. A consistent offset points to the mount measurements.</p>
+<p>The camera's mounting transform is wrong. A consistent offset points to the mount measurements.</p>
 </details>
-<p class="credit">Parts of this lesson are adapted from the Limelight, Fused Pose Estimation, and Pose Estimation Calibration lessons of <a href="https://github.com/itkan-robotics/mantik">Mantik</a> by Itkan Robotics (CC BY 4.0). MegaTag2 usage follows Limelight's documentation and <code>LimelightHelpers</code>.</p>
+<details class="question">
+<summary>The robot code crashes with a NullPointerException, but only when a camera sees a tag. What's the likely cause?</summary>
+<p>The vision subsystem's constructor didn't save the drive subsystem, so <code>m_drive</code> is <code>null</code> when it tries to add a measurement.</p>
+</details>
+<p class="credit">The vision subsystem follows the approach of <a href="https://github.com/ironmosquitos5653/nmrc-codecamp-level2-rev-2026/blob/main/src/main/java/frc/robot/subsystems/PhotonVisionSubsystem.java">PhotonVisionSubsystem.java</a> from the NMRC code camp (level 2, 2026), adapted for a differential drive. Parts of the fusion and calibration explanations are adapted from <a href="https://github.com/itkan-robotics/mantik">Mantik</a> by Itkan Robotics (CC BY 4.0). API details follow PhotonLib 2026's source.</p>
     </article>
     <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="17-odometry.html"><span>Previous</span>17. Poses and Odometry</a><a class="pager-next" href="19-pathplanner.html"><span>Next</span>19. Autos with PathPlanner</a></nav>
   </main>

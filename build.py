@@ -69,7 +69,7 @@ NAV = [
     ]),
     ("Going Further", [
         ("17. Poses and Odometry", "going-further/17-odometry.md"),
-        ("18. Vision: AprilTags and Limelight", "going-further/18-vision.md"),
+        ("18. Vision: AprilTags and PhotonVision", "going-further/18-vision.md"),
         ("19. Autos with PathPlanner", "going-further/19-pathplanner.md"),
         ("20. Logs, AdvantageScope & AdvantageKit", "going-further/20-logging.md"),
         ("21. Swerve Drive", "going-further/21-swerve.md"),

@@ -77,14 +77,14 @@ Lab 11 logs `Drive/Odometry/Pose` as a whole `Pose2d` (a **struct**). In Advanta
 2. Drag `Telemetry/Drive/Odometry/Pose` onto it. It appears as a robot.
 3. Drag `/PathPlanner/activePath` on too, as a **Trajectory**, during an auto. Now you can see exactly where the robot left the path.
 
-With vision ([Lesson 18](18-vision.md)), log the camera's pose too (`m_telemetry.log("Vision/Pose", estimate.pose)`) and drag it on as a **Ghost**. You'll see the camera's guess and the fused pose side by side.
+With vision ([Lesson 18](18-vision.md)), the vision subsystem logs each camera's pose as `Telemetry/Vision/Front/Pose`. Drag it on as a **Ghost**. You'll see the camera's guess and the fused pose side by side.
 
 ### Name things so you can find them
 A value nobody can find during a match might as well not exist.
 
 - Start every name with the subsystem: `Elevator/...`, `Drive/...`. The library's `Telemetry.getTable("Elevator")` does this for you.
 - Put the **units** in the name: `Height (m)`, `Heading (deg)`.
-- Log **why**, not only **what**: a boolean like `Vision/Used`, or the name of the current preset, explains the jumps in the graphs.
+- Log **why**, not only **what**: a count like `Vision/Front/Measurements Used`, or the name of the current preset, explains the jumps in the graphs.
 
 ### Which code was on the robot?
 When a log shows something strange, the first question is "what code was running?" WPILib can stamp the code version into every log. Add the **gversion** plugin to the `plugins` block of `build.gradle`; on every build it writes the git commit into a generated `BuildConstants.java`. Then log it once at startup:
