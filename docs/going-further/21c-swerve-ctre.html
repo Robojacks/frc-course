@@ -58,7 +58,7 @@ try {
 <details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
 <details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
 <details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
-<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="19b-pathplanner-app.html">19.1 Using the PathPlanner App</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li><li><a href="21b-swerve-maxswerve.html">21.1 Our Swerve Today: REV MAXSwerve</a></li><li><a href="21c-swerve-ctre.html" class="current" aria-current="page">21.2 Next Year: SDS MK5i with CTRE</a></li></ul></details>
+<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="19b-pathplanner-app.html">19.1 Using the PathPlanner App</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li><li><a href="21b-swerve-maxswerve.html">21.1 Our Swerve Today: REV MAXSwerve</a></li><li><a href="21c-swerve-ctre.html" class="current" aria-current="page">21.2 Next Year: SDS MK5i with CTRE</a></li><li><a href="21d-phoenix-tuner.html">21.3 Using Phoenix Tuner X</a></li></ul></details>
 <details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
 <details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
     </details>
@@ -71,6 +71,7 @@ try {
 <p>The swerve ideas from <a href="21-swerve.html">Lesson 21</a> are exactly the same. What changes is who writes the code: the generator writes the hardware setup for you, measures the encoder offsets, and hands you a working drivetrain. Your job is to set it up correctly, check it, and add PathPlanner, vision, and the auto menu.</p>
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
+<li><a href="21d-phoenix-tuner.html">Lesson 21.3: Using Phoenix Tuner X</a></li>
 <li><a href="https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html">Tuner X Swerve Project Generator (CTRE)</a></li>
 <li><a href="https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-overview.html">Swerve API (CTRE)</a></li>
 <li><a href="https://github.com/CrossTheRoadElec/Phoenix6-Examples/tree/main/java/SwerveWithPathPlanner">CTRE's SwerveWithPathPlanner example</a></li>
@@ -78,7 +79,7 @@ try {
 </ul>
 <div class="admonition info">
 <p class="admonition-title">Licenses</p>
-<p>Code the generator writes, and CTRE's example projects, carry WPILib's BSD license header. Phoenix 6 itself is CTRE's closed-source library, free to use on FRC robots; some features need a paid <strong>Phoenix Pro</strong> license (noted below).</p>
+<p>Code the generator writes, and CTRE's example projects, carry WPILib's BSD license header. Phoenix 6 itself is CTRE's closed-source library, free to use on FRC robots; some features need a paid <strong>Phoenix Pro</strong> license (noted below). CTRE's <strong>documentation</strong> is © CTR Electronics under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a> (no derivatives), so the generator steps below are written for this course in our own words, with a link to each CTRE page they come from.</p>
 </div>
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
 <h3 id="whats-on-the-robot">What's on the robot<a class="headerlink" href="#whats-on-the-robot" title="Permanent link">#</a></h3>
@@ -202,6 +203,11 @@ try {
 <td><strong>Measured by the generator</strong> and written into <code>TunerConstants</code></td>
 </tr>
 <tr>
+<td>Setup tool</td>
+<td>REV Hardware Client</td>
+<td><strong>Phoenix Tuner X</strong> (<a href="21d-phoenix-tuner.html">Lesson 21.3</a>)</td>
+</tr>
+<tr>
 <td>Odometry</td>
 <td>Every 20 ms in <code>periodic()</code></td>
 <td>A separate fast thread: <strong>250 Hz</strong> on a CANivore</td>
@@ -229,27 +235,102 @@ try {
 </tbody>
 </table>
 <h3 id="step-1-before-the-generator">Step 1: Before the generator<a class="headerlink" href="#step-1-before-the-generator" title="Permanent link">#</a></h3>
-<ol>
-<li>Install <strong>Phoenix Tuner X</strong> (Microsoft Store or CTRE's site) and connect to the robot.</li>
-<li><strong>Update the firmware</strong> on every device to the version that matches the season's Phoenix 6.</li>
-<li><strong>Set every CAN ID</strong> from your table and give each device a name.</li>
-<li>If you have a CANivore, give it a name (like <code>drivetrain</code>) and put every swerve device on it. <strong>All swerve devices must be on the same bus.</strong></li>
-<li>Check the <strong>Pigeon 2</strong> is mounted flat and its ID is set.</li>
-</ol>
+<p>Do the bring-up in <a href="21d-phoenix-tuner.html">Lesson 21.3: Using Phoenix Tuner X</a> first: every device found, IDs and names set from your table, firmware on <strong>26.x</strong>, the CANivore named, and all swerve devices on the <strong>same</strong> bus. Then check the generator's own requirements:</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8 TalonFX (4 drive, 4 steer), 4 CANcoders, 1 Pigeon 2</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>Every device shows up in Tuner X</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>All on the same CAN bus</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>Firmware matches the season (26.x for 2026)</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>A 2026 diagnostic server is running (robot code, or <strong>Run Temporary Diagnostic Server</strong>)</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>Devices renamed (like "FL Steer")</td>
+<td>Recommended</td>
+</tr>
+<tr>
+<td>On a CANivore</td>
+<td>Recommended</td>
+</tr>
+<tr>
+<td>Pro-licensed</td>
+<td>Recommended</td>
+</tr>
+</tbody>
+</table>
+<p>The generator's <strong>Pre-Check</strong> box shows whether the robot meets them. Click its refresh button after fixing something.</p>
+<p><em>Source: <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/swerve-system-requirements.html">CTRE: Swerve Requirements</a></em></p>
 <h3 id="step-2-the-swerve-project-generator">Step 2: The Swerve Project Generator<a class="headerlink" href="#step-2-the-swerve-project-generator" title="Permanent link">#</a></h3>
-<p>In Tuner X, open <strong>Mechanisms → Swerve Project Generator</strong>. It walks you through:</p>
-<ol>
-<li><strong>Drivetrain:</strong> pick <strong>Swerve Drive Specialties → MK5i</strong> and your <strong>drive ratio</strong>. This fills in the gear ratios, coupling ratio, and wheel size. Pick the CAN bus and the <strong>Pigeon 2</strong>.</li>
-<li><strong>Chassis size:</strong> the distance between module centers, front-to-back and left-to-right.</li>
-<li><strong>Modules:</strong> for each corner, pick its drive TalonFX, steer TalonFX, and CANcoder from the device list.</li>
-<li><strong>Encoder offsets:</strong> straighten all four wheels so they point <strong>forward</strong>, with every wheel's <strong>bevel gear facing the same side</strong> of the robot. Hold them straight with a long metal bar against the module forks. The generator reads each CANcoder and saves the offset.</li>
-<li><strong>Validation:</strong> the generator spins each drive motor and steers each module so you can check the directions. With the robot <strong>on blocks</strong>, check every wheel spins forward when told to and steers the right way. Fix any inverts it asks about.</li>
-<li><strong>Generate Project</strong>, enter team <strong>4674</strong>, and pick <strong>Java</strong>.</li>
-</ol>
+<p>In Tuner X, open <strong>Mechanisms → Swerve Project Generator</strong>.</p>
+<p><strong>1. Create the project.</strong> Fill in:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>MK5i robot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wheel Radius (inches)</td>
+<td>Measure the wheel's diameter and halve it</td>
+</tr>
+<tr>
+<td>FL to FR distance (inches)</td>
+<td>Center of front-left module to center of front-right</td>
+</tr>
+<tr>
+<td>FL to BL distance (inches)</td>
+<td>Center of front-left module to center of back-left</td>
+</tr>
+<tr>
+<td>Module Type</td>
+<td><strong>MK5i</strong> if it's in the list. If not, <strong>Custom</strong>, and enter the steer ratio <strong>26:1</strong> yourself.</td>
+</tr>
+<tr>
+<td>Drive Ratio</td>
+<td>The MK5i ratio the team ordered</td>
+</tr>
+</tbody>
+</table>
+<p>Then <strong>New Project</strong>.</p>
+<p><strong>2. Configure each module.</strong> For each corner, pick its <strong>CANcoder</strong>, <strong>steer</strong> TalonFX, and <strong>drive</strong> TalonFX (use <strong>Blink</strong> to be sure which is which), then click <strong>Encoder Calibration</strong>. Point the wheel straight forward, held with a straightedge or locking pin, with its <strong>bevel gear facing toward the center of the robot</strong>, exactly as CTRE's instructions say. The generator saves that CANcoder's offset. When all four are done, click <strong>Configuration Completed!</strong></p>
+<div class="admonition warning">
+<p class="admonition-title">The generator factory-defaults the devices</p>
+<p>To make its tests accurate, the generator resets every swerve device's configs. Back up any Tuner X configs you care about first.</p>
+</div>
+<p><strong>3. Validate the drivetrain.</strong> With the robot <strong>on blocks</strong> and the Driver Station <strong>enabled</strong>:</p>
+<ul>
+<li><strong>Verify Steer:</strong> every module turns; seen from above, they should turn <strong>counterclockwise</strong>.</li>
+<li><strong>Verify Drive:</strong> the wheels point forward and spin at about 10%. Answer whether the robot would have moved <strong>forward</strong>. Looking at the robot's <strong>right</strong> side, forward is the wheels turning <strong>clockwise</strong>; on the left side, <strong>counterclockwise</strong>.</li>
+</ul>
+<p>If one side spins the wrong way, go back and redo that side's <strong>encoder calibration</strong> (bevel gears toward the center). If both sides are wrong, answer <strong>No</strong> and the generator flips them.</p>
+<p><strong>4. Generate.</strong> Click <strong>Generate Project</strong>, enter team <strong>4674</strong>, and pick <strong>Java</strong>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Save the generator settings</p>
-<p>Use <strong>Save As</strong> (top right) to export the generator settings into the robot project folder, and commit them. If you change a module or re-zero the encoders, load them, change one thing, and use <strong>Generate only TunerConstants</strong> instead of starting over.</p>
+<p>Use the <strong>export</strong> button (top right) to save the generator settings into the robot project folder, and commit them. Later, <strong>Import Project</strong> reloads them, so after changing a module or re-zeroing the encoders you can change one thing and use <strong>Generate only TunerConstants</strong> instead of starting over.</p>
 </div>
+<p><em>Sources: <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/creating-your-project.html">CTRE: Creating your Project</a>, <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/configuring-your-modules.html">Configuring Modules</a>, <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/validating-drivetrain.html">Validating the Drivetrain</a>, <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/generating-running-project.html">Generating the Project</a></em></p>
 <h3 id="what-the-generator-writes">What the generator writes<a class="headerlink" href="#what-the-generator-writes" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -605,7 +686,7 @@ try {
 </details>
 <details class="question">
 <summary>How are encoder offsets set on the MK5i robot?</summary>
-<p>Straighten all four wheels with the bevel gears on the same side, and the generator reads each CANcoder and saves its offset.</p>
+<p>In the generator's Encoder Calibration, with each wheel pointing straight forward and its bevel gear facing the center of the robot. The generator reads the CANcoder and saves the offset.</p>
 </details>
 <details class="question">
 <summary>Why does the CTRE drivetrain run odometry faster than 50 times a second?</summary>
@@ -621,7 +702,7 @@ try {
 </details>
 <p class="credit">Code in Steps 3–5 is adapted from CTRE's <a href="https://github.com/CrossTheRoadElec/Phoenix6-Examples/tree/main/java/SwerveWithPathPlanner">SwerveWithPathPlanner</a> example (2026, WPILib BSD license header). It hasn't been compiled for this course, because Phoenix 6 isn't available in the course's build environment; build it in your generated project.</p>
     </article>
-    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="21b-swerve-maxswerve.html"><span>Previous</span>21.1 Our Swerve Today: REV MAXSwerve</a><a class="pager-next" href="../reference/next-steps.html"><span>Next</span>Where to Go Next</a></nav>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="21b-swerve-maxswerve.html"><span>Previous</span>21.1 Our Swerve Today: REV MAXSwerve</a><a class="pager-next" href="21d-phoenix-tuner.html"><span>Next</span>21.3 Using Phoenix Tuner X</a></nav>
   </main>
 </div>
 <div class="search-panel" hidden>

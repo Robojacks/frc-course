@@ -6,13 +6,14 @@ Next season the team switches to **SDS MK5i** modules with CTRE motors and senso
 The swerve ideas from [Lesson 21](21-swerve.md) are exactly the same. What changes is who writes the code: the generator writes the hardware setup for you, measures the encoder offsets, and hands you a working drivetrain. Your job is to set it up correctly, check it, and add PathPlanner, vision, and the auto menu.
 
 ## Read this
+- [Lesson 21.3: Using Phoenix Tuner X](21d-phoenix-tuner.md)
 - [Tuner X Swerve Project Generator (CTRE)](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html)
 - [Swerve API (CTRE)](https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/mechanisms/swerve/swerve-overview.html)
 - [CTRE's SwerveWithPathPlanner example](https://github.com/CrossTheRoadElec/Phoenix6-Examples/tree/main/java/SwerveWithPathPlanner)
 - [SDS MK5i](https://www.swervedrivespecialties.com/) product page, for your module's drive ratio
 
 !!! info "Licenses"
-    Code the generator writes, and CTRE's example projects, carry WPILib's BSD license header. Phoenix 6 itself is CTRE's closed-source library, free to use on FRC robots; some features need a paid **Phoenix Pro** license (noted below).
+    Code the generator writes, and CTRE's example projects, carry WPILib's BSD license header. Phoenix 6 itself is CTRE's closed-source library, free to use on FRC robots; some features need a paid **Phoenix Pro** license (noted below). CTRE's **documentation** is © CTR Electronics under [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) (no derivatives), so the generator steps below are written for this course in our own words, with a link to each CTRE page they come from.
 
 ## Walkthrough
 
@@ -48,6 +49,7 @@ CTRE devices can share an ID number with other **types** (a TalonFX 1 and a CANc
 | Motor controllers | SPARK Flex / SPARK MAX | TalonFX built into each Kraken |
 | Steer sensor | Through Bore Encoder on the SPARK MAX | **CANcoder** on CAN |
 | Encoder offsets | Zeroed in REV Hardware Client, plus chassis offsets in code | **Measured by the generator** and written into `TunerConstants` |
+| Setup tool | REV Hardware Client | **Phoenix Tuner X** ([Lesson 21.3](21d-phoenix-tuner.md)) |
 | Odometry | Every 20 ms in `periodic()` | A separate fast thread: **250 Hz** on a CANivore |
 | How you drive it | `drive(x, y, rot, fieldRelative)` | **Swerve requests**: `FieldCentric`, `RobotCentric`, `SwerveDriveBrake`, … |
 | Red-alliance driving | You add it (Lesson 21.1, problem 5) | Built in ("operator perspective") |
@@ -55,24 +57,56 @@ CTRE devices can share an ID number with other **types** (a TalonFX 1 and a CANc
 | SysId | You add it | Built in, bound to buttons |
 
 ### Step 1: Before the generator
-1. Install **Phoenix Tuner X** (Microsoft Store or CTRE's site) and connect to the robot.
-2. **Update the firmware** on every device to the version that matches the season's Phoenix 6.
-3. **Set every CAN ID** from your table and give each device a name.
-4. If you have a CANivore, give it a name (like `drivetrain`) and put every swerve device on it. **All swerve devices must be on the same bus.**
-5. Check the **Pigeon 2** is mounted flat and its ID is set.
+Do the bring-up in [Lesson 21.3: Using Phoenix Tuner X](21d-phoenix-tuner.md) first: every device found, IDs and names set from your table, firmware on **26.x**, the CANivore named, and all swerve devices on the **same** bus. Then check the generator's own requirements:
+
+| Requirement | |
+|---|---|
+| 8 TalonFX (4 drive, 4 steer), 4 CANcoders, 1 Pigeon 2 | Required |
+| Every device shows up in Tuner X | Required |
+| All on the same CAN bus | Required |
+| Firmware matches the season (26.x for 2026) | Required |
+| A 2026 diagnostic server is running (robot code, or **Run Temporary Diagnostic Server**) | Required |
+| Devices renamed (like "FL Steer") | Recommended |
+| On a CANivore | Recommended |
+| Pro-licensed | Recommended |
+
+The generator's **Pre-Check** box shows whether the robot meets them. Click its refresh button after fixing something.
+
+*Source: [CTRE: Swerve Requirements](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/swerve-system-requirements.html)*
 
 ### Step 2: The Swerve Project Generator
-In Tuner X, open **Mechanisms → Swerve Project Generator**. It walks you through:
+In Tuner X, open **Mechanisms → Swerve Project Generator**.
 
-1. **Drivetrain:** pick **Swerve Drive Specialties → MK5i** and your **drive ratio**. This fills in the gear ratios, coupling ratio, and wheel size. Pick the CAN bus and the **Pigeon 2**.
-2. **Chassis size:** the distance between module centers, front-to-back and left-to-right.
-3. **Modules:** for each corner, pick its drive TalonFX, steer TalonFX, and CANcoder from the device list.
-4. **Encoder offsets:** straighten all four wheels so they point **forward**, with every wheel's **bevel gear facing the same side** of the robot. Hold them straight with a long metal bar against the module forks. The generator reads each CANcoder and saves the offset.
-5. **Validation:** the generator spins each drive motor and steers each module so you can check the directions. With the robot **on blocks**, check every wheel spins forward when told to and steers the right way. Fix any inverts it asks about.
-6. **Generate Project**, enter team **4674**, and pick **Java**.
+**1. Create the project.** Fill in:
+
+| Field | MK5i robot |
+|---|---|
+| Wheel Radius (inches) | Measure the wheel's diameter and halve it |
+| FL to FR distance (inches) | Center of front-left module to center of front-right |
+| FL to BL distance (inches) | Center of front-left module to center of back-left |
+| Module Type | **MK5i** if it's in the list. If not, **Custom**, and enter the steer ratio **26:1** yourself. |
+| Drive Ratio | The MK5i ratio the team ordered |
+
+Then **New Project**.
+
+**2. Configure each module.** For each corner, pick its **CANcoder**, **steer** TalonFX, and **drive** TalonFX (use **Blink** to be sure which is which), then click **Encoder Calibration**. Point the wheel straight forward, held with a straightedge or locking pin, with its **bevel gear facing toward the center of the robot**, exactly as CTRE's instructions say. The generator saves that CANcoder's offset. When all four are done, click **Configuration Completed!**
+
+!!! warning "The generator factory-defaults the devices"
+    To make its tests accurate, the generator resets every swerve device's configs. Back up any Tuner X configs you care about first.
+
+**3. Validate the drivetrain.** With the robot **on blocks** and the Driver Station **enabled**:
+
+- **Verify Steer:** every module turns; seen from above, they should turn **counterclockwise**.
+- **Verify Drive:** the wheels point forward and spin at about 10%. Answer whether the robot would have moved **forward**. Looking at the robot's **right** side, forward is the wheels turning **clockwise**; on the left side, **counterclockwise**.
+
+If one side spins the wrong way, go back and redo that side's **encoder calibration** (bevel gears toward the center). If both sides are wrong, answer **No** and the generator flips them.
+
+**4. Generate.** Click **Generate Project**, enter team **4674**, and pick **Java**.
 
 !!! tip "Save the generator settings"
-    Use **Save As** (top right) to export the generator settings into the robot project folder, and commit them. If you change a module or re-zero the encoders, load them, change one thing, and use **Generate only TunerConstants** instead of starting over.
+    Use the **export** button (top right) to save the generator settings into the robot project folder, and commit them. Later, **Import Project** reloads them, so after changing a module or re-zeroing the encoders you can change one thing and use **Generate only TunerConstants** instead of starting over.
+
+*Sources: [CTRE: Creating your Project](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/creating-your-project.html), [Configuring Modules](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/configuring-your-modules.html), [Validating the Drivetrain](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/validating-drivetrain.html), [Generating the Project](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/generating-running-project.html)*
 
 ### What the generator writes
 | File | What it is | Edit it? |
@@ -321,7 +355,7 @@ The generator writes `FusedCANcoder` by default; **without Pro it automatically 
     It's generated. The next time anyone regenerates it, hand edits are lost. Change the generator settings instead.
 
 ??? question "How are encoder offsets set on the MK5i robot?"
-    Straighten all four wheels with the bevel gears on the same side, and the generator reads each CANcoder and saves its offset.
+    In the generator's Encoder Calibration, with each wheel pointing straight forward and its bevel gear facing the center of the robot. The generator reads the CANcoder and saves the offset.
 
 ??? question "Why does the CTRE drivetrain run odometry faster than 50 times a second?"
     It runs on its own thread, 250 Hz on a CANivore. More samples means less error when the robot moves and turns fast.

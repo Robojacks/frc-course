@@ -76,6 +76,7 @@ NAV = [
         ("21. Swerve Drive", "going-further/21-swerve.md"),
         ("21.1 Our Swerve Today: REV MAXSwerve", "going-further/21b-swerve-maxswerve.md"),
         ("21.2 Next Year: SDS MK5i with CTRE", "going-further/21c-swerve-ctre.md"),
+        ("21.3 Using Phoenix Tuner X", "going-further/21d-phoenix-tuner.md"),
     ]),
     ("Reference", [
         ("Where to Go Next", "reference/next-steps.md"),
@@ -386,6 +387,8 @@ def build():
     shutil.copytree(ASSETS / "photos", OUT / "assets" / "photos")
     # Screenshots from the PathPlanner docs (MIT), with their license
     shutil.copytree(ASSETS / "pathplanner", OUT / "assets" / "pathplanner")
+    # Unmodified screenshots from CTRE's Phoenix 6 docs (CC BY-NC-ND 4.0), with their license
+    shutil.copytree(ASSETS / "ctre", OUT / "assets" / "ctre")
     # Code colors: light by default; dark when the switch says dark, or when the
     # device is in dark mode and the switch hasn't been set to light.
     light = HtmlFormatter(style="friendly").get_style_defs(".highlight")
