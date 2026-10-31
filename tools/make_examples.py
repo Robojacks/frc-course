@@ -25,7 +25,7 @@ GRADLERIO = "2026.2.1"
 TEAM = 4674
 
 HEADER = """// RoboJacks 4674 FRC Programming Course: finished code for {lab}.
-// Built from the WPILib 2026 Command Robot template.
+// Built from {base}.
 
 """
 
@@ -744,9 +744,49 @@ public class RobotContainer {{
     yield "lab11-odometry", "Lab 11", "lab11-odometry.md", dict(files), ["REVLib", "Studica"]
 
 
+def swerve_states():
+    """Lesson 21.1: the team's MAXSwerve project, course version."""
+    page = (ROOT / "src" / "going-further" / "21b-swerve-maxswerve.md").read_text()
+    l18 = (ROOT / "src" / "going-further" / "18-vision.md").read_text()
+    base = ROOT / "tools" / "swerve-maxswerve-base"
+
+    module = (base / "MAXSwerveModule.java").read_text()
+    module = edit(module, "\n  /** Zeroes all the SwerveModule encoders. */",
+                  "\n" + java_block(page, "public SwerveModuleState getDesiredState()").rstrip("\n") + "\n",
+                  where="before")
+
+    robot = (base / "Robot.java").read_text()
+    warm = java_block(page, "DataLogManager.start();")
+    before, after = warm.split("    m_robotContainer = new RobotContainer();\n")
+    robot = edit(robot, "    m_robotContainer = new RobotContainer();\n", before, where="before")
+    robot = edit(robot, "    m_robotContainer = new RobotContainer();\n", after)
+    robot = add_imports(robot, "edu.wpi.first.wpilibj.DataLogManager", "edu.wpi.first.wpilibj.DriverStation",
+                        "com.pathplanner.lib.commands.FollowPathCommand")
+
+    files = {
+        "Main.java": (base / "Main.java").read_text(),
+        "Robot.java": robot,
+        "Constants.java": java_block(page, "public final class Constants"),
+        "Configs.java": (base / "Configs.java").read_text(),
+        "RobotContainer.java": java_block(page, "public class RobotContainer"),
+        "subsystems/MAXSwerveModule.java": module,
+        "subsystems/DriveSubsystem.java": java_block(page, "public class DriveSubsystem"),
+        "subsystems/VisionSubsystem.java": java_block(l18, "public class VisionSubsystem"),
+    }
+    files.update(library_files())
+    extra = {
+        "src/main/deploy/pathplanner": base / "pathplanner",
+        "REV-LICENSE.txt": base / "REV-LICENSE.txt",
+    }
+    deps = ["REVLib", "PathplannerLib-2026.1.2.json", "Phoenix6-26.1.1.json", "photonlib.json"]
+    yield ("swerve-maxswerve", "Lesson 21.1", "going-further/21b-swerve-maxswerve.md", files, deps,
+           "REV Robotics' MAXSwerve Java Template (BSD 3-Clause, see REV-LICENSE.txt) and the team's copy", extra)
+
+
 # --------------------------------------------------------------------------- writing projects
 
-def write_project(folder, lab, page, files, deps, template, vendordeps, project_name):
+def write_project(folder, lab, page, files, deps, template, vendordeps, project_name,
+                  base="the WPILib 2026 Command Robot template", extra=None):
     dest = OUT / folder
     if dest.exists():
         shutil.rmtree(dest)
@@ -775,7 +815,8 @@ def write_project(folder, lab, page, files, deps, template, vendordeps, project_
     vd.mkdir()
     shutil.copy2(vendordeps / "WPILibNewCommands.json", vd / "WPILibNewCommands.json")
     for dep in deps:
-        src = sorted(vendordeps.glob(f"{dep}-2026.*.json"))[-1]
+        # A dependency is either a name ("REVLib": newest REVLib-2026.*.json) or an exact file
+        src = vendordeps / dep if dep.endswith(".json") else sorted(vendordeps.glob(f"{dep}-2026.*.json"))[-1]
         data = json.loads(src.read_text())
         (vd / data["fileName"]).write_text(src.read_text())
 
@@ -783,12 +824,22 @@ def write_project(folder, lab, page, files, deps, template, vendordeps, project_
     for rel, code in files.items():
         path = java_root / rel
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(HEADER.format(lab=lab) + code.strip("\n") + "\n")
+        path.write_text(HEADER.format(lab=lab, base=base) + code.strip("\n") + "\n")
+    # Other files copied as-is (deploy files, license notices), keyed by path in the project
+    for rel, source in (extra or {}).items():
+        target = dest / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if Path(source).is_dir():
+            shutil.copytree(source, target, dirs_exist_ok=True)
+        else:
+            shutil.copy2(source, target)
 
-    hardware = "the test bed (team 4674)" if project_name == "TestBed" else "the West Coast Drive (team 4674)"
+    hardware = {"TestBed": "the test bed (team 4674)",
+                "SwerveMAXSwerve": "the REV MAXSwerve drivetrain (team 4674)"}.get(project_name, "the West Coast Drive (team 4674)")
+    page_link = f"../../src/{page}" if "/" in page else f"../../src/testbed/{page}"
     (dest / "README.md").write_text(f"""# {lab} finished code ({project_name})
 
-This is the **{project_name}** project as it looks at the end of [{lab}](../../src/testbed/{page}).
+This is the **{project_name}** project as it looks at the end of [{lab}]({page_link}).
 It runs on {hardware}.
 
 Use it to check your own work, or to catch up if you missed a lab. Try to finish the lab
@@ -799,7 +850,7 @@ yourself first: you learn much more from fixing your own code than from reading 
 2. Check the CAN IDs, DIO ports, and other numbers in `Constants.java` against your robot.
 3. Build (Ctrl+Shift+P → **WPILib: Build Robot Code**), then deploy.
 
-The vendor libraries it needs are already in `vendordeps/`: {", ".join(["WPILib New Commands"] + deps)}.
+The vendor libraries it needs are already in `vendordeps/`: {", ".join(["WPILib New Commands"] + [d.split("-")[0].removesuffix(".json") for d in deps])}.
 The first build downloads them, so be online for it.
 """)
 
@@ -816,8 +867,12 @@ def main():
         for folder, lab, page, files, deps in states:
             write_project(folder, lab, page, files, deps, args.template, args.vendordeps, project)
             made.append((folder, lab, page, project))
+    for folder, lab, page, files, deps, base, extra in swerve_states():
+        write_project(folder, lab, page, files, deps, args.template, args.vendordeps, "SwerveMAXSwerve",
+                      base=base, extra=extra)
+        made.append((folder, lab, page, "SwerveMAXSwerve"))
 
-    rows = "\n".join(f"| [{lab}](../src/testbed/{page}) | [`{folder}`]({folder}/) | {project} |"
+    rows = "\n".join(f"| [{lab}](../src/{page if '/' in page else 'testbed/' + page}) | [`{folder}`]({folder}/) | {project} |"
                      for folder, lab, page, project in sorted(made))
     (OUT / "README.md").write_text(f"""# Finished code for every lab
 

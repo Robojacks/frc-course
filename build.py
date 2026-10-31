@@ -74,6 +74,8 @@ NAV = [
         ("19.1 Using the PathPlanner App", "going-further/19b-pathplanner-app.md"),
         ("20. Logs, AdvantageScope & AdvantageKit", "going-further/20-logging.md"),
         ("21. Swerve Drive", "going-further/21-swerve.md"),
+        ("21.1 Our Swerve Today: REV MAXSwerve", "going-further/21b-swerve-maxswerve.md"),
+        ("21.2 Next Year: SDS MK5i with CTRE", "going-further/21c-swerve-ctre.md"),
     ]),
     ("Reference", [
         ("Where to Go Next", "reference/next-steps.md"),

@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>21.1 Our Swerve Today: REV MAXSwerve | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<script>
+// Apply the saved light/dark choice before the page draws, so it never flashes the wrong theme.
+try {
+  var savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) {}
+</script>
+
+</head>
+<body id="top" data-root="../">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
+      <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <span class="theme-track"><span class="theme-knob"></span></span>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="19b-pathplanner-app.html">19.1 Using the PathPlanner App</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html">21. Swerve Drive</a></li><li><a href="21b-swerve-maxswerve.html" class="current" aria-current="page">21.1 Our Swerve Today: REV MAXSwerve</a></li><li><a href="21c-swerve-ctre.html">21.2 Next Year: SDS MK5i with CTRE</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="211-our-swerve-today-rev-maxswerve">21.1 Our Swerve Today: REV MAXSwerve<a class="headerlink" href="#211-our-swerve-today-rev-maxswerve" title="Permanent link">#</a></h1>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p><a href="21-swerve.html">Lesson 21</a> explained how any swerve drive works. This lesson is about <strong>ours</strong>: the REV MAXSwerve drivetrain, running the team's copy of REV's MAXSwerve template with PathPlanner added.</p>
+<p>You'll read the code file by file, see what the team changed from REV's template, fix a few problems hiding in it, and add the course's pieces: the <code>Selectable</code> auto menu, telemetry for AdvantageScope, and PhotonVision.</p>
+<p>Next year's drivetrain is different: SDS MK5i modules set up with CTRE's generator. That's <a href="21c-swerve-ctre.html">Lesson 21.2</a>. The ideas carry over; the code doesn't.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://github.com/REVrobotics/MAXSwerve-Java-Template">REV MAXSwerve Java Template</a> and its README</li>
+<li>The team's copy: <a href="https://github.com/kedrickjohnson/MAXSwerve-Java-Template-main">kedrickjohnson/MAXSwerve-Java-Template-main</a></li>
+<li><a href="https://docs.revrobotics.com/brushless/maxswerve">MAXSwerve module documentation (REV)</a></li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Licenses</p>
+<p>REV's MAXSwerve template is © REV Robotics under a BSD 3-Clause license, and built on WPILib's BSD-licensed template. The finished code for this lesson, in <a href="https://github.com/Robojacks/frc-course/tree/main/examples/swerve-maxswerve"><code>examples/swerve-maxswerve</code></a>, keeps REV's files and license notice.</p>
+</div>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="whats-on-the-robot">What's on the robot<a class="headerlink" href="#whats-on-the-robot" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Each module</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Drive motor</strong></td>
+<td>NEO <strong>Vortex</strong> on a <strong>SPARK Flex</strong></td>
+<td>REV's template uses a NEO on a SPARK MAX; ours uses SPARK Flex</td>
+</tr>
+<tr>
+<td><strong>Turning motor</strong></td>
+<td>NEO 550 on a SPARK MAX</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Turning encoder</strong></td>
+<td>REV Through Bore Encoder, plugged into the turning SPARK MAX</td>
+<td>Absolute: knows the wheel's angle at power-on</td>
+</tr>
+<tr>
+<td><strong>Gyro</strong></td>
+<td>One <strong>Pigeon 2</strong> for the robot, CAN ID 9</td>
+<td>REV's template uses an ADIS16470</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Drive CAN ID</th>
+<th>Turn CAN ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Front left</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Rear left</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Front right</td>
+<td>5</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Rear right</td>
+<td>7</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-files">The files<a class="headerlink" href="#the-files" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Job</th>
+<th>Changed in this lesson?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Constants.java</code></td>
+<td>Chassis size, CAN IDs, gear ratio, max speeds</td>
+<td>Yes: motor free speed, robot config</td>
+</tr>
+<tr>
+<td><code>Configs.java</code></td>
+<td>SPARK settings: conversion factors, PID, current limits</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>subsystems/MAXSwerveModule.java</code></td>
+<td>One module: point the wheel, spin it</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>subsystems/DriveSubsystem.java</code></td>
+<td>Four modules, the gyro, odometry, PathPlanner</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>RobotContainer.java</code></td>
+<td>Controller bindings and the auto menu</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>Robot.java</code></td>
+<td>Logging and PathPlanner warmup</td>
+<td>Yes (small)</td>
+</tr>
+<tr>
+<td><code>subsystems/VisionSubsystem.java</code></td>
+<td>PhotonVision, from <a href="18-vision.html">Lesson 18</a></td>
+<td>New</td>
+</tr>
+</tbody>
+</table>
+<p>The module code is REV's, and it works. Leave it alone. Almost everything you'll change is in <code>Constants</code>, <code>DriveSubsystem</code>, and <code>RobotContainer</code>.</p>
+<h3 id="how-one-module-works-maxswervemodule">How one module works (<code>MAXSwerveModule</code>)<a class="headerlink" href="#how-one-module-works-maxswervemodule" title="Permanent link">#</a></h3>
+<p>Everything from <a href="21-swerve.html#inside-one-module">Lesson 21</a> is here, but the PID loops run <strong>on the SPARKs</strong>, not the roboRIO:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Command driving and turning SPARKS towards their respective setpoints.</span>
+<span class="w">    </span><span class="n">m_drivingClosedLoopController</span><span class="p">.</span><span class="na">setSetpoint</span><span class="p">(</span><span class="n">correctedDesiredState</span><span class="p">.</span><span class="na">speedMetersPerSecond</span><span class="p">,</span><span class="w"> </span><span class="n">ControlType</span><span class="p">.</span><span class="na">kVelocity</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_turningClosedLoopController</span><span class="p">.</span><span class="na">setSetpoint</span><span class="p">(</span><span class="n">correctedDesiredState</span><span class="p">.</span><span class="na">angle</span><span class="p">.</span><span class="na">getRadians</span><span class="p">(),</span><span class="w"> </span><span class="n">ControlType</span><span class="p">.</span><span class="na">kPosition</span><span class="p">);</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>Where in the template</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Drive velocity control</td>
+<td><code>ControlType.kVelocity</code>, with PID and a kV feedforward set in <code>Configs.drivingConfig.closedLoop</code></td>
+</tr>
+<tr>
+<td>Steer position control</td>
+<td><code>ControlType.kPosition</code> on the <strong>absolute</strong> encoder, set in <code>Configs.turningConfig.closedLoop</code></td>
+</tr>
+<tr>
+<td>Continuous input (179° and −179° are neighbors)</td>
+<td><code>positionWrappingEnabled(true)</code> in <code>Configs</code></td>
+</tr>
+<tr>
+<td><code>optimize</code> (never turn more than 90°)</td>
+<td><code>correctedDesiredState.optimize(...)</code> in <code>setDesiredState</code></td>
+</tr>
+<tr>
+<td>Units</td>
+<td><code>Configs</code> sets conversion factors so the drive encoder reads <strong>meters</strong> and <strong>m/s</strong>, and the turn encoder reads <strong>radians</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="encoder-offsets-the-chassis-angular-offsets">Encoder offsets: the "chassis angular offsets"<a class="headerlink" href="#encoder-offsets-the-chassis-angular-offsets" title="Permanent link">#</a></h3>
+<p>MAXSwerve modules are zeroed <strong>before</strong> they go on the robot. With REV's alignment tool in the module, open <strong>REV Hardware Client</strong>, select the turning SPARK MAX, and use the <strong>Absolute Encoder</strong> utility to set the zero offset. Every module is zeroed the same way.</p>
+<p>Then the four modules are bolted on facing different directions, so the template adds one angle per corner in <code>Constants</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kFrontLeftChassisAngularOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kFrontRightChassisAngularOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kBackLeftChassisAngularOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kBackRightChassisAngularOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+</code></pre></div>
+<p>These match the mounting in REV's instructions. If a wheel points sideways when it should point forward, the module was zeroed or mounted differently from the instructions. Re-zero it before you change these numbers.</p>
+<h3 id="problems-hiding-in-our-copy">Problems hiding in our copy<a class="headerlink" href="#problems-hiding-in-our-copy" title="Permanent link">#</a></h3>
+<p>The template drives, but a few things don't match the robot. Each one makes autos or driving a little wrong in a way that's hard to track down later.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Problem</th>
+<th>Why it matters</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>The drive motors are <strong>Vortexes</strong> (SPARK Flex), but <code>Constants</code> uses the <strong>NEO's</strong> free speed, 5676 RPM</td>
+<td>The drive kV feedforward and the max speed are calculated from it. The Vortex is about 6784 RPM, so every speed is planned wrong.</td>
+<td><code>kFreeSpeedRpm = 6784</code> for a Vortex</td>
+</tr>
+<tr>
+<td>2</td>
+<td>PathPlanner's robot config in <code>Constants</code> says <code>DCMotor.getNEO(1)</code> and a mass of <strong>40 lb</strong></td>
+<td>PathPlanner uses these to plan acceleration. A real robot with bumpers and battery is around 110–150 lb.</td>
+<td><code>DCMotor.getNeoVortex(1)</code> and the real mass. Better: read the app's config (fix 3).</td>
+</tr>
+<tr>
+<td>3</td>
+<td>The PathPlanner <strong>app's</strong> <code>settings.json</code> still has the app's <strong>defaults</strong>: Kraken X60, 5.143 gearing, 0.048 m wheels, 5.45 m/s, 0.273 m module offsets</td>
+<td>The app plans paths for a robot we don't have, while the code uses a different config</td>
+<td>Fill in the app's Robot Config with the real numbers (table below), and use <code>RobotConfig.fromGUISettings()</code> so both agree</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>zeroHeading()</code> resets the Pigeon, but not odometry</td>
+<td>The pose's heading jumps, so PathPlanner and vision think the robot spun</td>
+<td>Reset the <strong>pose's</strong> heading instead, and drive field-relative from the pose</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Field-relative driving ignores the alliance</td>
+<td>On red, "forward" on the stick drives <strong>toward</strong> the driver</td>
+<td>Flip by 180° on red, like CTRE's generated code does</td>
+</tr>
+<tr>
+<td>6</td>
+<td>The auto menu is a <code>SendableChooser</code></td>
+<td>The course uses <code>Selectable</code> (<a href="../robot-code/06b-dashboards.html#a-dropdown-menu-selectable">Lesson 6.1</a>)</td>
+<td><code>Selectable</code> with every PathPlanner auto</td>
+</tr>
+<tr>
+<td>7</td>
+<td>X-lock uses <code>PS4Controller.Button.kR1</code> on an Xbox controller</td>
+<td>Works only because both happen to be button 6</td>
+<td><code>CommandXboxController.rightBumper()</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Plain odometry, no warmup, no logging</td>
+<td>No place for vision; the first path can stutter; nothing to debug with</td>
+<td><code>SwerveDrivePoseEstimator</code>, PathPlanner warmup, <code>DataLogManager</code>, telemetry</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Check problem 1 on the robot</p>
+<p>The team's code creates the drive motors as <code>SparkFlex</code>, and a SPARK Flex almost always means a <strong>NEO Vortex</strong>. Look at the motors. If they're plain NEOs on a SPARK Flex dock, keep 5676 RPM and <code>DCMotor.getNEO(1)</code>.</p>
+</div>
+<h3 id="step-1-constants">Step 1: Constants<a class="headerlink" href="#step-1-constants" title="Permanent link">#</a></h3>
+<p>Here's the course version of <code>Constants.java</code>. The changes from the team's copy are marked <code>// CHANGED</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.pathplanner.lib.config.ModuleConfig</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.pathplanner.lib.config.RobotConfig</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.geometry.Translation2d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.kinematics.SwerveDriveKinematics</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.system.plant.DCMotor</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.util.Units</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Constants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DriveConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// The fastest the code will ever ASK the robot to go. Not the robot's true top speed.</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kMaxSpeedMetersPerSecond</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">4.8</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kMaxAngularSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="p">;</span><span class="w"> </span><span class="c1">// radians per second</span>
+
+<span class="w">    </span><span class="c1">// Chassis: wheel centers, left-to-right (track width) and front-to-back (wheel base)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kTrackWidth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mi">25</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kWheelBase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mi">28</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Where each module is from the robot's center. Order: FL, FR, RL, RR. +X forward, +Y left.</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SwerveDriveKinematics</span><span class="w"> </span><span class="n">kDriveKinematics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SwerveDriveKinematics</span><span class="p">(</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="n">kWheelBase</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">kTrackWidth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="n">kWheelBase</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">kTrackWidth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="o">-</span><span class="n">kWheelBase</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">kTrackWidth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="o">-</span><span class="n">kWheelBase</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">kTrackWidth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// How each module is turned when mounted, compared with how it was zeroed (radians)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kFrontLeftChassisAngularOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">-</span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kFrontRightChassisAngularOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kBackLeftChassisAngularOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kBackRightChassisAngularOffset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Driving motors: SPARK Flex CAN IDs</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kFrontLeftDrivingCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kRearLeftDrivingCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kFrontRightDrivingCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kRearRightDrivingCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Turning motors: SPARK MAX CAN IDs</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kFrontLeftTurningCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kRearLeftTurningCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kFrontRightTurningCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kRearRightTurningCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kPigeonCanId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">9</span><span class="p">;</span><span class="w">   </span><span class="c1">// CHANGED: named instead of a bare 9 in DriveSubsystem</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">ModuleConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// The MAXSwerve pinion: 12T, 13T, or 14T. More teeth = faster robot.</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kDrivingMotorPinionTeeth</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">14</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Free speed of the DRIVE motor, turns per second</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kDrivingMotorFreeSpeedRps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MotorConstants</span><span class="p">.</span><span class="na">kDrivingFreeSpeedRpm</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">60</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kWheelDiameterMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">inchesToMeters</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kWheelCircumferenceMeters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kWheelDiameterMeters</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">PI</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// 45 teeth on the wheel's bevel gear, 22 on the first-stage spur gear, 15 on the bevel pinion</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kDrivingMotorReduction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="mf">45.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">22</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">kDrivingMotorPinionTeeth</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">15</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// The wheel's free speed, in meters per second of travel</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kDriveWheelFreeSpeedRps</span><span class="w"> </span><span class="o">=</span>
+<span class="w">        </span><span class="p">(</span><span class="n">kDrivingMotorFreeSpeedRps</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">kWheelCircumferenceMeters</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">kDrivingMotorReduction</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">OIConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">kDriverControllerPort</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kDriveDeadband</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.05</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">AutoConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// PathPlanner's path-following PID: meters of error -&gt; m/s, and radians of error -&gt; rad/s</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kPPTranslationP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kPPRotationP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// A backup robot config, used only if the PathPlanner app's settings can't be read.</span>
+<span class="w">    </span><span class="c1">// CHANGED: real motor and a mass you must measure. Keep these matching the app's Robot Config.</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kRobotMassKg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Units</span><span class="p">.</span><span class="na">lbsToKilograms</span><span class="p">(</span><span class="mi">125</span><span class="p">);</span><span class="w">   </span><span class="c1">// CHANGED: WEIGH THE ROBOT</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kRobotMOI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">6.883</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kWheelCOF</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.2</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kDriveCurrentLimitAmps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">50.0</span><span class="p">;</span><span class="w">   </span><span class="c1">// matches Configs.drivingConfig</span>
+
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">RobotConfig</span><span class="w"> </span><span class="n">kBackupPPConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RobotConfig</span><span class="p">(</span>
+<span class="w">        </span><span class="n">kRobotMassKg</span><span class="p">,</span>
+<span class="w">        </span><span class="n">kRobotMOI</span><span class="p">,</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">ModuleConfig</span><span class="p">(</span>
+<span class="w">            </span><span class="n">ModuleConstants</span><span class="p">.</span><span class="na">kWheelDiameterMeters</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span>
+<span class="w">            </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kMaxSpeedMetersPerSecond</span><span class="p">,</span>
+<span class="w">            </span><span class="n">kWheelCOF</span><span class="p">,</span>
+<span class="w">            </span><span class="n">DCMotor</span><span class="p">.</span><span class="na">getNeoVortex</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="na">withReduction</span><span class="p">(</span><span class="n">ModuleConstants</span><span class="p">.</span><span class="na">kDrivingMotorReduction</span><span class="p">),</span><span class="w">   </span><span class="c1">// CHANGED</span>
+<span class="w">            </span><span class="n">kDriveCurrentLimitAmps</span><span class="p">,</span>
+<span class="w">            </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kWheelBase</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kTrackWidth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kWheelBase</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kTrackWidth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="o">-</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kWheelBase</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kTrackWidth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Translation2d</span><span class="p">(</span><span class="o">-</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kWheelBase</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kTrackWidth</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">));</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MotorConstants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// CHANGED: the drive motors are NEO Vortexes (6784 RPM). A plain NEO is 5676 RPM.</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kDrivingFreeSpeedRpm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6784</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Two files to rename in</p>
+<p>REV's <code>Configs.java</code> and <code>Constants</code> used <code>NeoMotorConstants.kFreeSpeedRpm</code>. The course version renames it <code>MotorConstants.kDrivingFreeSpeedRpm</code>, because it's the <strong>drive</strong> motor's free speed and the drive motor isn't a NEO. <code>Configs.java</code> only uses <code>ModuleConstants.kDriveWheelFreeSpeedRps</code>, so it doesn't change.</p>
+</div>
+<p>With a Vortex, the wheel's free speed is 6784 ÷ 60 × 0.2394 m ÷ 4.714 ≈ <strong>5.74 m/s</strong>. <code>kMaxSpeedMetersPerSecond</code> stays 4.8: that's how fast the <strong>driver's</strong> full stick goes, which leaves headroom for the velocity loop.</p>
+<h3 id="step-2-pathplanners-robot-config">Step 2: PathPlanner's Robot Config<a class="headerlink" href="#step-2-pathplanners-robot-config" title="Permanent link">#</a></h3>
+<p>Open the PathPlanner app (<a href="19b-pathplanner-app.html#step-2-settings-for-a-tank-drive">Lesson 19.1</a>) on this project, leave <strong>Holonomic Mode on</strong>, and set Robot Config to the real robot:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+<th>From</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Robot Mass</td>
+<td>Weigh it (kg)</td>
+<td>Scale, with bumpers and battery</td>
+</tr>
+<tr>
+<td>Robot MOI</td>
+<td>6.883 for now</td>
+<td>Better: from SysId (PathPlanner docs)</td>
+</tr>
+<tr>
+<td>Wheel Radius</td>
+<td><strong>0.0381</strong></td>
+<td>3 in wheel</td>
+</tr>
+<tr>
+<td>Drive Gearing</td>
+<td><strong>4.714</strong></td>
+<td>14T pinion: (45 × 22) ÷ (14 × 15)</td>
+</tr>
+<tr>
+<td>True Max Drive Speed</td>
+<td>Measure; about 5.2 to start</td>
+<td>~90% of the 5.74 m/s free speed</td>
+</tr>
+<tr>
+<td>Wheel COF</td>
+<td>1.2</td>
+<td></td>
+</tr>
+<tr>
+<td>Drive Motor</td>
+<td><strong>NEO Vortex</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>Drive Current Limit</td>
+<td><strong>50</strong></td>
+<td><code>Configs.drivingConfig</code></td>
+</tr>
+<tr>
+<td>Front Left X / Y</td>
+<td><strong>0.3556 / 0.3175</strong></td>
+<td>Half of 28 in / half of 25 in</td>
+</tr>
+<tr>
+<td>Front Right X / Y</td>
+<td>0.3556 / −0.3175</td>
+<td></td>
+</tr>
+<tr>
+<td>Back Left X / Y</td>
+<td>−0.3556 / 0.3175</td>
+<td></td>
+</tr>
+<tr>
+<td>Back Right X / Y</td>
+<td>−0.3556 / −0.3175</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-3-the-drive-subsystem">Step 3: The drive subsystem<a class="headerlink" href="#step-3-the-drive-subsystem" title="Permanent link">#</a></h3>
+<p>The course version of <code>DriveSubsystem.java</code>. Compared with the team's copy, it: uses a pose estimator (for vision), reads PathPlanner's config from the app, resets the heading through the pose, drives field-relative for either alliance, and logs everything.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.ctre.phoenix6.hardware.Pigeon2</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.pathplanner.lib.auto.AutoBuilder</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.pathplanner.lib.config.PIDConstants</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.pathplanner.lib.config.RobotConfig</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.pathplanner.lib.controllers.PPHolonomicDriveController</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.Matrix</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.estimator.SwerveDrivePoseEstimator</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.geometry.Pose2d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.geometry.Rotation2d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.kinematics.ChassisSpeeds</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.kinematics.SwerveDriveKinematics</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.kinematics.SwerveModulePosition</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.kinematics.SwerveModuleState</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.numbers.N1</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.numbers.N3</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.DriverStation</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.DriverStation.Alliance</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.TimedRobot</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.Field2d</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.smartdashboard.SmartDashboard</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants.AutoConstants</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants.DriveConstants</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Telemetry</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.TelemetryTable</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">DriveSubsystem</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// The four MAXSwerve modules. Order everywhere: front left, front right, rear left, rear right.</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MAXSwerveModule</span><span class="w"> </span><span class="n">m_frontLeft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MAXSwerveModule</span><span class="p">(</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kFrontLeftDrivingCanId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kFrontLeftTurningCanId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kFrontLeftChassisAngularOffset</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MAXSwerveModule</span><span class="w"> </span><span class="n">m_frontRight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MAXSwerveModule</span><span class="p">(</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kFrontRightDrivingCanId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kFrontRightTurningCanId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kFrontRightChassisAngularOffset</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MAXSwerveModule</span><span class="w"> </span><span class="n">m_rearLeft</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MAXSwerveModule</span><span class="p">(</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kRearLeftDrivingCanId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kRearLeftTurningCanId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kBackLeftChassisAngularOffset</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MAXSwerveModule</span><span class="w"> </span><span class="n">m_rearRight</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MAXSwerveModule</span><span class="p">(</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kRearRightDrivingCanId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kRearRightTurningCanId</span><span class="p">,</span>
+<span class="w">      </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kBackRightChassisAngularOffset</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// The Pigeon 2 gyro. getRotation2d() is counterclockwise-positive, like WPILib.</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Pigeon2</span><span class="w"> </span><span class="n">m_gyro</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Pigeon2</span><span class="p">(</span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kPigeonCanId</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Odometry that can also take vision measurements (Lesson 18)</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SwerveDrivePoseEstimator</span><span class="w"> </span><span class="n">m_poseEstimator</span><span class="p">;</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Drive"</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Field2d</span><span class="w"> </span><span class="n">m_field</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Field2d</span><span class="p">();</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">DriveSubsystem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_poseEstimator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SwerveDrivePoseEstimator</span><span class="p">(</span>
+<span class="w">        </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kDriveKinematics</span><span class="p">,</span>
+<span class="w">        </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">getModulePositions</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">Pose2d</span><span class="p">.</span><span class="na">kZero</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SmartDashboard</span><span class="p">.</span><span class="na">putData</span><span class="p">(</span><span class="s">"Field"</span><span class="p">,</span><span class="w"> </span><span class="n">m_field</span><span class="p">);</span>
+<span class="w">    </span><span class="n">configurePathPlanner</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Lets PathPlanner drive this subsystem (Lesson 19). */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configurePathPlanner</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">RobotConfig</span><span class="w"> </span><span class="n">config</span><span class="p">;</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RobotConfig</span><span class="p">.</span><span class="na">fromGUISettings</span><span class="p">();</span><span class="w">   </span><span class="c1">// the PathPlanner app's Robot Config</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="n">Exception</span><span class="w"> </span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">DriverStation</span><span class="p">.</span><span class="na">reportError</span><span class="p">(</span><span class="s">"PathPlanner settings didn't load; using backup config"</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="na">getStackTrace</span><span class="p">());</span>
+<span class="w">      </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AutoConstants</span><span class="p">.</span><span class="na">kBackupPPConfig</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">AutoBuilder</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span>
+<span class="w">        </span><span class="k">this</span><span class="p">::</span><span class="n">getPose</span><span class="p">,</span>
+<span class="w">        </span><span class="k">this</span><span class="p">::</span><span class="n">resetPose</span><span class="p">,</span>
+<span class="w">        </span><span class="k">this</span><span class="p">::</span><span class="n">getRobotRelativeSpeeds</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">speeds</span><span class="p">,</span><span class="w"> </span><span class="n">feedforwards</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">driveRobotRelative</span><span class="p">(</span><span class="n">speeds</span><span class="p">),</span>
+<span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">PPHolonomicDriveController</span><span class="p">(</span>
+<span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">PIDConstants</span><span class="p">(</span><span class="n">AutoConstants</span><span class="p">.</span><span class="na">kPPTranslationP</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">),</span>
+<span class="w">            </span><span class="k">new</span><span class="w"> </span><span class="n">PIDConstants</span><span class="p">(</span><span class="n">AutoConstants</span><span class="p">.</span><span class="na">kPPRotationP</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)),</span>
+<span class="w">        </span><span class="n">config</span><span class="p">,</span>
+<span class="w">        </span><span class="n">DriveSubsystem</span><span class="p">::</span><span class="n">isRedAlliance</span><span class="p">,</span><span class="w">   </span><span class="c1">// flip paths to the red side when we're red</span>
+<span class="w">        </span><span class="k">this</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="nd">@Override</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">update</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getModulePositions</span><span class="p">());</span>
+
+<span class="w">    </span><span class="n">Pose2d</span><span class="w"> </span><span class="n">pose</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getPose</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_field</span><span class="p">.</span><span class="na">setRobotPose</span><span class="p">(</span><span class="n">pose</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Pose"</span><span class="p">,</span><span class="w"> </span><span class="n">pose</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Heading (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">pose</span><span class="p">.</span><span class="na">getRotation</span><span class="p">().</span><span class="na">getDegrees</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Gyro (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">().</span><span class="na">getDegrees</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Measured States"</span><span class="p">,</span><span class="w"> </span><span class="n">getModuleStates</span><span class="p">(),</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="p">.</span><span class="na">struct</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Desired States"</span><span class="p">,</span><span class="w"> </span><span class="n">getDesiredStates</span><span class="p">(),</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="p">.</span><span class="na">struct</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Speeds"</span><span class="p">,</span><span class="w"> </span><span class="n">getRobotRelativeSpeeds</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// ---------------------------------------------------------------- pose</span>
+
+<span class="w">  </span><span class="cm">/** Where the robot is on the field: odometry, corrected by vision. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Pose2d</span><span class="w"> </span><span class="nf">getPose</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">getEstimatedPosition</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Tells the pose estimator the robot is at this pose. PathPlanner calls this at the start of an auto. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">resetPose</span><span class="p">(</span><span class="n">Pose2d</span><span class="w"> </span><span class="n">pose</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">resetPosition</span><span class="p">(</span><span class="n">m_gyro</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">(),</span><span class="w"> </span><span class="n">getModulePositions</span><span class="p">(),</span><span class="w"> </span><span class="n">pose</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Hands a camera's pose to the estimator (Lesson 18). stdDevs: x m, y m, heading rad. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">addVisionMeasurement</span><span class="p">(</span><span class="n">Pose2d</span><span class="w"> </span><span class="n">visionPose</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">timestampSeconds</span><span class="p">,</span><span class="w"> </span><span class="n">Matrix</span><span class="o">&lt;</span><span class="n">N3</span><span class="p">,</span><span class="w"> </span><span class="n">N1</span><span class="o">&gt;</span><span class="w"> </span><span class="n">stdDevs</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_poseEstimator</span><span class="p">.</span><span class="na">addVisionMeasurement</span><span class="p">(</span><span class="n">visionPose</span><span class="p">,</span><span class="w"> </span><span class="n">timestampSeconds</span><span class="p">,</span><span class="w"> </span><span class="n">stdDevs</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Makes the direction the robot faces right now "away from the driver."</span>
+<span class="cm">   * Changes the pose's heading only; the Pigeon isn't reset, so odometry doesn't jump.</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">zeroHeadingCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">resetPose</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Pose2d</span><span class="p">(</span><span class="n">getPose</span><span class="p">().</span><span class="na">getTranslation</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">isRedAlliance</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">k180deg</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">kZero</span><span class="p">)))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">ignoringDisable</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Zero Heading"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// ---------------------------------------------------------------- driving</span>
+
+<span class="w">  </span><span class="cm">/**</span>
+<span class="cm">   * Drives from joystick values, each -1 to 1.</span>
+<span class="cm">   *</span>
+<span class="cm">   * @param xSpeed forward (+) / backward (-)</span>
+<span class="cm">   * @param ySpeed left (+) / right (-)</span>
+<span class="cm">   * @param rot counterclockwise (+) / clockwise (-)</span>
+<span class="cm">   * @param fieldRelative true: forward means away from the driver</span>
+<span class="cm">   */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">drive</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">xSpeed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ySpeed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">rot</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">fieldRelative</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">drive</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ChassisSpeeds</span><span class="p">(</span>
+<span class="w">            </span><span class="n">xSpeed</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kMaxSpeedMetersPerSecond</span><span class="p">,</span>
+<span class="w">            </span><span class="n">ySpeed</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kMaxSpeedMetersPerSecond</span><span class="p">,</span>
+<span class="w">            </span><span class="n">rot</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kMaxAngularSpeed</span><span class="p">),</span>
+<span class="w">        </span><span class="n">fieldRelative</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** The default teleop command: field-relative driving from three joystick axes. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveCommand</span><span class="p">(</span>
+<span class="w">      </span><span class="n">java</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">function</span><span class="p">.</span><span class="na">DoubleSupplier</span><span class="w"> </span><span class="n">xSpeed</span><span class="p">,</span>
+<span class="w">      </span><span class="n">java</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">function</span><span class="p">.</span><span class="na">DoubleSupplier</span><span class="w"> </span><span class="n">ySpeed</span><span class="p">,</span>
+<span class="w">      </span><span class="n">java</span><span class="p">.</span><span class="na">util</span><span class="p">.</span><span class="na">function</span><span class="p">.</span><span class="na">DoubleSupplier</span><span class="w"> </span><span class="n">rot</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">(</span><span class="n">xSpeed</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="n">ySpeed</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="n">rot</span><span class="p">.</span><span class="na">getAsDouble</span><span class="p">(),</span><span class="w"> </span><span class="kc">true</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Field-Relative Drive"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Points the wheels in an X so the robot is hard to push. Runs while held. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">setXCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">setX</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"X-Lock"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">driveRobotRelative</span><span class="p">(</span><span class="n">ChassisSpeeds</span><span class="w"> </span><span class="n">speeds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">drive</span><span class="p">(</span><span class="n">speeds</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">drive</span><span class="p">(</span><span class="n">ChassisSpeeds</span><span class="w"> </span><span class="n">speeds</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="n">fieldRelative</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fieldRelative</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="c1">// The driver's "forward": +X on blue, -X on red (the field origin is always on the blue side)</span>
+<span class="w">      </span><span class="n">Rotation2d</span><span class="w"> </span><span class="n">driverForward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">isRedAlliance</span><span class="p">()</span>
+<span class="w">          </span><span class="o">?</span><span class="w"> </span><span class="n">getPose</span><span class="p">().</span><span class="na">getRotation</span><span class="p">().</span><span class="na">plus</span><span class="p">(</span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">k180deg</span><span class="p">)</span>
+<span class="w">          </span><span class="p">:</span><span class="w"> </span><span class="n">getPose</span><span class="p">().</span><span class="na">getRotation</span><span class="p">();</span>
+<span class="w">      </span><span class="n">speeds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChassisSpeeds</span><span class="p">.</span><span class="na">fromFieldRelativeSpeeds</span><span class="p">(</span><span class="n">speeds</span><span class="p">,</span><span class="w"> </span><span class="n">driverForward</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">speeds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChassisSpeeds</span><span class="p">.</span><span class="na">discretize</span><span class="p">(</span><span class="n">speeds</span><span class="p">,</span><span class="w"> </span><span class="n">TimedRobot</span><span class="p">.</span><span class="na">kDefaultPeriod</span><span class="p">);</span>
+<span class="w">    </span><span class="n">SwerveModuleState</span><span class="o">[]</span><span class="w"> </span><span class="n">states</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kDriveKinematics</span><span class="p">.</span><span class="na">toSwerveModuleStates</span><span class="p">(</span><span class="n">speeds</span><span class="p">);</span>
+<span class="w">    </span><span class="n">setModuleStates</span><span class="p">(</span><span class="n">states</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sends one state to each module, slowing all four together if any is too fast. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setModuleStates</span><span class="p">(</span><span class="n">SwerveModuleState</span><span class="o">[]</span><span class="w"> </span><span class="n">desiredStates</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">SwerveDriveKinematics</span><span class="p">.</span><span class="na">desaturateWheelSpeeds</span><span class="p">(</span><span class="n">desiredStates</span><span class="p">,</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kMaxSpeedMetersPerSecond</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_frontLeft</span><span class="p">.</span><span class="na">setDesiredState</span><span class="p">(</span><span class="n">desiredStates</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_frontRight</span><span class="p">.</span><span class="na">setDesiredState</span><span class="p">(</span><span class="n">desiredStates</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_rearLeft</span><span class="p">.</span><span class="na">setDesiredState</span><span class="p">(</span><span class="n">desiredStates</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="p">);</span>
+<span class="w">    </span><span class="n">m_rearRight</span><span class="p">.</span><span class="na">setDesiredState</span><span class="p">(</span><span class="n">desiredStates</span><span class="o">[</span><span class="mi">3</span><span class="o">]</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Sets the wheels into an X formation to prevent movement. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setX</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_frontLeft</span><span class="p">.</span><span class="na">setDesiredState</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">fromDegrees</span><span class="p">(</span><span class="mi">45</span><span class="p">)));</span>
+<span class="w">    </span><span class="n">m_frontRight</span><span class="p">.</span><span class="na">setDesiredState</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">fromDegrees</span><span class="p">(</span><span class="o">-</span><span class="mi">45</span><span class="p">)));</span>
+<span class="w">    </span><span class="n">m_rearLeft</span><span class="p">.</span><span class="na">setDesiredState</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">fromDegrees</span><span class="p">(</span><span class="o">-</span><span class="mi">45</span><span class="p">)));</span>
+<span class="w">    </span><span class="n">m_rearRight</span><span class="p">.</span><span class="na">setDesiredState</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">fromDegrees</span><span class="p">(</span><span class="mi">45</span><span class="p">)));</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// ---------------------------------------------------------------- readings</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">ChassisSpeeds</span><span class="w"> </span><span class="nf">getRobotRelativeSpeeds</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">DriveConstants</span><span class="p">.</span><span class="na">kDriveKinematics</span><span class="p">.</span><span class="na">toChassisSpeeds</span><span class="p">(</span><span class="n">getModuleStates</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="o">[]</span><span class="w"> </span><span class="nf">getModuleStates</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="o">[]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">m_frontLeft</span><span class="p">.</span><span class="na">getState</span><span class="p">(),</span><span class="w"> </span><span class="n">m_frontRight</span><span class="p">.</span><span class="na">getState</span><span class="p">(),</span><span class="w"> </span><span class="n">m_rearLeft</span><span class="p">.</span><span class="na">getState</span><span class="p">(),</span><span class="w"> </span><span class="n">m_rearRight</span><span class="p">.</span><span class="na">getState</span><span class="p">()};</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="o">[]</span><span class="w"> </span><span class="nf">getDesiredStates</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="o">[]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">m_frontLeft</span><span class="p">.</span><span class="na">getDesiredState</span><span class="p">(),</span><span class="w"> </span><span class="n">m_frontRight</span><span class="p">.</span><span class="na">getDesiredState</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">m_rearLeft</span><span class="p">.</span><span class="na">getDesiredState</span><span class="p">(),</span><span class="w"> </span><span class="n">m_rearRight</span><span class="p">.</span><span class="na">getDesiredState</span><span class="p">()};</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">SwerveModulePosition</span><span class="o">[]</span><span class="w"> </span><span class="nf">getModulePositions</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SwerveModulePosition</span><span class="o">[]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">m_frontLeft</span><span class="p">.</span><span class="na">getPosition</span><span class="p">(),</span><span class="w"> </span><span class="n">m_frontRight</span><span class="p">.</span><span class="na">getPosition</span><span class="p">(),</span>
+<span class="w">        </span><span class="n">m_rearLeft</span><span class="p">.</span><span class="na">getPosition</span><span class="p">(),</span><span class="w"> </span><span class="n">m_rearRight</span><span class="p">.</span><span class="na">getPosition</span><span class="p">()};</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isRedAlliance</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">DriverStation</span><span class="p">.</span><span class="na">getAlliance</span><span class="p">().</span><span class="na">orElse</span><span class="p">(</span><span class="n">Alliance</span><span class="p">.</span><span class="na">Blue</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">Alliance</span><span class="p">.</span><span class="na">Red</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>getDesiredStates()</code> needs one small getter in <code>MAXSwerveModule</code> (REV's code stores the state but doesn't share it):</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** The state this module was last told to reach (before the chassis offset), for logging. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="w"> </span><span class="nf">getDesiredState</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_desiredState</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<h3 id="piece-by-piece">Piece by piece<a class="headerlink" href="#piece-by-piece" title="Permanent link">#</a></h3>
+<p><div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">SwerveDrivePoseEstimator</span><span class="w"> </span><span class="n">m_poseEstimator</span><span class="p">;</span>
+</code></pre></div>
+Replaces the template's <code>SwerveDriveOdometry</code>. It does the same odometry every loop, and can also take camera measurements, exactly like the WCD in <a href="18-vision.html#step-1-a-pose-estimator-in-the-drive-subsystem">Lesson 18</a>.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">RobotConfig</span><span class="p">.</span><span class="na">fromGUISettings</span><span class="p">();</span>
+</code></pre></div>
+Reads the robot config you entered in the PathPlanner app (Step 2), so the app and the robot plan with the <strong>same</strong> numbers. The template built a separate config in <code>Constants</code>, which had drifted away from the app's.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">resetPose</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">Pose2d</span><span class="p">(</span><span class="n">getPose</span><span class="p">().</span><span class="na">getTranslation</span><span class="p">(),</span><span class="w"> </span><span class="n">isRedAlliance</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">k180deg</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">kZero</span><span class="p">))</span>
+</code></pre></div>
+"The robot now faces away from the driver." On blue that's 0°; on red it's 180°, because WPILib's field always has its origin on the blue side. Only the pose changes; the Pigeon keeps counting, so nothing jumps.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">Rotation2d</span><span class="w"> </span><span class="n">driverForward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">isRedAlliance</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">getPose</span><span class="p">().</span><span class="na">getRotation</span><span class="p">().</span><span class="na">plus</span><span class="p">(</span><span class="n">Rotation2d</span><span class="p">.</span><span class="na">k180deg</span><span class="p">)</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">getPose</span><span class="p">().</span><span class="na">getRotation</span><span class="p">();</span>
+<span class="n">speeds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ChassisSpeeds</span><span class="p">.</span><span class="na">fromFieldRelativeSpeeds</span><span class="p">(</span><span class="n">speeds</span><span class="p">,</span><span class="w"> </span><span class="n">driverForward</span><span class="p">);</span>
+</code></pre></div>
+Field-relative driving uses the <strong>pose's</strong> heading, so a vision correction also corrects driving. On red, the driver's forward is the field's −X, so the heading is turned 180°.</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Measured States"</span><span class="p">,</span><span class="w"> </span><span class="n">getModuleStates</span><span class="p">(),</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="p">.</span><span class="na">struct</span><span class="p">);</span>
+<span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Desired States"</span><span class="p">,</span><span class="w"> </span><span class="n">getDesiredStates</span><span class="p">(),</span><span class="w"> </span><span class="n">SwerveModuleState</span><span class="p">.</span><span class="na">struct</span><span class="p">);</span>
+</code></pre></div>
+Four arrows each: what the modules were told and what they did. Drag both onto AdvantageScope's <strong>Swerve</strong> tab (<a href="20-logging.html">Lesson 20</a>). A module whose arrow doesn't match is the broken one.</p>
+<h3 id="step-4-robotcontainer">Step 4: RobotContainer<a class="headerlink" href="#step-4-robotcontainer" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.pathplanner.lib.auto.AutoBuilder</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.pathplanner.lib.auto.NamedCommands</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.pathplanner.lib.commands.PathPlannerAuto</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.MathUtil</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Commands</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.button.CommandXboxController</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants.OIConstants</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.subsystems.DriveSubsystem</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.subsystems.VisionSubsystem</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Selectable</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Tunables</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RobotContainer</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// The robot's subsystems</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">DriveSubsystem</span><span class="w"> </span><span class="n">m_robotDrive</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">DriveSubsystem</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">VisionSubsystem</span><span class="w"> </span><span class="n">m_vision</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">VisionSubsystem</span><span class="p">(</span><span class="n">m_robotDrive</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// The driver's Xbox controller</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="w"> </span><span class="n">m_driverController</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="p">(</span><span class="n">OIConstants</span><span class="p">.</span><span class="na">kDriverControllerPort</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// The autonomous menu in Elastic (Lesson 19, Step 7)</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotContainer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Named commands first: autos look them up when they're built (Lesson 19, Step 6)</span>
+<span class="w">    </span><span class="n">NamedCommands</span><span class="p">.</span><span class="na">registerCommand</span><span class="p">(</span><span class="s">"X-Lock"</span><span class="p">,</span><span class="w"> </span><span class="n">m_robotDrive</span><span class="p">.</span><span class="na">setXCommand</span><span class="p">().</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">));</span>
+
+<span class="w">    </span><span class="n">configureBindings</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">addDefault</span><span class="p">(</span><span class="s">"Do nothing"</span><span class="p">,</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">none</span><span class="p">());</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="n">AutoBuilder</span><span class="p">.</span><span class="na">getAllAutoNames</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PathPlannerAuto</span><span class="p">(</span><span class="n">name</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="n">Tunables</span><span class="p">.</span><span class="na">publish</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">,</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configureBindings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Left stick drives (field-relative); right stick X turns.</span>
+<span class="w">    </span><span class="c1">// Every axis is negated: pushing a stick forward or left reads negative on an Xbox controller.</span>
+<span class="w">    </span><span class="n">m_robotDrive</span><span class="p">.</span><span class="na">setDefaultCommand</span><span class="p">(</span><span class="n">m_robotDrive</span><span class="p">.</span><span class="na">driveCommand</span><span class="p">(</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="n">m_driverController</span><span class="p">.</span><span class="na">getLeftY</span><span class="p">(),</span><span class="w"> </span><span class="n">OIConstants</span><span class="p">.</span><span class="na">kDriveDeadband</span><span class="p">),</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="n">m_driverController</span><span class="p">.</span><span class="na">getLeftX</span><span class="p">(),</span><span class="w"> </span><span class="n">OIConstants</span><span class="p">.</span><span class="na">kDriveDeadband</span><span class="p">),</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="n">m_driverController</span><span class="p">.</span><span class="na">getRightX</span><span class="p">(),</span><span class="w"> </span><span class="n">OIConstants</span><span class="p">.</span><span class="na">kDriveDeadband</span><span class="p">)));</span>
+
+<span class="w">    </span><span class="c1">// Right bumper: X-lock while held</span>
+<span class="w">    </span><span class="n">m_driverController</span><span class="p">.</span><span class="na">rightBumper</span><span class="p">().</span><span class="na">whileTrue</span><span class="p">(</span><span class="n">m_robotDrive</span><span class="p">.</span><span class="na">setXCommand</span><span class="p">());</span>
+<span class="w">    </span><span class="c1">// Start: the robot now faces away from the driver</span>
+<span class="w">    </span><span class="n">m_driverController</span><span class="p">.</span><span class="na">start</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_robotDrive</span><span class="p">.</span><span class="na">zeroHeadingCommand</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">getSelected</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="step-5-robotjava">Step 5: Robot.java<a class="headerlink" href="#step-5-robotjava" title="Permanent link">#</a></h3>
+<p>Two lines in <code>robotInit()</code>, before <code>new RobotContainer()</code>, and one after:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Record everything published to NetworkTables, plus the Driver Station (Lesson 20)</span>
+<span class="w">    </span><span class="n">DataLogManager</span><span class="p">.</span><span class="na">start</span><span class="p">();</span>
+<span class="w">    </span><span class="n">DriverStation</span><span class="p">.</span><span class="na">startDataLog</span><span class="p">(</span><span class="n">DataLogManager</span><span class="p">.</span><span class="na">getLog</span><span class="p">());</span>
+
+<span class="w">    </span><span class="n">m_robotContainer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">RobotContainer</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Load PathPlanner's code now so the first auto path doesn't stutter (Lesson 19)</span>
+<span class="w">    </span><span class="n">CommandScheduler</span><span class="p">.</span><span class="na">getInstance</span><span class="p">().</span><span class="na">schedule</span><span class="p">(</span><span class="n">FollowPathCommand</span><span class="p">.</span><span class="na">warmupCommand</span><span class="p">());</span>
+</code></pre></div>
+<h3 id="step-6-vision">Step 6: Vision<a class="headerlink" href="#step-6-vision" title="Permanent link">#</a></h3>
+<p>Lesson 18's <code>VisionSubsystem</code> works on swerve with one change: its <code>m_drive</code> field and constructor take this <code>DriveSubsystem</code> (the swerve one) instead of the WCD's. It only calls <code>addVisionMeasurement</code>, which both have. The <code>aimAtTagCommand</code> from Lesson 18 is for a tank drive; on swerve, aim by giving <code>drive(...)</code> a rotation from the PID instead.</p>
+<p>Swerve rotates on its own, so vision's heading is useful here: start with the code-camp rule <code>VecBuilder.fill(stdDev, stdDev, stdDev)</code>.</p>
+<h3 id="step-7-check-it-on-blocks">Step 7: Check it on blocks<a class="headerlink" href="#step-7-check-it-on-blocks" title="Permanent link">#</a></h3>
+<p>With the robot on blocks and the wheels free, enable and check one thing at a time:</p>
+<table>
+<thead>
+<tr>
+<th>Do</th>
+<th>Expect</th>
+<th>If not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Disabled, look at the wheels after power-on</td>
+<td>Nothing moves</td>
+<td></td>
+</tr>
+<tr>
+<td>Enable, sticks centered</td>
+<td>All four wheels hold their angle, no buzzing</td>
+<td>Turning PID too high, or an encoder unplugged</td>
+</tr>
+<tr>
+<td>Push left stick forward</td>
+<td>All four wheels point <strong>forward</strong> and spin forward</td>
+<td>A wheel pointing sideways: that module's zero or chassis offset. Spinning backward: drive direction.</td>
+</tr>
+<tr>
+<td>Push left stick left</td>
+<td>All four point <strong>left</strong></td>
+<td>Check the module order in <code>kDriveKinematics</code></td>
+</tr>
+<tr>
+<td>Right stick left</td>
+<td>Wheels form a circle; the robot would turn <strong>counterclockwise</strong></td>
+<td>Rotation sign</td>
+</tr>
+<tr>
+<td>Right bumper</td>
+<td>X pattern</td>
+<td></td>
+</tr>
+<tr>
+<td>AdvantageScope <strong>Swerve</strong> tab</td>
+<td>Desired and measured arrows match</td>
+<td>That module's PID or wiring</td>
+</tr>
+</tbody>
+</table>
+<p>Then on the floor: drive field-relative, turn the robot around, and check "forward" still means away from you. Press <strong>Start</strong> facing away, and check again on a <strong>red</strong> practice setting in the Driver Station.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Look at the drive motors and fix <code>kDrivingFreeSpeedRpm</code> if they aren't Vortexes</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Weigh the robot and enter the real numbers in PathPlanner's Robot Config</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run the on-blocks checklist</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Drag the module states onto AdvantageScope's Swerve tab while driving</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run the team's <code>autotest</code> auto from the Elastic menu</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: add a button that drives robot-relative while held, for lining up with a game piece</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>Where do the drive and turn PID loops run on a MAXSwerve module?</summary>
+<p>On the SPARKs, not the roboRIO. <code>setSetpoint(..., ControlType.kVelocity)</code> and <code>kPosition</code> send targets to the motor controllers.</p>
+</details>
+<details class="question">
+<summary>Why does the template need four 'chassis angular offsets'?</summary>
+<p>Every module is zeroed the same way before mounting, then bolted on facing a different direction. The offset turns each module's zero into the robot's forward.</p>
+</details>
+<details class="question">
+<summary>Why use the Vortex's free speed instead of the NEO's?</summary>
+<p>The drive feedforward and the max speed are calculated from the drive motor's free speed. Using the wrong motor makes every speed command wrong.</p>
+</details>
+<details class="question">
+<summary>Why reset the pose's heading instead of the Pigeon?</summary>
+<p>Resetting the Pigeon makes its reading jump, so odometry (and PathPlanner and vision) think the robot spun. Changing the pose's heading changes only what "forward" means.</p>
+</details>
+<details class="question">
+<summary>Why add 180° to the heading for field-relative driving on red?</summary>
+<p>The field's +X points away from the blue wall. A red driver's "forward" is toward the blue wall, which is the field's −X.</p>
+</details>
+<p class="credit">Code adapted from REV Robotics' <a href="https://github.com/REVrobotics/MAXSwerve-Java-Template">MAXSwerve Java Template</a> (© REV Robotics, BSD 3-Clause) and the team's copy with PathPlanner added.</p>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="21-swerve.html"><span>Previous</span>21. Swerve Drive</a><a class="pager-next" href="21c-swerve-ctre.html"><span>Next</span>21.2 Next Year: SDS MK5i with CTRE</a></nav>
+  </main>
+</div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+
+// Light/dark switch. With no saved choice, the site follows the device's setting.
+(function () {
+  var root = document.documentElement;
+  var toggle = document.querySelector(".theme-toggle");
+  var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() {
+    var chosen = root.getAttribute("data-theme");
+    return chosen ? chosen === "dark" : systemDark.matches;
+  }
+  function show() {
+    toggle.setAttribute("aria-checked", isDark() ? "true" : "false");
+  }
+  toggle.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  systemDark.addEventListener("change", function () {
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  show();
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+
+</body>
+</html>

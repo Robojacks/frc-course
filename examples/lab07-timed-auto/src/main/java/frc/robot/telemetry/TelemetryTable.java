@@ -11,6 +11,7 @@ import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.util.struct.Struct;
 import edu.wpi.first.util.struct.StructSerializable;
@@ -39,6 +40,7 @@ public final class TelemetryTable {
   private final Map<String, StringPublisher> m_strings = new HashMap<>();
   private final Map<String, DoubleArrayPublisher> m_numberArrays = new HashMap<>();
   private final Map<String, StructPublisher<?>> m_structs = new HashMap<>();
+  private final Map<String, StructArrayPublisher<?>> m_structArrays = new HashMap<>();
 
   /** Use Telemetry.getTable(...) instead of making these yourself. */
   TelemetryTable(String path) {
@@ -106,6 +108,19 @@ public final class TelemetryTable {
   public <T> void log(String name, T value, Struct<T> struct) {
     StructPublisher<T> publisher = (StructPublisher<T>)
         m_structs.computeIfAbsent(name, n -> kNT.getStructTopic(topic(n), struct).publish());
+    publisher.set(value);
+  }
+
+  /**
+   * Sends a list of structured values, like the four SwerveModuleStates of a swerve drive.
+   * AdvantageScope's Swerve tab draws these as arrows.
+   *
+   * <p>Example: {@code telemetry.log("Module States", states, SwerveModuleState.struct);}
+   */
+  @SuppressWarnings("unchecked")
+  public <T> void log(String name, T[] value, Struct<T> struct) {
+    StructArrayPublisher<T> publisher = (StructArrayPublisher<T>)
+        m_structArrays.computeIfAbsent(name, n -> kNT.getStructArrayTopic(topic(n), struct).publish());
     publisher.set(value);
   }
 

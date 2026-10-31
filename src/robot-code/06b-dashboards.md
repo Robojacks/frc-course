@@ -172,6 +172,12 @@ public void log(String name, double value) {
 m_telemetry.log("Pose", m_odometry.getPoseMeters());
 ```
 
+A **list** of structs needs its serializer passed in, like the four module states of a swerve drive ([Lesson 21.1](../going-further/21b-swerve-maxswerve.md)):
+
+```java
+m_telemetry.log("Measured States", moduleStates, SwerveModuleState.struct);
+```
+
 **Tunable numbers reset.** A tunable goes back to its starting value every time the robot code starts. **Dashboard edits are not saved.** When you find a good number, copy it into `Constants.java`.
 
 ### A dropdown menu: `Selectable`

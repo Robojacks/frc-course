@@ -74,4 +74,9 @@ public final class Telemetry {
   public static <T> void log(String name, T value, Struct<T> struct) {
     kRoot.log(name, value, struct);
   }
+
+  /** Sends a list of structured values (like SwerveModuleStates) with the serializer you give it. */
+  public static <T> void log(String name, T[] value, Struct<T> struct) {
+    kRoot.log(name, value, struct);
+  }
 }

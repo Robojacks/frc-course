@@ -58,7 +58,7 @@ try {
 <details class="nav-section"><summary>Drivetrain Project</summary><ul><li><a href="../project/10-teleop.html">10. Teleop</a></li><li><a href="../project/11-autonomous.html">11. Autonomous</a></li></ul></details>
 <details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
 <details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
-<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="19b-pathplanner-app.html">19.1 Using the PathPlanner App</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html" class="current" aria-current="page">21. Swerve Drive</a></li></ul></details>
+<details class="nav-section" open><summary>Going Further</summary><ul><li><a href="17-odometry.html">17. Poses and Odometry</a></li><li><a href="18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="19b-pathplanner-app.html">19.1 Using the PathPlanner App</a></li><li><a href="20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="21-swerve.html" class="current" aria-current="page">21. Swerve Drive</a></li><li><a href="21b-swerve-maxswerve.html">21.1 Our Swerve Today: REV MAXSwerve</a></li><li><a href="21c-swerve-ctre.html">21.2 Next Year: SDS MK5i with CTRE</a></li></ul></details>
 <details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
 <details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
     </details>
@@ -70,6 +70,10 @@ try {
 <p>The West Coast Drive can go forward, backward, and turn. To move sideways it has to turn, drive, and turn back. A defender who knows that can pin it against a wall.</p>
 <p>A <strong>swerve drive</strong> has four wheels that each <strong>steer</strong> on their own. Point all four wheels sideways and the robot slides sideways. Point them in a circle and it spins in place. Do both at once and it can drive across the field in a straight line <strong>while</strong> spinning to face a goal. Most competitive FRC robots now drive swerve.</p>
 <p>You won't write swerve from scratch: teams start from a vendor template. This lesson explains what the template is doing, using everything from Lessons 12–19, so you can read it, tune it, and fix it.</p>
+<div class="admonition tip">
+<p class="admonition-title">Our two swerve drives</p>
+<p>This lesson is the ideas. Then: <a href="21b-swerve-maxswerve.html">Lesson 21.1</a> walks through <strong>our current</strong> REV MAXSwerve code, and <a href="21c-swerve-ctre.html">Lesson 21.2</a> sets up <strong>next year's</strong> SDS MK5i drivetrain with CTRE's generator.</p>
+</div>
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html">Swerve Drive Kinematics (WPILib)</a></li>
@@ -261,7 +265,7 @@ try {
 </details>
 <p class="credit">Parts of this lesson are adapted from the Swerve Drive Example and Odometry lessons of <a href="https://github.com/itkan-robotics/mantik">Mantik</a> by Itkan Robotics (CC BY 4.0).</p>
     </article>
-    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="20-logging.html"><span>Previous</span>20. Logs, AdvantageScope &amp; AdvantageKit</a><a class="pager-next" href="../reference/next-steps.html"><span>Next</span>Where to Go Next</a></nav>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="20-logging.html"><span>Previous</span>20. Logs, AdvantageScope &amp; AdvantageKit</a><a class="pager-next" href="21b-swerve-maxswerve.html"><span>Next</span>21.1 Our Swerve Today: REV MAXSwerve</a></nav>
   </main>
 </div>
 <div class="search-panel" hidden>

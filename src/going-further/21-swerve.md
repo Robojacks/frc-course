@@ -7,6 +7,9 @@ A **swerve drive** has four wheels that each **steer** on their own. Point all f
 
 You won't write swerve from scratch: teams start from a vendor template. This lesson explains what the template is doing, using everything from Lessons 12–19, so you can read it, tune it, and fix it.
 
+!!! tip "Our two swerve drives"
+    This lesson is the ideas. Then: [Lesson 21.1](21b-swerve-maxswerve.md) walks through **our current** REV MAXSwerve code, and [Lesson 21.2](21c-swerve-ctre.md) sets up **next year's** SDS MK5i drivetrain with CTRE's generator.
+
 ## Read this
 - [Swerve Drive Kinematics (WPILib)](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html)
 - [Swerve Drive Odometry (WPILib)](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-odometry.html)
