@@ -22,7 +22,7 @@ try {
 <script src="../assets/wpilib/pid-tune.js"></script>
 <script src="../assets/wpilib/pid-tune-fixes.js"></script>
 </head>
-<body id="top">
+<body id="top" data-root="../">
 <a class="skip-link" href="#content">Skip to content</a>
 <header class="site-header">
   <div class="plaid" aria-hidden="true"></div>
@@ -35,6 +35,10 @@ try {
       </span>
     </a>
     <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
       <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
       <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
         <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
@@ -430,6 +434,17 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
     <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab8-navx-gyro.html"><span>Previous</span>Lab 8: Gyro Turns and Encoder Distances</a><a class="pager-next" href="lab10-elevator.html"><span>Next</span>Lab 10: Elevator Position Control</a></nav>
   </main>
 </div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
+</div>
 <footer class="site-footer">
   <div class="plaid plaid-thin" aria-hidden="true"></div>
   <div class="footer-inner">
@@ -469,6 +484,7 @@ if (window.matchMedia("(max-width: 860px)").matches) {
   show();
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 
 </body>
 </html>

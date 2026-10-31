@@ -11,6 +11,7 @@ the next time someone runs build.py.
 """
 
 import html
+import json
 import os
 import re
 import shutil
@@ -209,7 +210,7 @@ try {{
 </script>
 {extra_head}
 </head>
-<body id="top">
+<body id="top" data-root="{root}">
 <a class="skip-link" href="#content">Skip to content</a>
 <header class="site-header">
   <div class="plaid" aria-hidden="true"></div>
@@ -222,6 +223,10 @@ try {{
       </span>
     </a>
     <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
       <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
       <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
         <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
@@ -245,6 +250,17 @@ try {{
     </article>
     {pager}
   </main>
+</div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
 </div>
 <footer class="site-footer">
   <div class="plaid plaid-thin" aria-hidden="true"></div>
@@ -285,6 +301,7 @@ if (window.matchMedia("(max-width: 860px)").matches) {{
   show();
 }})();
 </script>
+<script src="{root}assets/search.js" defer></script>
 {mermaid}
 </body>
 </html>
@@ -315,6 +332,34 @@ SIM_HEAD = """<link rel="stylesheet" href="{root}assets/wpilib/pid-tune.css">
 <script src="{root}assets/wpilib/pid-tune-fixes.js"></script>"""
 
 
+def search_entries(title: str, url: str, body: str) -> list:
+    """Split one page into sections at its h2/h3 headings for the search box."""
+    body = re.sub(r'<a class="headerlink"[^>]*>.*?</a>', "", body, flags=re.S)
+    body = re.sub(r"<(script|style)\b.*?</\1>", " ", body, flags=re.S)
+    parts = re.split(r'(<h[1-3][^>]*>.*?</h[1-3]>)', body, flags=re.S)
+    entries = []
+    heading, anchor, text = "", "", []
+
+    def flush():
+        words = html.unescape(re.sub(r"<[^>]+>", " ", " ".join(text)))
+        words = re.sub(r"\s+", " ", words).strip()
+        if words or heading:
+            entries.append({"p": title, "h": heading, "u": url + (f"#{anchor}" if anchor else ""), "t": words})
+
+    for part in parts:
+        m = re.match(r'<h([1-3])([^>]*)>(.*?)</h\1>', part, flags=re.S)
+        if m and m.group(1) in "23":
+            flush()
+            heading = html.unescape(re.sub(r"<[^>]+>", "", m.group(3))).strip()
+            idm = re.search(r'id="([^"]+)"', m.group(2))
+            anchor = idm.group(1) if idm else ""
+            text = []
+        elif not m:
+            text.append(part)
+    flush()
+    return entries
+
+
 def build():
     # GitHub Pages' custom domain lives in docs/CNAME. Keep it across rebuilds.
     cname = (OUT / "CNAME").read_text() if (OUT / "CNAME").exists() else None
@@ -337,6 +382,8 @@ def build():
         f"{light}\n@media (prefers-color-scheme: dark) {{\n{dark_auto}\n}}\n{dark_chosen}\n")
     (OUT / ".nojekyll").write_text("")  # tell GitHub Pages to serve files as-is
 
+    shutil.copy(ASSETS / "search.js", OUT / "assets" / "search.js")
+    search = []
     all_pages = [(t, p) for _, _, nav in TABS for _, pages in nav for t, p in pages]
     for title, path in all_pages:
         src = (SRC / path).read_text(encoding="utf-8")
@@ -358,7 +405,12 @@ def build():
             mermaid=MERMAID if 'class="mermaid"' in body else "",
             extra_head=SIM_HEAD.format(root="../" * depth) if "viz-div" in body else "",
         ), encoding="utf-8")
+        search.extend(search_entries(title, out_path(path), body))
         print("built", dest.relative_to(ROOT))
+    # A .js file (not .json) so search also works when the pages are opened straight from disk.
+    (OUT / "assets" / "search-index.js").write_text(
+        "window.SEARCH_INDEX = " + json.dumps(search, ensure_ascii=False, separators=(",", ":")) + ";\n",
+        encoding="utf-8")
 
 
 if __name__ == "__main__":
