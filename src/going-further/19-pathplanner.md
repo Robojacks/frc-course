@@ -12,6 +12,15 @@ PathPlanner needs to know where the robot is, so it builds on odometry from [Les
 - [PathPlannerLib: Build an Auto](https://pathplanner.dev/pplib-build-an-auto.html)
 - [PathPlannerLib Java API](https://pathplanner.dev/api/java/)
 
+!!! info "Licenses"
+    PathPlanner (the app), PathPlannerLib (the vendor library), and the PathPlanner documentation are all in one repository, [mjansen4857/pathplanner](https://github.com/mjansen4857/pathplanner), under the [MIT License](https://github.com/mjansen4857/pathplanner/blob/main/LICENSE) (© Michael Jansen).
+
+    | What | License | What it means for you |
+    |---|---|---|
+    | **PathPlannerLib** (in your robot code) | MIT | Use it freely. Keep the copyright notice if you copy its source files. |
+    | **PathPlanner app** | MIT | Free to install and use. |
+    | **PathPlanner documentation** (pathplanner.dev) | MIT (same repository) | You may copy and adapt it if you keep the copyright and license notice. |
+
 ## Walkthrough
 
 ### The two halves

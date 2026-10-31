@@ -77,6 +77,40 @@ try {
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html">Pose Estimators (WPILib)</a></li>
 <li><a href="https://github.com/ironmosquitos5653/nmrc-codecamp-level2-rev-2026/blob/main/src/main/java/frc/robot/subsystems/PhotonVisionSubsystem.java">Example: PhotonVisionSubsystem.java</a>, from the NMRC code camp (level 2, 2026). This lesson follows its approach.</li>
 </ul>
+<div class="admonition info">
+<p class="admonition-title">Licenses</p>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>License</th>
+<th>What it means for you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PhotonLib</strong> (the vendor library in your robot code)</td>
+<td><a href="https://github.com/PhotonVision/photonvision/blob/main/photon-lib/src/main/java/org/photonvision/PhotonCamera.java">MIT</a></td>
+<td>Use it in robot code freely. Keep its copyright notice if you copy its source files.</td>
+</tr>
+<tr>
+<td><strong>PhotonVision</strong> (the program on the coprocessor)</td>
+<td><a href="https://github.com/PhotonVision/photonvision/blob/main/LICENSE">GNU GPL v3</a></td>
+<td>Free to install and run. If you change PhotonVision itself and share it, you must share your changes under GPL v3 too. Your robot code isn't affected: it only talks to PhotonVision over NetworkTables.</td>
+</tr>
+<tr>
+<td><strong>PhotonVision documentation</strong></td>
+<td><a href="https://github.com/PhotonVision/photonvision/blob/main/docs/LICENSE">CC BY 4.0</a></td>
+<td>You may copy and adapt it if you credit PhotonVision and link the license, the same way this course credits WPILib.</td>
+</tr>
+<tr>
+<td><strong>NMRC code camp example</strong></td>
+<td>No license file in the repository</td>
+<td>Read it and learn from it, but don't copy it into team code word for word without asking its authors. This lesson's code is written for the course.</td>
+</tr>
+</tbody>
+</table>
+</div>
 <h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
 <h3 id="the-two-halves">The two halves<a class="headerlink" href="#the-two-halves" title="Permanent link">#</a></h3>
 <table>

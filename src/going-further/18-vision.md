@@ -13,6 +13,14 @@ RoboJacks uses **PhotonVision**. This lesson covers how it works, how to read it
 - [Pose Estimators (WPILib)](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html)
 - [Example: PhotonVisionSubsystem.java](https://github.com/ironmosquitos5653/nmrc-codecamp-level2-rev-2026/blob/main/src/main/java/frc/robot/subsystems/PhotonVisionSubsystem.java), from the NMRC code camp (level 2, 2026). This lesson follows its approach.
 
+!!! info "Licenses"
+    | What | License | What it means for you |
+    |---|---|---|
+    | **PhotonLib** (the vendor library in your robot code) | [MIT](https://github.com/PhotonVision/photonvision/blob/main/photon-lib/src/main/java/org/photonvision/PhotonCamera.java) | Use it in robot code freely. Keep its copyright notice if you copy its source files. |
+    | **PhotonVision** (the program on the coprocessor) | [GNU GPL v3](https://github.com/PhotonVision/photonvision/blob/main/LICENSE) | Free to install and run. If you change PhotonVision itself and share it, you must share your changes under GPL v3 too. Your robot code isn't affected: it only talks to PhotonVision over NetworkTables. |
+    | **PhotonVision documentation** | [CC BY 4.0](https://github.com/PhotonVision/photonvision/blob/main/docs/LICENSE) | You may copy and adapt it if you credit PhotonVision and link the license, the same way this course credits WPILib. |
+    | **NMRC code camp example** | No license file in the repository | Read it and learn from it, but don't copy it into team code word for word without asking its authors. This lesson's code is written for the course. |
+
 ## Walkthrough
 
 ### The two halves
