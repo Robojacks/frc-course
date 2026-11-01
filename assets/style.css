@@ -178,6 +178,23 @@ img { max-width: 100%; }
 .search-snippet { display: block; font-size: .9rem; color: var(--text-muted); margin-top: 3px; overflow-wrap: anywhere; }
 .search-results mark { background: rgba(179,32,42,.18); color: inherit; border-radius: 2px; padding: 0 1px; }
 
+/* The always-visible search bar at the top of the menu */
+.search-bar {
+  display: flex; align-items: center; gap: 10px; width: 100%; margin: 0 0 14px;
+  padding: 10px 12px; cursor: pointer; text-align: left;
+  background: var(--surface); color: var(--text-muted);
+  border: 1px solid var(--border); border-radius: 6px; font: 400 .95rem var(--font-body);
+}
+.search-bar:hover { border-color: var(--brand); color: var(--text); }
+.search-bar:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.search-bar svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; flex: none; }
+.search-bar span { flex: 1; }
+.search-bar kbd {
+  font: 600 .75rem var(--font-code); padding: 1px 6px; border: 1px solid var(--border);
+  border-radius: 4px; background: var(--bg);
+}
+@media (max-width: 860px) { .search-bar kbd { display: none; } }
+
 /* ---------- Tabs (Lessons / Labs) ---------- */
 .tabs { background: var(--plaid-dark); border-top: 1px solid rgba(255,255,255,.12); }
 .tabs-inner {

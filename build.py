@@ -251,6 +251,11 @@ try {{
 </header>
 <div class="layout">
   <aside class="sidebar">
+    <button class="search-bar" type="button" aria-label="Search the course">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <span>Search lessons and labs</span>
+      <kbd>/</kbd>
+    </button>
     <details class="sidebar-toggle" open>
       <summary>{tab_name} menu</summary>
       <nav aria-label="Course">{nav}</nav>

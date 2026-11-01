@@ -7,7 +7,7 @@
   var input = panel.querySelector(".search-input");
   var list = panel.querySelector(".search-results");
   var status = panel.querySelector(".search-status");
-  var opener = document.querySelector(".search-open");
+  var openers = document.querySelectorAll(".search-open, .search-bar");
   var lastFocus = null;
   var active = -1;
 
@@ -121,7 +121,7 @@
     if (lastFocus) lastFocus.focus();
   }
 
-  opener.addEventListener("click", open);
+  openers.forEach(function (b) { b.addEventListener("click", open); });
   panel.querySelector(".search-close").addEventListener("click", close);
   panel.addEventListener("click", function (ev) { if (ev.target === panel) close(); });
   input.addEventListener("input", run);
