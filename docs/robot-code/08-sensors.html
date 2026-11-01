@@ -260,6 +260,65 @@ meters per motor rotation = 0.319 / 8 ≈ 0.0399
 <p>WPILib's math assumes <strong>counterclockwise is positive</strong> when looking down at the robot. Some gyros report clockwise as positive. If turning left makes the heading go down, your code needs to flip the sign, or your odometry will be mirrored.</p>
 </div>
 <p>Gyros drift a little over time and are zeroed at power-on. Many teams add a driver button that resets the heading to 0 when the robot is facing away from the driver.</p>
+<h3 id="sensors-on-can">Sensors on CAN<a class="headerlink" href="#sensors-on-can" title="Permanent link">#</a></h3>
+<p>The labs read sensors plugged into the roboRIO (DIO, analog, MXP). Swerve drives mostly use sensors on the <strong>CAN bus</strong> instead, read through the vendor library. The ideas are the same: get a number, convert it to real units, check its direction. <a href="../hardware/04d-sensors.html#encoders-inside-motors">Lesson 4.3</a> covers the hardware.</p>
+<p><strong>REV (MAXSwerve): the motor controller reads the sensor.</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// A SPARK MAX's built-in (relative) encoder, and the absolute encoder in its data port</span>
+<span class="n">SparkMax</span><span class="w"> </span><span class="n">turningSpark</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMax</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushless</span><span class="p">);</span>
+<span class="n">RelativeEncoder</span><span class="w"> </span><span class="n">motorEncoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">turningSpark</span><span class="p">.</span><span class="na">getEncoder</span><span class="p">();</span>
+<span class="n">AbsoluteEncoder</span><span class="w"> </span><span class="n">wheelAngle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">turningSpark</span><span class="p">.</span><span class="na">getAbsoluteEncoder</span><span class="p">();</span>
+
+<span class="kt">double</span><span class="w"> </span><span class="n">motorTurns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">motorEncoder</span><span class="p">.</span><span class="na">getPosition</span><span class="p">();</span><span class="w">   </span><span class="c1">// motor rotations, unless a conversion factor is set</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">motorRpm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">motorEncoder</span><span class="p">.</span><span class="na">getVelocity</span><span class="p">();</span><span class="w">     </span><span class="c1">// RPM, unless a conversion factor is set</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">angle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wheelAngle</span><span class="p">.</span><span class="na">getPosition</span><span class="p">();</span><span class="w">          </span><span class="c1">// 0 to 1 turn, unless a conversion factor is set</span>
+</code></pre></div>
+<p>The SPARK's <strong>conversion factors</strong> (set in its config, like <code>Configs.java</code> in <a href="../going-further/21b-swerve-maxswerve.html">Lesson 21.1</a>) do the unit math on the SPARK itself, so <code>getPosition()</code> can return meters or radians directly.</p>
+<p><strong>CTRE (MK5i): every sensor is its own CAN device.</strong> Phoenix 6 always uses <strong>rotations</strong> and <strong>rotations per second</strong>, never encoder ticks.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Everything on the CANivore named "drivetrain"</span>
+<span class="n">CANBus</span><span class="w"> </span><span class="n">bus</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CANBus</span><span class="p">(</span><span class="s">"drivetrain"</span><span class="p">);</span>
+<span class="n">TalonFX</span><span class="w"> </span><span class="n">driveMotor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TalonFX</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">bus</span><span class="p">);</span>
+<span class="n">CANcoder</span><span class="w"> </span><span class="n">steerEncoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CANcoder</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">bus</span><span class="p">);</span>
+<span class="n">Pigeon2</span><span class="w"> </span><span class="n">pigeon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Pigeon2</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="n">bus</span><span class="p">);</span>
+
+<span class="c1">// Each getter returns a StatusSignal; getValueAsDouble() gives the number</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">motorTurns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">driveMotor</span><span class="p">.</span><span class="na">getPosition</span><span class="p">().</span><span class="na">getValueAsDouble</span><span class="p">();</span><span class="w">          </span><span class="c1">// rotations</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">motorTurnsPerSec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">driveMotor</span><span class="p">.</span><span class="na">getVelocity</span><span class="p">().</span><span class="na">getValueAsDouble</span><span class="p">();</span><span class="w">    </span><span class="c1">// rotations per second</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">wheelAngle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">steerEncoder</span><span class="p">.</span><span class="na">getAbsolutePosition</span><span class="p">().</span><span class="na">getValueAsDouble</span><span class="p">();</span><span class="w"> </span><span class="c1">// rotations, -0.5 to 0.5</span>
+<span class="n">Rotation2d</span><span class="w"> </span><span class="n">heading</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pigeon</span><span class="p">.</span><span class="na">getRotation2d</span><span class="p">();</span><span class="w">                              </span><span class="c1">// counterclockwise-positive</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">turnRate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pigeon</span><span class="p">.</span><span class="na">getAngularVelocityZWorld</span><span class="p">().</span><span class="na">getValueAsDouble</span><span class="p">();</span><span class="w">   </span><span class="c1">// degrees per second</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Phoenix 6 idea</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>StatusSignal</strong></td>
+<td>A value the device sends on its own, many times a second. <code>getValueAsDouble()</code> reads the latest one.</td>
+</tr>
+<tr>
+<td><strong>Rotations</strong></td>
+<td>All positions are in rotations. Multiply by 360 for degrees, or by the wheel circumference for meters.</td>
+</tr>
+<tr>
+<td><code>SensorToMechanismRatio</code></td>
+<td>A TalonFX config that divides by the gear ratio <strong>on the motor controller</strong>, so <code>getPosition()</code> returns <strong>mechanism</strong> rotations. Like REV's conversion factors.</td>
+</tr>
+<tr>
+<td><code>getMagnetHealth()</code></td>
+<td>A CANcoder's magnet check (green, orange, red), the same as its LED</td>
+</tr>
+</tbody>
+</table>
+<p>For devices on the roboRIO's own CAN bus, leave the bus out: <code>new Pigeon2(9)</code>, like the MAXSwerve robot does.</p>
+<div class="admonition tip">
+<p class="admonition-title">Log them</p>
+<p>Send each reading to the dashboard with the course's telemetry library while you check the hardware, exactly like the labs do: <code>m_telemetry.log("Steer Angle (rot)", wheelAngle);</code>. Turn the wheel by hand and watch the number.</p>
+</div>
+<p><em>Sources: <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/api-usage/status-signals.html">CTRE: Status Signals</a>; <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/remote-sensors.html">CTRE: Remote Sensors</a>; <a href="https://docs.revrobotics.com/revlib">REVLib documentation</a>.</em></p>
 <h3 id="units-pick-a-system-and-stick-to-it">Units: pick a system and stick to it<a class="headerlink" href="#units-pick-a-system-and-stick-to-it" title="Permanent link">#</a></h3>
 <p>WPILib's math classes (kinematics, odometry, controllers, feedforward) assume <strong>SI units</strong>:</p>
 <table>
@@ -355,6 +414,14 @@ meters per motor rotation = 0.319 / 8 ≈ 0.0399
 <details class="question">
 <summary>Your gyro heading goes down when the robot turns left. What's wrong?</summary>
 <p>The gyro reports clockwise as positive, but WPILib expects counterclockwise positive. Flip the sign.</p>
+</details>
+<details class="question">
+<summary>A Kraken's getPosition() says 6.12 after the wheel turned once. Why, and how do you fix it?</summary>
+<p>It's counting motor rotations, and the gear ratio is 6.12:1. Divide by the ratio in code, or set the TalonFX's SensorToMechanismRatio so it returns wheel rotations.</p>
+</details>
+<details class="question">
+<summary>What unit does Phoenix 6 use for position?</summary>
+<p>Rotations (and rotations per second for velocity).</p>
 </details>
     </article>
     <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="07b-scheduler.html"><span>Previous</span>7.1 How the Command Scheduler Works</a><a class="pager-next" href="09-debugging.html"><span>Next</span>9. Testing, Debugging &amp; Simulation</a></nav>

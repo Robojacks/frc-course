@@ -25,6 +25,8 @@ Next year's drivetrain is different: SDS MK5i modules set up with CTRE's generat
 | **Turning encoder** | REV Through Bore Encoder, plugged into the turning SPARK MAX | Absolute: knows the wheel's angle at power-on |
 | **Gyro** | One **Pigeon 2** for the robot, CAN ID 9 | REV's template uses an ADIS16470 |
 
+How each sensor works, how it's wired, and what its LEDs mean: [Lesson 4.3](../hardware/04d-sensors.md#encoders-inside-motors). Reading them in code: [Lesson 8](../robot-code/08-sensors.md#sensors-on-can).
+
 | Module | Drive CAN ID | Turn CAN ID |
 |---|---|---|
 | Front left | 1 | 2 |

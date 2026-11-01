@@ -10,6 +10,15 @@ Motors let the robot act. Sensors let it **know** what's happening. The labs use
 | **REV Through Bore Encoder** | "How far has this shaft turned, and how fast?" | roboRIO **DIO** (two ports) | 6, 9, 10 |
 | **NavX2** | "Which way is the robot facing?" | roboRIO **MXP** port | 8 |
 
+The swerve drives use four more ([Lessons 21.1–21.3](../going-further/21-swerve.md)):
+
+| Sensor | Answers | Wired to | Robot |
+|---|---|---|---|
+| **Through Bore Encoder, absolute mode** | "Which way is this wheel pointing, right now?" | A **SPARK MAX** data port | MAXSwerve (steering) |
+| **Encoders inside motors** | "How far and how fast has this motor turned?" | Built in; read over **CAN** | Both swerves, and Labs 1 and 9 |
+| **CANcoder** | "Which way is this wheel pointing, right now?" | **CAN** (and 12 V power) | MK5i (steering) |
+| **Pigeon 2** | "Which way is the robot facing?" | **CAN** (and 12 V power) | Both swerves |
+
 This lesson covers the hardware side: what each sensor is, how it's wired, and what can go wrong. The labs cover the code. [Lesson 8](../robot-code/08-sensors.md) covers sensors and units in general.
 
 ## Read this
@@ -17,6 +26,8 @@ This lesson covers the hardware side: what each sensor is, how it's wired, and w
 - [Analog Inputs – Hardware (WPILib)](https://docs.wpilib.org/en/stable/docs/hardware/sensors/analog-inputs-hardware.html)
 - [Encoders – Hardware (WPILib)](https://docs.wpilib.org/en/stable/docs/hardware/sensors/encoders-hardware.html)
 - [Gyroscopes – Hardware (WPILib)](https://docs.wpilib.org/en/stable/docs/hardware/sensors/gyros-hardware.html)
+- [CANcoder](https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/cancoder/index.html) and [Pigeon 2.0](https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/pigeon2/index.html) (CTRE hardware reference)
+- [MAXSwerve module documentation (REV)](https://docs.revrobotics.com/brushless/maxswerve)
 
 ## Walkthrough
 
@@ -184,6 +195,81 @@ The NavX2 is a small board with its own processor and three kinds of sensors: gy
 !!! info "Mounting matters"
     The NavX measures rotation around the axis pointing up through the board. If the roboRIO is mounted flat, that's the robot's yaw. If it's mounted on its side, the NavX has to be told which way is up, or the headings will be wrong. Keep it flat, and firmly attached, so it moves exactly with the robot.
 
+### Encoders inside motors
+Brushless motors need to know where their rotor is to run at all, so most FRC brushless motors have an encoder **built in**:
+
+| Motor | Built-in encoder | Read through |
+|---|---|---|
+| NEO, NEO 550, NEO Vortex | Hall-effect sensors (NEO, NEO 550) or a built-in encoder (Vortex) | The SPARK MAX / SPARK Flex, with REVLib |
+| Kraken X60, Kraken X44, Falcon 500 | A high-resolution encoder in the integrated TalonFX | The TalonFX, with Phoenix 6 |
+
+There's nothing to wire: the reading comes over CAN from the motor controller. These encoders are **relative**: they read 0 at power-on (or wherever the code last set them). They count the **motor's** turns, so divide by the gear ratio to get the mechanism's turns. That's exactly what the conversion factors in [Lesson 8](../robot-code/08-sensors.md#encoders-count-rotations-conversion-factors) are for.
+
+A swerve module's **drive** distance and speed come from the drive motor's built-in encoder. Its **steering** angle needs an **absolute** sensor, because the wheel can be pointing any direction when the robot turns on. That's the next two sections.
+
+### The Through Bore Encoder in absolute mode (MAXSwerve)
+The Through Bore Encoder has two outputs ([above](#the-rev-through-bore-encoder)): the **quadrature** signal the labs use (relative), and an **absolute** signal on the **white** wire, which tells the angle of the shaft within one turn, even right after power-on.
+
+On a MAXSwerve module, the Through Bore Encoder sits on the steering axis and plugs into the **steering SPARK MAX's data port** (the connector on top), not the roboRIO. The SPARK MAX reads the absolute angle and runs the steering PID itself.
+
+| | MAXSwerve steering encoder |
+|---|---|
+| Wired to | The turning SPARK MAX's data port, with the cable and adapter that come with the module |
+| Reads | The wheel's angle, 0 to 1 turn (the code converts it to radians) |
+| Zeroing | In **REV Hardware Client**, with REV's alignment tool in the module: select the turning SPARK MAX and use the **Absolute Encoder** tool to set the zero offset ([Lesson 21.1](../going-further/21b-swerve-maxswerve.md#encoder-offsets-the-chassis-angular-offsets)) |
+| If it reads wrong | Re-zero it. Check the cable at both ends. Check the encoder is pressed fully onto the shaft. |
+
+### The CTRE CANcoder (MK5i)
+The CANcoder is an **absolute magnetic encoder** that talks over CAN. A small round **magnet** is attached to the end of the rotating shaft (on a swerve module, the steering axis); the CANcoder sits just above it on the module and measures the magnet's angle.
+
+| | CANcoder |
+|---|---|
+| Wires | **Red/black: 12 V power**. **Yellow/green: CAN high/low**, daisy-chained like other CAN devices ([Lesson 4](04-electronics.md)). |
+| Has a CAN ID | Yes. Set it in Phoenix Tuner X ([Lesson 21.3](../going-further/21d-phoenix-tuner.md#step-3-name-id-and-blink)). |
+| Reads | **Absolute position** (within one turn) and a relative position and velocity |
+| Magnet | Comes with the encoder, not the module. It must be centered under the CANcoder and the right distance away. |
+| Zeroing | For swerve, the Tuner X generator measures each offset ([Lesson 21.2](../going-further/21c-swerve-ctre.md#step-2-the-swerve-project-generator)) |
+
+**The LED tells you about the magnet.** Wait about 8 seconds after power-on:
+
+| LED | Means | Do |
+|---|---|---|
+| Off | No power | Check the red/black power wires |
+| Slow bright red | No CAN | Check the yellow/green wires; is the robot on? |
+| Rapid **green** | Magnet in range | Good |
+| Rapid **orange** | Magnet in range, but a little too close or far | Adjust the magnet or the CANcoder's spacing |
+| Rapid **red** | Magnet out of range | The magnet is missing, off-center, or far too close or far |
+
+Bright blinking means CAN is healthy; dim blinking means CAN hasn't been seen since power-on. Tuner X's **Self Test** shows the magnet health too.
+
+*Source: [CTRE: CANcoder hardware reference](https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/cancoder/index.html), written in our own words.*
+
+### The CTRE Pigeon 2 (gyro)
+The Pigeon 2 is CTRE's gyro (an **IMU**: gyros plus accelerometers). It's what both swerve robots use for heading.
+
+| | Pigeon 2 | NavX2 (for comparison) |
+|---|---|---|
+| Wires | **Red/black: 12 V**, **yellow/green: CAN** | Plugs into the roboRIO's MXP port |
+| Has a CAN ID | Yes (CAN ID 9 on the MAXSwerve robot) | No |
+| At power-on | **No calibration wait**: it's ready right away | Must sit still for a few seconds |
+| Drift | Very low | Some |
+| Mounting | Anywhere, any orientation, firmly attached. Then run **Mount Calibration** in Tuner X ([Lesson 21.3](../going-further/21d-phoenix-tuner.md#step-8-configs-self-test-and-pigeon-calibration)) so it knows which way is up. | Flat, with the roboRIO |
+
+**Its LEDs:**
+
+| LEDs | Means |
+|---|---|
+| Off | No power |
+| Alternating **red** | No CAN |
+| Alternating **orange** | CAN works, but no robot code using Phoenix is running |
+| Both **orange** together | Robot code is running; robot disabled |
+| Alternating **green** | Robot enabled. All good. |
+
+!!! info "Pigeon 2 on a CANivore"
+    Some Pigeon 2s made in September 2022 can't talk on a CANivore until their firmware is updated. If every device on a CANivore goes red when the Pigeon is added, see CTRE's [Pigeon 2.0 troubleshooting](https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/pigeon2/pigeon-issues.html) page.
+
+*Source: [CTRE: Pigeon 2.0 hardware reference](https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/pigeon2/index.html), written in our own words.*
+
 ### Which sensor for which job?
 
 | Job | Best sensor | Why |
@@ -193,6 +279,8 @@ The NavX2 is a small board with its own processor and three kinds of sensors: gy
 | Measure an arm angle | Potentiometer or absolute encoder | Knows the angle right after power-on |
 | Drive a set distance | Encoder on the drivetrain | Counts wheel rotations |
 | Turn to an angle | Gyro | Measures the robot's rotation directly |
+| Point a swerve wheel | Absolute encoder (Through Bore on a SPARK MAX, or CANcoder) | Knows the wheel's angle right after power-on |
+| Drive speed and distance of a swerve wheel | The drive motor's built-in encoder | Already there; high resolution |
 | Driver adjusts a value | Potentiometer | A knob is easy for people to use |
 
 ## Try it
@@ -201,6 +289,9 @@ The NavX2 is a small board with its own processor and three kinds of sensors: gy
 - [ ] Find the Through Bore Encoder's two quadrature wires and which DIO ports they go to
 - [ ] Find the NavX2 on the WCD's roboRIO. Is it mounted flat?
 - [ ] Fill in a wiring table for your team: every sensor, its port, and which lab uses it. Post it near the test bed.
+- [ ] On the swerve robot, find each module's steering encoder and follow its cable to the SPARK MAX
+- [ ] On a CANcoder, read the LED after 8 seconds. Is the magnet green?
+- [ ] Find the Pigeon 2 and check its LEDs with the robot disabled and enabled
 
 ## Check yourself
 ??? question "What's the difference between DIO and Analog In ports?"
@@ -220,3 +311,16 @@ The NavX2 is a small board with its own processor and three kinds of sensors: gy
 
 ??? question "Why must the robot sit still when the NavX2 powers on?"
     It calibrates itself during the first few seconds. Moving during calibration makes the heading drift for the rest of the session.
+
+??? question "Why does a swerve module's steering need an absolute encoder, but its drive doesn't?"
+    The wheel can be pointing any direction when the robot turns on, and the code has to know which. The drive only needs to measure how far it rolls from now, which a relative encoder does.
+
+??? question "A CANcoder's LED is blinking rapid red. What's wrong?"
+    CAN is fine, but the magnet is out of range: missing, off-center, or much too close or far.
+
+??? question "Name two differences between the Pigeon 2 and the NavX2."
+    The Pigeon 2 is on CAN (with its own 12 V power), needs no calibration wait at power-on, and can be mounted in any orientation after a mount calibration. The NavX2 plugs into the roboRIO's MXP port and must sit still to calibrate.
+
+??? question "Where does the MAXSwerve steering encoder plug in?"
+    Into the turning SPARK MAX's data port, not the roboRIO. The SPARK MAX reads it and runs the steering PID.
+

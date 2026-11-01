@@ -27,6 +27,8 @@ The swerve ideas from [Lesson 21](21-swerve.md) are exactly the same. What chang
 | **Gyro** | One **Pigeon 2** for the robot | |
 | **CAN bus** | A **CANivore** is strongly recommended | CAN FD: faster and much less crowded than the roboRIO's bus |
 
+How each sensor works, how it's wired, and what its LEDs mean: [Lesson 4.3](../hardware/04d-sensors.md#encoders-inside-motors). Reading them in code: [Lesson 8](../robot-code/08-sensors.md#sensors-on-can).
+
 !!! note "Check the order before you write code"
     Confirm the exact motors and drive ratio the team orders. The generator asks for them, and they change the gear ratios and top speed.
 

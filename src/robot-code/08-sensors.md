@@ -155,6 +155,55 @@ public Rotation2d getHeading() {
 
 Gyros drift a little over time and are zeroed at power-on. Many teams add a driver button that resets the heading to 0 when the robot is facing away from the driver.
 
+### Sensors on CAN
+The labs read sensors plugged into the roboRIO (DIO, analog, MXP). Swerve drives mostly use sensors on the **CAN bus** instead, read through the vendor library. The ideas are the same: get a number, convert it to real units, check its direction. [Lesson 4.3](../hardware/04d-sensors.md#encoders-inside-motors) covers the hardware.
+
+**REV (MAXSwerve): the motor controller reads the sensor.**
+
+```java
+// A SPARK MAX's built-in (relative) encoder, and the absolute encoder in its data port
+SparkMax turningSpark = new SparkMax(2, MotorType.kBrushless);
+RelativeEncoder motorEncoder = turningSpark.getEncoder();
+AbsoluteEncoder wheelAngle = turningSpark.getAbsoluteEncoder();
+
+double motorTurns = motorEncoder.getPosition();   // motor rotations, unless a conversion factor is set
+double motorRpm = motorEncoder.getVelocity();     // RPM, unless a conversion factor is set
+double angle = wheelAngle.getPosition();          // 0 to 1 turn, unless a conversion factor is set
+```
+
+The SPARK's **conversion factors** (set in its config, like `Configs.java` in [Lesson 21.1](../going-further/21b-swerve-maxswerve.md)) do the unit math on the SPARK itself, so `getPosition()` can return meters or radians directly.
+
+**CTRE (MK5i): every sensor is its own CAN device.** Phoenix 6 always uses **rotations** and **rotations per second**, never encoder ticks.
+
+```java
+// Everything on the CANivore named "drivetrain"
+CANBus bus = new CANBus("drivetrain");
+TalonFX driveMotor = new TalonFX(1, bus);
+CANcoder steerEncoder = new CANcoder(3, bus);
+Pigeon2 pigeon = new Pigeon2(13, bus);
+
+// Each getter returns a StatusSignal; getValueAsDouble() gives the number
+double motorTurns = driveMotor.getPosition().getValueAsDouble();          // rotations
+double motorTurnsPerSec = driveMotor.getVelocity().getValueAsDouble();    // rotations per second
+double wheelAngle = steerEncoder.getAbsolutePosition().getValueAsDouble(); // rotations, -0.5 to 0.5
+Rotation2d heading = pigeon.getRotation2d();                              // counterclockwise-positive
+double turnRate = pigeon.getAngularVelocityZWorld().getValueAsDouble();   // degrees per second
+```
+
+| Phoenix 6 idea | What it means |
+|---|---|
+| **StatusSignal** | A value the device sends on its own, many times a second. `getValueAsDouble()` reads the latest one. |
+| **Rotations** | All positions are in rotations. Multiply by 360 for degrees, or by the wheel circumference for meters. |
+| `SensorToMechanismRatio` | A TalonFX config that divides by the gear ratio **on the motor controller**, so `getPosition()` returns **mechanism** rotations. Like REV's conversion factors. |
+| `getMagnetHealth()` | A CANcoder's magnet check (green, orange, red), the same as its LED |
+
+For devices on the roboRIO's own CAN bus, leave the bus out: `new Pigeon2(9)`, like the MAXSwerve robot does.
+
+!!! tip "Log them"
+    Send each reading to the dashboard with the course's telemetry library while you check the hardware, exactly like the labs do: `m_telemetry.log("Steer Angle (rot)", wheelAngle);`. Turn the wheel by hand and watch the number.
+
+*Sources: [CTRE: Status Signals](https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/api-usage/status-signals.html); [CTRE: Remote Sensors](https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/remote-sensors.html); [REVLib documentation](https://docs.revrobotics.com/revlib).*
+
 ### Units: pick a system and stick to it
 WPILib's math classes (kinematics, odometry, controllers, feedforward) assume **SI units**:
 
@@ -225,3 +274,10 @@ public void periodic() {
 
 ??? question "Your gyro heading goes down when the robot turns left. What's wrong?"
     The gyro reports clockwise as positive, but WPILib expects counterclockwise positive. Flip the sign.
+
+??? question "A Kraken's getPosition() says 6.12 after the wheel turned once. Why, and how do you fix it?"
+    It's counting motor rotations, and the gear ratio is 6.12:1. Divide by the ratio in code, or set the TalonFX's SensorToMechanismRatio so it returns wheel rotations.
+
+??? question "What unit does Phoenix 6 use for position?"
+    Rotations (and rotations per second for velocity).
+
