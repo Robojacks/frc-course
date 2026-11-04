@@ -9,7 +9,7 @@ The drivetrain is the most important mechanism on any robot: if it can't drive w
 - **Inversion:** why one side of the robot has to run "backward"
 - **Skid steer driving:** each joystick runs one side of the robot, just like the two levers on a skid steer loader
 
-**Before you start:** finish [Lab 1.1](lab1b-dashboard.md). [Lesson 10](../project/10-teleop.md) explains the drive code in more depth; read it before or after.
+**Before you start:** finish [Lab 1.1](lab1b-dashboard.md). [Lesson 10.1](../project/10-teleop.md) explains the drive code in more depth, on the XRP; read it before or after.
 
 ## Read this
 - [Using the WPILib Drive Classes](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html)
@@ -339,7 +339,7 @@ The Xbox controller's two sticks are the two levers. In code, WPILib calls this 
 | Spin in place to the right (a skid steer's "counter-rotate") | Left stick forward, right stick back |
 | Stop | Let go of both |
 
-`m_drive.tankDrive(left, right)` sends those two values straight to the two sides. It also **squares** them by default, which gives finer control at low speed: half stick gives about a quarter of full speed ([Lesson 10](../project/10-teleop.md)).
+`m_drive.tankDrive(left, right)` sends those two values straight to the two sides. It also **squares** them by default, which gives finer control at low speed: half stick gives about a quarter of full speed ([Lesson 10.1](../project/10-teleop.md)).
 
 !!! warning "Rename the template's controller first"
     The WPILib template names the controller `m_driverController`, and its port `kDriverControllerPort`. This course calls them **`m_controller`** and **`kControllerPort`**. In VS Code, click on `m_driverController`, press ++f2++ (**Rename Symbol**), and type `m_controller`. Do the same for `kDriverControllerPort` → `kControllerPort`. ++f2++ renames every use at once, so nothing breaks.

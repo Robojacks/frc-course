@@ -53,9 +53,10 @@ NAV = [
         ("8. Sensors & Units", "robot-code/08-sensors.md"),
         ("9. Testing, Debugging & Simulation", "robot-code/09-debugging.md"),
     ]),
-    ("Drivetrain Project", [
-        ("10. Teleop", "project/10-teleop.md"),
-        ("11. Autonomous", "project/11-autonomous.md"),
+    ("XRP Robot Project", [
+        ("10. The XRP: Set Up, Simulate, Run", "project/10-xrp.md"),
+        ("10.1 Teleop on the XRP", "project/10-teleop.md"),
+        ("10.2 Autonomous on the XRP", "project/11-autonomous.md"),
     ]),
     ("Controls", [
         ("12. PID Feedback", "controls/12-pid.md"),

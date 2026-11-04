@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>11. Autonomous | RoboJacks 4674</title>
+<title>10.2 Autonomous on the XRP | RoboJacks 4674</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
@@ -55,7 +55,7 @@ try {
 <details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
 <details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
 <details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
-<details class="nav-section" open><summary>Drivetrain Project</summary><ul><li><a href="10-teleop.html">10. Teleop</a></li><li><a href="11-autonomous.html" class="current" aria-current="page">11. Autonomous</a></li></ul></details>
+<details class="nav-section" open><summary>XRP Robot Project</summary><ul><li><a href="10-xrp.html">10. The XRP: Set Up, Simulate, Run</a></li><li><a href="10-teleop.html">10.1 Teleop on the XRP</a></li><li><a href="11-autonomous.html" class="current" aria-current="page">10.2 Autonomous on the XRP</a></li></ul></details>
 <details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li></ul></details>
 <details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
 <details class="nav-section"><summary>Going Further</summary><ul><li><a href="../going-further/17-odometry.html">17. Poses and Odometry</a></li><li><a href="../going-further/18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="../going-further/19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="../going-further/19b-pathplanner-app.html">19.1 Using the PathPlanner App</a></li><li><a href="../going-further/20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="../going-further/21-swerve.html">21. Swerve Drive</a></li><li><a href="../going-further/21b-swerve-maxswerve.html">21.1 Our Swerve Today: REV MAXSwerve</a></li><li><a href="../going-further/21c-swerve-ctre.html">21.2 Next Year: SDS MK5i with CTRE</a></li><li><a href="../going-further/21d-phoenix-tuner.html">21.3 Using Phoenix Tuner X</a></li></ul></details>
@@ -65,10 +65,10 @@ try {
   </aside>
   <main id="content" class="content">
     <article>
-<h1 id="11-drivetrain-project-autonomous">11. Drivetrain Project: Autonomous<a class="headerlink" href="#11-drivetrain-project-autonomous" title="Permanent link">#</a></h1>
+<h1 id="102-autonomous-on-the-xrp">10.2 Autonomous on the XRP<a class="headerlink" href="#102-autonomous-on-the-xrp" title="Permanent link">#</a></h1>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>The first 15 seconds of every match have <strong>no driver input</strong>. The robot runs entirely on code. Autonomous points often decide close matches, and a reliable auto is one of the things alliance captains look for when picking partners.</p>
-<p>In this lesson you'll build autonomous routines step by step: first a simple timed drive, then driving by measured distance, then multi-step routines, and finally a dashboard menu so the drive team can pick a routine before each match.</p>
+<p>In this lesson you'll program your XRP (<a href="10-teleop.html">Lesson 10.1</a>) to drive on its own, step by step: first a simple timed drive, then driving by measured distance, then turning by the gyro, then multi-step routines that also move the arm, and finally a dashboard menu so the drive team can pick a routine before each match.</p>
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html">Command Compositions</a></li>
@@ -139,114 +139,294 @@ try {
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Parallel commands can't share a subsystem</p>
-<p><code>drivetrain.arcadeDrive(...).alongWith(drivetrain.driveDistance(...))</code> is an error: both require the drivetrain. Parallel commands must use different subsystems, like driving <strong>while</strong> running the intake.</p>
+<p>Two drivetrain commands <code>alongWith</code> each other is an error: both require the drivetrain. Parallel commands must use different subsystems, like driving <strong>while</strong> moving the arm.</p>
 </div>
 <h3 id="version-1-a-timed-auto">Version 1: a timed auto<a class="headerlink" href="#version-1-a-timed-auto" title="Permanent link">#</a></h3>
-<p>The simplest auto drives at a fixed speed for a fixed time. Add to <code>Drivetrain.java</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveForSeconds</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">seconds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">.</span><span class="na">arcadeDrive</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">))</span><span class="w">   </span><span class="c1">// false = don't square the input</span>
+<p>The simplest auto drives at a fixed speed for a fixed time. Add this method to <code>XRPDrivetrain.java</code>, above <code>periodic()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Drives at a fixed speed for a set time, then stops. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveForSecondsCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">seconds</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">arcadeDriveRaw</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
 <span class="w">        </span><span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
-<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
-<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">seconds</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"s"</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">stop</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">seconds</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" s"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <p><code>.finallyDo(...)</code> runs when the command ends <strong>for any reason</strong>: finished, timed out, or canceled. Use it to make sure motors always stop.</p>
-<p>Then in <code>RobotContainer.java</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveForSeconds</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">);</span>
-<span class="p">}</span>
+<p>Then make <code>getAutonomousCommand()</code> in <code>RobotContainer.java</code> return it:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
-<p>Run it in the Sim GUI: select <strong>Autonomous</strong>, then enable.</p>
+<p>Run it: in the Sim GUI, select <strong>Autonomous</strong>, then enable. Try it in simulation first, then on the real XRP on the floor.</p>
 <div class="admonition warning">
 <p class="admonition-title">Timed autos are unreliable</p>
-<p>The same motor output moves the robot different distances depending on battery charge, wheel wear, carpet, and robot weight. A timed auto that's perfect on a fresh battery comes up short on a tired one. Use it to get started, then switch to distance.</p>
+<p>The same motor output moves the robot different distances depending on battery charge, wheel wear, the floor, and weight. On an XRP you'll see it right away: fresh AAs and tired AAs drive very different distances. Use timed autos to get started, then switch to distance.</p>
 </div>
 <h3 id="version-2-drive-by-distance">Version 2: drive by distance<a class="headerlink" href="#version-2-drive-by-distance" title="Permanent link">#</a></h3>
 <p>With encoders, the robot can drive until it has actually gone the right distance:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveDistance</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">meters</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">resetEncoders</span><span class="p">)</span>
-<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">.</span><span class="na">arcadeDrive</span><span class="p">(</span><span class="n">Math</span><span class="p">.</span><span class="na">copySign</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="n">meters</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">)))</span>
-<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">getDistanceMeters</span><span class="p">())</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">meters</span><span class="p">))</span>
-<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">drive</span><span class="p">.</span><span class="na">stopMotor</span><span class="p">())</span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_distanceTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">   </span><span class="c1">// where the current drive should stop, in meters</span>
+
+<span class="w">  </span><span class="cm">/** Drives straight until the robot has gone this far. Negative = backward. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveDistanceCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">meters</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">signum</span><span class="p">(</span><span class="n">meters</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_distanceTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getAverageMeters</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">meters</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">arcadeDriveRaw</span><span class="p">(</span><span class="n">direction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="o">?</span><span class="w"> </span><span class="n">getAverageMeters</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">m_distanceTarget</span>
+<span class="w">            </span><span class="p">:</span><span class="w"> </span><span class="n">getAverageMeters</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_distanceTarget</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)</span><span class="w">   </span><span class="c1">// safety: stop even if an encoder is unplugged</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">stop</span><span class="p">())</span>
 <span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">meters</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" m"</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <p>Reading it line by line:</p>
 <ol>
-<li>Reset the encoders to 0, once.</li>
-<li>Then drive at <code>speed</code>, in the direction of <code>meters</code> (negative = backward).</li>
-<li>Stop as soon as the measured distance reaches the target.</li>
+<li>Remember where to stop: <strong>here + the distance</strong>, so it works wherever the robot starts.</li>
+<li>Then drive at <code>speed</code>, in the direction of <code>meters</code>.</li>
+<li>Stop as soon as the measured distance passes the target.</li>
+<li>Give up after 10 seconds, in case an encoder is unplugged and the distance never changes.</li>
 <li>Always stop the motors at the end.</li>
 </ol>
-<p>This is much more consistent than a timer, but it still overshoots a little, because the robot is moving at full <code>speed</code> when it reaches the target and takes time to stop. In <a href="../controls/12-pid.html">Lesson 12</a> you'll replace the fixed speed with a <strong>PID controller</strong> that slows down smoothly as it arrives.</p>
+<p>This is much more consistent than a timer, but it still overshoots a little, because the robot is moving when it reaches the target and takes time to stop. In <a href="../controls/12-pid.html">Lesson 12</a> you'll replace the fixed speed with a <strong>PID controller</strong> that slows down smoothly as it arrives.</p>
+<h3 id="version-3-turn-by-the-gyro">Version 3: turn by the gyro<a class="headerlink" href="#version-3-turn-by-the-gyro" title="Permanent link">#</a></h3>
+<p>Turning with a timer is even worse than driving with one. The XRP's gyro measures how far it has actually turned:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">   </span><span class="c1">// where the current turn should stop, in degrees</span>
+
+<span class="w">  </span><span class="cm">/** Turns in place by this many degrees. Positive = left (counterclockwise). */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">turnDegreesCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">degrees</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">speed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">signum</span><span class="p">(</span><span class="n">degrees</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">degrees</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">arcadeDriveRaw</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speed</span><span class="p">)))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">until</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">direction</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span>
+<span class="w">            </span><span class="o">?</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">m_turnTarget</span>
+<span class="w">            </span><span class="p">:</span><span class="w"> </span><span class="n">getHeadingDegrees</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">m_turnTarget</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">5.0</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">stop</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Turn "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">degrees</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" deg"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p>It's the same shape as <code>driveDistanceCommand</code>: remember a target, move, stop when you pass it. Positive rotation in <code>arcadeDrive</code> turns left, which makes the heading go up.</p>
 <div class="admonition tip">
-<p class="admonition-title">Add a safety timeout</p>
-<p>If an encoder is unplugged, the distance never increases and the robot drives forever. Add <code>.withTimeout(5.0)</code> to any distance command, so a broken sensor can't send the robot across the field.</p>
+<p class="admonition-title">Why turns overshoot</p>
+<p>The XRP is still spinning when the gyro reaches the target. Turning slower (0.4 instead of 0.7) overshoots less. Try both and measure.</p>
 </div>
-<h3 id="version-3-a-multi-step-routine">Version 3: a multi-step routine<a class="headerlink" href="#version-3-a-multi-step-routine" title="Permanent link">#</a></h3>
-<p>Real autos combine several actions. Here's "drive out, score, drive back," using the intake from <a href="../robot-code/07-command-based.html">Lesson 7</a>:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">scoreAndBackUp</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<h3 id="version-4-an-arm-and-multi-step-routines">Version 4: an arm, and multi-step routines<a class="headerlink" href="#version-4-an-arm-and-multi-step-routines" title="Permanent link">#</a></h3>
+<p>The XRP's arm is a servo on the <strong>Servo 1</strong> port. Give it a small subsystem, <code>subsystems/Arm.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot.subsystems</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.xrp.XRPServo</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Commands</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.SubsystemBase</span><span class="p">;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants.ArmConstants</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Telemetry</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.TelemetryTable</span><span class="p">;</span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Arm</span><span class="w"> </span><span class="kd">extends</span><span class="w"> </span><span class="n">SubsystemBase</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// The arm's servo: give it an angle from 0 to 180 degrees and it goes there</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">XRPServo</span><span class="w"> </span><span class="n">m_servo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">XRPServo</span><span class="p">(</span><span class="n">ArmConstants</span><span class="p">.</span><span class="na">kServoChannel</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Arm"</span><span class="p">);</span>
+
+<span class="w">  </span><span class="cm">/** Moves the arm to an angle, then waits half a second for it to get there. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">setAngleCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">degrees</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_servo</span><span class="p">.</span><span class="na">setAngle</span><span class="p">(</span><span class="n">degrees</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">Commands</span><span class="p">.</span><span class="na">waitSeconds</span><span class="p">(</span><span class="mf">0.5</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Arm to "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">degrees</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" deg"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="nd">@Override</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">periodic</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Angle (deg)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_servo</span><span class="p">.</span><span class="na">getAngle</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>A servo has its own position control built in, so the code only says <strong>where</strong>. It can't report where it really is: <code>getAngle()</code> returns the angle it was <strong>told</strong>, which is why the command waits half a second.</p>
+<p>Now combine everything. In <code>RobotContainer.java</code>, build each routine in its own method:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Drive forward 0.5 m, raise the arm, back up. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">deliverAuto</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span>
-<span class="w">        </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveDistance</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">).</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">4.0</span><span class="p">),</span><span class="w">   </span><span class="c1">// drive out</span>
-<span class="w">        </span><span class="n">intake</span><span class="p">.</span><span class="na">outtake</span><span class="p">().</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">0.5</span><span class="p">),</span><span class="w">                     </span><span class="c1">// score</span>
-<span class="w">        </span><span class="n">Commands</span><span class="p">.</span><span class="na">waitSeconds</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span><span class="w">                            </span><span class="c1">// let the piece clear</span>
-<span class="w">        </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveDistance</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">).</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span><span class="w">   </span><span class="c1">// back up</span>
-<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Score and Back Up"</span><span class="p">);</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>And one that runs mechanisms at the same time, picking up a game piece while driving:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveAndIntake</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">m_arm</span><span class="p">.</span><span class="na">setAngleCommand</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w">                        </span><span class="c1">// arm down</span>
+<span class="w">        </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6</span><span class="p">),</span><span class="w">     </span><span class="c1">// drive out</span>
+<span class="w">        </span><span class="n">m_arm</span><span class="p">.</span><span class="na">setAngleCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">),</span><span class="w">                       </span><span class="c1">// "score"</span>
+<span class="w">        </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6</span><span class="p">)</span><span class="w">     </span><span class="c1">// back up</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Deliver"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** One side of a square: drive 0.4 m, then turn left 90 degrees. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">squareSide</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">turnDegreesCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">));</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Four sides: the robot should end where it started. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">squareAuto</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span><span class="n">squareSide</span><span class="p">(),</span><span class="w"> </span><span class="n">squareSide</span><span class="p">(),</span><span class="w"> </span><span class="n">squareSide</span><span class="p">(),</span><span class="w"> </span><span class="n">squareSide</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Square"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Raise the arm while driving: the drive is the deadline. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveAndRaiseAuto</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">deadline</span><span class="p">(</span>
-<span class="w">        </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveDistance</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4</span><span class="p">).</span><span class="na">withTimeout</span><span class="p">(</span><span class="mf">5.0</span><span class="p">),</span><span class="w">   </span><span class="c1">// the deadline</span>
-<span class="w">        </span><span class="n">intake</span><span class="p">.</span><span class="na">runIntake</span><span class="p">()</span><span class="w">                                     </span><span class="c1">// runs until driving ends</span>
-<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive and Intake"</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="w">        </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">),</span>
+<span class="w">        </span><span class="n">m_arm</span><span class="p">.</span><span class="na">setAngleCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">)</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive and Raise"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
-<p><code>deadline</code> ends when the drive finishes, and cancels the intake at the same moment.</p>
+<p><code>deadline</code> ends when the drive finishes. The arm runs at the same time, because it's a different subsystem.</p>
 <div class="admonition tip">
 <p class="admonition-title">Write autos as named methods</p>
-<p>Build each routine in its own method, like <code>scoreAndBackUp()</code>. Each call makes a <strong>fresh</strong> command object. Reusing one command object in two routines causes an error, because a command can only belong to one composition.</p>
+<p>Each call to a method like <code>squareSide()</code> makes a <strong>fresh</strong> command object. Reusing one command object in two places in a routine causes an error, because a command can only belong to one composition.</p>
 </div>
 <h3 id="let-the-drive-team-choose-selectable">Let the drive team choose: Selectable<a class="headerlink" href="#let-the-drive-team-choose-selectable" title="Permanent link">#</a></h3>
-<p>Different match strategies need different autos. A <code>Selectable</code> (<a href="../robot-code/06b-dashboards.html#a-dropdown-menu-selectable">Lesson 6.1</a>) puts a dropdown menu in Elastic:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+<p>Different strategies need different autos. A <code>Selectable</code> (<a href="../robot-code/06b-dashboards.html#a-dropdown-menu-selectable">Lesson 6.1</a>) puts a dropdown menu in Elastic. Here's the finished <code>RobotContainer.java</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">package</span><span class="w"> </span><span class="nn">frc.robot</span><span class="p">;</span>
 
-<span class="kd">public</span><span class="w"> </span><span class="nf">RobotContainer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// ...subsystems and default commands...</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.MathUtil</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj.xrp.XRPOnBoardIO</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Command</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.Commands</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.button.CommandXboxController</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.wpilibj2.command.button.Trigger</span><span class="p">;</span>
 
-<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">addDefault</span><span class="p">(</span><span class="s">"Do nothing"</span><span class="p">,</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">none</span><span class="p">());</span>
-<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Drive forward 2 m"</span><span class="p">,</span><span class="w"> </span><span class="n">drivetrain</span><span class="p">.</span><span class="na">driveDistance</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">));</span>
-<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Score and back up"</span><span class="p">,</span><span class="w"> </span><span class="n">scoreAndBackUp</span><span class="p">());</span>
-<span class="w">    </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Drive and intake"</span><span class="p">,</span><span class="w"> </span><span class="n">driveAndIntake</span><span class="p">());</span>
-<span class="w">    </span><span class="n">Tunables</span><span class="p">.</span><span class="na">publish</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">,</span><span class="w"> </span><span class="n">autoChooser</span><span class="p">);</span><span class="w">   </span><span class="c1">// shows up as /Tunables/Auto</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.Constants.OIConstants</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.subsystems.Arm</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.subsystems.XRPDrivetrain</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Selectable</span><span class="p">;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">frc.robot.telemetry.Tunables</span><span class="p">;</span>
 
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">RobotContainer</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// The robot's subsystems and the XRP's USER button and LED</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">XRPDrivetrain</span><span class="w"> </span><span class="n">m_drivetrain</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">XRPDrivetrain</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Arm</span><span class="w"> </span><span class="n">m_arm</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Arm</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">XRPOnBoardIO</span><span class="w"> </span><span class="n">m_onboardIO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">XRPOnBoardIO</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// An Xbox controller, or the Sim GUI's keyboard, in Joystick 0</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="w"> </span><span class="n">m_driver</span><span class="w"> </span><span class="o">=</span>
+<span class="w">      </span><span class="k">new</span><span class="w"> </span><span class="n">CommandXboxController</span><span class="p">(</span><span class="n">OIConstants</span><span class="p">.</span><span class="na">kDriverControllerPort</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// The autonomous menu in Elastic</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;</span><span class="n">Command</span><span class="o">&gt;</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Selectable</span><span class="o">&lt;&gt;</span><span class="p">();</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">RobotContainer</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">configureBindings</span><span class="p">();</span>
-<span class="p">}</span>
 
-<span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">autoChooser</span><span class="p">.</span><span class="na">getSelected</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">addDefault</span><span class="p">(</span><span class="s">"Do nothing"</span><span class="p">,</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">none</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Drive 2 s (timed)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveForSecondsCommand</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">));</span>
+<span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Drive 0.5 m"</span><span class="p">,</span><span class="w"> </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6</span><span class="p">));</span>
+<span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Deliver"</span><span class="p">,</span><span class="w"> </span><span class="n">deliverAuto</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Square"</span><span class="p">,</span><span class="w"> </span><span class="n">squareAuto</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">"Drive and raise"</span><span class="p">,</span><span class="w"> </span><span class="n">driveAndRaiseAuto</span><span class="p">());</span>
+<span class="w">    </span><span class="n">Tunables</span><span class="p">.</span><span class="na">publish</span><span class="p">(</span><span class="s">"Auto"</span><span class="p">,</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="p">);</span><span class="w">   </span><span class="c1">// shows up as /Tunables/Auto</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configureBindings</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// One-stick arcade: left stick up/down drives, left/right turns</span>
+<span class="w">    </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">setDefaultCommand</span><span class="p">(</span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">arcadeDriveCommand</span><span class="p">(</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">processAxis</span><span class="p">(</span><span class="n">m_driver</span><span class="p">.</span><span class="na">getLeftY</span><span class="p">())</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speedScale</span><span class="p">(),</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">-</span><span class="n">processAxis</span><span class="p">(</span><span class="n">m_driver</span><span class="p">.</span><span class="na">getLeftX</span><span class="p">())</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">speedScale</span><span class="p">()));</span>
+
+<span class="w">    </span><span class="c1">// A and B move the arm</span>
+<span class="w">    </span><span class="n">m_driver</span><span class="p">.</span><span class="na">a</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_arm</span><span class="p">.</span><span class="na">setAngleCommand</span><span class="p">(</span><span class="mi">0</span><span class="p">));</span>
+<span class="w">    </span><span class="n">m_driver</span><span class="p">.</span><span class="na">b</span><span class="p">().</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_arm</span><span class="p">.</span><span class="na">setAngleCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// The XRP's USER button puts the robot back at the start of the field map</span>
+<span class="w">    </span><span class="k">new</span><span class="w"> </span><span class="n">Trigger</span><span class="p">(</span><span class="n">m_onboardIO</span><span class="p">::</span><span class="n">getUserButtonPressed</span><span class="p">).</span><span class="na">onTrue</span><span class="p">(</span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">resetPoseCommand</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Deadband: treat a stick that's almost centered as exactly centered. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">processAxis</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">raw</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">MathUtil</span><span class="p">.</span><span class="na">applyDeadband</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span><span class="w"> </span><span class="n">OIConstants</span><span class="p">.</span><span class="na">kDeadband</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Slow mode: hold the right bumper for fine control. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">speedScale</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_driver</span><span class="p">.</span><span class="na">rightBumper</span><span class="p">().</span><span class="na">getAsBoolean</span><span class="p">()</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">OIConstants</span><span class="p">.</span><span class="na">kSlowModeScale</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Drive forward 0.5 m, raise the arm, back up. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">deliverAuto</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_arm</span><span class="p">.</span><span class="na">setAngleCommand</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<span class="w">        </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6</span><span class="p">),</span>
+<span class="w">        </span><span class="n">m_arm</span><span class="p">.</span><span class="na">setAngleCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">),</span>
+<span class="w">        </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6</span><span class="p">)</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Deliver"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** One side of a square: drive 0.4 m, then turn left 90 degrees. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">squareSide</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">turnDegreesCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">));</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Four sides: the robot should end where it started. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">squareAuto</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">sequence</span><span class="p">(</span><span class="n">squareSide</span><span class="p">(),</span><span class="w"> </span><span class="n">squareSide</span><span class="p">(),</span><span class="w"> </span><span class="n">squareSide</span><span class="p">(),</span><span class="w"> </span><span class="n">squareSide</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Square"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Raise the arm while driving: the drive is the deadline. */</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">driveAndRaiseAuto</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Commands</span><span class="p">.</span><span class="na">deadline</span><span class="p">(</span>
+<span class="w">        </span><span class="n">m_drivetrain</span><span class="p">.</span><span class="na">driveDistanceCommand</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">),</span>
+<span class="w">        </span><span class="n">m_arm</span><span class="p">.</span><span class="na">setAngleCommand</span><span class="p">(</span><span class="mi">90</span><span class="p">)</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Drive and Raise"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">getAutonomousCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_autoChooser</span><span class="p">.</span><span class="na">getSelected</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The drive team picks a routine in Elastic (<strong>Tunables → Auto</strong>, shown as a <strong>ComboBox Chooser</strong>) before the match. Make <strong>"Do nothing"</strong> the default, so a robot whose drive team forgot to choose sits still instead of running a routine meant for a different starting spot.</p>
 <h3 id="testing-autos">Testing autos<a class="headerlink" href="#testing-autos" title="Permanent link">#</a></h3>
 <ol>
-<li><strong>In simulation first.</strong> Watch the dashboard distance and command names. Does each step start and end when you expect?</li>
-<li><strong>On blocks.</strong> Wheels off the ground, check every step runs in order and the motors stop at the end.</li>
-<li><strong>On the floor</strong>, in open space, with a person ready to disable. Mark the starting position with tape so every test starts the same way.</li>
-<li>Test with a <strong>partly drained battery</strong> too. That's what you'll have in some matches.</li>
+<li><strong>In simulation first</strong> (XRP Client off). Watch the robot on the field map and the command names. Does each step start and end when you expect? Does the square close?</li>
+<li><strong>Wheels off the table</strong>, XRP Client on: check every step runs in order and the motors stop at the end.</li>
+<li><strong>On the floor</strong>, in open space, with your hand ready on the Sim GUI's <strong>Disabled</strong> button. Put a tape mark where the robot starts so every test starts the same way.</li>
+<li>Test with <strong>tired batteries</strong> too. That's what you'll have after an hour of practice.</li>
 </ol>
+<table>
+<thead>
+<tr>
+<th>Run</th>
+<th>Auto</th>
+<th>Where it ended vs. where it should (cm)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Drive 2 s (timed)</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Drive 0.5 m</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Square</td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
 <div class="admonition tip">
 <p class="admonition-title">Have the West Coast Drive?</p>
-<p><a href="../testbed/lab7-timed-auto.html">Lab 7: Timed Autonomous</a> builds a timed auto with a chooser on the real robot.</p>
+<p><a href="../testbed/lab7-timed-auto.html">Lab 7</a> and <a href="../testbed/lab8-navx-gyro.html">Lab 8</a> build the same timed, distance, and gyro autos on the full-size robot.</p>
 </div>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>driveForSeconds</code> and run it in simulation (select <strong>Autonomous</strong>, then enable)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>driveDistance</code> and confirm on the dashboard that it stops near the target distance</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build <code>scoreAndBackUp()</code> and watch each step on the scheduler dashboard</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a <code>Selectable</code> with at least three options, with "Do nothing" as the default</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Build a routine that uses <code>deadline</code> to run the intake while driving</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: write <code>turnDegrees(double degrees)</code> using the gyro from <a href="../robot-code/08-sensors.html">Lesson 8</a>, and use it to drive a square</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>driveForSecondsCommand</code> and run it in simulation, then on the XRP</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>driveDistanceCommand</code> and measure how far past 0.5 m it stops, at speeds 0.4, 0.6, and 0.8</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>turnDegreesCommand</code> and measure how far past 90° it turns</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add the <code>Arm</code> subsystem and move it with A and B</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add the <code>Selectable</code> and run every auto from Elastic</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Run the square three times. Does it close? Fill in the table.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: make <code>driveDistanceCommand</code> slow down for the last 0.1 m, like a two-speed turn</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: use the line sensor (<code>XRPReflectanceSensor</code>) to drive until the XRP reaches a strip of black tape</li>
 </ul>
 <h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
 <details class="question">
@@ -258,19 +438,23 @@ try {
 <p>A <code>race</code> ends when <strong>any</strong> of its commands ends. A <code>deadline</code> ends when one <strong>specific</strong> command (the first one) ends.</p>
 </details>
 <details class="question">
-<summary>Why are timed autos unreliable?</summary>
-<p>The same motor output moves the robot different distances depending on battery charge, wheel wear, and carpet.</p>
+<summary>Why are timed autos unreliable, especially on an XRP?</summary>
+<p>The same motor output moves the robot different distances depending on battery charge, the floor, and wear. AA batteries lose voltage quickly, so the XRP's timed drives change a lot.</p>
 </details>
 <details class="question">
-<summary>Why add a timeout to a distance-based command?</summary>
-<p>If the encoder fails, the distance never reaches the target, and without a timeout the robot would drive forever.</p>
+<summary>Why does <code>driveDistanceCommand</code> remember a target instead of resetting the encoders?</summary>
+<p>So it works from wherever the robot is, and so it doesn't disturb the odometry, which needs the encoders to keep counting.</p>
+</details>
+<details class="question">
+<summary>Why does <code>setAngleCommand</code> wait half a second?</summary>
+<p>A servo can't report where it really is. The wait gives it time to get there before the next step.</p>
 </details>
 <details class="question">
 <summary>Why should 'Do nothing' be the default auto?</summary>
-<p>If the drive team forgets to pick, the robot stays still instead of running a routine meant for a different starting position, which could hit another robot or a field element.</p>
+<p>If the drive team forgets to pick, the robot stays still instead of running a routine meant for a different starting position.</p>
 </details>
     </article>
-    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="10-teleop.html"><span>Previous</span>10. Teleop</a><a class="pager-next" href="../controls/12-pid.html"><span>Next</span>12. PID Feedback</a></nav>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="10-teleop.html"><span>Previous</span>10.1 Teleop on the XRP</a><a class="pager-next" href="../controls/12-pid.html"><span>Next</span>12. PID Feedback</a></nav>
   </main>
 </div>
 <div class="search-panel" hidden>

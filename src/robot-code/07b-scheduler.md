@@ -164,7 +164,7 @@ Here's how the scheduler decides, as a flowchart:
     If a command uses a motor but doesn't require its subsystem, the scheduler can't protect it. Two commands will both run and fight over the motor every loop, and the mechanism twitches or does whichever one ran last. Using the subsystem's own factories avoids this.
 
 ### Default commands
-A **default command** runs whenever nothing else requires its subsystem. The drivetrain's joystick command from [Lesson 10](../project/10-teleop.md) is the classic example.
+A **default command** runs whenever nothing else requires its subsystem. The drivetrain's joystick command from [Lesson 10.1](../project/10-teleop.md) is the classic example.
 
 - When another command takes the subsystem, the default command is **interrupted**.
 - When that command ends, the scheduler **restarts** the default command in step 6 of the same loop.

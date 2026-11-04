@@ -130,7 +130,7 @@ Click **←** to go back, then **+** on the **Autos** side. Name it `Two Paths`.
 
 <p class="credit">The auto editor. From the <a href="https://pathplanner.dev/gui-editing-paths-and-autos.html">PathPlanner docs</a>, © Michael Jansen (MIT).</p>
 
-An auto is a **sequential group**: commands that run one after another, like `andThen` in [Lesson 11](../project/11-autonomous.md).
+An auto is a **sequential group**: commands that run one after another, like `andThen` in [Lesson 10.2](../project/11-autonomous.md).
 
 1. Click **+** next to **Sequential Group** and pick **Follow Path**. Choose `Forward 2m`.
 2. Click **+** again and add a **Wait** of 1 second.

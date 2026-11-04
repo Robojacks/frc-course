@@ -19,6 +19,8 @@ Each folder is a complete **WPILib 2026** Java project: the robot code exactly a
 | [Lab 10](../src/testbed/lab10-elevator.md) | [`lab10-elevator`](lab10-elevator/) | WestCoastDrive |
 | [Lab 11](../src/testbed/lab11-odometry.md) | [`lab11-odometry`](lab11-odometry/) | WestCoastDrive |
 | [Lesson 21.1](../src/going-further/21b-swerve-maxswerve.md) | [`swerve-maxswerve`](swerve-maxswerve/) | SwerveMAXSwerve |
+| [Lesson 10.2](../src/project/11-autonomous.md) | [`xrp-autonomous`](xrp-autonomous/) | XRPDrive |
+| [Lesson 10.1](../src/project/10-teleop.md) | [`xrp-teleop`](xrp-teleop/) | XRPDrive |
 
 Labs on the test bed build up the **TestBed** project; labs on the West Coast Drive build up the
 **WestCoastDrive** project. Each folder includes everything from the labs before it in the same project.

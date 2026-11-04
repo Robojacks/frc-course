@@ -744,6 +744,33 @@ public class RobotContainer {{
     yield "lab11-odometry", "Lab 11", "lab11-odometry.md", dict(files), ["REVLib", "Studica"]
 
 
+def xrp_states():
+    """Lessons 10.1 and 10.2: the XRPDrive project."""
+    l101 = (ROOT / "src" / "project" / "10-teleop.md").read_text()
+    l102 = (ROOT / "src" / "project" / "11-autonomous.md").read_text()
+    drive = java_block(l101, "public class XRPDrivetrain")
+    files = {
+        "Main.java": MAIN,
+        "Robot.java": template_robot(),
+        "Constants.java": java_block(l101, "public final class Constants"),
+        "RobotContainer.java": java_block(l101, "public class RobotContainer"),
+        "subsystems/XRPDrivetrain.java": drive,
+    }
+    files.update(library_files())
+    yield "xrp-teleop", "Lesson 10.1", "project/10-teleop.md", dict(files), ["XRPVendordep.json"]
+
+    for marker in ("public Command driveForSecondsCommand(", "private double m_distanceTarget",
+                   "private double m_turnTarget"):
+        drive = edit(drive, "\n  @Override\n  public void periodic()",
+                     "\n" + java_block(l102, marker), where="before")
+    files.update({
+        "subsystems/XRPDrivetrain.java": drive,
+        "subsystems/Arm.java": java_block(l102, "public class Arm"),
+        "RobotContainer.java": java_block(l102, "public class RobotContainer"),
+    })
+    yield "xrp-autonomous", "Lesson 10.2", "project/11-autonomous.md", dict(files), ["XRPVendordep.json"]
+
+
 def swerve_states():
     """Lesson 21.1: the team's MAXSwerve project, course version."""
     page = (ROOT / "src" / "going-further" / "21b-swerve-maxswerve.md").read_text()
@@ -835,7 +862,8 @@ def write_project(folder, lab, page, files, deps, template, vendordeps, project_
             shutil.copy2(source, target)
 
     hardware = {"TestBed": "the test bed (team 4674)",
-                "SwerveMAXSwerve": "the REV MAXSwerve drivetrain (team 4674)"}.get(project_name, "the West Coast Drive (team 4674)")
+                "SwerveMAXSwerve": "the REV MAXSwerve drivetrain (team 4674)",
+                "XRPDrive": "an XRP robot (the code runs on your laptop; see Lesson 10)"}.get(project_name, "the West Coast Drive (team 4674)")
     page_link = f"../../src/{page}" if "/" in page else f"../../src/testbed/{page}"
     (dest / "README.md").write_text(f"""# {lab} finished code ({project_name})
 
@@ -867,6 +895,11 @@ def main():
         for folder, lab, page, files, deps in states:
             write_project(folder, lab, page, files, deps, args.template, args.vendordeps, project)
             made.append((folder, lab, page, project))
+    xrp_template = ROOT / "tools" / "xrp-project-template"
+    for folder, lab, page, files, deps in xrp_states():
+        write_project(folder, lab, page, files, deps, xrp_template, args.vendordeps, "XRPDrive",
+                      base="the WPILib 2026 XRP - Command Robot template")
+        made.append((folder, lab, page, "XRPDrive"))
     for folder, lab, page, files, deps, base, extra in swerve_states():
         write_project(folder, lab, page, files, deps, args.template, args.vendordeps, "SwerveMAXSwerve",
                       base=base, extra=extra)

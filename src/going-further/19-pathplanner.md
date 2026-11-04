@@ -1,7 +1,7 @@
 # 19. Autos with PathPlanner
 
 ## Why it matters
-The autos from [Lesson 11](../project/11-autonomous.md) and [Lab 8](../testbed/lab8-navx-gyro.md) are lists of moves: drive 1 m, turn 90°, drive 1 m. Each move stops before the next one starts, and every stop wastes time.
+The autos from [Lesson 10.2](../project/11-autonomous.md) and [Lab 8](../testbed/lab8-navx-gyro.md) are lists of moves: drive 1 m, turn 90°, drive 1 m. Each move stops before the next one starts, and every stop wastes time.
 
 **PathPlanner** lets you **draw** a smooth path on a picture of the field and have the robot follow it at full speed, curving through turns without stopping. You can drop actions onto the path ("start the intake here") and chain paths into whole autos, all without changing robot code.
 
@@ -171,7 +171,7 @@ To run a mechanism during an auto, register it by name **before** building any a
 In the app, add a **Named Command** block to an auto (between paths), or an **event marker** on a path (runs while driving), and type the same name.
 
 ### Step 7: Pick an auto in Elastic
-Lesson 11's `Selectable` menu still works. Add every PathPlanner auto to it by name:
+Lesson 10.2's `Selectable` menu still works. Add every PathPlanner auto to it by name:
 
 ```java
     m_autoChooser.addDefault("Do nothing", Commands.none());

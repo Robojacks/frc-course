@@ -65,7 +65,7 @@ try {
 <li><strong>Inversion:</strong> why one side of the robot has to run "backward"</li>
 <li><strong>Skid steer driving:</strong> each joystick runs one side of the robot, just like the two levers on a skid steer loader</li>
 </ul>
-<p><strong>Before you start:</strong> finish <a href="lab1b-dashboard.html">Lab 1.1</a>. <a href="../project/10-teleop.html">Lesson 10</a> explains the drive code in more depth; read it before or after.</p>
+<p><strong>Before you start:</strong> finish <a href="lab1b-dashboard.html">Lab 1.1</a>. <a href="../project/10-teleop.html">Lesson 10.1</a> explains the drive code in more depth, on the XRP; read it before or after.</p>
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
 <li><a href="https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html">Using the WPILib Drive Classes</a></li>
@@ -500,7 +500,7 @@ try {
 </tr>
 </tbody>
 </table>
-<p><code>m_drive.tankDrive(left, right)</code> sends those two values straight to the two sides. It also <strong>squares</strong> them by default, which gives finer control at low speed: half stick gives about a quarter of full speed (<a href="../project/10-teleop.html">Lesson 10</a>).</p>
+<p><code>m_drive.tankDrive(left, right)</code> sends those two values straight to the two sides. It also <strong>squares</strong> them by default, which gives finer control at low speed: half stick gives about a quarter of full speed (<a href="../project/10-teleop.html">Lesson 10.1</a>).</p>
 <div class="admonition warning">
 <p class="admonition-title">Rename the template's controller first</p>
 <p>The WPILib template names the controller <code>m_driverController</code>, and its port <code>kDriverControllerPort</code>. This course calls them <strong><code>m_controller</code></strong> and <strong><code>kControllerPort</code></strong>. In VS Code, click on <code>m_driverController</code>, press <span class="keys"><kbd class="key-f2">F2</kbd></span> (<strong>Rename Symbol</strong>), and type <code>m_controller</code>. Do the same for <code>kDriverControllerPort</code> → <code>kControllerPort</code>. <span class="keys"><kbd class="key-f2">F2</kbd></span> renames every use at once, so nothing breaks.</p>

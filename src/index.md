@@ -2,7 +2,7 @@
 
 A hands-on tutorial course for high school FRC students. It starts with installing the tools and goes through PID, feedforward, SysId, and motion profiles, then odometry, vision, PathPlanner, logging, and swerve: the same techniques top teams use.
 
-You don't need any programming experience to start. You don't need a robot for most of it, either. Nearly every exercise runs in simulation on your laptop.
+You don't need any programming experience to start. You don't need a robot for most of it, either. Nearly every exercise runs in simulation on your laptop, and the drivetrain project runs on a small **XRP** robot you can keep on your desk.
 
 <a class="cta" href="testbed/index.html">🔧 Go to the Test Bed Labs</a>
 
@@ -39,7 +39,7 @@ Every lesson follows the same shape:
 flowchart LR
     A[Foundations<br/>0–3] --> B[Hardware<br/>4–5]
     B --> C[Robot Code<br/>6–9]
-    C --> D[Drivetrain Project<br/>10–11]
+    C --> D[XRP Robot Project<br/>10]
     D --> E[Controls<br/>12–14]
     D --> F[Team Workflow<br/>15–16]
     E --> G[Going Further<br/>17–21]
@@ -50,7 +50,7 @@ flowchart LR
 | **Foundations** | 0–3 | Set up WPILib, use Git and the terminal, and look up the Java robot code uses |
 | **Hardware** | 4–5 | Trace power and data through the robot; know our motors (NEO, CIM, 775pro), the SPARK MAX, and our sensors; control pneumatics |
 | **Robot Code** | 6–9 | Explain the 20 ms loop and the command scheduler, write subsystems and commands, read sensors in real units, debug in simulation |
-| **Drivetrain Project** | 10–11 | Build a driveable robot with good controls and distance-based autonomous routines |
+| **XRP Robot Project** | 10–10.2 | Set up your own XRP robot, run code in simulation and on the robot, and build a drivetrain with good controls and sensor-based autonomous routines |
 | **Controls** | 12–14 | Tune PID, add feedforward, characterize mechanisms with SysId, use motion profiles |
 | **Team Workflow** | 15–16 | Work on a shared codebase with branches, reviews, unit tests, and CI |
 | **Going Further** | 17–21 | Track the robot's pose with odometry and AprilTag vision, follow PathPlanner paths, debug matches from logs, and understand swerve |
