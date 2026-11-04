@@ -51,7 +51,7 @@ try {
   <aside class="sidebar">
     <details class="sidebar-toggle" open>
       <summary>Lessons menu</summary>
-      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li><li><a href="../path.html">Course Path</a></li></ul></details>
 <details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
 <details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
 <details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
@@ -66,6 +66,7 @@ try {
   <main id="content" class="content">
     <article>
 <h1 id="19-autos-with-pathplanner">19. Autos with PathPlanner<a class="headerlink" href="#19-autos-with-pathplanner" title="Permanent link">#</a></h1>
+<div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 8: Going further · step 40 of 46</p></div>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>The autos from <a href="../project/11-autonomous.html">Lesson 10.2</a> and <a href="../testbed/lab8-navx-gyro.html">Lab 8</a> are lists of moves: drive 1 m, turn 90°, drive 1 m. Each move stops before the next one starts, and every stop wastes time.</p>
 <p><strong>PathPlanner</strong> lets you <strong>draw</strong> a smooth path on a picture of the field and have the robot follow it at full speed, curving through turns without stopping. You can drop actions onto the path ("start the intake here") and chain paths into whole autos, all without changing robot code.</p>

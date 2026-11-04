@@ -9,7 +9,7 @@ The drivetrain is the most important mechanism on any robot: if it can't drive w
 - **Inversion:** why one side of the robot has to run "backward"
 - **Skid steer driving:** each joystick runs one side of the robot, just like the two levers on a skid steer loader
 
-**Before you start:** finish [Lab 1.1](lab1b-dashboard.md). [Lesson 10.1](../project/10-teleop.md) explains the drive code in more depth, on the XRP; read it before or after.
+**Before you start:** finish [Lab 1.1](lab1b-dashboard.md). Do [Lesson 10.1](../project/10-teleop.md) on an XRP first if you can: this lab is the same drivetrain code on the full-size robot, with SPARK MAXes and CIMs instead of XRP motors.
 
 ## Read this
 - [Using the WPILib Drive Classes](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/wpi-drive-classes.html)

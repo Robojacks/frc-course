@@ -51,7 +51,7 @@ try {
   <aside class="sidebar">
     <details class="sidebar-toggle" open>
       <summary>Lessons menu</summary>
-      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li></ul></details>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li><li><a href="../path.html">Course Path</a></li></ul></details>
 <details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
 <details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
 <details class="nav-section" open><summary>Robot Code</summary><ul><li><a href="06-robot-program.html" class="current" aria-current="page">6. How a Robot Program Runs</a></li><li><a href="06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="07-command-based.html">7. Command-Based Programming</a></li><li><a href="07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
@@ -66,6 +66,7 @@ try {
   <main id="content" class="content">
     <article>
 <h1 id="6-how-a-robot-program-runs">6. How a Robot Program Runs<a class="headerlink" href="#6-how-a-robot-program-runs" title="Permanent link">#</a></h1>
+<div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 2: Your first robot code · step 9 of 46</p><p><strong>Practice it in:</strong> <a href="../testbed/lab0-first-project.html">Lab 0: Set Up the TestBed Project</a>, <a href="../testbed/lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></p></div>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>Robot code is not like a normal program that starts, runs top to bottom, and exits. A robot program starts once and then <strong>repeats the same code about 50 times a second</strong> until the robot is turned off. Every sensor read, motor command, and button check happens inside that repeating loop.</p>
 <p>Once you understand <strong>the loop</strong>, everything else in this course makes sense: why you never wait inside your code, why commands are built the way they are, and why "loop overrun" warnings matter.</p>
@@ -296,7 +297,7 @@ try {
 <p>Start a <code>Timer</code> when the action begins, then check <code>timer.get()</code> every loop and stop the motor once it passes 2 seconds.</p>
 </details>
     </article>
-    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../hardware/05-pneumatics.html"><span>Previous</span>5. Pneumatics</a><a class="pager-next" href="06b-dashboards.html"><span>Next</span>6.1 Dashboards: NetworkTables and Elastic</a></nav>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../hardware/04c-spark-max.html"><span>Previous</span>4.2 The SPARK MAX</a><a class="pager-next" href="07-command-based.html"><span>Next</span>7. Command-Based Programming</a></nav>
   </main>
 </div>
 <div class="search-panel" hidden>

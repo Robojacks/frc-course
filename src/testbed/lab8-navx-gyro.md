@@ -7,7 +7,7 @@ A **gyro** fixes that. It measures how far the robot has **rotated**, so instead
 
 Then you'll fix the other half of the square. The sides were timed too. The WCD has an **encoder** on each gearbox, so you'll measure how far each side has rolled, in meters, and drive exact distances. By the end, the square is driven entirely by sensors: **encoders** for the straight sides and the **gyro** for the turns.
 
-**Before you start:** finish [Lab 7](lab7-timed-auto.md) and keep its repeatability table. You'll add to the same **WestCoastDrive** project. [Lesson 8](../robot-code/08-sensors.md) covers gyros. Lesson [4.3](../hardware/04d-sensors.md) covers the NavX2's hardware and mounting.
+**Before you start:** finish [Lab 7](lab7-timed-auto.md) and keep its repeatability table. You'll add to the same **WestCoastDrive** project. [Lesson 8](../robot-code/08-sensors.md) covers gyros. Lesson [4.3](../hardware/04d-sensors.md) covers the NavX2's hardware and mounting. [Lesson 10.2](../project/11-autonomous.md) does the same distance and gyro turns on the XRP.
 
 ## Read this
 - [Gyroscopes – Software](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/sensors/gyros-software.html)

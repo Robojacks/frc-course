@@ -178,6 +178,23 @@ img { max-width: 100%; }
 .search-snippet { display: block; font-size: .9rem; color: var(--text-muted); margin-top: 3px; overflow-wrap: anywhere; }
 .search-results mark { background: rgba(179,32,42,.18); color: inherit; border-radius: 2px; padding: 0 1px; }
 
+/* ---------- Course path: the box under each title, and the Course Path page ---------- */
+.path-box {
+  margin: -4px 0 22px; padding: 10px 14px; border: 1px solid var(--border);
+  border-left: 4px solid var(--brand); border-radius: 6px; background: var(--surface); font-size: .92rem;
+}
+.path-box p { margin: 4px 0; }
+.path-box .path-where { color: var(--text-muted); font-size: .85rem; }
+.path-list { padding-left: 2.4em; }
+.path-list li { margin: 6px 0; }
+.path-kind {
+  display: inline-block; min-width: 4.2em; text-align: center; margin-right: 6px;
+  padding: 1px 6px; border-radius: 4px; font: 700 .72rem var(--font-body); text-transform: uppercase;
+  letter-spacing: .04em; color: #fff; background: var(--brand);
+}
+.path-lab .path-kind, .path-kind-lab { background: var(--plaid-light); }
+.path-then { color: var(--text-muted); font-size: .88rem; }
+
 /* ---------- Tabs (Lessons / Labs) ---------- */
 .tabs { background: var(--plaid-dark); border-top: 1px solid rgba(255,255,255,.12); }
 .tabs-inner {

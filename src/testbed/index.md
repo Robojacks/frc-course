@@ -2,7 +2,7 @@
 
 Labs are hands-on exercises on the team's **test bed**: a board with real robot electronics on it, so you can write code and watch it run on real hardware without needing the competition robot.
 
-The **Lessons** tab teaches the ideas. The **Labs** tab is where you try them on hardware.
+The **Lessons** tab teaches the ideas. The **Labs** tab is where you try them on hardware. The [Course Path](../path.md) shows which lessons to read before each lab.
 
 ## The labs
 

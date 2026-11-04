@@ -5,7 +5,7 @@ The first 15 seconds of every FRC match are **autonomous**: the robot runs entir
 
 In this lab you'll make the West Coast Drive drive a pattern by itself, and let the drive team pick which pattern from a menu on the dashboard. You'll use only **time** to decide how far to go, and you'll find out why that's not good enough. That sets up [Lab 8](lab8-navx-gyro.md), where the robot uses a gyro to know how far it has really turned.
 
-**Before you start:** finish [Lab 2](lab2-west-coast-drive.md). You'll add to the same **WestCoastDrive** project. [Lesson 10.2](../project/11-autonomous.md) covers autonomous in more depth.
+**Before you start:** finish [Lab 2](lab2-west-coast-drive.md). You'll add to the same **WestCoastDrive** project. [Lesson 10.2](../project/11-autonomous.md) builds the same timed autos on the XRP; do it first if you can.
 
 ## Read this
 - [Command Compositions](https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html)

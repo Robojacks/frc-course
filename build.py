@@ -31,7 +31,7 @@ SITE_SUBTITLE = "FRC Programming Course"
 
 # (section, [(title, path), ...]). This is the site's navigation and lesson order.
 NAV = [
-    ("Start", [("Home", "index.md")]),
+    ("Start", [("Home", "index.md"), ("Course Path", "path.md")]),
     ("Foundations", [
         ("0. Setup", "foundations/00-setup.md"),
         ("1. Git & Version Control", "foundations/01-git.md"),
@@ -119,6 +119,120 @@ TABS = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# The course path: the one order to do everything in, lessons and labs mixed.
+# Every page on it gets a "where this fits" box, and its Previous/Next buttons
+# follow this order instead of the menu. Lab numbers stay in order along it.
+COURSE_PATH = [
+    ("Get set up", [
+        "foundations/00-setup.md", "foundations/01-git.md", "foundations/02-terminal.md",
+        "foundations/03-java.md", "testbed/lab0-first-project.md"]),
+    ("Your first robot code", [
+        "hardware/04-electronics.md", "hardware/04b-motors.md", "hardware/04c-spark-max.md",
+        "robot-code/06-robot-program.md", "robot-code/07-command-based.md", "testbed/lab1-spin-motor.md",
+        "robot-code/06b-dashboards.md", "testbed/lab1b-dashboard.md"]),
+    ("Drive a robot", [
+        "robot-code/09-debugging.md", "project/10-xrp.md", "project/10-teleop.md",
+        "testbed/lab2-west-coast-drive.md"]),
+    ("Buttons and sensors", [
+        "robot-code/07b-scheduler.md", "testbed/lab3-buttons-triggers.md", "hardware/04d-sensors.md",
+        "robot-code/08-sensors.md", "testbed/lab4-limit-switch.md", "testbed/lab5-knob-speed.md",
+        "testbed/lab6-encoder.md", "hardware/05-pneumatics.md"]),
+    ("Autonomous", [
+        "project/11-autonomous.md", "testbed/lab7-timed-auto.md", "testbed/lab8-navx-gyro.md"]),
+    ("Control", [
+        "controls/12-pid.md", "testbed/lab9-pid-wheel.md", "controls/13-feedforward.md",
+        "controls/13b-sysid.md", "controls/14-profiles.md", "testbed/lab10-elevator.md"]),
+    ("Working as a team", [
+        "workflow/15-team-process.md", "workflow/16-unit-testing.md"]),
+    ("Going further", [
+        "going-further/17-odometry.md", "testbed/lab11-odometry.md", "going-further/18-vision.md",
+        "going-further/19-pathplanner.md", "going-further/19b-pathplanner-app.md",
+        "going-further/20-logging.md", "going-further/21-swerve.md", "going-further/21b-swerve-maxswerve.md",
+        "going-further/21c-swerve-ctre.md", "going-further/21d-phoenix-tuner.md"]),
+]
+
+# Where each lesson gets practiced. Labs list the reverse automatically ("Learn it in").
+PRACTICE = {
+    "foundations/00-setup.md": ["testbed/lab0-first-project.md"],
+    "foundations/01-git.md": ["testbed/lab0-first-project.md"],
+    "foundations/03-java.md": ["testbed/lab1-spin-motor.md"],
+    "hardware/04-electronics.md": ["testbed/lab0-first-project.md", "testbed/lab2-west-coast-drive.md"],
+    "hardware/04b-motors.md": ["testbed/lab1-spin-motor.md", "testbed/lab2-west-coast-drive.md",
+                               "testbed/lab6-encoder.md", "testbed/lab10-elevator.md"],
+    "hardware/04c-spark-max.md": ["testbed/lab1-spin-motor.md", "testbed/lab2-west-coast-drive.md"],
+    "hardware/04d-sensors.md": ["testbed/lab4-limit-switch.md", "testbed/lab5-knob-speed.md",
+                                "testbed/lab6-encoder.md", "testbed/lab8-navx-gyro.md",
+                                "testbed/lab10-elevator.md"],
+    "robot-code/06-robot-program.md": ["testbed/lab0-first-project.md", "testbed/lab1-spin-motor.md"],
+    "robot-code/06b-dashboards.md": ["testbed/lab1b-dashboard.md"],
+    "robot-code/07-command-based.md": ["testbed/lab1-spin-motor.md", "testbed/lab3-buttons-triggers.md"],
+    "robot-code/07b-scheduler.md": ["testbed/lab3-buttons-triggers.md"],
+    "robot-code/08-sensors.md": ["testbed/lab4-limit-switch.md", "testbed/lab5-knob-speed.md",
+                                 "testbed/lab6-encoder.md", "testbed/lab8-navx-gyro.md"],
+    "robot-code/09-debugging.md": ["project/10-xrp.md"],
+    "project/10-xrp.md": ["testbed/lab2-west-coast-drive.md"],
+    "project/10-teleop.md": ["testbed/lab2-west-coast-drive.md"],
+    "project/11-autonomous.md": ["testbed/lab7-timed-auto.md", "testbed/lab8-navx-gyro.md"],
+    "controls/12-pid.md": ["testbed/lab9-pid-wheel.md", "testbed/lab10-elevator.md"],
+    "controls/14-profiles.md": ["testbed/lab10-elevator.md"],
+    "going-further/17-odometry.md": ["testbed/lab11-odometry.md"],
+}
+
+PATH_ORDER = [p for _, pages in COURSE_PATH for p in pages]
+
+
+def all_titles() -> dict:
+    return {p: t for _, _, nav in TABS for _, pages in nav for t, p in pages}
+
+
+def path_part(path: str):
+    for n, (part, pages) in enumerate(COURSE_PATH, 1):
+        if path in pages:
+            return n, part
+    return None
+
+
+def render_path_box(current: str) -> str:
+    """The "where this fits" box under each page's title."""
+    if current not in PATH_ORDER:
+        return ""
+    titles = all_titles()
+    link = lambda p: f'<a href="{rel(out_path(current), out_path(p))}">{html.escape(titles[p])}</a>'
+    n, part = path_part(current)
+    i = PATH_ORDER.index(current)
+    rows = [f'<p class="path-where"><a href="{rel(out_path(current), "path.html")}">Course path</a> · '
+            f'Part {n}: {html.escape(part)} · step {i + 1} of {len(PATH_ORDER)}</p>']
+    if current.startswith("testbed/"):
+        learn = [l for l in PATH_ORDER if current in PRACTICE.get(l, [])]
+        if learn:
+            rows.append(f'<p><strong>Learn it in:</strong> {", ".join(link(p) for p in learn)}</p>')
+    else:
+        practice = PRACTICE.get(current, [])
+        if practice:
+            rows.append(f'<p><strong>Practice it in:</strong> {", ".join(link(p) for p in practice)}</p>')
+    return '<div class="path-box">' + "".join(rows) + "</div>"
+
+
+def render_course_path() -> str:
+    """The Course Path page's list of every step."""
+    titles = all_titles()
+    out, step = [], 0
+    for n, (part, pages) in enumerate(COURSE_PATH, 1):
+        out.append(f'<h2 id="part-{n}">Part {n}: {html.escape(part)}</h2>\n<ol class="path-list" start="{step + 1}">')
+        for p in pages:
+            step += 1
+            kind = "Lab" if p.startswith("testbed/") else "Lesson"
+            extra = ""
+            if kind == "Lesson" and PRACTICE.get(p):
+                extra = ' <span class="path-then">→ practiced in ' + ", ".join(
+                    titles[l].split(":")[0] for l in PRACTICE[p]) + "</span>"
+            out.append(f'<li class="path-{kind.lower()}"><span class="path-kind">{kind}</span> '
+                       f'<a href="{out_path(p)}">{html.escape(titles[p])}</a>{extra}</li>')
+        out.append("</ol>")
+    return "\n".join(out)
+
+
 def tab_for(path: str):
     """The tab a page belongs to."""
     for tab in TABS:
@@ -179,7 +293,11 @@ def render_nav(current: str) -> str:
 
 
 def render_pager(current: str) -> str:
-    flat = [(t, p) for _, pages in tab_for(current)[2] for t, p in pages]
+    if current in PATH_ORDER:
+        titles = all_titles()
+        flat = [(titles[p], p) for p in PATH_ORDER]
+    else:
+        flat = [(t, p) for _, pages in tab_for(current)[2] for t, p in pages]
     i = next(i for i, (_, p) in enumerate(flat) if p == current)
     links = []
     if i > 0:
@@ -406,6 +524,11 @@ def build():
         src = (SRC / path).read_text(encoding="utf-8")
         md = markdown.Markdown(extensions=MD_EXTENSIONS, extension_configs=MD_CONFIG)
         body = fix_links(md.convert(src))
+        if "<!-- COURSE_PATH -->" in body:
+            body = body.replace("<!-- COURSE_PATH -->", render_course_path())
+        box = render_path_box(path)
+        if box:
+            body = body.replace("</h1>", "</h1>\n" + box, 1)
         dest = OUT / out_path(path)
         dest.parent.mkdir(parents=True, exist_ok=True)
         depth = out_path(path).count("/")

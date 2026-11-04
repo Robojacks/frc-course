@@ -57,6 +57,7 @@ try {
   <main id="content" class="content">
     <article>
 <h1 id="lab-11-track-the-robot-on-the-field-odometry">Lab 11: Track the Robot on the Field (Odometry)<a class="headerlink" href="#lab-11-track-the-robot-on-the-field-odometry" title="Permanent link">#</a></h1>
+<div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 8: Going further · step 38 of 46</p><p><strong>Learn it in:</strong> <a href="../going-further/17-odometry.html">17. Poses and Odometry</a></p></div>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>In <a href="lab8-navx-gyro.html">Lab 8</a>, the robot learned two things: how far each side has rolled (the encoders) and which way it's facing (the NavX2). Each answer is useful on its own. Put together, they answer a much bigger question: <strong>where is the robot on the field?</strong></p>
 <p>That's <strong>odometry</strong>. Every 20 ms, the robot asks "how far did I just roll, and which way was I facing?" and adds that small step to its position. Do that 50 times a second and you get a running estimate of the robot's <strong>pose</strong>: its X and Y position in meters, and its heading.</p>
@@ -431,7 +432,7 @@ Sends the whole <code>Pose2d</code> as one value. Elastic can't graph it, but Ad
 </details>
 <p class="credit">Parts of this lab are adapted from the Odometry and Pose Estimation Calibration lessons of <a href="https://github.com/itkan-robotics/mantik">Mantik</a> by Itkan Robotics (CC BY 4.0), rewritten for the RoboJacks West Coast Drive.</p>
     </article>
-    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab10-elevator.html"><span>Previous</span>Lab 10: Elevator Position Control</a></nav>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../going-further/17-odometry.html"><span>Previous</span>17. Poses and Odometry</a><a class="pager-next" href="../going-further/18-vision.html"><span>Next</span>18. Vision: AprilTags and PhotonVision</a></nav>
   </main>
 </div>
 <div class="search-panel" hidden>

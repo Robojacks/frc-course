@@ -4,9 +4,9 @@ A hands-on tutorial course for high school FRC students. It starts with installi
 
 You don't need any programming experience to start. You don't need a robot for most of it, either. Nearly every exercise runs in simulation on your laptop, and the drivetrain project runs on a small **XRP** robot you can keep on your desk.
 
-<a class="cta" href="testbed/index.html">🔧 Go to the Test Bed Labs</a>
+<a class="cta" href="path.html">🧭 Follow the Course Path</a> <a class="cta" href="testbed/index.html">🔧 Go to the Test Bed Labs</a>
 
-Two tabs at the top of every page switch between the **Lessons** and the **Labs**.
+Two tabs at the top of every page switch between the **Lessons** and the **Labs**. The [Course Path](path.md) puts them in one order: read a lesson, practice it in a lab, move on.
 
 ## Before you start: learn Java
 This course doesn't teach Java from scratch. Before the labs, work through an interactive Java course:
