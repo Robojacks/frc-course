@@ -134,8 +134,13 @@ The **Robot Code** light is probably red. That's fine: there's no code on the ro
 !!! info "The roboRIO must be set up for this season"
     Each season, the roboRIO gets a new system image that matches that year's WPILib. A mentor or lead programmer does this once. If deploy complains about the image version, ask them.
 
-### Part 8: Deploy
-++ctrl+shift+p++ → **WPILib: Deploy Robot Code**
+### Part 8: Open the console, then deploy
+Your message prints **once**, the moment the robot program starts, so the console has to be open **before** that happens. Open it first:
+
+- In VS Code: ++ctrl+shift+p++ → **WPILib: Start RioLog**
+- Or in the Driver Station: click the **gear icon** above the message box and choose **View Console**
+
+Then deploy: ++ctrl+shift+p++ → **WPILib: Deploy Robot Code**
 
 This builds your code, copies it to the roboRIO, and restarts the robot program. It takes about 15 to 30 seconds. Near the end, the terminal shows lines like this:
 
@@ -147,10 +152,7 @@ BUILD SUCCESSFUL in 12s
 `frcKillRobot` stops the old robot program and starts yours. When it finishes, the **Robot Code** light on the Driver Station turns **green**. That's your code running on real hardware.
 
 ### Part 9: See your message
-Your `println` went to the robot's console. Open it either way:
-
-- In VS Code: ++ctrl+shift+p++ → **WPILib: Start RioLog**
-- In the Driver Station: click the **gear icon** above the message box and choose **View Console**
+Your `println` went to the robot's console, which you opened in Part 8.
 
 ![The RioLog window in VS Code, with its buttons along the bottom](../assets/wpilib/riolog-window.png)
 
@@ -162,7 +164,10 @@ Look for:
 Hello from the TestBed! Written by YOUR NAME.
 ```
 
-If you missed it, restart the robot code from the Driver Station (**Restart Robot Code** on the Diagnostics tab) and watch it print again.
+If you missed it (the console wasn't open yet when the program started), keep the console open and restart the robot code from the Driver Station (**Restart Robot Code** on the Diagnostics tab). Watch it print again.
+
+!!! warning "Don't move it to `robotPeriodic()`"
+    If you put the `println` in `robotPeriodic()` instead, you'll see it right away, because `robotPeriodic()` runs **50 times a second** and prints the line over and over. That floods the console and hides real error messages. The constructor is the right place for a message that should print once at startup. The message didn't fail in the constructor; it just printed before you were watching.
 
 ### Part 10: Enable (nothing should move)
 1. Say **"Enabling!"** out loud.
@@ -191,7 +196,7 @@ From now on, commit after each lab, so you can always get back to working code.
 | Deploy says the roboRIO image is the wrong version | The roboRIO needs this season's image. Ask a mentor. |
 | Build fails after installing REVLib | You may have been offline, so it couldn't download the library. Connect to the internet and build again. |
 | Robot Code light red after deploy | Your code crashed on startup. Open RioLog and read the first error. |
-| No message in the console | Make sure you deployed after adding the line |
+| No message in the console | The console wasn't open when the program started: keep it open and use **Restart Robot Code**. Also make sure you deployed after adding the line. |
 
 !!! example "Finished code"
     Stuck, or missed a lab? [**lab00-testbed-setup**](https://github.com/Robojacks/frc-course/tree/main/examples/lab00-testbed-setup) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
