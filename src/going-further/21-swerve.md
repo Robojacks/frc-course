@@ -15,6 +15,9 @@ You won't write swerve from scratch: teams start from a vendor template. This le
 - [Swerve Drive Odometry (WPILib)](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-odometry.html)
 - Your module's template: [CTRE Tuner X Swerve Generator](https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html) (Kraken/Falcon + CANcoder), [REV MAXSwerve template](https://github.com/REVrobotics/MAXSwerve-Java-Template) (NEO/Vortex), or [YAGSL](https://github.com/BroncBotz3481/YAGSL) (many combinations)
 
+!!! tip "Go deeper"
+    FRC Team 3847 Spectrum's interactive [Swerve Drive](https://spectrum3847.org/training/swerve/) course covers module internals, odometry, the gyro, and field- vs. robot-centric control, built from their own robots.
+
 ## Walkthrough
 
 ### What's in a swerve module

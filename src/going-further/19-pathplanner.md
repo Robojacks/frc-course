@@ -12,6 +12,9 @@ PathPlanner needs to know where the robot is, so it builds on odometry from [Les
 - [PathPlannerLib: Build an Auto](https://pathplanner.dev/pplib-build-an-auto.html)
 - [PathPlannerLib Java API](https://pathplanner.dev/api/java/)
 
+!!! tip "Go deeper"
+    FRC Team 3847 Spectrum's interactive [Paths & Autonomous](https://spectrum3847.org/training/autonomous/) course covers path following, events, and reactive autos, built from their own robots.
+
 !!! info "Licenses"
     PathPlanner (the app), PathPlannerLib (the vendor library), and the PathPlanner documentation are all in one repository, [mjansen4857/pathplanner](https://github.com/mjansen4857/pathplanner), under the [MIT License](https://github.com/mjansen4857/pathplanner/blob/main/LICENSE) (© Michael Jansen).
 

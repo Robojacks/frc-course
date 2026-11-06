@@ -12,6 +12,9 @@ If the robot was **logging**, you can find out. A log records every value the ro
 - [AdvantageScope documentation](https://docs.advantagescope.org/)
 - [AdvantageKit documentation](https://docs.advantagekit.org/)
 
+!!! tip "Go deeper"
+    FRC Team 3847 Spectrum's interactive [Telemetry, Logs and Replay](https://spectrum3847.org/training/telemetry/) course covers NetworkTables, dashboards, and match-log analysis, built from their own robots.
+
 ## Walkthrough
 
 ### Step 1: Turn on logging

@@ -13,6 +13,9 @@ RoboJacks uses **PhotonVision**. This lesson covers how it works, how to read it
 - [Pose Estimators (WPILib)](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/state-space/state-space-pose-estimators.html)
 - [Example: PhotonVisionSubsystem.java](https://github.com/ironmosquitos5653/nmrc-codecamp-level2-rev-2026/blob/main/src/main/java/frc/robot/subsystems/PhotonVisionSubsystem.java), from the NMRC code camp (level 2, 2026). This lesson follows its approach.
 
+!!! tip "Go deeper"
+    FRC Team 3847 Spectrum's interactive [Vision & AprilTags](https://spectrum3847.org/training/vision/) course covers camera calibration, pose estimation, Limelight, and PhotonVision, built from their own robots.
+
 !!! info "Licenses"
     | What | License | What it means for you |
     |---|---|---|

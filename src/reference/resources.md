@@ -9,6 +9,17 @@
 - [CTRE Phoenix 6](https://v6.docs.ctr-electronics.com/) (TalonFX, CANcoder, Pigeon 2)
 - [REV Robotics](https://docs.revrobotics.com/) (SPARK MAX / Flex, Pneumatic Hub)
 
+## Other teams' training
+- [Spectrum 3847 Training](https://spectrum3847.org/resources/training/): interactive courses built from their own robots, plus videos on programming, CAD, build, and strategy. Their programming courses:
+    - [Motors and Power](https://spectrum3847.org/training/motors/)
+    - [CTRE Control Modes](https://spectrum3847.org/training/ctre-control-modes/)
+    - [Swerve Drive](https://spectrum3847.org/training/swerve/)
+    - [Vision & AprilTags](https://spectrum3847.org/training/vision/)
+    - [Paths & Autonomous](https://spectrum3847.org/training/autonomous/)
+    - [Telemetry, Logs and Replay](https://spectrum3847.org/training/telemetry/)
+    - [Control Systems](https://spectrum3847.org/training/control-systems/)
+- [Mantik](https://github.com/itkan-robotics/mantik) by Itkan Robotics: an FRC programming course. Parts of Lessons 17–21 are adapted from it (see [Credits](credits.md)).
+
 ## Learning Java
 - [dev.java Learn](https://dev.java/learn/)
 - [W3Schools Java](https://www.w3schools.com/java/)

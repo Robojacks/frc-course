@@ -59,7 +59,7 @@ try {
   <main id="content" class="content">
     <article>
 <h1 id="lab-9-turn-the-wheel-exactly-10-times-with-pid">Lab 9: Turn the Wheel Exactly 10 Times with PID<a class="headerlink" href="#lab-9-turn-the-wheel-exactly-10-times-with-pid" title="Permanent link">#</a></h1>
-<div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 6: Control · step 30 of 46</p><p><strong>Learn it in:</strong> <a href="../controls/12-pid.html">12. PID Feedback</a></p></div>
+<div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 6: Control · step 30 of 47</p><p><strong>Learn it in:</strong> <a href="../controls/12-pid.html">12. PID Feedback</a></p></div>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>In <a href="lab6-encoder.html">Lab 6</a> you tried to turn the wheel exactly 10 times. Timing missed by a different amount every run. Bang-bang was consistent, but always overshot, because the wheel was still moving fast when it reached 10.</p>
 <p>What you needed was to <strong>slow down as you get close</strong>, and to <strong>correct</strong> if you miss. That's <strong>feedback control</strong>, and <strong>PID</strong> is how almost every robot does it. In this lab you'll add PID to the same <code>WheelSubsystem</code> one letter at a time, and watch each letter fix the previous attempt's problem.</p>

@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>14.1 Control on the Motor Controller | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<script>
+// Apply the saved light/dark choice before the page draws, so it never flashes the wrong theme.
+try {
+  var savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) {}
+</script>
+
+</head>
+<body id="top" data-root="../">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
+      <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <span class="theme-track"><span class="theme-knob"></span></span>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li><li><a href="../path.html">Course Path</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section"><summary>Robot Code</summary><ul><li><a href="../robot-code/06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="../robot-code/06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="../robot-code/07-command-based.html">7. Command-Based Programming</a></li><li><a href="../robot-code/07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="../robot-code/09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>XRP Robot Project</summary><ul><li><a href="../project/10-xrp.html">10. The XRP: Set Up, Simulate, Run</a></li><li><a href="../project/10-teleop.html">10.1 Teleop on the XRP</a></li><li><a href="../project/11-autonomous.html">10.2 Autonomous on the XRP</a></li></ul></details>
+<details class="nav-section" open><summary>Controls</summary><ul><li><a href="12-pid.html">12. PID Feedback</a></li><li><a href="13-feedforward.html">13. Feedforward</a></li><li><a href="13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="14-profiles.html">14. Motion Profiles</a></li><li><a href="14b-onboard-control.html" class="current" aria-current="page">14.1 Control on the Motor Controller</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Going Further</summary><ul><li><a href="../going-further/17-odometry.html">17. Poses and Odometry</a></li><li><a href="../going-further/18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="../going-further/19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="../going-further/19b-pathplanner-app.html">19.1 Using the PathPlanner App</a></li><li><a href="../going-further/20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="../going-further/21-swerve.html">21. Swerve Drive</a></li><li><a href="../going-further/21b-swerve-maxswerve.html">21.1 Our Swerve Today: REV MAXSwerve</a></li><li><a href="../going-further/21c-swerve-ctre.html">21.2 Next Year: SDS MK5i with CTRE</a></li><li><a href="../going-further/21d-phoenix-tuner.html">21.3 Using Phoenix Tuner X</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="141-control-on-the-motor-controller">14.1 Control on the Motor Controller<a class="headerlink" href="#141-control-on-the-motor-controller" title="Permanent link">#</a></h1>
+<div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 6: Control · step 35 of 47</p></div>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>In <a href="12-pid.html">Lessons 12–14</a> the <strong>roboRIO</strong> did all the control math: it read the encoder, ran the PID controller, added feedforward, followed the motion profile, and sent a voltage to the motor, 50 times a second. That's how <a href="../testbed/lab9-pid-wheel.html">Lab 9</a> and <a href="../testbed/lab10-elevator.html">Lab 10</a> work, and it's the best way to learn what each piece does.</p>
+<p>Modern motor controllers (the <strong>TalonFX</strong> inside every Kraken, and the <strong>SPARK MAX / SPARK Flex</strong>) can run the same math <strong>themselves</strong>, about <strong>1000 times a second</strong>, right next to the motor. Next year's robot runs on Krakens (<a href="../going-further/21c-swerve-ctre.html">Lesson 21.2</a>), so you'll use this a lot.</p>
+<p>This lesson shows how the ideas you already know map onto the motor controller, for both CTRE and REV.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/closed-loop-requests.html">Closed-Loop Control (CTRE Phoenix 6)</a> and <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/motion-magic.html">Motion Magic</a></li>
+<li><a href="https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/talonfx/improving-performance-with-current-limits.html">Improving Performance with Current Limits (CTRE)</a></li>
+<li><a href="https://docs.revrobotics.com/revlib/spark/closed-loop">Closed Loop Control</a> and <a href="https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control">Feed Forward Control (REV)</a></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Go deeper</p>
+<p>FRC Team 3847 Spectrum's interactive <a href="https://spectrum3847.org/training/ctre-control-modes/">CTRE Control Modes</a> course covers TalonFX control from duty cycle up to Motion Magic and FOC, built from their own robots.</p>
+</div>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="same-ideas-different-place">Same ideas, different place<a class="headerlink" href="#same-ideas-different-place" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Idea</th>
+<th>On the roboRIO (Lessons 12–14)</th>
+<th>On a TalonFX (Phoenix 6)</th>
+<th>On a SPARK (REVLib)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PID</td>
+<td><code>PIDController</code></td>
+<td><code>kP</code>, <code>kI</code>, <code>kD</code> in a <strong>slot</strong> config</td>
+<td><code>closedLoop.pid(...)</code></td>
+</tr>
+<tr>
+<td>Friction (kS), velocity (kV), acceleration (kA)</td>
+<td><code>SimpleMotorFeedforward</code></td>
+<td><code>kS</code>, <code>kV</code>, <code>kA</code> in the slot</td>
+<td><code>closedLoop.feedForward.kS / kV / kA</code></td>
+</tr>
+<tr>
+<td>Gravity, elevator (kG)</td>
+<td><code>ElevatorFeedforward</code></td>
+<td><code>kG</code> with <code>GravityType = Elevator_Static</code></td>
+<td><code>feedForward.kG</code></td>
+</tr>
+<tr>
+<td>Gravity, arm (kG·cos θ)</td>
+<td><code>ArmFeedforward</code></td>
+<td><code>kG</code> with <code>GravityType = Arm_Cosine</code></td>
+<td><code>feedForward.kCos</code> and <code>kCosRatio</code></td>
+</tr>
+<tr>
+<td>Motion profile</td>
+<td><code>ProfiledPIDController</code> / <code>TrapezoidProfile</code></td>
+<td><strong>Motion Magic</strong></td>
+<td><strong>MAXMotion</strong></td>
+</tr>
+<tr>
+<td>Gear ratio and units</td>
+<td>Your own math, or <code>setDistancePerPulse</code></td>
+<td><code>SensorToMechanismRatio</code></td>
+<td>Conversion factors</td>
+</tr>
+<tr>
+<td>Loop rate</td>
+<td>50 Hz (every 20 ms)</td>
+<td>about 1 kHz</td>
+<td>about 1 kHz</td>
+</tr>
+</tbody>
+</table>
+<p>Your code stops running the loop. Instead it sends a <strong>target</strong> ("go to 0.8 m", "spin at 40 rotations per second") and the motor controller does the rest.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>roboRIO control</th>
+<th>Motor controller control</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Speed</td>
+<td>50 Hz, plus CAN delay</td>
+<td>About 1 kHz, no delay</td>
+</tr>
+<tr>
+<td>CAN traffic</td>
+<td>A new voltage every loop</td>
+<td>Only when the target changes</td>
+</tr>
+<tr>
+<td>Easy to see and debug</td>
+<td>Everything is in your code and logs</td>
+<td>Must read the controller's signals back to see them</td>
+</tr>
+<tr>
+<td>Mixing sensors</td>
+<td>Any sensor the roboRIO can read</td>
+<td>The motor's own encoder, or a sensor wired or linked to it</td>
+</tr>
+<tr>
+<td>Best for learning</td>
+<td>Yes</td>
+<td>Once you understand the pieces</td>
+</tr>
+</tbody>
+</table>
+<h3 id="units-the-number-one-bug">Units: the number one bug<a class="headerlink" href="#units-the-number-one-bug" title="Permanent link">#</a></h3>
+<p>The controller does the math in <strong>its</strong> units, so the gains do too.</p>
+<ul>
+<li><strong>Phoenix 6</strong> always uses <strong>rotations</strong> and <strong>rotations per second</strong>. Set <code>Feedback.SensorToMechanismRatio</code> to your gear ratio and they become <strong>mechanism</strong> rotations. A <code>kP</code> of 10 means "10 V per rotation of error."</li>
+<li><strong>REV</strong> uses <strong>motor rotations</strong> and <strong>RPM</strong> by default. Set the encoder's <code>positionConversionFactor</code> and <code>velocityConversionFactor</code>, and the gains and targets use your units instead.</li>
+</ul>
+<p>A gain tuned in one set of units is wrong by a huge factor in another. Write the units next to every constant.</p>
+<h3 id="ctre-configure-once-then-send-control-requests">CTRE: configure once, then send control requests<a class="headerlink" href="#ctre-configure-once-then-send-control-requests" title="Permanent link">#</a></h3>
+<p>A TalonFX is configured with a <code>TalonFXConfiguration</code> object, applied once at startup. Gains live in <strong>slots</strong> (Slot0, Slot1, Slot2) so one motor can switch between, say, an empty and a loaded elevator.</p>
+<p>Here's the <a href="../testbed/lab10-elevator.html">Lab 10</a> elevator, as it would look on a Kraken: Motion Magic for the profile, plus gravity feedforward. (It's adapted from CTRE's MotionMagic and CurrentLimits examples.)</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TalonFX</span><span class="w"> </span><span class="n">m_motor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TalonFX</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CANBus</span><span class="p">(</span><span class="s">"rio"</span><span class="p">));</span>
+<span class="w">  </span><span class="c1">// A reusable request: "go to this position with Motion Magic, volts mode"</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">MotionMagicVoltage</span><span class="w"> </span><span class="n">m_positionRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MotionMagicVoltage</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="na">withSlot</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="nf">ElevatorSubsystem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">TalonFXConfiguration</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">TalonFXConfiguration</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Units: motor rotations divided by this = drum rotations. Positions are then in drum rotations.</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">Feedback</span><span class="p">.</span><span class="na">SensorToMechanismRatio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">12.0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Gains (slot 0), in volts per rotation of error, volts per rotation/s, ...</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">Slot0</span><span class="p">.</span><span class="na">GravityType</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GravityTypeValue</span><span class="p">.</span><span class="na">Elevator_Static</span><span class="p">;</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">Slot0</span><span class="p">.</span><span class="na">kG</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.35</span><span class="p">;</span><span class="w">   </span><span class="c1">// volts to hold the carriage still</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">Slot0</span><span class="p">.</span><span class="na">kS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.10</span><span class="p">;</span><span class="w">   </span><span class="c1">// volts to overcome friction</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">Slot0</span><span class="p">.</span><span class="na">kV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.20</span><span class="p">;</span><span class="w">   </span><span class="c1">// volts per rotation/s</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">Slot0</span><span class="p">.</span><span class="na">kA</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.05</span><span class="p">;</span><span class="w">   </span><span class="c1">// volts per rotation/s²</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">Slot0</span><span class="p">.</span><span class="na">kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">20.0</span><span class="p">;</span><span class="w">   </span><span class="c1">// volts per rotation of error</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">Slot0</span><span class="p">.</span><span class="na">kD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">    </span><span class="c1">// volts per rotation/s of error</span>
+
+<span class="w">    </span><span class="c1">// The motion profile: cruise speed, acceleration, and jerk (how fast acceleration changes)</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">MotionMagic</span><span class="p">.</span><span class="na">MotionMagicCruiseVelocity</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.0</span><span class="p">;</span><span class="w">   </span><span class="c1">// rotations per second</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">MotionMagic</span><span class="p">.</span><span class="na">MotionMagicAcceleration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">6.0</span><span class="p">;</span><span class="w">     </span><span class="c1">// rotations per second²</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">MotionMagic</span><span class="p">.</span><span class="na">MotionMagicJerk</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">60.0</span><span class="p">;</span><span class="w">            </span><span class="c1">// rotations per second³</span>
+
+<span class="w">    </span><span class="c1">// Current limits (see below)</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">CurrentLimits</span><span class="p">.</span><span class="na">StatorCurrentLimit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">80</span><span class="p">;</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">CurrentLimits</span><span class="p">.</span><span class="na">StatorCurrentLimitEnable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">CurrentLimits</span><span class="p">.</span><span class="na">SupplyCurrentLimit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">40</span><span class="p">;</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">CurrentLimits</span><span class="p">.</span><span class="na">SupplyCurrentLimitEnable</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">MotorOutput</span><span class="p">.</span><span class="na">NeutralMode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NeutralModeValue</span><span class="p">.</span><span class="na">Brake</span><span class="p">;</span>
+<span class="w">    </span><span class="n">m_motor</span><span class="p">.</span><span class="na">getConfigurator</span><span class="p">().</span><span class="na">apply</span><span class="p">(</span><span class="n">config</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="cm">/** Go to a height, in drum rotations. The TalonFX plans and follows the profile itself. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">goToCommand</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">rotations</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">m_motor</span><span class="p">.</span><span class="na">setControl</span><span class="p">(</span><span class="n">m_positionRequest</span><span class="p">.</span><span class="na">withPosition</span><span class="p">(</span><span class="n">rotations</span><span class="p">)))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">Commands</span><span class="p">.</span><span class="na">waitUntil</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">atTarget</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Elevator to "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rotations</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">atTarget</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">m_motor</span><span class="p">.</span><span class="na">getClosedLoopError</span><span class="p">().</span><span class="na">getValueAsDouble</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.05</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<p><code>setControl</code> is sent once. The TalonFX keeps following the profile and holding the position until it gets a different request. To convert meters to drum rotations, divide by the drum's circumference, exactly as Lab 10's constants do.</p>
+<p><strong>The control requests you'll use:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Request</th>
+<th>Means</th>
+<th>Like</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DutyCycleOut</code></td>
+<td>A fraction of battery voltage, −1 to 1</td>
+<td><code>set(0.5)</code> on a SPARK</td>
+</tr>
+<tr>
+<td><code>VoltageOut</code></td>
+<td>A voltage, −12 to 12</td>
+<td><code>setVoltage(6)</code></td>
+</tr>
+<tr>
+<td><code>PositionVoltage</code></td>
+<td>Go to a position with PID + feedforward</td>
+<td><code>PIDController</code> on position</td>
+</tr>
+<tr>
+<td><code>VelocityVoltage</code></td>
+<td>Hold a speed with PID + feedforward</td>
+<td>Flywheel PID + kV</td>
+</tr>
+<tr>
+<td><code>MotionMagicVoltage</code></td>
+<td>Go to a position along a profile</td>
+<td><code>ProfiledPIDController</code></td>
+</tr>
+<tr>
+<td><code>NeutralOut</code></td>
+<td>Stop (brake or coast, from the config)</td>
+<td><code>stopMotor()</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>FOC.</strong> Every request has <code>.withEnableFOC(true)</code>. FOC (field-oriented control) is a smarter way of driving the motor's coils that gives Krakens noticeably more power. It needs a <strong>Phoenix Pro</strong> license (<a href="../going-further/21d-phoenix-tuner.html#step-9-phoenix-pro-licenses">Lesson 21.3</a>); without one, the request is rejected. The <code>...TorqueCurrentFOC</code> requests (commanding current instead of voltage) also need Pro.</p>
+<p><strong>Seeing what it's doing.</strong> The loop runs inside the motor, so log its signals to see it: <code>getClosedLoopReference()</code> (where the profile is right now), <code>getClosedLoopError()</code>, <code>getPosition()</code>, and <code>getMotorVoltage()</code>. Graph the reference and the position together, like Lab 10's goal and setpoint.</p>
+<p><em>Sources: <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/closed-loop-requests.html">CTRE: Closed-Loop Control</a>; <a href="https://github.com/CrossTheRoadElec/Phoenix6-Examples/tree/main/java">CTRE MotionMagic and CurrentLimits examples</a> (WPILib BSD license header). Explanations in our own words.</em></p>
+<h3 id="current-limits-stator-vs-supply">Current limits: stator vs. supply<a class="headerlink" href="#current-limits-stator-vs-supply" title="Permanent link">#</a></h3>
+<p>Every course lab sets one current limit (<code>smartCurrentLimit</code>). CTRE motor controllers have <strong>two kinds</strong>, and they do different jobs:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Stator current</th>
+<th>Supply current</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it is</td>
+<td>Current through the <strong>motor</strong>. Proportional to <strong>torque</strong>.</td>
+<td>Current drawn from the <strong>battery</strong></td>
+</tr>
+<tr>
+<td>Limit it to</td>
+<td>Stop wheel slip, protect a mechanism hitting a hard stop, reduce motor heat</td>
+<td>Prevent brownouts, keep breakers from tripping, go easy on the battery</td>
+</tr>
+<tr>
+<td>Side effect</td>
+<td>Caps torque, so it also slows acceleration. Don't set it too low on a drivetrain.</td>
+<td>Mostly affects high-speed running</td>
+</tr>
+</tbody>
+</table>
+<p>At low speed, the motor can draw <strong>much more stator current than supply current</strong> (a stalled motor at half output might show 80 A stator but only 40 A supply), so a stator limit also keeps supply current down when starting from a stop. Set both. REV's <code>smartCurrentLimit</code> is a <strong>stator-style</strong> limit on motor current.</p>
+<p><em>Source: <a href="https://v6.docs.ctr-electronics.com/en/stable/docs/hardware-reference/talonfx/improving-performance-with-current-limits.html">CTRE: Improving Performance with Current Limits</a>, in our own words.</em></p>
+<h3 id="rev-closed-loop-on-a-spark">REV: closed loop on a SPARK<a class="headerlink" href="#rev-closed-loop-on-a-spark" title="Permanent link">#</a></h3>
+<p>The same elevator on a NEO and SPARK MAX, with MAXMotion for the profile. Gains go in the SPARK's config, alongside the conversion factors that set the units. Note one difference from CTRE: REV's <strong>PID</strong> output is a duty cycle (−1 to 1), while its <strong>feedforward</strong> terms are in <strong>volts</strong>.</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMaxConfig</span><span class="p">();</span>
+<span class="w">    </span><span class="c1">// Units: with these factors, position is in meters and velocity in meters per second</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">encoder</span>
+<span class="w">        </span><span class="p">.</span><span class="na">positionConversionFactor</span><span class="p">(</span><span class="n">kMetersPerMotorRotation</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">velocityConversionFactor</span><span class="p">(</span><span class="n">kMetersPerMotorRotation</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">60.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">closedLoop</span>
+<span class="w">        </span><span class="p">.</span><span class="na">feedbackSensor</span><span class="p">(</span><span class="n">FeedbackSensor</span><span class="p">.</span><span class="na">kPrimaryEncoder</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="na">pid</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">)</span><span class="w">            </span><span class="c1">// duty cycle (-1 to 1) per meter of error</span>
+<span class="w">        </span><span class="p">.</span><span class="na">feedForward</span>
+<span class="w">            </span><span class="p">.</span><span class="na">kS</span><span class="p">(</span><span class="mf">0.10</span><span class="p">)</span><span class="w">                  </span><span class="c1">// volts</span>
+<span class="w">            </span><span class="p">.</span><span class="na">kV</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span><span class="w">                   </span><span class="c1">// volts per m/s</span>
+<span class="w">            </span><span class="p">.</span><span class="na">kG</span><span class="p">(</span><span class="mf">0.35</span><span class="p">);</span><span class="w">                 </span><span class="c1">// volts to hold the carriage (use kCos for an arm)</span>
+<span class="w">    </span><span class="n">config</span><span class="p">.</span><span class="na">closedLoop</span><span class="p">.</span><span class="na">maxMotion</span>
+<span class="w">        </span><span class="p">.</span><span class="na">cruiseVelocity</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span><span class="w">           </span><span class="c1">// m/s</span>
+<span class="w">        </span><span class="p">.</span><span class="na">maxAcceleration</span><span class="p">(</span><span class="mf">2.0</span><span class="p">);</span><span class="w">         </span><span class="c1">// m/s²</span>
+<span class="w">    </span><span class="n">m_spark</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">ResetMode</span><span class="p">.</span><span class="na">kResetSafeParameters</span><span class="p">,</span><span class="w"> </span><span class="n">PersistMode</span><span class="p">.</span><span class="na">kPersistParameters</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Then, to move: the SPARK plans the profile and adds kG</span>
+<span class="w">    </span><span class="n">m_spark</span><span class="p">.</span><span class="na">getClosedLoopController</span><span class="p">().</span><span class="na">setSetpoint</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span><span class="w"> </span><span class="n">ControlType</span><span class="p">.</span><span class="na">kMAXMotionPositionControl</span><span class="p">);</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>REV control type</th>
+<th>Like</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kDutyCycle</code>, <code>kVoltage</code></td>
+<td><code>set(...)</code>, <code>setVoltage(...)</code></td>
+</tr>
+<tr>
+<td><code>kPosition</code></td>
+<td><code>PIDController</code> on position (kG/kCos applied)</td>
+</tr>
+<tr>
+<td><code>kVelocity</code></td>
+<td>Velocity PID + kV</td>
+</tr>
+<tr>
+<td><code>kMAXMotionPositionControl</code></td>
+<td><code>ProfiledPIDController</code> (kA and kG applied)</td>
+</tr>
+<tr>
+<td><code>kMAXMotionVelocityControl</code></td>
+<td>A velocity with limited acceleration</td>
+</tr>
+</tbody>
+</table>
+<p>For an <strong>arm</strong>, use <code>kCos</code> instead of <code>kG</code>, set <code>kCosRatio</code> to convert the sensor reading into arm rotations, and make the sensor read <strong>0 when the arm is horizontal</strong>. Use one of <code>kG</code> or <code>kCos</code>, never both.</p>
+<p><em>Sources: <a href="https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control">REV: Feed Forward Control</a>; <a href="https://github.com/REVrobotics/REVLib-Examples/tree/main/Java/SPARK/MAXMotion">REVLib MAXMotion example</a>.</em></p>
+<h3 id="finding-kg-by-hand">Finding kG by hand<a class="headerlink" href="#finding-kg-by-hand" title="Permanent link">#</a></h3>
+<p>SysId (<a href="13b-sysid.html">Lesson 13.1</a>) measures kG for you. Without it, here's a quick way that works for either brand:</p>
+<ol>
+<li>With only <code>kG</code> set (everything else 0), slowly raise <code>kG</code> until the mechanism <strong>just stops drifting down</strong>. Write it down: that's kG − kS.</li>
+<li>Keep raising until it <strong>just starts to creep up</strong>. That's kG + kS.</li>
+<li>kG is halfway between the two, and kS is half the difference.</li>
+</ol>
+<p>Then add kV (and kA) for smooth motion, and finally a small kP to fix what's left, the same order as <a href="13-feedforward.html#tuning-with-feedforward">Lesson 13</a>.</p>
+<h3 id="when-to-use-which">When to use which<a class="headerlink" href="#when-to-use-which" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Use the roboRIO when…</th>
+<th>Use the motor controller when…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You're learning, or debugging what each term does</td>
+<td>The mechanism needs fast, smooth, precise motion</td>
+</tr>
+<tr>
+<td>The sensor is wired to the roboRIO</td>
+<td>The motor's own encoder (or a linked CANcoder) is the sensor</td>
+</tr>
+<tr>
+<td>You need unusual logic in the loop</td>
+<td>It's a standard elevator, arm, flywheel, or drivetrain</td>
+</tr>
+</tbody>
+</table>
+<p>Most competition code does the <strong>simple, standard</strong> loops on the motor controller and keeps the roboRIO for deciding <strong>what</strong> each mechanism should do.</p>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Fill in the "Same ideas, different place" table from memory</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Rewrite Lab 10's elevator constants for a TalonFX: what's <code>SensorToMechanismRatio</code>, and what's a 0.8 m height in drum rotations?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Explain to a teammate why a drivetrain's stator limit shouldn't be too low</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find kG on the test bed's elevator by hand, using the three steps above</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: port Lab 10's elevator to MAXMotion on the SPARK MAX, keeping the same presets</li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>What does 'Motion Magic' (or 'MAXMotion') replace from Lesson 14?</summary>
+<p>The <code>ProfiledPIDController</code>: the motor controller plans the trapezoid profile and follows it itself.</p>
+</details>
+<details class="question">
+<summary>Why does <code>SensorToMechanismRatio</code> change your gains?</summary>
+<p>It changes the units of position and velocity from motor rotations to mechanism rotations, and the gains are in volts per unit.</p>
+</details>
+<details class="question">
+<summary>Stator or supply limit: which one stops wheel slip?</summary>
+<p>Stator. It caps motor current, which caps torque. Supply current limits protect the battery and breakers.</p>
+</details>
+<details class="question">
+<summary>Why isn't <code>kG</code> enough for an arm?</summary>
+<p>The torque gravity puts on an arm changes with its angle, strongest when horizontal. The arm term (<code>Arm_Cosine</code> on CTRE, <code>kCos</code> on REV) multiplies by the cosine of the angle.</p>
+</details>
+<details class="question">
+<summary>Why log <code>getClosedLoopReference()</code> on a TalonFX?</summary>
+<p>The profile runs inside the motor, so your code doesn't know where it is unless you read it back. Graphing the reference next to the position shows how well it's tracking.</p>
+</details>
+<p class="credit">Written for this course from CTRE's Phoenix 6 documentation (CC BY-NC-ND 4.0; linked, not copied) and REV's REVLib documentation. Code adapted from CTRE's Phoenix 6 examples (WPILib BSD license header) and REV's REVLib examples.</p>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../testbed/lab10-elevator.html"><span>Previous</span>Lab 10: Elevator Position Control</a><a class="pager-next" href="../workflow/15-team-process.html"><span>Next</span>15. Branches, PRs &amp; Code Review</a></nav>
+  </main>
+</div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+
+// Light/dark switch. With no saved choice, the site follows the device's setting.
+(function () {
+  var root = document.documentElement;
+  var toggle = document.querySelector(".theme-toggle");
+  var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() {
+    var chosen = root.getAttribute("data-theme");
+    return chosen ? chosen === "dark" : systemDark.matches;
+  }
+  function show() {
+    toggle.setAttribute("aria-checked", isDark() ? "true" : "false");
+  }
+  toggle.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  systemDark.addEventListener("change", function () {
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  show();
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+
+</body>
+</html>

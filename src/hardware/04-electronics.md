@@ -11,6 +11,9 @@ You won't be wiring the robot yourself in this lesson. The goal is to understand
 - [CAN Wiring Basics](https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/can-wiring-basics.html)
 - [roboRIO Brownout and Understanding Current Draw](https://docs.wpilib.org/en/stable/docs/software/roborio-info/roborio-brownouts.html)
 
+!!! tip "Go deeper"
+    FRC Team 3847 Spectrum's interactive [Control Systems](https://spectrum3847.org/training/control-systems/) course covers networking, the CAN bus, and power and wiring, built from their own robots.
+
 ## Walkthrough
 
 ### The three ideas you need

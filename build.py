@@ -63,6 +63,7 @@ NAV = [
         ("13. Feedforward", "controls/13-feedforward.md"),
         ("13.1 Characterizing with SysId", "controls/13b-sysid.md"),
         ("14. Motion Profiles", "controls/14-profiles.md"),
+        ("14.1 Control on the Motor Controller", "controls/14b-onboard-control.md"),
     ]),
     ("Team Workflow", [
         ("15. Branches, PRs & Code Review", "workflow/15-team-process.md"),
@@ -142,7 +143,8 @@ COURSE_PATH = [
         "project/11-autonomous.md", "testbed/lab7-timed-auto.md", "testbed/lab8-navx-gyro.md"]),
     ("Control", [
         "controls/12-pid.md", "testbed/lab9-pid-wheel.md", "controls/13-feedforward.md",
-        "controls/13b-sysid.md", "controls/14-profiles.md", "testbed/lab10-elevator.md"]),
+        "controls/13b-sysid.md", "controls/14-profiles.md", "testbed/lab10-elevator.md",
+        "controls/14b-onboard-control.md"]),
     ("Working as a team", [
         "workflow/15-team-process.md", "workflow/16-unit-testing.md"]),
     ("Going further", [

@@ -15,6 +15,9 @@ This lesson covers the motors on the team's test bed and West Coast Drive:
 - [NEO V1.1 (REV)](https://docs.revrobotics.com/brushless/neo/v1.1)
 - [Using Motor Controllers in Code (WPILib)](https://docs.wpilib.org/en/stable/docs/software/hardware-apis/motors/using-motor-controllers.html)
 
+!!! tip "Go deeper"
+    FRC Team 3847 Spectrum's interactive [Motors and Power](https://spectrum3847.org/training/motors/) course covers CIM vs. Kraken motors, current limits, and battery limits, built from their own robots.
+
 ## Walkthrough
 
 ### Brushed vs. brushless

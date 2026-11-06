@@ -64,6 +64,9 @@ Lessons 18–20 teach libraries made by other teams and projects. Their licenses
 
 [Lesson 19.1](../going-further/19b-pathplanner-app.md) adapts steps from the PathPlanner documentation and uses its screenshots (the `assets/pathplanner` folder), © Michael Jansen, under the [MIT License](../assets/pathplanner/LICENSE.txt), whose notice is included with them. The course doesn't copy text from the PhotonVision documentation; it links to it. Lesson 18's vision subsystem follows the code camp example's approach but is written for this course.
 
+## Linked, not copied
+Some lessons link to **Spectrum 3847's** [training courses](https://spectrum3847.org/resources/training/) as "Go deeper" reading. Their site doesn't state a license, so this course only links to them; nothing from them is copied or adapted. Lesson 14.1 covers a topic their CTRE Control Modes course also teaches, written for this course from CTRE's and REV's documentation.
+
 ## Other sources
 - Motor specifications: [REV Robotics NEO V1.1](https://docs.revrobotics.com/brushless/neo/v1.1); CIM and 775pro figures from [RobotPy's motor configurations](https://robotpy.readthedocs.io/projects/websim/en/latest/motor-configurations.html).
 - NavX2 API details: Studica's AHRS Java documentation.

@@ -154,7 +154,7 @@ Modern motor controllers can run profiles **on the controller itself** at much f
 - CTRE TalonFX: **Motion Magic**
 - REV SPARK MAX / Flex: **MAXMotion**
 
-You give them the constraints and feedforward gains once, then just send a goal. They're excellent and widely used. Learn the WPILib version first so you understand what they're doing and can tune them.
+You give them the constraints and feedforward gains once, then just send a goal. They're excellent and widely used. Learn the WPILib version first so you understand what they're doing and can tune them; then [Lesson 14.1](14b-onboard-control.md) shows how to set them up.
 
 ## Try it
 - [ ] By hand: an elevator moves 1.2 m with max velocity 1.5 m/s and max acceleration 3 m/s². Is the profile a trapezoid or a triangle? How long does the move take?
