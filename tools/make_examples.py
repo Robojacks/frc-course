@@ -140,7 +140,7 @@ public class Robot extends TimedRobot {{
    * initialization code.
    */
   public Robot() {{
-{hello}    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
   }}
@@ -189,7 +189,7 @@ public class Robot extends TimedRobot {{
     if (m_autonomousCommand != null) {{
       m_autonomousCommand.cancel();
     }}
-  }}
+{hello}  }}
 
   /** This function is called periodically during operator control. */
   @Override

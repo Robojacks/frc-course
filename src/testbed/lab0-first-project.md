@@ -95,18 +95,23 @@ If you don't see the sidebar, use ++ctrl+shift+p++ → **WPILib: Manage Vendor L
     The REVLib version must match your WPILib season. Installing from the WPILib vendor list picks a compatible one for you. You need internet for this step.
 
 ### Part 5: Say hello
-Open `Robot.java` and find the constructor, `public Robot()`. Add one line at the top, with your real name:
+Open `Robot.java` and find `teleopInit()`. Add one line at the end of it, with your real name:
 
 ```java
-public Robot() {
+@Override
+public void teleopInit() {
+    // This makes sure that the autonomous stops running when
+    // teleop starts running. If you want the autonomous to
+    // continue until interrupted by another command, remove
+    // this line or comment it out.
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
     System.out.println("Hello from the TestBed! Written by YOUR NAME.");
-    // Instantiate our RobotContainer. This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
 }
 ```
 
-This line runs **once**, when the robot program starts.
+`teleopInit()` runs **once, every time the robot is enabled in TeleOperated**. So your message prints exactly when you click **Enable**, and again each time you enable.
 
 ### Part 6: Build
 Make sure the code compiles before touching the robot:
@@ -134,13 +139,8 @@ The **Robot Code** light is probably red. That's fine: there's no code on the ro
 !!! info "The roboRIO must be set up for this season"
     Each season, the roboRIO gets a new system image that matches that year's WPILib. A mentor or lead programmer does this once. If deploy complains about the image version, ask them.
 
-### Part 8: Open the console, then deploy
-Your message prints **once**, the moment the robot program starts, so the console has to be open **before** that happens. Open it first:
-
-- In VS Code: ++ctrl+shift+p++ → **WPILib: Start RioLog**
-- Or in the Driver Station: click the **gear icon** above the message box and choose **View Console**
-
-Then deploy: ++ctrl+shift+p++ → **WPILib: Deploy Robot Code**
+### Part 8: Deploy
+++ctrl+shift+p++ → **WPILib: Deploy Robot Code**
 
 This builds your code, copies it to the roboRIO, and restarts the robot program. It takes about 15 to 30 seconds. Near the end, the terminal shows lines like this:
 
@@ -151,29 +151,37 @@ BUILD SUCCESSFUL in 12s
 
 `frcKillRobot` stops the old robot program and starts yours. When it finishes, the **Robot Code** light on the Driver Station turns **green**. That's your code running on real hardware.
 
-### Part 9: See your message
-Your `println` went to the robot's console, which you opened in Part 8.
+### Part 9: Open the console
+Your `println` goes to the robot's console. Open it now, before you enable:
+
+- In VS Code: ++ctrl+shift+p++ → **WPILib: Start RioLog**
+- Or in the Driver Station: click the **gear icon** above the message box and choose **View Console**
 
 ![The RioLog window in VS Code, with its buttons along the bottom](../assets/wpilib/riolog-window.png)
 
 <p class="credit">The RioLog window. Your messages appear in the big area; the buttons below pause, clear, and filter it. From the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html">Viewing Console Output</a> (CC BY 4.0).</p>
 
-Look for:
-
-```
-Hello from the TestBed! Written by YOUR NAME.
-```
-
-If you missed it (the console wasn't open yet when the program started), keep the console open and restart the robot code from the Driver Station (**Restart Robot Code** on the Diagnostics tab). Watch it print again.
-
-!!! warning "Don't move it to `robotPeriodic()`"
-    If you put the `println` in `robotPeriodic()` instead, you'll see it right away, because `robotPeriodic()` runs **50 times a second** and prints the line over and over. That floods the console and hides real error messages. The constructor is the right place for a message that should print once at startup. The message didn't fail in the constructor; it just printed before you were watching.
-
-### Part 10: Enable (nothing should move)
+### Part 10: Enable and see your message (nothing should move)
 1. Say **"Enabling!"** out loud.
 2. In the Driver Station, choose **TeleOperated** and click **Enable**.
-3. Watch the orange **Robot Signal Light** on the test bed: it **blinks** while enabled.
-4. Click **Disable**, or press ++enter++. The light goes back to **solid**.
+3. Look in the console. The moment you enabled, your message appeared:
+
+    ```
+    Hello from the TestBed! Written by YOUR NAME.
+    ```
+
+4. Watch the orange **Robot Signal Light** on the test bed: it **blinks** while enabled.
+5. Click **Disable**, or press ++enter++. The light goes back to **solid**.
+6. Enable again: the message prints again. Every enable in TeleOperated runs `teleopInit()` once.
+
+!!! info "Which method runs when?"
+    | Method | Runs |
+    |---|---|
+    | `Robot()` (the constructor) | Once, when the program starts, right after a deploy. Easy to miss: it prints before you've opened the console. |
+    | `teleopInit()` | Once, each time TeleOperated is enabled |
+    | `teleopPeriodic()` / `robotPeriodic()` | **50 times a second**. A `println` here floods the console and buries real error messages. |
+
+    [Lesson 6](../robot-code/06-robot-program.md) covers all of these.
 
 !!! tip "Know your emergency keys"
     In the Driver Station, ++enter++ **disables** the robot, and ++space++ is the **emergency stop**. An emergency stop requires restarting the roboRIO before you can enable again. Use it if anything goes wrong.
@@ -196,7 +204,7 @@ From now on, commit after each lab, so you can always get back to working code.
 | Deploy says the roboRIO image is the wrong version | The roboRIO needs this season's image. Ask a mentor. |
 | Build fails after installing REVLib | You may have been offline, so it couldn't download the library. Connect to the internet and build again. |
 | Robot Code light red after deploy | Your code crashed on startup. Open RioLog and read the first error. |
-| No message in the console | The console wasn't open when the program started: keep it open and use **Restart Robot Code**. Also make sure you deployed after adding the line. |
+| No message in the console | It only prints when you **enable in TeleOperated**. Check the line is inside `teleopInit()`, and that you deployed after adding it. |
 
 !!! example "Finished code"
     Stuck, or missed a lab? [**lab00-testbed-setup**](https://github.com/Robojacks/frc-course/tree/main/examples/lab00-testbed-setup) on GitHub is the complete project as it looks at the end of this lab. It's a full WPILib 2026 project you can open in VS Code, build, and deploy. Try to finish the lab yourself first.
@@ -225,7 +233,10 @@ From now on, commit after each lab, so you can always get back to working code.
     **Build** only compiles the code on your laptop. **Deploy** builds it, copies it to the roboRIO, and restarts the robot program.
 
 ??? question "How can you tell your code is running on the robot?"
-    The Driver Station's **Robot Code** light is green, and your message shows up in the console.
+    The Driver Station's **Robot Code** light is green, and your message shows up in the console when you enable.
+
+??? question "Why does your message print every time you enable, but not 50 times a second?"
+    It's in `teleopInit()`, which runs once each time TeleOperated is enabled. A `println` in `teleopPeriodic()` or `robotPeriodic()` would run 50 times a second.
 
 ??? question "Which key disables the robot from the Driver Station?"
     ++enter++. ++space++ is the emergency stop.
