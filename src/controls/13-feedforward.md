@@ -145,21 +145,75 @@ public Command holdAt(double targetRadians) {
 Here the velocity passed to feedforward is 0, because `holdAt` jumps straight to the target. In [Lesson 14](14-profiles.md), a motion profile supplies a real velocity for every step of the move, and kV and kA start pulling their weight.
 
 ### Getting the numbers
-**Quick and dirty, by hand:**
+There are three ways to get feedforward gains, from roughest to best. Use the first to get a starting point before the mechanism is even built, the second to check it on the real mechanism, and SysId for the real values.
+
+#### 1. Estimate them from the motor's specs
+You can work out a good starting point for kV and kG from numbers on the motor's spec sheet and your gear ratio. No robot needed.
+
+**kV: 12 volts ÷ the mechanism's top speed.** At full voltage, a motor with no load spins at its **free speed**. So:
+
+```
+kV ≈ 12 V ÷ (free speed of the mechanism, in your units)
+```
+
+Example: a flywheel on a NEO (free speed **5676 RPM** = 94.6 rotations/second) with a 1.5:1 reduction. The flywheel's free speed is 94.6 ÷ 1.5 = 63.1 rotations/second:
+
+```
+kV ≈ 12 ÷ 63.1 = 0.19 V per (rotation/second)
+```
+
+For an elevator, convert the free speed to meters per second (motor rotations per second ÷ gear ratio × the drum's circumference). The real kV comes out a little **higher**, because friction and load mean the mechanism never quite reaches free speed.
+
+**kG: 12 volts × the fraction of the motor's stall torque needed to hold the mechanism.** A motor makes its **stall torque** at 12 V with the shaft held still. To hold a load still, it needs just enough voltage to make the torque gravity is putting on it:
+
+```
+torque at the motor = (weight × lever arm) ÷ gear ratio
+kG ≈ 12 V × (torque at the motor) ÷ (stall torque × number of motors)
+```
+
+The **lever arm** is the drum's radius for an elevator, or the distance from the pivot to the center of mass (with the arm level) for an arm.
+
+Example: an elevator lifting a **5 kg** carriage with a **1.8 cm** radius sprocket, through a **10:1** gearbox, on one NEO (stall torque **2.6 N·m**):
+
+```
+weight × lever arm   = 5 kg × 9.81 m/s² × 0.018 m = 0.88 N·m
+torque at the motor  = 0.88 ÷ 10                   = 0.088 N·m
+kG                   ≈ 12 × 0.088 ÷ 2.6            = 0.41 V
+```
+
+WPILib's `DCMotor` class has every FRC motor's specs built in, and can do this math in code:
+
+```java
+DCMotor neo = DCMotor.getNEO(1);
+double torqueAtMotor = 5.0 * 9.81 * 0.018 / 10.0;          // N·m
+double kG = neo.getVoltage(torqueAtMotor, 0.0);             // volts to hold still: about 0.41
+```
+
+**kS and kA:** kS is friction, which no spec sheet knows. Start around **0.1 to 0.3 V** for a small mechanism and measure it (below). kA only matters for fast acceleration; start at **0**.
+
+!!! tip "ReCalc does all of this for you"
+    [ReCalc](https://www.reca.lc/) is a free online calculator made for FRC. Choose arm, elevator, flywheel, or drivetrain, enter the motor, gear ratio, and load, and it estimates kG, kV, and kA. It's the fastest way to get starting gains, and a great check on your own math.
+
+#### 2. Measure them by hand
+On the real mechanism, with PID turned off:
 
 1. **kG** (arm or elevator): slowly raise the voltage until the mechanism holds still without drifting. For an arm, do this with it horizontal. That voltage is roughly kG.
 2. **kS**: on a flywheel or roller with no gravity, raise the voltage slowly from 0 until it just starts to turn. That's roughly kS.
 3. **kV**: run at a few steady voltages, measure the speed each time, and calculate (volts − kS) ÷ speed.
 
-**The right way:** use **SysId**. It runs the mechanism through test motions and calculates kS, kV, kA, and kG from real data. [Lesson 13.1](13b-sysid.md) walks through it step by step.
+Compare your measurements with the estimates from step 1. If they're close (within about 30%), the mechanism is working as designed. If kG is much bigger than you calculated, look for friction or binding. If kV is much bigger, check the gear ratio and the units.
 
-**For motors you haven't built yet:** WPILib's `DCMotor` models (like `DCMotor.getKrakenX60(1)`) and online calculators like ReCalc can estimate kV and kA from the motor, gear ratio, and load.
+!!! tip "kG and kS together"
+    Friction makes "the voltage that holds it still" a range, not one number. Raise the voltage until it **stops drifting down** (that's kG − kS), then until it **starts creeping up** (kG + kS). kG is halfway between, and kS is half the difference.
+
+#### 3. SysId
+**The right way:** use **SysId**. It runs the mechanism through test motions and calculates kS, kV, kA, and kG from real data. [Lesson 13.1](13b-sysid.md) walks through it step by step. Its numbers should land near your estimates; if they're wildly different, double-check the units before trusting either.
 
 ### Tuning with feedforward
 1. Set kP, kI, and kD to 0.
 2. Set the feedforward gains (from SysId, or by hand).
 3. Run the mechanism. It should get **close** to the target with no PID at all.
-4. Add a small kP to remove what's left. It'll be much smaller than your PID-only kP.
+4. Add a small kP to remove what's left. It'll be much smaller than your PID-only kP. Use the "most output ÷ slowing-down distance" rule from [Lesson 12](12-pid.md#picking-starting-gains), but with a much smaller "most output," like 1–2 V, because feedforward is already doing the heavy lifting.
 5. Add kD only if it overshoots.
 
 ## Try it

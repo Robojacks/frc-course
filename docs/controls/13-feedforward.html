@@ -287,20 +287,56 @@ try {
 </div>
 <p>Here the velocity passed to feedforward is 0, because <code>holdAt</code> jumps straight to the target. In <a href="14-profiles.html">Lesson 14</a>, a motion profile supplies a real velocity for every step of the move, and kV and kA start pulling their weight.</p>
 <h3 id="getting-the-numbers">Getting the numbers<a class="headerlink" href="#getting-the-numbers" title="Permanent link">#</a></h3>
-<p><strong>Quick and dirty, by hand:</strong></p>
+<p>There are three ways to get feedforward gains, from roughest to best. Use the first to get a starting point before the mechanism is even built, the second to check it on the real mechanism, and SysId for the real values.</p>
+<h4 id="1-estimate-them-from-the-motors-specs">1. Estimate them from the motor's specs<a class="headerlink" href="#1-estimate-them-from-the-motors-specs" title="Permanent link">#</a></h4>
+<p>You can work out a good starting point for kV and kG from numbers on the motor's spec sheet and your gear ratio. No robot needed.</p>
+<p><strong>kV: 12 volts ÷ the mechanism's top speed.</strong> At full voltage, a motor with no load spins at its <strong>free speed</strong>. So:</p>
+<div class="highlight"><pre><span></span><code>kV ≈ 12 V ÷ (free speed of the mechanism, in your units)
+</code></pre></div>
+<p>Example: a flywheel on a NEO (free speed <strong>5676 RPM</strong> = 94.6 rotations/second) with a 1.5:1 reduction. The flywheel's free speed is 94.6 ÷ 1.5 = 63.1 rotations/second:</p>
+<div class="highlight"><pre><span></span><code>kV ≈ 12 ÷ 63.1 = 0.19 V per (rotation/second)
+</code></pre></div>
+<p>For an elevator, convert the free speed to meters per second (motor rotations per second ÷ gear ratio × the drum's circumference). The real kV comes out a little <strong>higher</strong>, because friction and load mean the mechanism never quite reaches free speed.</p>
+<p><strong>kG: 12 volts × the fraction of the motor's stall torque needed to hold the mechanism.</strong> A motor makes its <strong>stall torque</strong> at 12 V with the shaft held still. To hold a load still, it needs just enough voltage to make the torque gravity is putting on it:</p>
+<div class="highlight"><pre><span></span><code>torque at the motor = (weight × lever arm) ÷ gear ratio
+kG ≈ 12 V × (torque at the motor) ÷ (stall torque × number of motors)
+</code></pre></div>
+<p>The <strong>lever arm</strong> is the drum's radius for an elevator, or the distance from the pivot to the center of mass (with the arm level) for an arm.</p>
+<p>Example: an elevator lifting a <strong>5 kg</strong> carriage with a <strong>1.8 cm</strong> radius sprocket, through a <strong>10:1</strong> gearbox, on one NEO (stall torque <strong>2.6 N·m</strong>):</p>
+<div class="highlight"><pre><span></span><code>weight × lever arm   = 5 kg × 9.81 m/s² × 0.018 m = 0.88 N·m
+torque at the motor  = 0.88 ÷ 10                   = 0.088 N·m
+kG                   ≈ 12 × 0.088 ÷ 2.6            = 0.41 V
+</code></pre></div>
+<p>WPILib's <code>DCMotor</code> class has every FRC motor's specs built in, and can do this math in code:</p>
+<div class="highlight"><pre><span></span><code><span class="n">DCMotor</span><span class="w"> </span><span class="n">neo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">DCMotor</span><span class="p">.</span><span class="na">getNEO</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">torqueAtMotor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">5.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">9.81</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">0.018</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">10.0</span><span class="p">;</span><span class="w">          </span><span class="c1">// N·m</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">kG</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">neo</span><span class="p">.</span><span class="na">getVoltage</span><span class="p">(</span><span class="n">torqueAtMotor</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w">             </span><span class="c1">// volts to hold still: about 0.41</span>
+</code></pre></div>
+<p><strong>kS and kA:</strong> kS is friction, which no spec sheet knows. Start around <strong>0.1 to 0.3 V</strong> for a small mechanism and measure it (below). kA only matters for fast acceleration; start at <strong>0</strong>.</p>
+<div class="admonition tip">
+<p class="admonition-title">ReCalc does all of this for you</p>
+<p><a href="https://www.reca.lc/">ReCalc</a> is a free online calculator made for FRC. Choose arm, elevator, flywheel, or drivetrain, enter the motor, gear ratio, and load, and it estimates kG, kV, and kA. It's the fastest way to get starting gains, and a great check on your own math.</p>
+</div>
+<h4 id="2-measure-them-by-hand">2. Measure them by hand<a class="headerlink" href="#2-measure-them-by-hand" title="Permanent link">#</a></h4>
+<p>On the real mechanism, with PID turned off:</p>
 <ol>
 <li><strong>kG</strong> (arm or elevator): slowly raise the voltage until the mechanism holds still without drifting. For an arm, do this with it horizontal. That voltage is roughly kG.</li>
 <li><strong>kS</strong>: on a flywheel or roller with no gravity, raise the voltage slowly from 0 until it just starts to turn. That's roughly kS.</li>
 <li><strong>kV</strong>: run at a few steady voltages, measure the speed each time, and calculate (volts − kS) ÷ speed.</li>
 </ol>
-<p><strong>The right way:</strong> use <strong>SysId</strong>. It runs the mechanism through test motions and calculates kS, kV, kA, and kG from real data. <a href="13b-sysid.html">Lesson 13.1</a> walks through it step by step.</p>
-<p><strong>For motors you haven't built yet:</strong> WPILib's <code>DCMotor</code> models (like <code>DCMotor.getKrakenX60(1)</code>) and online calculators like ReCalc can estimate kV and kA from the motor, gear ratio, and load.</p>
+<p>Compare your measurements with the estimates from step 1. If they're close (within about 30%), the mechanism is working as designed. If kG is much bigger than you calculated, look for friction or binding. If kV is much bigger, check the gear ratio and the units.</p>
+<div class="admonition tip">
+<p class="admonition-title">kG and kS together</p>
+<p>Friction makes "the voltage that holds it still" a range, not one number. Raise the voltage until it <strong>stops drifting down</strong> (that's kG − kS), then until it <strong>starts creeping up</strong> (kG + kS). kG is halfway between, and kS is half the difference.</p>
+</div>
+<h4 id="3-sysid">3. SysId<a class="headerlink" href="#3-sysid" title="Permanent link">#</a></h4>
+<p><strong>The right way:</strong> use <strong>SysId</strong>. It runs the mechanism through test motions and calculates kS, kV, kA, and kG from real data. <a href="13b-sysid.html">Lesson 13.1</a> walks through it step by step. Its numbers should land near your estimates; if they're wildly different, double-check the units before trusting either.</p>
 <h3 id="tuning-with-feedforward">Tuning with feedforward<a class="headerlink" href="#tuning-with-feedforward" title="Permanent link">#</a></h3>
 <ol>
 <li>Set kP, kI, and kD to 0.</li>
 <li>Set the feedforward gains (from SysId, or by hand).</li>
 <li>Run the mechanism. It should get <strong>close</strong> to the target with no PID at all.</li>
-<li>Add a small kP to remove what's left. It'll be much smaller than your PID-only kP.</li>
+<li>Add a small kP to remove what's left. It'll be much smaller than your PID-only kP. Use the "most output ÷ slowing-down distance" rule from <a href="12-pid.html#picking-starting-gains">Lesson 12</a>, but with a much smaller "most output," like 1–2 V, because feedforward is already doing the heavy lifting.</li>
 <li>Add kD only if it overshoots.</li>
 </ol>
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>

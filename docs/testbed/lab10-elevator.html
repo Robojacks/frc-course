@@ -251,7 +251,7 @@ try {
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">L2Meters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="p">;</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">L3Meters</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.45</span><span class="p">;</span>
 
-<span class="w">    </span><span class="c1">// PID, in volts per meter of error</span>
+<span class="w">    </span><span class="c1">// PID, in volts per meter of error. Starting kP: 6 V at 0.6 m from the goal = 10 V/m.</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10.0</span><span class="p">;</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kI</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
@@ -826,6 +826,16 @@ distance per pulse    = meters per revolution ÷ 2048
 </code></pre></div>
 <p><strong>Set up Elastic for tuning:</strong> one <strong>Graph</strong> with <strong>Goal</strong>, <strong>Setpoint</strong>, and <strong>Height</strong> together, plus <strong>Text Display</strong> widgets for <strong>kP</strong>, <strong>kI</strong>, <strong>kD</strong>, <strong>Max Velocity</strong>, and <strong>Max Accel</strong>, and <strong>Error</strong> and <strong>Output (V)</strong>.</p>
 <p>Press <strong>B</strong>. Watch the graph: <strong>Goal</strong> jumps to L2, <strong>Setpoint</strong> ramps smoothly up to it, and <strong>Height</strong> follows the setpoint.</p>
+<div class="admonition info">
+<p class="admonition-title">Where the starting gains come from</p>
+<p>Using the rules in <a href="../controls/12-pid.html#picking-starting-gains">Lesson 12</a>:</p>
+<ul>
+<li><strong>kP = 10:</strong> start slowing down about <strong>0.6 m</strong> from the goal with up to <strong>6 V</strong>: 6 ÷ 0.6 = 10 V per meter.</li>
+<li><strong>kD:</strong> when you add it, start at kP × 0.05 s = <strong>0.5</strong>.</li>
+<li><strong>kI:</strong> when you add it, start at kP ÷ 5 s = <strong>2</strong>.</li>
+</ul>
+<p>You can also <strong>predict the sag</strong> before you see it. <a href="../controls/13-feedforward.html#1-estimate-them-from-the-motors-specs">Lesson 13</a> shows how to estimate the hold voltage (kG) from the carriage's weight, the sprocket, the gear ratio, and the motor. If kG comes out around 0.4 V, then with kP = 10 the sag will be about 0.4 ÷ 10 = <strong>4 cm</strong>. Check your prediction in Attempt 1.</p>
+</div>
 <h3 id="attempt-1-p-only-and-the-sag">Attempt 1: P only, and the sag<a class="headerlink" href="#attempt-1-p-only-and-the-sag" title="Permanent link">#</a></h3>
 <p>With <strong>kI and kD at 0</strong> and kP = 10, press <strong>B</strong> (L2) and let it settle.</p>
 <p><strong>What you'll see:</strong> The carriage follows the setpoint a little <strong>below</strong> it the whole way up, then settles <strong>below</strong> the goal and stays there. That gap is <strong>sag</strong>, and gravity causes it.</p>

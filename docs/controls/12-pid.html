@@ -414,13 +414,72 @@ try {
 </div>
 <h3 id="units-of-the-gains">Units of the gains<a class="headerlink" href="#units-of-the-gains" title="Permanent link">#</a></h3>
 <p>The gains depend on your units. With degrees in and motor percent out, kP = 0.02 means "2% output per degree of error." Measure in radians instead and the same behavior needs kP ≈ 1.15. <strong>If you change units, you must retune.</strong> That's one more reason to pick units once and keep them (<a href="../robot-code/08-sensors.html">Lesson 8</a>).</p>
+<h3 id="picking-starting-gains">Picking starting gains<a class="headerlink" href="#picking-starting-gains" title="Permanent link">#</a></h3>
+<p>"Start with a small kP" isn't much help when you don't know whether small means 0.001 or 10. You can <strong>calculate</strong> a good first guess for each gain from what you want the mechanism to do, in your units. Then tuning is a few small adjustments instead of a guessing game.</p>
+<p><strong>kP: how hard to push, and at what distance.</strong> Ask: <em>"How far from the target should the mechanism still be pushing as hard as I allow?"</em> Inside that distance it slows down; outside it, it's at full output.</p>
+<div class="highlight"><pre><span></span><code>kP = (the most output you'll allow) ÷ (the error where it should start slowing down)
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Most output</th>
+<th>Start slowing at</th>
+<th>Starting kP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Arm, percent output</td>
+<td>0.5 (50%)</td>
+<td>25° away</td>
+<td>0.5 ÷ 25 = <strong>0.02</strong> per degree</td>
+</tr>
+<tr>
+<td>Test bed wheel, volts (<a href="../testbed/lab9-pid-wheel.html">Lab 9</a>)</td>
+<td>6 V</td>
+<td>6 rotations away</td>
+<td>6 ÷ 6 = <strong>1.0</strong> V per rotation</td>
+</tr>
+<tr>
+<td>Elevator, volts (<a href="../testbed/lab10-elevator.html">Lab 10</a>)</td>
+<td>6 V</td>
+<td>0.6 m away</td>
+<td>6 ÷ 0.6 = <strong>10</strong> V per meter</td>
+</tr>
+<tr>
+<td>Turret, radians</td>
+<td>6 V</td>
+<td>0.5 rad (about 30°) away</td>
+<td>6 ÷ 0.5 = <strong>12</strong> V per radian</td>
+</tr>
+</tbody>
+</table>
+<p>A heavier, slower mechanism needs a longer slowing-down distance (smaller kP). A light, quick one can use a shorter distance (bigger kP).</p>
+<p><strong>kD: how far ahead to look.</strong> D pushes against the current speed, as if the error were already a little further along. Pick that look-ahead time:</p>
+<div class="highlight"><pre><span></span><code>kD = kP × (look-ahead time)        start with 0.05 to 0.1 seconds
+</code></pre></div>
+<p>For the wheel: kD = 1.0 × 0.05 = <strong>0.05</strong>. For the elevator: kD = 10 × 0.05 = <strong>0.5</strong>. Start at <strong>0</strong> and add it only if the mechanism overshoots; this tells you which size of number to try first.</p>
+<p><strong>kI: how long to take fixing leftover error.</strong> I adds up error over time. Pick roughly how many seconds it should take to push out a small leftover error:</p>
+<div class="highlight"><pre><span></span><code>kI = kP ÷ (seconds)                start with 5 to 10 seconds, so kI = kP/5 to kP/10
+</code></pre></div>
+<p>For the wheel: kI = 1.0 ÷ 5 = <strong>0.2</strong>. For the elevator: kI = 10 ÷ 5 = <strong>2</strong>. Start at <strong>0</strong>, add it only if a steady error is left over (and try feedforward first, Lesson 13), and always set an <strong>IZone</strong> so it can't wind up.</p>
+<p><strong>Sanity-check before you run it.</strong> Work out the output at a typical error. If the elevator is 5 cm off with kP = 10, that's 0.5 V: small, but enough to nudge it. If your kP gives 40 V for a 10 cm error, it's far too big. If it gives 0.001 V, it's far too small.</p>
+<div class="admonition tip">
+<p class="admonition-title">Gravity sets a minimum kP</p>
+<p>On an arm or elevator <strong>without feedforward</strong>, P has to supply the hold voltage itself, so the mechanism sags until <code>kP × sag = hold voltage</code>. If it takes 0.4 V to hold an elevator and you can live with 1 cm of sag, kP must be at least 0.4 ÷ 0.01 = 40, usually more than is stable. That's exactly why gravity mechanisms need feedforward (<a href="13-feedforward.html">Lesson 13</a>).</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">SysId can suggest them too</p>
+<p>Once you have feedforward gains from SysId (<a href="13b-sysid.html">Lesson 13.1</a>), its <strong>Feedback Analysis</strong> panel calculates suggested kP and kD for you, from the measured model and how much error and output you'll accept.</p>
+</div>
 <h3 id="a-tuning-recipe">A tuning recipe<a class="headerlink" href="#a-tuning-recipe" title="Permanent link">#</a></h3>
 <ol>
 <li><strong>Check the sensor first.</strong> Move the mechanism by hand. Does the measurement go up when the motor would push it positive? If the sensor and motor disagree on direction, PID will push the wrong way and run away.</li>
 <li>Set kI = 0 and kD = 0.</li>
-<li>Start with a small kP. Raise it (doubling works well) until the mechanism <strong>oscillates</strong> around the target.</li>
+<li>Start with the kP you <strong>calculated</strong> above. Raise it (doubling works well) until the mechanism <strong>oscillates</strong> around the target; if it already oscillates, halve it.</li>
 <li>Back kP off by about half.</li>
-<li>Raise <strong>kD</strong> in small steps until the overshoot is gone, or it starts to jitter.</li>
+<li>Raise <strong>kD</strong> in small steps, starting near <strong>kP × 0.05</strong>, until the overshoot is gone, or it starts to jitter.</li>
 <li>If it still settles short, add <strong>feedforward</strong> (Lesson 13) before reaching for kI.</li>
 <li>Write down the gains that work, and put them in <code>Constants.java</code>.</li>
 </ol>

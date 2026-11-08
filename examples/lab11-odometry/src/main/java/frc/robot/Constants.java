@@ -64,7 +64,7 @@ public final class Constants {
     public static final double L2Meters = 0.25;
     public static final double L3Meters = 0.45;
 
-    // PID, in volts per meter of error
+    // PID, in volts per meter of error. Starting kP: 6 V at 0.6 m from the goal = 10 V/m.
     public static final double kP = 10.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;

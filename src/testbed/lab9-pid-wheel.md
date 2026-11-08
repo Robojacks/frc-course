@@ -38,6 +38,13 @@ Add three rows to your Lab 6 scorecard:
     public static final double ToleranceRps = 0.1;   // "nearly stopped"
 ```
 
+!!! info "Where these starting numbers come from"
+    They come from the rules in [Lesson 12](../controls/12-pid.md#picking-starting-gains), so you're not guessing:
+
+    - **P = 1.0:** the most voltage this lab allows is 6 V (`MaxVolts`). If the wheel should start slowing down about **6 rotations** from the target, kP = 6 V ÷ 6 rotations = **1.0 V per rotation**.
+    - **D starts at 0.** When you need it, try kP × 0.05 s = **0.05** first.
+    - **I starts at 0.** When you need it, try kP ÷ 5 s = **0.2** first.
+
 ### Step 2: Add a PID controller to the subsystem
 Open `WheelSubsystem.java`. Add the imports:
 
@@ -219,7 +226,7 @@ Unlike bang-bang, if the wheel overshoots, P **pushes it back**. It corrects its
 No new code: the same `turnPid` command uses whatever gains are in the controller.
 
 1. Set kP high enough that it overshoots a little.
-2. Raise **kD** in small steps (try 0.02, 0.05, 0.1) until the overshoot disappears.
+2. Raise **kD** in small steps (try 0.02, 0.05, 0.1) until the overshoot disappears. (0.05 is kP × 0.05 seconds of look-ahead, the starting rule from Lesson 12.)
 3. If the output starts to buzz or jitter, kD is too high. Back it off.
 4. Run three times with your best gains and record the results.
 
@@ -230,7 +237,7 @@ No new code: the same `turnPid` command uses whatever gains are in the controlle
 
 Still no new code. Keep your P and D from Attempt 4.
 
-1. Set **kI** small, like 0.1, and run `turnPid(10)`. Watch **Error** on the dashboard: after the wheel slows down, the last little bit should creep to 0.
+1. Set **kI** small, like 0.1, and run `turnPid(10)`. (The Lesson 12 starting rule, kP ÷ 5 seconds, gives 0.2, so 0.1 is a gentle first step.) Watch **Error** on the dashboard: after the wheel slows down, the last little bit should creep to 0.
 2. Raise kI (try 0.3, then 0.5) until the leftover error goes away quickly.
 3. Too much kI makes the wheel overshoot and slowly swing back and forth. Back it off.
 4. Run three times with your best gains and record the results.

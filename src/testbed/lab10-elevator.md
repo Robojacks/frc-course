@@ -134,7 +134,7 @@ Add this class inside `Constants` in the WestCoastDrive project, and add `import
     public static final double L2Meters = 0.25;
     public static final double L3Meters = 0.45;
 
-    // PID, in volts per meter of error
+    // PID, in volts per meter of error. Starting kP: 6 V at 0.6 m from the goal = 10 V/m.
     public static final double kP = 10.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
@@ -641,6 +641,15 @@ Pick three heights between 0 and your max, and put them in `StartMeters`, `L2Met
 **Set up Elastic for tuning:** one **Graph** with **Goal**, **Setpoint**, and **Height** together, plus **Text Display** widgets for **kP**, **kI**, **kD**, **Max Velocity**, and **Max Accel**, and **Error** and **Output (V)**.
 
 Press **B**. Watch the graph: **Goal** jumps to L2, **Setpoint** ramps smoothly up to it, and **Height** follows the setpoint.
+
+!!! info "Where the starting gains come from"
+    Using the rules in [Lesson 12](../controls/12-pid.md#picking-starting-gains):
+
+    - **kP = 10:** start slowing down about **0.6 m** from the goal with up to **6 V**: 6 ÷ 0.6 = 10 V per meter.
+    - **kD:** when you add it, start at kP × 0.05 s = **0.5**.
+    - **kI:** when you add it, start at kP ÷ 5 s = **2**.
+
+    You can also **predict the sag** before you see it. [Lesson 13](../controls/13-feedforward.md#1-estimate-them-from-the-motors-specs) shows how to estimate the hold voltage (kG) from the carriage's weight, the sprocket, the gear ratio, and the motor. If kG comes out around 0.4 V, then with kP = 10 the sag will be about 0.4 ÷ 10 = **4 cm**. Check your prediction in Attempt 1.
 
 ### Attempt 1: P only, and the sag
 With **kI and kD at 0** and kP = 10, press **B** (L2) and let it settle.

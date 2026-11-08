@@ -257,12 +257,54 @@ public class Arm extends SubsystemBase {
 ### Units of the gains
 The gains depend on your units. With degrees in and motor percent out, kP = 0.02 means "2% output per degree of error." Measure in radians instead and the same behavior needs kP ≈ 1.15. **If you change units, you must retune.** That's one more reason to pick units once and keep them ([Lesson 8](../robot-code/08-sensors.md)).
 
+### Picking starting gains
+"Start with a small kP" isn't much help when you don't know whether small means 0.001 or 10. You can **calculate** a good first guess for each gain from what you want the mechanism to do, in your units. Then tuning is a few small adjustments instead of a guessing game.
+
+**kP: how hard to push, and at what distance.** Ask: *"How far from the target should the mechanism still be pushing as hard as I allow?"* Inside that distance it slows down; outside it, it's at full output.
+
+```
+kP = (the most output you'll allow) ÷ (the error where it should start slowing down)
+```
+
+| Mechanism | Most output | Start slowing at | Starting kP |
+|---|---|---|---|
+| Arm, percent output | 0.5 (50%) | 25° away | 0.5 ÷ 25 = **0.02** per degree |
+| Test bed wheel, volts ([Lab 9](../testbed/lab9-pid-wheel.md)) | 6 V | 6 rotations away | 6 ÷ 6 = **1.0** V per rotation |
+| Elevator, volts ([Lab 10](../testbed/lab10-elevator.md)) | 6 V | 0.6 m away | 6 ÷ 0.6 = **10** V per meter |
+| Turret, radians | 6 V | 0.5 rad (about 30°) away | 6 ÷ 0.5 = **12** V per radian |
+
+A heavier, slower mechanism needs a longer slowing-down distance (smaller kP). A light, quick one can use a shorter distance (bigger kP).
+
+**kD: how far ahead to look.** D pushes against the current speed, as if the error were already a little further along. Pick that look-ahead time:
+
+```
+kD = kP × (look-ahead time)        start with 0.05 to 0.1 seconds
+```
+
+For the wheel: kD = 1.0 × 0.05 = **0.05**. For the elevator: kD = 10 × 0.05 = **0.5**. Start at **0** and add it only if the mechanism overshoots; this tells you which size of number to try first.
+
+**kI: how long to take fixing leftover error.** I adds up error over time. Pick roughly how many seconds it should take to push out a small leftover error:
+
+```
+kI = kP ÷ (seconds)                start with 5 to 10 seconds, so kI = kP/5 to kP/10
+```
+
+For the wheel: kI = 1.0 ÷ 5 = **0.2**. For the elevator: kI = 10 ÷ 5 = **2**. Start at **0**, add it only if a steady error is left over (and try feedforward first, Lesson 13), and always set an **IZone** so it can't wind up.
+
+**Sanity-check before you run it.** Work out the output at a typical error. If the elevator is 5 cm off with kP = 10, that's 0.5 V: small, but enough to nudge it. If your kP gives 40 V for a 10 cm error, it's far too big. If it gives 0.001 V, it's far too small.
+
+!!! tip "Gravity sets a minimum kP"
+    On an arm or elevator **without feedforward**, P has to supply the hold voltage itself, so the mechanism sags until `kP × sag = hold voltage`. If it takes 0.4 V to hold an elevator and you can live with 1 cm of sag, kP must be at least 0.4 ÷ 0.01 = 40, usually more than is stable. That's exactly why gravity mechanisms need feedforward ([Lesson 13](13-feedforward.md)).
+
+!!! info "SysId can suggest them too"
+    Once you have feedforward gains from SysId ([Lesson 13.1](13b-sysid.md)), its **Feedback Analysis** panel calculates suggested kP and kD for you, from the measured model and how much error and output you'll accept.
+
 ### A tuning recipe
 1. **Check the sensor first.** Move the mechanism by hand. Does the measurement go up when the motor would push it positive? If the sensor and motor disagree on direction, PID will push the wrong way and run away.
 2. Set kI = 0 and kD = 0.
-3. Start with a small kP. Raise it (doubling works well) until the mechanism **oscillates** around the target.
+3. Start with the kP you **calculated** above. Raise it (doubling works well) until the mechanism **oscillates** around the target; if it already oscillates, halve it.
 4. Back kP off by about half.
-5. Raise **kD** in small steps until the overshoot is gone, or it starts to jitter.
+5. Raise **kD** in small steps, starting near **kP × 0.05**, until the overshoot is gone, or it starts to jitter.
 6. If it still settles short, add **feedforward** (Lesson 13) before reaching for kI.
 7. Write down the gains that work, and put them in `Constants.java`.
 

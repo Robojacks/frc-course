@@ -124,6 +124,15 @@ try {
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ToleranceRot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.02</span><span class="p">;</span><span class="w">  </span><span class="c1">// 0.02 rotations ≈ 7°</span>
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">ToleranceRps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span><span class="w">   </span><span class="c1">// "nearly stopped"</span>
 </code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Where these starting numbers come from</p>
+<p>They come from the rules in <a href="../controls/12-pid.html#picking-starting-gains">Lesson 12</a>, so you're not guessing:</p>
+<ul>
+<li><strong>P = 1.0:</strong> the most voltage this lab allows is 6 V (<code>MaxVolts</code>). If the wheel should start slowing down about <strong>6 rotations</strong> from the target, kP = 6 V ÷ 6 rotations = <strong>1.0 V per rotation</strong>.</li>
+<li><strong>D starts at 0.</strong> When you need it, try kP × 0.05 s = <strong>0.05</strong> first.</li>
+<li><strong>I starts at 0.</strong> When you need it, try kP ÷ 5 s = <strong>0.2</strong> first.</li>
+</ul>
+</div>
 <h3 id="step-2-add-a-pid-controller-to-the-subsystem">Step 2: Add a PID controller to the subsystem<a class="headerlink" href="#step-2-add-a-pid-controller-to-the-subsystem" title="Permanent link">#</a></h3>
 <p>Open <code>WheelSubsystem.java</code>. Add the imports:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">edu.wpi.first.math.MathUtil</span><span class="p">;</span>
@@ -324,7 +333,7 @@ try {
 <p>No new code: the same <code>turnPid</code> command uses whatever gains are in the controller.</p>
 <ol>
 <li>Set kP high enough that it overshoots a little.</li>
-<li>Raise <strong>kD</strong> in small steps (try 0.02, 0.05, 0.1) until the overshoot disappears.</li>
+<li>Raise <strong>kD</strong> in small steps (try 0.02, 0.05, 0.1) until the overshoot disappears. (0.05 is kP × 0.05 seconds of look-ahead, the starting rule from Lesson 12.)</li>
 <li>If the output starts to buzz or jitter, kD is too high. Back it off.</li>
 <li>Run three times with your best gains and record the results.</li>
 </ol>
@@ -333,7 +342,7 @@ try {
 <p><strong>The idea:</strong> "If you've been a little short for a while, push a little harder." <strong>I</strong> adds up the error over time. While the wheel sits just short of 10, that total keeps growing, so the push keeps growing until it's enough to beat friction and finish the move.</p>
 <p>Still no new code. Keep your P and D from Attempt 4.</p>
 <ol>
-<li>Set <strong>kI</strong> small, like 0.1, and run <code>turnPid(10)</code>. Watch <strong>Error</strong> on the dashboard: after the wheel slows down, the last little bit should creep to 0.</li>
+<li>Set <strong>kI</strong> small, like 0.1, and run <code>turnPid(10)</code>. (The Lesson 12 starting rule, kP ÷ 5 seconds, gives 0.2, so 0.1 is a gentle first step.) Watch <strong>Error</strong> on the dashboard: after the wheel slows down, the last little bit should creep to 0.</li>
 <li>Raise kI (try 0.3, then 0.5) until the leftover error goes away quickly.</li>
 <li>Too much kI makes the wheel overshoot and slowly swing back and forth. Back it off.</li>
 <li>Run three times with your best gains and record the results.</li>

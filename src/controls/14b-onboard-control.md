@@ -46,6 +46,8 @@ The controller does the math in **its** units, so the gains do too.
 
 A gain tuned in one set of units is wrong by a huge factor in another. Write the units next to every constant.
 
+The **starting-gain rules** from [Lesson 12](12-pid.md#picking-starting-gains) and [Lesson 13](13-feedforward.md#getting-the-numbers) work the same here, as long as you do them in the controller's units. For example, an elevator on a TalonFX with `SensorToMechanismRatio` set to drum rotations: "6 V when 0.1 drum rotations away" gives kP = 60 V per rotation. On a SPARK, PID output is a duty cycle, so use the most duty cycle you'll allow (like 0.5) instead of volts.
+
 ### CTRE: configure once, then send control requests
 A TalonFX is configured with a `TalonFXConfiguration` object, applied once at startup. Gains live in **slots** (Slot0, Slot1, Slot2) so one motor can switch between, say, an empty and a loaded elevator.
 
