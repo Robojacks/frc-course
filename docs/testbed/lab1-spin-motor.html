@@ -422,8 +422,8 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <td>The CAN ID in <code>Constants</code> doesn't match the REV Hardware Client, or a CAN wire is loose</td>
 </tr>
 <tr>
-<td>Motor keeps spinning after you let go</td>
-<td>The command doesn't stop the motor when it ends. Check that you used <code>startEnd</code> with <code>setMotorSpeed(0.0)</code> as the end action.</td>
+<td>Motor keeps spinning after you let go of A</td>
+<td>Check these, in order: <strong>(1)</strong> the binding says <code>whileTrue</code>, not <code>onTrue</code> (<code>onTrue</code> starts the command but never cancels it); <strong>(2)</strong> the command uses <code>startEnd</code>, not <code>run</code> or <code>runOnce</code> (those have no end action); <strong>(3)</strong> the end action is <code>setMotorSpeed(0.0)</code>, not <code>setMotorSpeed(speed)</code>; <strong>(4)</strong> nothing else calls <code>set(...)</code> on the motor, like <code>periodic()</code>; <strong>(5)</strong> you deployed after the fix. Disabling the robot always stops it.</td>
 </tr>
 <tr>
 <td>Motor spins the wrong way</td>

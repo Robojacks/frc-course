@@ -283,7 +283,7 @@ git commit -m "Lab 1: spin brushless motor on A"
 |---|---|
 | Nothing happens when you hold A | Robot not enabled, or the controller isn't in slot 0 on the Driver Station USB tab |
 | Still nothing, and the console mentions CAN or SPARK MAX errors | The CAN ID in `Constants` doesn't match the REV Hardware Client, or a CAN wire is loose |
-| Motor keeps spinning after you let go | The command doesn't stop the motor when it ends. Check that you used `startEnd` with `setMotorSpeed(0.0)` as the end action. |
+| Motor keeps spinning after you let go of A | Check these, in order: **(1)** the binding says `whileTrue`, not `onTrue` (`onTrue` starts the command but never cancels it); **(2)** the command uses `startEnd`, not `run` or `runOnce` (those have no end action); **(3)** the end action is `setMotorSpeed(0.0)`, not `setMotorSpeed(speed)`; **(4)** nothing else calls `set(...)` on the motor, like `periodic()`; **(5)** you deployed after the fix. Disabling the robot always stops it. |
 | Motor spins the wrong way | Add `brushlessMotorConfig.inverted(true);` in the constructor |
 | Build error: cannot find symbol `SparkMax` | REVLib isn't installed. Go back to Lab 0, Part 4. |
 
