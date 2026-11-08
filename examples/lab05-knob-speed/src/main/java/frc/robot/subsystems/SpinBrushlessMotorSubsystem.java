@@ -12,6 +12,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -31,6 +33,14 @@ public class SpinBrushlessMotorSubsystem extends SubsystemBase {
   // The limit switch on the test bed (Lab 4)
   private final DigitalInput m_limitSwitch =
       new DigitalInput(Constants.kSensorConstants.LimitSwitchDio);
+
+  // The 10-turn knob on the test bed (Lab 5)
+  private final AnalogPotentiometer m_knob = new AnalogPotentiometer(
+      Constants.kSensorConstants.KnobAnalogPort,
+      Constants.kSensorConstants.KnobTurns,
+      0.0);   // offset: added to every reading
+
+  private final TelemetryTable m_knobTelemetry = Telemetry.getTable("Knob");
 
   // Everything this subsystem sends shows up in /Telemetry/Brushless on the dashboard
   private final TelemetryTable m_telemetry = Telemetry.getTable("Brushless");
@@ -111,6 +121,28 @@ public class SpinBrushlessMotorSubsystem extends SubsystemBase {
     ).withName("Spin Tunable");
   }
 
+  /** Turns the knob position into a motor speed from -1 to 1. */
+  private double knobToSpeed() {
+    double min = Constants.kSensorConstants.KnobMin;
+    double max = Constants.kSensorConstants.KnobMax;
+    double center = (min + max) / 2.0;
+    double halfRange = (max - min) / 2.0;
+
+    double speed = (m_knob.get() - center) / halfRange;
+
+    speed = MathUtil.clamp(speed, -1.0, 1.0);      // never go past full speed
+    speed = MathUtil.applyDeadband(speed, 0.05);   // a small dead zone in the middle
+    return speed * 0.5;                            // cap at 50% while learning
+  }
+
+  /** Lets the knob set the motor speed, read every loop. Stops the motor when it ends. */
+  public Command spinWithKnobCommand() {
+    return runEnd(
+        () -> setMotorSpeed(knobToSpeed()),   // every loop: read the knob, set the motor
+        () -> setMotorSpeed(0.0)              // when it ends: stop
+    ).withName("Knob Control");
+  }
+
   @Override
   public void periodic() {
     // Runs every 20 ms, enabled or not
@@ -122,5 +154,8 @@ public class SpinBrushlessMotorSubsystem extends SubsystemBase {
     Command running = getCurrentCommand();
     m_telemetry.log("Command", running == null ? "none" : running.getName());
     m_telemetry.log("Limit Pressed", isLimitPressed());
+
+    m_knobTelemetry.log("Turns", m_knob.get());
+    m_knobTelemetry.log("Speed", knobToSpeed());
   }
 }

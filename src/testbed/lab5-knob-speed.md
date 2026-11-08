@@ -47,9 +47,10 @@ Find which Analog In port the pot is wired to, and add it to `kSensorConstants`:
 ### Step 2: Read the knob
 WPILib's `AnalogPotentiometer` turns the voltage into a number for you. Give it the port and the **full range** you want it to report. With a range of 10, it reports **turns**: about 0 at one end and about 10 at the other.
 
-Open `RobotContainer.java` and add the knob as a field, next to the controller:
+The knob belongs to the motor it controls, so it goes in the **subsystem**. Open `SpinBrushlessMotorSubsystem.java` and add the knob as a field, next to the limit switch from Lab 4:
 
 ```java
+  // The 10-turn knob on the test bed (Lab 5)
   private final AnalogPotentiometer m_knob = new AnalogPotentiometer(
       Constants.kSensorConstants.KnobAnalogPort,
       Constants.kSensorConstants.KnobTurns,
@@ -64,31 +65,22 @@ Open `RobotContainer.java` and add the knob as a field, next to the controller:
 
 Import `edu.wpi.first.wpilibj.AnalogPotentiometer`.
 
-Add a telemetry table for the knob's values, below the knob (import `frc.robot.telemetry.Telemetry` and `frc.robot.telemetry.TelemetryTable`):
+Add a second telemetry table for the knob's values, below the knob, so they get their own **Knob** folder on the dashboard:
 
 ```java
   private final TelemetryTable m_knobTelemetry = Telemetry.getTable("Knob");
 ```
 
-!!! info "Why put the knob in RobotContainer?"
-    The knob is a **control**, like the Xbox controller, not part of the motor's mechanism. Controls live in `RobotContainer`; mechanisms live in subsystems.
+!!! info "Why put the knob in the subsystem?"
+    A subsystem owns the hardware it uses. With the knob inside `SpinBrushlessMotorSubsystem`, the only way to make the knob move the motor is through one of the subsystem's commands, and the math that turns knob turns into a speed can stay `private`. `RobotContainer` just decides **which button** starts that command.
 
-Put the reading on the dashboard. `RobotContainer` doesn't have a `periodic()`, so add this line to the end of `robotPeriodic()` in `Robot.java`, after the scheduler runs:
-
-```java
-    m_robotContainer.updateDashboard();
-```
-
-And add the method to `RobotContainer`:
+Put the reading on the dashboard. Add this line to the end of the subsystem's `periodic()`, after the Lab 4 limit switch line:
 
 ```java
-  /** Called every loop from Robot.robotPeriodic(). */
-  public void updateDashboard() {
     m_knobTelemetry.log("Turns", m_knob.get());
-  }
 ```
 
-- **`public void updateDashboard()`**: a new method you wrote. `Robot` calls it every loop, so the knob's value stays fresh on the dashboard.
+- **`periodic()`** runs every 20 ms, enabled or not, so the knob's value stays fresh on the dashboard.
 - **`m_knob.get()`** reads the knob right now, as a number of turns from 0 to 10.
 
 ### Step 3: Calibrate
@@ -130,7 +122,7 @@ speed     = (turns - center) / halfRange
 - Knob at 7.45 turns: speed = (7.45 − 5.0) ÷ 4.9 = **0.5**
 - Knob at 2.55 turns: speed = (2.55 − 5.0) ÷ 4.9 = **−0.5**
 
-Add this method to `RobotContainer`:
+Add this method to `SpinBrushlessMotorSubsystem`:
 
 ```java
   /** Turns the knob position into a motor speed from -1 to 1. */
@@ -152,7 +144,7 @@ Reading it from the top:
 
 | Line | What it does |
 |---|---|
-| `private double knobToSpeed()` | A method only `RobotContainer` uses (`private`) that answers with a number (`double`) |
+| `private double knobToSpeed()` | A method only this subsystem uses (`private`) that answers with a number (`double`) |
 | `double min = ...;` and `double max = ...;` | **Local variables**: short names for the two constants, so the math below is easier to read. They only exist while the method runs. |
 | `double center = (min + max) / 2.0;` | The knob reading that should mean "stopped" |
 | `double halfRange = (max - min) / 2.0;` | How far the knob can turn from center to either end |
@@ -168,22 +160,43 @@ Why the safety lines matter:
 | `applyDeadband` | It's hard to leave a knob exactly at center. The dead zone makes "close to center" mean stopped. |
 | `* 0.5` | A safety cap while you test |
 
-Add the speed to `updateDashboard()` so you can watch it:
+Import `edu.wpi.first.math.MathUtil`.
+
+Add the speed to the end of `periodic()` so you can watch it:
 
 ```java
     m_knobTelemetry.log("Speed", knobToSpeed());
 ```
 
 ### Step 5: Let the knob drive the motor
-You already wrote `spinWithSupplierCommand` in Lab 3. It reads a speed every loop, which is exactly what the knob needs. Bind it in `configureBindings()`:
+Now write the command, in the subsystem, below `knobToSpeed()`. It works like `spinWithSupplierCommand` from Lab 3, except it reads the knob itself:
+
+```java
+  /** Lets the knob set the motor speed, read every loop. Stops the motor when it ends. */
+  public Command spinWithKnobCommand() {
+    return runEnd(
+        () -> setMotorSpeed(knobToSpeed()),   // every loop: read the knob, set the motor
+        () -> setMotorSpeed(0.0)              // when it ends: stop
+    ).withName("Knob Control");
+  }
+```
+
+| Part | What it does |
+|---|---|
+| `public Command spinWithKnobCommand()` | Public, so `RobotContainer` can bind it. It needs no arguments: the subsystem already has the knob. |
+| `runEnd(...)` | The first lambda runs **every loop** while the command runs; the second runs once when it ends ([Lesson 7](../robot-code/07-command-based.md)) |
+| `() -> setMotorSpeed(knobToSpeed())` | Each loop, read the knob, turn it into a speed, and set the motor. Because it's inside the lambda, `knobToSpeed()` runs fresh every 20 ms. |
+| `() -> setMotorSpeed(0.0)` | Stop the motor when the command ends, so it never keeps spinning |
+| `.withName("Knob Control")` | The name that shows up in **Brushless → Command** on the dashboard |
+
+Then bind it in `RobotContainer`'s `configureBindings()`:
 
 ```java
     // D-pad right: tap to let the knob control the motor, tap again to stop
-    m_controller.povRight().toggleOnTrue(
-        m_spinBrushlessMotorSubsystem.spinWithSupplierCommand(this::knobToSpeed));
+    m_controller.povRight().toggleOnTrue(m_spinBrushlessMotorSubsystem.spinWithKnobCommand());
 ```
 
-`this::knobToSpeed` is a **method reference**: "call `knobToSpeed()` every time you need a value." ([Lesson 3](../foundations/03-java.md))
+`toggleOnTrue` starts the command on the first tap and cancels it on the next one. Cancelling runs the end lambda, which stops the motor.
 
 **Test it:**
 
@@ -225,5 +238,8 @@ git commit -m "Lab 5: knob controls speed"
 ??? question "Why do we clamp after mapping?"
     If the knob reads slightly past the measured min or max, the math would give a speed beyond ±1. Clamping keeps it in range.
 
-??? question "Why does the knob command use `this::knobToSpeed` instead of `knobToSpeed()`?"
-    `knobToSpeed()` would run once, when the robot starts, and hand over a single number. `this::knobToSpeed` hands over the method itself, so the command can call it every loop and follow the knob.
+??? question "Why is `knobToSpeed()` called inside the lambda, `() -> setMotorSpeed(knobToSpeed())`?"
+    `runEnd` runs that lambda every loop, so the knob is read fresh every 20 ms and the motor follows it. If you called `knobToSpeed()` once outside the lambda, the command would use that one number forever.
+
+??? question "Why does the knob live in the subsystem instead of `RobotContainer`?"
+    A subsystem owns the hardware it uses. That keeps the knob math private and means the knob can only move the motor through the subsystem's own commands. `RobotContainer` just binds the button.

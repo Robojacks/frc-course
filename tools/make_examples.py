@@ -534,21 +534,20 @@ def testbed_states():
     calib = java_block(l5, "KnobMin")
     sensor5 = edit(sensor5, "    public static final double KnobTurns = 10.0;   // it's a 10-turn pot\n", calib)
     constants = re.sub(r"  public static class kSensorConstants \{.*?\n  \}\n", lambda m: sensor5, constants, flags=re.S)
-    container = edit(container, "      new CommandXboxController(OperatorConstants.kControllerPort);\n",
-                     "\n" + java_block(l5, "new AnalogPotentiometer(") + "\n"
-                     + java_block(l5, 'Telemetry.getTable("Knob")'))
-    container = edit(container, "\n  /**\n   * Use this to pass the autonomous command",
-                     "\n" + java_block(l5, "public void updateDashboard()").rstrip("\n").replace(
-                         '    m_knobTelemetry.log("Turns", m_knob.get());\n',
-                         '    m_knobTelemetry.log("Turns", m_knob.get());\n' + java_block(l5, 'm_knobTelemetry.log("Speed"'))
-                     + "\n\n" + java_block(l5, "private double knobToSpeed()").rstrip("\n") + "\n",
-                     where="before")
+    # The knob, its math, and its command all live in the motor subsystem
+    spin = edit(spin, "      new DigitalInput(Constants.kSensorConstants.LimitSwitchDio);\n",
+                "\n" + java_block(l5, "new AnalogPotentiometer(") + "\n"
+                + java_block(l5, 'Telemetry.getTable("Knob")'))
+    spin = edit(spin, "\n  @Override\n  public void periodic()",
+                "\n" + java_block(l5, "private double knobToSpeed()") + "\n"
+                + java_block(l5, "public Command spinWithKnobCommand()"), where="before")
+    spin = edit(spin, '    m_telemetry.log("Limit Pressed", isLimitPressed());\n',
+                "\n" + java_block(l5, 'm_knobTelemetry.log("Turns"') + java_block(l5, 'm_knobTelemetry.log("Speed"'))
+    spin = add_imports(spin, "edu.wpi.first.wpilibj.AnalogPotentiometer", "edu.wpi.first.math.MathUtil")
     container = edit(container, "\n    // Show which commands are running, live\n",
                      "\n" + java_block(l5, "m_controller.povRight()"), where="before")
-    container = add_imports(container, "edu.wpi.first.wpilibj.AnalogPotentiometer", "edu.wpi.first.math.MathUtil",
-                            "frc.robot.telemetry.Telemetry", "frc.robot.telemetry.TelemetryTable")
     files.update({"Constants.java": constants, "RobotContainer.java": container,
-                  "Robot.java": template_robot(println=True, update_dashboard=True)})
+                  "subsystems/SpinBrushlessMotorSubsystem.java": spin})
     yield "lab05-knob-speed", "Lab 5", "lab5-knob-speed.md", dict(files), ["REVLib"]
 
     # ---- Lab 6: the encoder wheel

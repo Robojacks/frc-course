@@ -3,8 +3,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -16,8 +14,6 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.SpinBrushlessMotorSubsystem;
-import frc.robot.telemetry.Telemetry;
-import frc.robot.telemetry.TelemetryTable;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -35,13 +31,6 @@ public class RobotContainer {
   // The driver's Xbox controller, in Driver Station slot 0
   private final CommandXboxController m_controller =
       new CommandXboxController(OperatorConstants.kControllerPort);
-
-  private final AnalogPotentiometer m_knob = new AnalogPotentiometer(
-      Constants.kSensorConstants.KnobAnalogPort,
-      Constants.kSensorConstants.KnobTurns,
-      0.0);   // offset: added to every reading
-
-  private final TelemetryTable m_knobTelemetry = Telemetry.getTable("Knob");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -94,31 +83,10 @@ public class RobotContainer {
         .onTrue(Commands.print("Limit switch hit!"));
 
     // D-pad right: tap to let the knob control the motor, tap again to stop
-    m_controller.povRight().toggleOnTrue(
-        m_spinBrushlessMotorSubsystem.spinWithSupplierCommand(this::knobToSpeed));
+    m_controller.povRight().toggleOnTrue(m_spinBrushlessMotorSubsystem.spinWithKnobCommand());
 
     // Show which commands are running, live
     SmartDashboard.putData(CommandScheduler.getInstance());
-  }
-
-  /** Called every loop from Robot.robotPeriodic(). */
-  public void updateDashboard() {
-    m_knobTelemetry.log("Turns", m_knob.get());
-    m_knobTelemetry.log("Speed", knobToSpeed());
-  }
-
-  /** Turns the knob position into a motor speed from -1 to 1. */
-  private double knobToSpeed() {
-    double min = Constants.kSensorConstants.KnobMin;
-    double max = Constants.kSensorConstants.KnobMax;
-    double center = (min + max) / 2.0;
-    double halfRange = (max - min) / 2.0;
-
-    double speed = (m_knob.get() - center) / halfRange;
-
-    speed = MathUtil.clamp(speed, -1.0, 1.0);      // never go past full speed
-    speed = MathUtil.applyDeadband(speed, 0.05);   // a small dead zone in the middle
-    return speed * 0.5;                            // cap at 50% while learning
   }
 
   /**

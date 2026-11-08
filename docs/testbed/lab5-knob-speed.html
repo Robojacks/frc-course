@@ -111,8 +111,9 @@ try {
 </code></pre></div>
 <h3 id="step-2-read-the-knob">Step 2: Read the knob<a class="headerlink" href="#step-2-read-the-knob" title="Permanent link">#</a></h3>
 <p>WPILib's <code>AnalogPotentiometer</code> turns the voltage into a number for you. Give it the port and the <strong>full range</strong> you want it to report. With a range of 10, it reports <strong>turns</strong>: about 0 at one end and about 10 at the other.</p>
-<p>Open <code>RobotContainer.java</code> and add the knob as a field, next to the controller:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">AnalogPotentiometer</span><span class="w"> </span><span class="n">m_knob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AnalogPotentiometer</span><span class="p">(</span>
+<p>The knob belongs to the motor it controls, so it goes in the <strong>subsystem</strong>. Open <code>SpinBrushlessMotorSubsystem.java</code> and add the knob as a field, next to the limit switch from Lab 4:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="c1">// The 10-turn knob on the test bed (Lab 5)</span>
+<span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">AnalogPotentiometer</span><span class="w"> </span><span class="n">m_knob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">AnalogPotentiometer</span><span class="p">(</span>
 <span class="w">      </span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">KnobAnalogPort</span><span class="p">,</span>
 <span class="w">      </span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">KnobTurns</span><span class="p">,</span>
 <span class="w">      </span><span class="mf">0.0</span><span class="p">);</span><span class="w">   </span><span class="c1">// offset: added to every reading</span>
@@ -140,24 +141,18 @@ try {
 </tbody>
 </table>
 <p>Import <code>edu.wpi.first.wpilibj.AnalogPotentiometer</code>.</p>
-<p>Add a telemetry table for the knob's values, below the knob (import <code>frc.robot.telemetry.Telemetry</code> and <code>frc.robot.telemetry.TelemetryTable</code>):</p>
+<p>Add a second telemetry table for the knob's values, below the knob, so they get their own <strong>Knob</strong> folder on the dashboard:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_knobTelemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Knob"</span><span class="p">);</span>
 </code></pre></div>
 <div class="admonition info">
-<p class="admonition-title">Why put the knob in RobotContainer?</p>
-<p>The knob is a <strong>control</strong>, like the Xbox controller, not part of the motor's mechanism. Controls live in <code>RobotContainer</code>; mechanisms live in subsystems.</p>
+<p class="admonition-title">Why put the knob in the subsystem?</p>
+<p>A subsystem owns the hardware it uses. With the knob inside <code>SpinBrushlessMotorSubsystem</code>, the only way to make the knob move the motor is through one of the subsystem's commands, and the math that turns knob turns into a speed can stay <code>private</code>. <code>RobotContainer</code> just decides <strong>which button</strong> starts that command.</p>
 </div>
-<p>Put the reading on the dashboard. <code>RobotContainer</code> doesn't have a <code>periodic()</code>, so add this line to the end of <code>robotPeriodic()</code> in <code>Robot.java</code>, after the scheduler runs:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_robotContainer</span><span class="p">.</span><span class="na">updateDashboard</span><span class="p">();</span>
-</code></pre></div>
-<p>And add the method to <code>RobotContainer</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Called every loop from Robot.robotPeriodic(). */</span>
-<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">updateDashboard</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_knobTelemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Turns"</span><span class="p">,</span><span class="w"> </span><span class="n">m_knob</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
-<span class="w">  </span><span class="p">}</span>
+<p>Put the reading on the dashboard. Add this line to the end of the subsystem's <code>periodic()</code>, after the Lab 4 limit switch line:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_knobTelemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Turns"</span><span class="p">,</span><span class="w"> </span><span class="n">m_knob</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
 </code></pre></div>
 <ul>
-<li><strong><code>public void updateDashboard()</code></strong>: a new method you wrote. <code>Robot</code> calls it every loop, so the knob's value stays fresh on the dashboard.</li>
+<li><strong><code>periodic()</code></strong> runs every 20 ms, enabled or not, so the knob's value stays fresh on the dashboard.</li>
 <li><strong><code>m_knob.get()</code></strong> reads the knob right now, as a number of turns from 0 to 10.</li>
 </ul>
 <h3 id="step-3-calibrate">Step 3: Calibrate<a class="headerlink" href="#step-3-calibrate" title="Permanent link">#</a></h3>
@@ -207,7 +202,7 @@ speed     = (turns - center) / halfRange
 <li>Knob at 7.45 turns: speed = (7.45 − 5.0) ÷ 4.9 = <strong>0.5</strong></li>
 <li>Knob at 2.55 turns: speed = (2.55 − 5.0) ÷ 4.9 = <strong>−0.5</strong></li>
 </ul>
-<p>Add this method to <code>RobotContainer</code>:</p>
+<p>Add this method to <code>SpinBrushlessMotorSubsystem</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Turns the knob position into a motor speed from -1 to 1. */</span>
 <span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">knobToSpeed</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">min</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Constants</span><span class="p">.</span><span class="na">kSensorConstants</span><span class="p">.</span><span class="na">KnobMin</span><span class="p">;</span>
@@ -233,7 +228,7 @@ speed     = (turns - center) / halfRange
 <tbody>
 <tr>
 <td><code>private double knobToSpeed()</code></td>
-<td>A method only <code>RobotContainer</code> uses (<code>private</code>) that answers with a number (<code>double</code>)</td>
+<td>A method only this subsystem uses (<code>private</code>) that answers with a number (<code>double</code>)</td>
 </tr>
 <tr>
 <td><code>double min = ...;</code> and <code>double max = ...;</code></td>
@@ -284,16 +279,55 @@ speed     = (turns - center) / halfRange
 </tr>
 </tbody>
 </table>
-<p>Add the speed to <code>updateDashboard()</code> so you can watch it:</p>
+<p>Import <code>edu.wpi.first.math.MathUtil</code>.</p>
+<p>Add the speed to the end of <code>periodic()</code> so you can watch it:</p>
 <div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_knobTelemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">knobToSpeed</span><span class="p">());</span>
 </code></pre></div>
 <h3 id="step-5-let-the-knob-drive-the-motor">Step 5: Let the knob drive the motor<a class="headerlink" href="#step-5-let-the-knob-drive-the-motor" title="Permanent link">#</a></h3>
-<p>You already wrote <code>spinWithSupplierCommand</code> in Lab 3. It reads a speed every loop, which is exactly what the knob needs. Bind it in <code>configureBindings()</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// D-pad right: tap to let the knob control the motor, tap again to stop</span>
-<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">povRight</span><span class="p">().</span><span class="na">toggleOnTrue</span><span class="p">(</span>
-<span class="w">        </span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinWithSupplierCommand</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">knobToSpeed</span><span class="p">));</span>
+<p>Now write the command, in the subsystem, below <code>knobToSpeed()</code>. It works like <code>spinWithSupplierCommand</code> from Lab 3, except it reads the knob itself:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="cm">/** Lets the knob set the motor speed, read every loop. Stops the motor when it ends. */</span>
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">spinWithKnobCommand</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runEnd</span><span class="p">(</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="n">knobToSpeed</span><span class="p">()),</span><span class="w">   </span><span class="c1">// every loop: read the knob, set the motor</span>
+<span class="w">        </span><span class="p">()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">setMotorSpeed</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span><span class="w">              </span><span class="c1">// when it ends: stop</span>
+<span class="w">    </span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Knob Control"</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
 </code></pre></div>
-<p><code>this::knobToSpeed</code> is a <strong>method reference</strong>: "call <code>knobToSpeed()</code> every time you need a value." (<a href="../foundations/03-java.html">Lesson 3</a>)</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>public Command spinWithKnobCommand()</code></td>
+<td>Public, so <code>RobotContainer</code> can bind it. It needs no arguments: the subsystem already has the knob.</td>
+</tr>
+<tr>
+<td><code>runEnd(...)</code></td>
+<td>The first lambda runs <strong>every loop</strong> while the command runs; the second runs once when it ends (<a href="../robot-code/07-command-based.html">Lesson 7</a>)</td>
+</tr>
+<tr>
+<td><code>() -&gt; setMotorSpeed(knobToSpeed())</code></td>
+<td>Each loop, read the knob, turn it into a speed, and set the motor. Because it's inside the lambda, <code>knobToSpeed()</code> runs fresh every 20 ms.</td>
+</tr>
+<tr>
+<td><code>() -&gt; setMotorSpeed(0.0)</code></td>
+<td>Stop the motor when the command ends, so it never keeps spinning</td>
+</tr>
+<tr>
+<td><code>.withName("Knob Control")</code></td>
+<td>The name that shows up in <strong>Brushless → Command</strong> on the dashboard</td>
+</tr>
+</tbody>
+</table>
+<p>Then bind it in <code>RobotContainer</code>'s <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// D-pad right: tap to let the knob control the motor, tap again to stop</span>
+<span class="w">    </span><span class="n">m_controller</span><span class="p">.</span><span class="na">povRight</span><span class="p">().</span><span class="na">toggleOnTrue</span><span class="p">(</span><span class="n">m_spinBrushlessMotorSubsystem</span><span class="p">.</span><span class="na">spinWithKnobCommand</span><span class="p">());</span>
+</code></pre></div>
+<p><code>toggleOnTrue</code> starts the command on the first tap and cancels it on the next one. Cancelling runs the end lambda, which stops the motor.</p>
 <p><strong>Test it:</strong></p>
 <ol>
 <li>Set the knob to the middle. Enable.</li>
@@ -338,8 +372,12 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <p>If the knob reads slightly past the measured min or max, the math would give a speed beyond ±1. Clamping keeps it in range.</p>
 </details>
 <details class="question">
-<summary>Why does the knob command use <code>this::knobToSpeed</code> instead of <code>knobToSpeed()</code>?</summary>
-<p><code>knobToSpeed()</code> would run once, when the robot starts, and hand over a single number. <code>this::knobToSpeed</code> hands over the method itself, so the command can call it every loop and follow the knob.</p>
+<summary>Why is <code>knobToSpeed()</code> called inside the lambda, <code>() -&gt; setMotorSpeed(knobToSpeed())</code>?</summary>
+<p><code>runEnd</code> runs that lambda every loop, so the knob is read fresh every 20 ms and the motor follows it. If you called <code>knobToSpeed()</code> once outside the lambda, the command would use that one number forever.</p>
+</details>
+<details class="question">
+<summary>Why does the knob live in the subsystem instead of <code>RobotContainer</code>?</summary>
+<p>A subsystem owns the hardware it uses. That keeps the knob math private and means the knob can only move the motor through the subsystem's own commands. <code>RobotContainer</code> just binds the button.</p>
 </details>
     </article>
     <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="lab4-limit-switch.html"><span>Previous</span>Lab 4: Stop at a Limit Switch</a><a class="pager-next" href="lab6-encoder.html"><span>Next</span>Lab 6: Count Turns with an Encoder</a></nav>
