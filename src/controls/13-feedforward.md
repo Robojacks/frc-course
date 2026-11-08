@@ -1,7 +1,7 @@
 # 13. Feedforward
 
 ## Why it matters
-PID only reacts **after** something goes wrong: it needs error before it does anything. That means a PID-only arm always sags a little below its target (the error has to exist to make the output that holds it up), and a PID-only flywheel always runs a little slow.
+PID only reacts **after** something goes wrong: it needs error before it does anything. That means a PID-only arm always sags a little below its target (the error has to exist to make the output that holds it up), and a PID-only flywheel always runs a little slow. You saw the flywheel version yourself in [Lab 9, Part 2](../testbed/lab9-pid-wheel.md#part-2-hold-a-speed-velocity-pid): P alone held the wheel below its target, and adding kV fixed it.
 
 **Feedforward** predicts what the motor needs **before** there's any error, using a simple model of the mechanism. Most good FRC control is *mostly feedforward, with a little PID for cleanup*. Add feedforward and your PID gains get smaller, your mechanisms get faster and smoother, and tuning gets easier.
 

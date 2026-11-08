@@ -586,6 +586,22 @@ def testbed_states():
     wheel = edit(wheel, "\n    @Override\n    public void periodic()",
                  "\n" + indent(java_block(l9, "public Command turnPid("), 4) + "\n", where="before")
     container = edit(container, "  // Attempt 2\n", java_block(l9, "m_wheel.turnPid("))
+    # Part 2: velocity PID
+    vel_consts = java_block(l9, "public static final double TargetRps")
+    constants = edit(constants, "    public static final double ToleranceRps = 0.1;   // \"nearly stopped\"\n",
+                     "\n" + vel_consts)
+    wheel = edit(wheel, "        new PIDController(kWheelConstants.P, kWheelConstants.I, kWheelConstants.D);\n",
+                 "\n" + java_block(l9, "private final PIDController m_velocityPid"))
+    wheel = edit(wheel, '    private final TunableDouble m_iZone = Tunables.addDouble("Wheel/IZone", kWheelConstants.IZone);\n',
+                 java_block(l9, 'Tunables.addDouble("Wheel/Velocity kP"'))
+    wheel = edit(wheel, "        m_pid.setIZone(kWheelConstants.IZone);       // limits integral windup (Attempt 5)\n",
+                 "\n" + java_block(l9, "m_encoder.setSamplesToAverage("))
+    wheel = edit(wheel, "        m_pid.setIZone(m_iZone.get());\n", java_block(l9, "m_velocityPid.setP("))
+    wheel = edit(wheel, "\n    @Override\n    public void periodic()",
+                 "\n" + indent(java_block(l9, "public Command holdSpeed("), 4) + "\n", where="before")
+    wheel = edit(wheel, '        m_telemetry.log("Velocity (rot per s)", getRps());\n',
+                 java_block(l9, 'm_telemetry.log("Target Speed (rot per s)"'))
+    container = edit(container, java_block(l9, "m_wheel.turnPid("), java_block(l9, "m_wheel.holdSpeed()"))
     files.update({"Constants.java": constants, "RobotContainer.java": container,
                   "subsystems/WheelSubsystem.java": wheel})
     yield "lab09-pid-wheel", "Lab 9", "lab9-pid-wheel.md", dict(files), ["REVLib"]

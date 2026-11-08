@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lab 9: PID on the Wheel | RoboJacks 4674</title>
+<title>Lab 9: PID for Position and Velocity | RoboJacks 4674</title>
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
@@ -53,17 +53,50 @@ try {
   <aside class="sidebar">
     <details class="sidebar-toggle" open>
       <summary>Labs menu</summary>
-      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Gyro Turns and Encoder Distances</a></li><li><a href="lab9-pid-wheel.html" class="current" aria-current="page">Lab 9: PID on the Wheel</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li><li><a href="lab11-odometry.html">Lab 11: Track the Robot on the Field</a></li></ul></details></nav>
+      <nav aria-label="Course"><details class="nav-section" open><summary>Test Bed Labs</summary><ul><li><a href="index.html">Overview</a></li><li><a href="lab0-first-project.html">Lab 0: Set Up the TestBed Project</a></li><li><a href="lab1-spin-motor.html">Lab 1: Spin a Brushless Motor</a></li><li><a href="lab1b-dashboard.html">Lab 1.1: Put It on the Dashboard</a></li><li><a href="lab2-west-coast-drive.html">Lab 2: Drive a West Coast Drive</a></li><li><a href="lab3-buttons-triggers.html">Lab 3: Buttons and Triggers</a></li><li><a href="lab4-limit-switch.html">Lab 4: Stop at a Limit Switch</a></li><li><a href="lab5-knob-speed.html">Lab 5: Control Speed with a Knob</a></li><li><a href="lab6-encoder.html">Lab 6: Count Turns with an Encoder</a></li><li><a href="lab7-timed-auto.html">Lab 7: Timed Autonomous</a></li><li><a href="lab8-navx-gyro.html">Lab 8: Gyro Turns and Encoder Distances</a></li><li><a href="lab9-pid-wheel.html" class="current" aria-current="page">Lab 9: PID for Position and Velocity</a></li><li><a href="lab10-elevator.html">Lab 10: Elevator Position Control</a></li><li><a href="lab11-odometry.html">Lab 11: Track the Robot on the Field</a></li></ul></details></nav>
     </details>
   </aside>
   <main id="content" class="content">
     <article>
-<h1 id="lab-9-turn-the-wheel-exactly-10-times-with-pid">Lab 9: Turn the Wheel Exactly 10 Times with PID<a class="headerlink" href="#lab-9-turn-the-wheel-exactly-10-times-with-pid" title="Permanent link">#</a></h1>
+<h1 id="lab-9-pid-for-position-and-velocity">Lab 9: PID for Position and Velocity<a class="headerlink" href="#lab-9-pid-for-position-and-velocity" title="Permanent link">#</a></h1>
 <div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 6: Control · step 31 of 48</p><p><strong>Learn it in:</strong> <a href="../controls/12-pid.html">12. PID Feedback</a></p></div>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>In <a href="lab6-encoder.html">Lab 6</a> you tried to turn the wheel exactly 10 times. Timing missed by a different amount every run. Bang-bang was consistent, but always overshot, because the wheel was still moving fast when it reached 10.</p>
 <p>What you needed was to <strong>slow down as you get close</strong>, and to <strong>correct</strong> if you miss. That's <strong>feedback control</strong>, and <strong>PID</strong> is how almost every robot does it. In this lab you'll add PID to the same <code>WheelSubsystem</code> one letter at a time, and watch each letter fix the previous attempt's problem.</p>
-<p>It's the same problem as driving exactly 2 meters in auto, raising an elevator to a scoring height, or spinning a turret to a target. Get this right on the test bed and you're ready for the elevator in <a href="lab10-elevator.html">Lab 10</a>.</p>
+<p>It's the same problem as driving exactly 2 meters in auto, raising an elevator to a scoring height, or spinning a turret to a target.</p>
+<p>Then, in <strong>Part 2</strong>, you'll use the same encoder and the same <code>PIDController</code> for a different job: holding the wheel at a steady <strong>speed</strong>, the way a shooter flywheel or an intake roller does. You'll find out why speed needs one more ingredient that position didn't.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Part 1: <strong>position</strong> PID</th>
+<th>Part 2: <strong>velocity</strong> PID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Question</td>
+<td>"Where should the wheel <strong>stop</strong>?"</td>
+<td>"How <strong>fast</strong> should the wheel spin?"</td>
+</tr>
+<tr>
+<td>Measurement</td>
+<td>Rotations (<code>getRotations()</code>)</td>
+<td>Rotations per second (<code>getRps()</code>)</td>
+</tr>
+<tr>
+<td>When it ends</td>
+<td>When the wheel arrives</td>
+<td>When you tell it to stop</td>
+</tr>
+<tr>
+<td>Real robot examples</td>
+<td>Elevator, arm, turret, drive 2 meters</td>
+<td>Shooter flywheel, intake, drive wheel speed</td>
+</tr>
+</tbody>
+</table>
+<p>Get both working on the test bed and you're ready for the elevator in <a href="lab10-elevator.html">Lab 10</a>.</p>
 <p><strong>Before you start:</strong> finish <a href="lab6-encoder.html">Lab 6</a> and keep its scorecard. Read <a href="../controls/12-pid.html">Lesson 12</a> (PID) first.</p>
 <h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
 <ul>
@@ -108,6 +141,41 @@ try {
 <tr>
 <td>5. P + I + D</td>
 <td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>And for Part 2 (velocity), a second scorecard:</p>
+<table>
+<thead>
+<tr>
+<th>Attempt</th>
+<th>Target (rot/s)</th>
+<th>Speed after 2 s</th>
+<th>Error</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6. P only, kP = ___</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>6. P only, kP = ___</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>7. kV + P</td>
 <td></td>
 <td></td>
 <td></td>
@@ -354,7 +422,7 @@ try {
 <p><code>setIZone(0.5)</code> in the constructor fixes it: the integral only builds up when the wheel is within 0.5 rotations of the target, and resets to zero outside that. Try setting <strong>IZone</strong> to 20 in Elastic and watch what happens to the overshoot.</p>
 </div>
 <p><strong>What you'll see:</strong> With P, I, and D tuned, the wheel moves quickly, slows smoothly, and finishes within the tolerance of 10, run after run, even with the cloth on it.</p>
-<h3 id="what-you-just-learned">What you just learned<a class="headerlink" href="#what-you-just-learned" title="Permanent link">#</a></h3>
+<h3 id="what-you-just-learned-position">What you just learned: position<a class="headerlink" href="#what-you-just-learned-position" title="Permanent link">#</a></h3>
 <table>
 <thead>
 <tr>
@@ -398,9 +466,248 @@ try {
 </tbody>
 </table>
 <p>Each term fixes the previous attempt's problem: <strong>P</strong> gets you close, <strong>D</strong> stops the overshoot, and <strong>I</strong> cleans up whatever is left.</p>
+<h2 id="part-2-hold-a-speed-velocity-pid">Part 2: Hold a speed (velocity PID)<a class="headerlink" href="#part-2-hold-a-speed-velocity-pid" title="Permanent link">#</a></h2>
+<h3 id="the-hardware-check">The hardware check<a class="headerlink" href="#the-hardware-check" title="Permanent link">#</a></h3>
+<p>Velocity PID uses the <strong>same</strong> encoder as Part 1: the Through Bore Encoder on the wheel, wired to roboRIO <strong>DIO 0 and 1</strong> with its Dupont cable (<a href="lab6-encoder.html#wiring-the-encoder">Lab 6</a>). The roboRIO measures speed from the time between encoder pulses, and <code>getRps()</code> already reports it in wheel rotations per second.</p>
+<div class="admonition warning">
+<p class="admonition-title">Encoder plugged into the SPARK MAX?</p>
+<p>If your test bed's Through Bore Encoder is plugged into the SPARK MAX's data port (through an encoder adapter board), the roboRIO can't see it. Unplug the encoder's JST plug from the adapter and use the cable that came with the encoder: the white 6-pin JST plug goes into the encoder, and the <strong>blue</strong> and <strong>yellow</strong> Dupont plugs go to DIO 0 and DIO 1, black on ⏚ (<a href="lab6-encoder.html#wiring-the-encoder">Lab 6</a>). Watch <strong>Velocity (rot per s)</strong> on the dashboard while you spin the wheel by hand: it should change, and go negative the other way.</p>
+</div>
+<h3 id="step-4-measure-the-wheels-speed-at-4-volts">Step 4: Measure the wheel's speed at 4 volts<a class="headerlink" href="#step-4-measure-the-wheels-speed-at-4-volts" title="Permanent link">#</a></h3>
+<p>You need one number from the real wheel before choosing gains: how fast it spins at a known voltage.</p>
+<ol>
+<li>Add <strong>Velocity (rot per s)</strong> from <strong>Telemetry → Wheel</strong> to an Elastic <strong>Graph</strong>.</li>
+<li>Press <strong>A</strong> on the wheel controller (Attempt 1: 4 V for 2 seconds).</li>
+<li>The graph rises quickly and then goes <strong>flat</strong>. Read the flat part. Do it three times and average.</li>
+</ol>
+<p><strong>Speed at 4 V</strong> = ______ rot/s</p>
+<p>That number tells you two things:</p>
+<ul>
+<li><strong>How fast to aim.</strong> A target a little under that speed needs about 4 V to hold, comfortably under this lab's 6 V limit.</li>
+<li><strong>How many volts each rot/s needs.</strong> That's called <strong>kV</strong>, and you'll use it in Attempt 7: kV = 4 V ÷ speed at 4 V.</li>
+</ul>
+<p><strong>Worked example:</strong> if the wheel runs at 5.0 rot/s at 4 V, then kV = 4 ÷ 5.0 = <strong>0.8 V per rot/s</strong>, and a good target is <strong>4.0 rot/s</strong>.</p>
+<h3 id="step-5-velocity-constants">Step 5: Velocity constants<a class="headerlink" href="#step-5-velocity-constants" title="Permanent link">#</a></h3>
+<p>Add these inside <code>kWheelConstants</code> too, below the Part 1 gains. Use your own measured speed.</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// Lab 9, Part 2: velocity PID</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">TargetRps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">4.0</span><span class="p">;</span><span class="w">      </span><span class="c1">// a bit under your speed at 4 V</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">VelocityP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.5</span><span class="p">;</span><span class="w">      </span><span class="c1">// volts per (rot per s) of speed error</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">kV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">             </span><span class="c1">// volts per (rot per s) of target speed (Attempt 7)</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">VelocityToleranceRps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.25</span><span class="p">;</span><span class="w">  </span><span class="c1">// "at speed" when this close</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">EncoderSamplesToAverage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w">     </span><span class="c1">// smooths the speed reading</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Where these starting numbers come from</p>
+<ul>
+<li><strong>VelocityP = 1.5:</strong> the Lesson 12 rule, kP = max output ÷ the error that should get full output. If the wheel is stopped, the error is the whole 4 rot/s target, and full output is 6 V: 6 ÷ 4 = <strong>1.5</strong>. Use your own target.</li>
+<li><strong>kV starts at 0</strong>, so Attempt 6 is pure feedback. You'll fill it in from Step 4 for Attempt 7.</li>
+<li><strong>No kI or kD.</strong> Most velocity loops don't use them. D reacts to changes in speed, which is mostly encoder noise, and I gets replaced by something better in Attempt 7.</li>
+</ul>
+</div>
+<h3 id="step-6-add-a-velocity-controller">Step 6: Add a velocity controller<a class="headerlink" href="#step-6-add-a-velocity-controller" title="Permanent link">#</a></h3>
+<p>Velocity gets its <strong>own</strong> <code>PIDController</code>, because its gains mean something different (volts per rot/s, not volts per rotation). Add it as a field, below <code>m_pid</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">PIDController</span><span class="w"> </span><span class="n">m_velocityPid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">PIDController</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">VelocityP</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_targetRps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">   </span><span class="c1">// the speed Part 2 is holding, for the dashboard</span>
+</code></pre></div>
+<p>Make its gains and target tunable, below the other tunables:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TunableDouble</span><span class="w"> </span><span class="n">m_velocityKP</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Tunables</span><span class="p">.</span><span class="na">addDouble</span><span class="p">(</span><span class="s">"Wheel/Velocity kP"</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">VelocityP</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TunableDouble</span><span class="w"> </span><span class="n">m_kV</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Tunables</span><span class="p">.</span><span class="na">addDouble</span><span class="p">(</span><span class="s">"Wheel/kV"</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">kV</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TunableDouble</span><span class="w"> </span><span class="n">m_targetSpeed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Tunables</span><span class="p">.</span><span class="na">addDouble</span><span class="p">(</span><span class="s">"Wheel/Target Speed (rot per s)"</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">TargetRps</span><span class="p">);</span>
+</code></pre></div>
+<p>At the end of the constructor, smooth the speed reading:</p>
+<div class="highlight"><pre><span></span><code><span class="w">        </span><span class="c1">// Speed is measured from the time between pulses. Averaging a few makes it steadier.</span>
+<span class="w">        </span><span class="n">m_encoder</span><span class="p">.</span><span class="na">setSamplesToAverage</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">EncoderSamplesToAverage</span><span class="p">);</span>
+</code></pre></div>
+<p>With 4x decoding, the edges of channels A and B aren't perfectly evenly spaced, so the time between any two of them jitters a little. Averaging the last 4 smooths that out, which matters a lot here: velocity PID reacts to every wiggle in the speed reading.</p>
+<p>Add the command, below <code>turnPid</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">holdSpeed</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="n">m_velocityPid</span><span class="p">::</span><span class="n">reset</span><span class="p">)</span><span class="w">                 </span><span class="c1">// clear old history</span>
+<span class="w">        </span><span class="p">.</span><span class="na">andThen</span><span class="p">(</span><span class="n">run</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">m_targetRps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_targetSpeed</span><span class="p">.</span><span class="na">get</span><span class="p">();</span><span class="w">           </span><span class="c1">// read the dashboard every loop</span>
+<span class="w">            </span><span class="kt">double</span><span class="w"> </span><span class="n">feedforward</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_kV</span><span class="p">.</span><span class="na">get</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">m_targetRps</span><span class="p">;</span><span class="w">                 </span><span class="c1">// Attempt 7</span>
+<span class="w">            </span><span class="kt">double</span><span class="w"> </span><span class="n">feedback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_velocityPid</span><span class="p">.</span><span class="na">calculate</span><span class="p">(</span><span class="n">getRps</span><span class="p">(),</span><span class="w"> </span><span class="n">m_targetRps</span><span class="p">);</span>
+<span class="w">            </span><span class="kt">double</span><span class="w"> </span><span class="n">volts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">feedforward</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">feedback</span><span class="p">;</span>
+<span class="w">            </span><span class="n">setVolts</span><span class="p">(</span><span class="n">MathUtil</span><span class="p">.</span><span class="na">clamp</span><span class="p">(</span><span class="n">volts</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">,</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">MaxVolts</span><span class="p">));</span>
+<span class="w">        </span><span class="p">}))</span>
+<span class="w">        </span><span class="p">.</span><span class="na">finallyDo</span><span class="p">(()</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">m_targetRps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="w">            </span><span class="n">stop</span><span class="p">();</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">        </span><span class="p">.</span><span class="na">withName</span><span class="p">(</span><span class="s">"Attempts 6-7: Hold Speed"</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>m_velocityPid.calculate(getRps(), m_targetRps)</code></td>
+<td>The same PID math as Part 1, but on <strong>speed</strong>: kP × (target speed − measured speed)</td>
+</tr>
+<tr>
+<td><code>feedforward = kV × target</code></td>
+<td>A guess at the voltage this speed needs, worked out <strong>before</strong> looking at the encoder. It's 0 until Attempt 7.</td>
+</tr>
+<tr>
+<td><code>volts = feedforward + feedback</code></td>
+<td>The guess does most of the work; PID corrects whatever the guess gets wrong</td>
+</tr>
+<tr>
+<td>No <code>.until(...)</code></td>
+<td>A position move ends when it arrives. A speed is something you <strong>hold</strong>, so this runs until you cancel it.</td>
+</tr>
+<tr>
+<td><code>.finallyDo(...)</code></td>
+<td>However it ends, stop the motor and clear the target</td>
+</tr>
+</tbody>
+</table>
+<p>In <code>periodic()</code>, keep the velocity gain up to date, next to <code>m_pid.setPID(...)</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">        </span><span class="n">m_velocityPid</span><span class="p">.</span><span class="na">setP</span><span class="p">(</span><span class="n">m_velocityKP</span><span class="p">.</span><span class="na">get</span><span class="p">());</span>
+</code></pre></div>
+<p>And log the speed target and error, with the other telemetry:</p>
+<div class="highlight"><pre><span></span><code><span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Target Speed (rot per s)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_targetRps</span><span class="p">);</span>
+<span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Speed Error (rot per s)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_targetRps</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getRps</span><span class="p">());</span>
+<span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"At Speed"</span><span class="p">,</span><span class="w"> </span><span class="n">m_targetRps</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mf">0.0</span>
+<span class="w">            </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">Math</span><span class="p">.</span><span class="na">abs</span><span class="p">(</span><span class="n">m_targetRps</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getRps</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">VelocityToleranceRps</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>At Speed</strong> is what a real shooter waits for before feeding a game piece.</p>
+<p>Bind it on the wheel controller, in <code>configureBindings()</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">m_wheelController</span><span class="p">.</span><span class="na">y</span><span class="p">().</span><span class="na">toggleOnTrue</span><span class="p">(</span><span class="n">m_wheel</span><span class="p">.</span><span class="na">holdSpeed</span><span class="p">());</span><span class="w">   </span><span class="c1">// Attempts 6 and 7: tap to start, tap to stop</span>
+</code></pre></div>
+<p>In Elastic, add <strong>Velocity kP</strong>, <strong>kV</strong>, and <strong>Target Speed</strong> from <strong>Tunables → Wheel</strong>, and put <strong>Velocity (rot per s)</strong> and <strong>Target Speed (rot per s)</strong> on one graph. Add <strong>At Speed</strong> as a <strong>Boolean Box</strong>.</p>
+<h3 id="warm-up-in-the-simulator_1">Warm up in the simulator<a class="headerlink" href="#warm-up-in-the-simulator_1" title="Permanent link">#</a></h3>
+<p>This is WPILib's flywheel simulator: a heavy wheel you want spinning at a set speed, just like Part 2. It has both <strong>kV</strong> (feedforward) and <strong>kP</strong> (feedback).</p>
+<div class="viz-div" id="lab9_flywheel_container">
+<div>
+<div class="col" id="lab9_flywheel_plotVals"></div>
+<div class="col" id="lab9_flywheel_plotVolts"></div>
+</div>
+<div class="flex-grid">
+<div class="col" id="lab9_flywheel_viz"></div>
+<div id="lab9_flywheel_ctrls"></div>
+</div>
+<script>new FlywheelPIDF("lab9_flywheel", "both");</script>
+</div>
+
+<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html">Tuning a Flywheel Velocity Controller</a> (CC BY 4.0).</p>
+
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Leave kV at 0 and raise <strong>kP</strong> until the wheel gets moving. Does it ever reach the setpoint?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set kP back to 0 and raise <strong>kV</strong> until the wheel settles right at the setpoint on its own.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Now add a little kP on top. Turn on <strong>System Noise</strong> and watch what kP does.</li>
+</ul>
+<h3 id="attempt-6-p-only-feedback-alone">Attempt 6: P only (feedback alone)<a class="headerlink" href="#attempt-6-p-only-feedback-alone" title="Permanent link">#</a></h3>
+<ol>
+<li>Make sure <strong>kV</strong> is 0 in Elastic.</li>
+<li>Tap <strong>Y</strong>. Watch <strong>Velocity</strong> and <strong>Target Speed</strong> on your graph for 3 or 4 seconds, then tap <strong>Y</strong> again to stop.</li>
+<li>Record the speed it settles at.</li>
+<li>Double <strong>Velocity kP</strong> and try again. Then double it again.</li>
+</ol>
+<p><strong>What you'll see:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Velocity kP</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Low</td>
+<td>Spins up, but settles well <strong>below</strong> the target and stays there</td>
+</tr>
+<tr>
+<td>Higher</td>
+<td>Closer to the target, but still below it</td>
+</tr>
+<tr>
+<td>Too high</td>
+<td>The speed and the voltage start to buzz and jitter, and it <strong>still</strong> doesn't quite reach the target</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why it can never get there:</strong> to keep spinning at 4 rot/s, the wheel needs about 3 or 4 volts, all the time, just to fight friction. But P only pushes when there's <strong>error</strong>. If the wheel ever reached the target, the error would be 0, P would ask for 0 V, and the wheel would slow down. So it settles at the speed where kP × error equals the voltage it needs. Raising kP shrinks that gap but never closes it, and soon the noise in the speed reading makes the output jitter.</p>
+<p>This is the big difference from position: a wheel sitting <strong>still</strong> at its target needs 0 V, but a wheel <strong>spinning</strong> at its target needs voltage the whole time.</p>
+<h3 id="attempt-7-kv-p-feedforward-does-the-work">Attempt 7: kV + P (feedforward does the work)<a class="headerlink" href="#attempt-7-kv-p-feedforward-does-the-work" title="Permanent link">#</a></h3>
+<p><strong>The idea:</strong> don't wait for an error. You already know about how many volts this speed needs, because you measured it in Step 4. Apply that from the start, and let P fix whatever is left.</p>
+<div class="highlight"><pre><span></span><code>volts = kV × target speed  +  kP × speed error
+         (feedforward)        (feedback)
+</code></pre></div>
+<ol>
+<li>Work out <strong>kV = 4 V ÷ your speed at 4 V</strong> and type it into <strong>kV</strong> in Elastic.</li>
+<li>Set <strong>Velocity kP</strong> back to your Step 5 value.</li>
+<li>Tap <strong>Y</strong>. The wheel should go almost straight to the target and stay there, and <strong>At Speed</strong> should light up.</li>
+<li>Change <strong>Target Speed</strong> in Elastic while it's running. It should follow each new speed quickly.</li>
+<li>Gently drag the cloth against the wheel. The speed dips a little, and P pushes the voltage up to bring it back. (Don't stop the wheel: the 775pro must never stall.)</li>
+<li>Copy your kV and Velocity kP into <code>Constants.java</code>.</li>
+</ol>
+<p><strong>What you'll see:</strong> with kV doing most of the work, kP can be <strong>smaller</strong> than in Attempt 6 and the wheel still holds speed better, with less jitter. Feedforward handles what you can predict; feedback handles what you can't.</p>
+<div class="admonition info">
+<p class="admonition-title">Why not use I instead?</p>
+<p>I can fix the gap in Attempt 6 too: it adds up the error until the voltage is enough. But it's slow to build up, overshoots when the target changes, and has to build up all over again at every new speed. A feedforward is right immediately, at every speed. That's why teams use feedforward for velocity. <a href="../controls/13-feedforward.html">Lesson 13</a> covers it fully, including <strong>kS</strong> for friction and how <strong>SysId</strong> measures kV for you.</p>
+</div>
+<h3 id="what-you-just-learned-velocity">What you just learned: velocity<a class="headerlink" href="#what-you-just-learned-velocity" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Attempt</th>
+<th>Reaches the target speed?</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6. P only</td>
+<td>No, always a little slow</td>
+<td>P only pushes when there's error, but spinning needs voltage all the time</td>
+</tr>
+<tr>
+<td>7. kV + P</td>
+<td>Yes</td>
+<td>kV supplies the voltage the speed needs; P corrects the rest</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Position (Part 1)</th>
+<th>Velocity (Part 2)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Volts needed <strong>at</strong> the target</td>
+<td>0, the wheel is sitting still</td>
+<td>Some, all the time, to keep it spinning</td>
+</tr>
+<tr>
+<td>P alone</td>
+<td>Gets close; friction leaves a small gap</td>
+<td>Always short</td>
+</tr>
+<tr>
+<td>What closes the gap</td>
+<td>I (with an IZone)</td>
+<td>Feedforward (kV)</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Useful, stops overshoot</td>
+<td>Usually 0, it mostly amplifies noise</td>
+</tr>
+</tbody>
+</table>
 <h3 id="commit">Commit<a class="headerlink" href="#commit" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
-git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 9: PID on the wheel"</span>
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">"Lab 9: position and velocity PID on the wheel"</span>
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Finished code</p>
@@ -414,6 +721,10 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Press X three times in a row, waiting for each to finish. Does the wheel end at 10, 20, and 30? Compare with bang-bang in Lab 6.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <code>turnPid(-10)</code> on another button and make sure it comes back to where it started</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: use the test bed's 10-turn knob from <a href="lab5-knob-speed.html">Lab 5</a> to set the target, so the wheel follows the knob turn for turn</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Complete the velocity scorecard: Attempt 6 at two kP values, and Attempt 7</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Velocity: set kV to 0, Velocity kP to 0, and add kI to the velocity controller instead. How long does it take to reach speed? What happens when you change Target Speed?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Velocity: make kV 20% too big on purpose. Does the wheel go too fast? Does P fix it?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: use the knob to set <strong>Target Speed</strong>, so the knob controls the wheel's speed with velocity PID instead of raw power like Lab 5</li>
 </ul>
 <h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
 <details class="question">
@@ -439,6 +750,22 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <details class="question">
 <summary>Why does <code>turnPid</code> have a timeout?</summary>
 <p>If the wheel stalls just outside the tolerance, <code>atSetpoint()</code> never becomes true. The timeout ends the command so the motor doesn't keep pushing forever.</p>
+</details>
+<details class="question">
+<summary>Why can't P alone hold the wheel at its target speed?</summary>
+<p>Spinning at a speed takes voltage all the time. P only gives voltage when there's error, so the wheel settles at whatever speed makes kP × error equal to the voltage it needs, which is always a little below the target.</p>
+</details>
+<details class="question">
+<summary>Your wheel spins at 6.0 rot/s at 4 V. What's kV, and what feedforward voltage does a 5.0 rot/s target get?</summary>
+<p>kV = 4 ÷ 6.0 ≈ <strong>0.67 V per rot/s</strong>. Feedforward = 0.67 × 5.0 ≈ <strong>3.3 V</strong>.</p>
+</details>
+<details class="question">
+<summary>Why does <code>holdSpeed</code> have no <code>.until(...)</code>, when <code>turnPid</code> does?</summary>
+<p>A position move is finished once the wheel arrives. A speed is something you keep holding, so the command runs until it's cancelled (by tapping Y again).</p>
+</details>
+<details class="question">
+<summary>Why does the velocity controller use its own <code>PIDController</code> instead of sharing <code>m_pid</code>?</summary>
+<p>The gains mean different things: position kP is volts per rotation of error, velocity kP is volts per rot/s of error. They also need separate history (the last error the D term and I term remember).</p>
 </details>
     </article>
     <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../controls/12-pid.html"><span>Previous</span>12. PID Feedback</a><a class="pager-next" href="../controls/13-feedforward.html"><span>Next</span>13. Feedforward</a></nav>

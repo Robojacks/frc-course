@@ -35,6 +35,9 @@ The REV Through Bore Encoder's cable ends in four 3-pin plugs. Only two go to th
 | **Green** | Index (once per turn) | Not used. Leave it unplugged and tape it out of the way. |
 | **White** | Absolute position | Not used in these labs. Leave it unplugged and tape it out of the way. |
 
+!!! warning "Not into the SPARK MAX"
+    For these labs the encoder goes to the **roboRIO**, so WPILib's `Encoder` class can read it. If it's plugged into the SPARK MAX's data port through an encoder adapter board, unplug it there and use this Dupont cable instead.
+
 **Which way around?** Each roboRIO DIO port is three pins in a row, and the roboRIO has a label printed next to each row of pins: the ground symbol (⏚), **V** (5 V), and **S** (signal). Turn each plug so the **black** wire is on **ground** (⏚), the **red** wire is on **V**, and the **blue** or **yellow** wire is on **S**. Every plug on this cable has its own red and black, so each one powers itself; that's normal. ([Lesson 4.3](../hardware/04d-sensors.md#wiring-the-through-bore-encoder-to-the-roborio) has more.)
 
 We count turns of the **wheel**, not the motor. A 775pro spins about 18,700 RPM with no load, so 10 turns of the motor shaft would be over in a blink. The gearbox slows it down enough to watch.

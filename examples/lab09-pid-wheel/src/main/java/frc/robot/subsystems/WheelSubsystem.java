@@ -36,6 +36,10 @@ public class WheelSubsystem extends SubsystemBase {
     private final PIDController m_pid =
         new PIDController(kWheelConstants.P, kWheelConstants.I, kWheelConstants.D);
 
+    private final PIDController m_velocityPid = new PIDController(kWheelConstants.VelocityP, 0.0, 0.0);
+
+    private double m_targetRps = 0.0;   // the speed Part 2 is holding, for the dashboard
+
     private double m_target = 0.0;     // where the current attempt is trying to stop
     private double m_lastVolts = 0.0;  // for the dashboard
 
@@ -46,6 +50,9 @@ public class WheelSubsystem extends SubsystemBase {
     private final TunableDouble m_kI = Tunables.addDouble("Wheel/kI", kWheelConstants.I);
     private final TunableDouble m_kD = Tunables.addDouble("Wheel/kD", kWheelConstants.D);
     private final TunableDouble m_iZone = Tunables.addDouble("Wheel/IZone", kWheelConstants.IZone);
+    private final TunableDouble m_velocityKP = Tunables.addDouble("Wheel/Velocity kP", kWheelConstants.VelocityP);
+    private final TunableDouble m_kV = Tunables.addDouble("Wheel/kV", kWheelConstants.kV);
+    private final TunableDouble m_targetSpeed = Tunables.addDouble("Wheel/Target Speed (rot per s)", kWheelConstants.TargetRps);
 
     public WheelSubsystem() {
         SparkMaxConfig config = new SparkMaxConfig();
@@ -59,6 +66,9 @@ public class WheelSubsystem extends SubsystemBase {
 
         m_pid.setTolerance(kWheelConstants.ToleranceRot, kWheelConstants.ToleranceRps);
         m_pid.setIZone(kWheelConstants.IZone);       // limits integral windup (Attempt 5)
+
+        // Speed is measured from the time between pulses. Averaging a few makes it steadier.
+        m_encoder.setSamplesToAverage(kWheelConstants.EncoderSamplesToAverage);
     }
 
     public double getRotations() { return m_encoder.getDistance(); }
@@ -117,16 +127,37 @@ public class WheelSubsystem extends SubsystemBase {
             .withName("Attempts 3-5: PID");
     }
 
+    public Command holdSpeed() {
+        return runOnce(m_velocityPid::reset)                 // clear old history
+            .andThen(run(() -> {
+                m_targetRps = m_targetSpeed.get();           // read the dashboard every loop
+                double feedforward = m_kV.get() * m_targetRps;                 // Attempt 7
+                double feedback = m_velocityPid.calculate(getRps(), m_targetRps);
+                double volts = feedforward + feedback;
+                setVolts(MathUtil.clamp(volts, -kWheelConstants.MaxVolts, kWheelConstants.MaxVolts));
+            }))
+            .finallyDo(() -> {
+                m_targetRps = 0.0;
+                stop();
+            })
+            .withName("Attempts 6-7: Hold Speed");
+    }
+
     @Override
     public void periodic() {
         // Use whatever gains are on the dashboard right now
         m_pid.setPID(m_kP.get(), m_kI.get(), m_kD.get());
         m_pid.setIZone(m_iZone.get());
+        m_velocityPid.setP(m_velocityKP.get());
 
         m_telemetry.log("Position (rot)", getRotations());
         m_telemetry.log("Target (rot)", m_target);
         m_telemetry.log("Error (rot)", m_target - getRotations());
         m_telemetry.log("Velocity (rot per s)", getRps());
+        m_telemetry.log("Target Speed (rot per s)", m_targetRps);
+        m_telemetry.log("Speed Error (rot per s)", m_targetRps - getRps());
+        m_telemetry.log("At Speed", m_targetRps != 0.0
+            && Math.abs(m_targetRps - getRps()) < kWheelConstants.VelocityToleranceRps);
         m_telemetry.log("Output (V)", m_lastVolts);
         m_telemetry.log("Current (A)", m_motor.getOutputCurrent());
         m_telemetry.log("Raw Counts", m_encoder.getRaw());

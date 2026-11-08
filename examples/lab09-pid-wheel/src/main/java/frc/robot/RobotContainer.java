@@ -96,6 +96,7 @@ public class RobotContainer {
     m_wheelController.a().onTrue(m_wheel.turnTimed(4.0, 2.0));    // Attempt 1
     m_wheelController.b().onTrue(m_wheel.turnBangBang(10, 4.0));  // Attempt 2
     m_wheelController.x().onTrue(m_wheel.turnPid(10));   // Attempts 3 to 5
+    m_wheelController.y().toggleOnTrue(m_wheel.holdSpeed());   // Attempts 6 and 7: tap to start, tap to stop
 
     // Show which commands are running, live
     SmartDashboard.putData(CommandScheduler.getInstance());

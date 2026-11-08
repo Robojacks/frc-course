@@ -18,7 +18,7 @@ The **Lessons** tab teaches the ideas. The **Labs** tab is where you try them on
 | [Lab 6: Count Turns with an Encoder](lab6-encoder.md) | Test bed | Lab 5 | Read an encoder, then try to turn exactly 10 times with timing and bang-bang |
 | [Lab 7: Timed Autonomous](lab7-timed-auto.md) | WCD | Lab 6 | Drive a pattern on its own, picked from a dashboard menu |
 | [Lab 8: Gyro Turns and Encoder Distances](lab8-navx-gyro.md) | WCD | Lab 7 | Turn by angle with the NavX2, drive exact distances with the drive encoders, and close the square |
-| [Lab 9: PID on the Wheel](lab9-pid-wheel.md) | Test bed | Lab 8 and [Lesson 12](../controls/12-pid.md) | Turn exactly 10 times with P, then D, then I |
+| [Lab 9: PID for Position and Velocity](lab9-pid-wheel.md) | Test bed | Lab 8 and [Lesson 12](../controls/12-pid.md) | Turn exactly 10 times with P, then D, then I; then hold a speed with P, then kV + P |
 | [Lab 10: Elevator Position Control](lab10-elevator.md) | WCD | Lab 9 | Move the elevator between START, L2, and L3 with a ProfiledPIDController, in meters, and hold against gravity |
 | [Lab 11: Track the Robot on the Field](lab11-odometry.md) | WCD | Lab 10 and [Lesson 17](../going-further/17-odometry.md) | Add odometry, watch the robot move on a field map in Elastic, and calibrate it against a tape measure |
 

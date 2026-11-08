@@ -333,7 +333,7 @@ Modern motor controllers (TalonFX, SPARK MAX, SPARK Flex) can run PID **on the c
 
 ## Try it
 !!! tip "Have the test bed?"
-    Do [Lab 9: PID on the Wheel](../testbed/lab9-pid-wheel.md), then [Lab 10: Elevator Position Control](../testbed/lab10-elevator.md). They're this whole lesson on real hardware.
+    Do [Lab 9: PID for Position and Velocity](../testbed/lab9-pid-wheel.md), then [Lab 10: Elevator Position Control](../testbed/lab10-elevator.md). They're this whole lesson on real hardware.
 
 ### Tune a turret, right here
 This is WPILib's turret simulator, running **PID only**. Click a spot around the turret to set a new angle, or click and drag the pointer to make the setpoint move smoothly.

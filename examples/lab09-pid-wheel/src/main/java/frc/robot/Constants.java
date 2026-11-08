@@ -42,5 +42,12 @@ public final class Constants {
     public static final double IZone = 0.5;          // only build up I within 0.5 rotations
     public static final double ToleranceRot = 0.02;  // 0.02 rotations ≈ 7°
     public static final double ToleranceRps = 0.1;   // "nearly stopped"
+
+    // Lab 9, Part 2: velocity PID
+    public static final double TargetRps = 4.0;      // a bit under your speed at 4 V
+    public static final double VelocityP = 1.5;      // volts per (rot per s) of speed error
+    public static final double kV = 0.0;             // volts per (rot per s) of target speed (Attempt 7)
+    public static final double VelocityToleranceRps = 0.25;  // "at speed" when this close
+    public static final int EncoderSamplesToAverage = 4;     // smooths the speed reading
   }
 }
