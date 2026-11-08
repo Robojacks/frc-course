@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7.2 Finding and Using APIs | RoboJacks 4674</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/code.css">
+<script>
+// Apply the saved light/dark choice before the page draws, so it never flashes the wrong theme.
+try {
+  var savedTheme = localStorage.getItem("theme");
+  if (savedTheme === "dark" || savedTheme === "light") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+} catch (e) {}
+</script>
+
+</head>
+<body id="top" data-root="../">
+<a class="skip-link" href="#content">Skip to content</a>
+<header class="site-header">
+  <div class="plaid" aria-hidden="true"></div>
+  <div class="header-inner">
+    <a class="brand" href="../index.html">
+      <img class="brand-logo" src="../assets/robojacks-logo.png" alt="RoboJacks logo">
+      <span class="brand-text">
+        <span class="brand-title">RoboJacks 4674</span>
+        <span class="brand-subtitle">FRC Programming Course</span>
+      </span>
+    </a>
+    <div class="header-actions">
+      <button class="search-open" type="button" aria-label="Search the course" title="Search (press /)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+        <span class="search-open-label">Search</span>
+      </button>
+      <a class="header-link" href="https://docs.wpilib.org/en/stable/">WPILib Docs</a>
+      <button class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+        <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <span class="theme-track"><span class="theme-knob"></span></span>
+        <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Sections"><div class="tabs-inner"><a class="tab current" aria-current="true" href="../index.html">Lessons</a><a class="tab" href="../testbed/index.html">Labs</a></div></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <details class="sidebar-toggle" open>
+      <summary>Lessons menu</summary>
+      <nav aria-label="Course"><details class="nav-section"><summary>Start</summary><ul><li><a href="../index.html">Home</a></li><li><a href="../path.html">Course Path</a></li></ul></details>
+<details class="nav-section"><summary>Foundations</summary><ul><li><a href="../foundations/00-setup.html">0. Setup</a></li><li><a href="../foundations/01-git.html">1. Git &amp; Version Control</a></li><li><a href="../foundations/02-terminal.html">2. The Terminal</a></li><li><a href="../foundations/03-java.html">3. Java Reference</a></li></ul></details>
+<details class="nav-section"><summary>Hardware</summary><ul><li><a href="../hardware/04-electronics.html">4. Electronics</a></li><li><a href="../hardware/04b-motors.html">4.1 Motors: NEO, CIM, and 775pro</a></li><li><a href="../hardware/04c-spark-max.html">4.2 The SPARK MAX</a></li><li><a href="../hardware/04d-sensors.html">4.3 Sensors</a></li><li><a href="../hardware/05-pneumatics.html">5. Pneumatics</a></li></ul></details>
+<details class="nav-section" open><summary>Robot Code</summary><ul><li><a href="06-robot-program.html">6. How a Robot Program Runs</a></li><li><a href="06b-dashboards.html">6.1 Dashboards: NetworkTables and Elastic</a></li><li><a href="07-command-based.html">7. Command-Based Programming</a></li><li><a href="07b-scheduler.html">7.1 How the Command Scheduler Works</a></li><li><a href="07c-apis.html" class="current" aria-current="page">7.2 Finding and Using APIs</a></li><li><a href="08-sensors.html">8. Sensors &amp; Units</a></li><li><a href="09-debugging.html">9. Testing, Debugging &amp; Simulation</a></li></ul></details>
+<details class="nav-section"><summary>XRP Robot Project</summary><ul><li><a href="../project/10-xrp.html">10. The XRP: Set Up, Simulate, Run</a></li><li><a href="../project/10-teleop.html">10.1 Teleop on the XRP</a></li><li><a href="../project/11-autonomous.html">10.2 Autonomous on the XRP</a></li></ul></details>
+<details class="nav-section"><summary>Controls</summary><ul><li><a href="../controls/12-pid.html">12. PID Feedback</a></li><li><a href="../controls/13-feedforward.html">13. Feedforward</a></li><li><a href="../controls/13b-sysid.html">13.1 Characterizing with SysId</a></li><li><a href="../controls/14-profiles.html">14. Motion Profiles</a></li><li><a href="../controls/14b-onboard-control.html">14.1 Control on the Motor Controller</a></li></ul></details>
+<details class="nav-section"><summary>Team Workflow</summary><ul><li><a href="../workflow/15-team-process.html">15. Branches, PRs &amp; Code Review</a></li><li><a href="../workflow/16-unit-testing.html">16. Unit Testing &amp; CI</a></li></ul></details>
+<details class="nav-section"><summary>Going Further</summary><ul><li><a href="../going-further/17-odometry.html">17. Poses and Odometry</a></li><li><a href="../going-further/18-vision.html">18. Vision: AprilTags and PhotonVision</a></li><li><a href="../going-further/19-pathplanner.html">19. Autos with PathPlanner</a></li><li><a href="../going-further/19b-pathplanner-app.html">19.1 Using the PathPlanner App</a></li><li><a href="../going-further/20-logging.html">20. Logs, AdvantageScope &amp; AdvantageKit</a></li><li><a href="../going-further/21-swerve.html">21. Swerve Drive</a></li><li><a href="../going-further/21b-swerve-maxswerve.html">21.1 Our Swerve Today: REV MAXSwerve</a></li><li><a href="../going-further/21c-swerve-ctre.html">21.2 Next Year: SDS MK5i with CTRE</a></li><li><a href="../going-further/21d-phoenix-tuner.html">21.3 Using Phoenix Tuner X</a></li></ul></details>
+<details class="nav-section"><summary>Reference</summary><ul><li><a href="../reference/next-steps.html">Where to Go Next</a></li><li><a href="../reference/glossary.html">Glossary</a></li><li><a href="../reference/resources.html">Resources</a></li><li><a href="../reference/credits.html">Credits</a></li></ul></details>
+<details class="nav-section"><summary>Contributing</summary><ul><li><a href="../contributing/index.html">How to Contribute</a></li><li><a href="../contributing/lesson-template.html">Lesson Template</a></li><li><a href="../contributing/yearly-checklist.html">Yearly Checklist</a></li></ul></details></nav>
+    </details>
+  </aside>
+  <main id="content" class="content">
+    <article>
+<h1 id="72-finding-and-using-apis">7.2 Finding and Using APIs<a class="headerlink" href="#72-finding-and-using-apis" title="Permanent link">#</a></h1>
+<div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 2: Your first robot code · step 14 of 48</p><p><strong>Practice it in:</strong> <a href="../testbed/lab8-navx-gyro.html">Lab 8: Gyro Turns and Encoder Distances</a></p></div>
+<h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
+<p>Your robot code talks to a lot of hardware: SPARK MAXes, TalonFXs, a NavX, a camera, an XRP. Every one of them has its <strong>own library</strong>, written by a different company, with its own class names and its own habits. Nobody memorizes all of them. Good robot programmers are just good at <strong>looking things up</strong>.</p>
+<p>An <strong>API</strong> (Application Programming Interface) is the set of classes and methods a library lets you use. <code>SparkMax</code>, <code>set(0.5)</code>, and <code>getEncoder()</code> are part of REVLib's API. This lesson shows you where every API in this course is documented, how to read that documentation, and a recipe for getting any new device working.</p>
+<h2 id="read-this">Read this<a class="headerlink" href="#read-this" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="https://docs.wpilib.org/en/stable/docs/software/vscode-overview/3rd-party-libraries.html">3rd Party Libraries (WPILib)</a>: how vendordeps work and how to install them</li>
+<li><a href="https://github.wpilib.org/allwpilib/docs/release/java/index.html">WPILib Java API reference</a>: every WPILib class and method</li>
+</ul>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">#</a></h2>
+<h3 id="two-kinds-of-library">Two kinds of library<a class="headerlink" href="#two-kinds-of-library" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>WPILib</strong></th>
+<th><strong>Vendor libraries</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who writes it</td>
+<td>The WPILib team, for FIRST</td>
+<td>The company that makes the hardware</td>
+</tr>
+<tr>
+<td>What it covers</td>
+<td>The roboRIO's own ports (PWM, DIO, analog), controllers, commands, math (PID, kinematics, units), simulation</td>
+<td>That company's devices: motor controllers, sensors, cameras</td>
+</tr>
+<tr>
+<td>How you get it</td>
+<td>Already in every new project</td>
+<td>Installed as a <strong>vendordep</strong>, one per vendor</td>
+</tr>
+<tr>
+<td>Package names start with</td>
+<td><code>edu.wpi.first</code></td>
+<td>The company's name: <code>com.revrobotics</code>, <code>com.ctre</code>, <code>com.studica</code>...</td>
+</tr>
+</tbody>
+</table>
+<p>The package name in an <code>import</code> tells you which library a class comes from, and so <strong>which documentation to open</strong>. <code>import com.revrobotics.spark.SparkMax;</code> means REV's docs; <code>import edu.wpi.first.wpilibj.Timer;</code> means WPILib's.</p>
+<h3 id="where-every-api-in-this-course-lives">Where every API in this course lives<a class="headerlink" href="#where-every-api-in-this-course-lives" title="Permanent link">#</a></h3>
+<p>Each library has three kinds of documentation. You'll use all three.</p>
+<table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>What it's for</th>
+<th>When to open it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Guide</strong> (the docs site)</td>
+<td>Explains ideas and walks through setup, in order</td>
+<td>Starting with a new device or feature</td>
+</tr>
+<tr>
+<td><strong>API reference</strong> (Javadoc)</td>
+<td>Lists every class and method: parameters, return values, units</td>
+<td>"What methods does this class have?" "What does this method return?"</td>
+</tr>
+<tr>
+<td><strong>Examples</strong></td>
+<td>Complete, working projects</td>
+<td>"Just show me code that works"</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Used for</th>
+<th>Guide</th>
+<th>API reference (Java)</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>WPILib</strong></td>
+<td>Everything not made by a vendor</td>
+<td><a href="https://docs.wpilib.org/en/stable/">docs.wpilib.org</a></td>
+<td><a href="https://github.wpilib.org/allwpilib/docs/release/java/index.html">WPILib Javadoc</a></td>
+<td>Built in: <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Create a new project</strong> → <strong>Example</strong></td>
+</tr>
+<tr>
+<td><strong>REVLib</strong></td>
+<td>SPARK MAX, SPARK Flex, NEO, Through Bore</td>
+<td><a href="https://docs.revrobotics.com/revlib/">REVLib docs</a></td>
+<td><a href="https://codedocs.revrobotics.com/java/com/revrobotics/package-summary.html">REVLib Javadoc</a></td>
+<td><a href="https://github.com/REVrobotics/REVLib-Examples">REVLib-Examples</a></td>
+</tr>
+<tr>
+<td><strong>Phoenix 6</strong> (CTRE)</td>
+<td>TalonFX (Kraken, Falcon), CANcoder, Pigeon 2</td>
+<td><a href="https://v6.docs.ctr-electronics.com/en/stable/">Phoenix 6 docs</a></td>
+<td><a href="https://api.ctr-electronics.com/phoenix6/stable/java/">Phoenix 6 Javadoc</a></td>
+<td><a href="https://github.com/CrossTheRoadElec/Phoenix6-Examples">Phoenix6-Examples</a></td>
+</tr>
+<tr>
+<td><strong>Studica</strong></td>
+<td>NavX gyro (<a href="../testbed/lab8-navx-gyro.html">Lab 8</a>)</td>
+<td><a href="https://docs.studica.com/">Studica docs</a></td>
+<td>Linked from their docs</td>
+<td>In their docs</td>
+</tr>
+<tr>
+<td><strong>PathPlannerLib</strong></td>
+<td>Autonomous paths (<a href="../going-further/19-pathplanner.html">Lesson 19</a>)</td>
+<td><a href="https://pathplanner.dev/home.html">pathplanner.dev</a></td>
+<td><a href="https://pathplanner.dev/api/java/">PathPlannerLib Javadoc</a></td>
+<td>In the guide</td>
+</tr>
+<tr>
+<td><strong>PhotonLib</strong></td>
+<td>PhotonVision cameras (<a href="../going-further/18-vision.html">Lesson 18</a>)</td>
+<td><a href="https://docs.photonvision.org/">PhotonVision docs</a></td>
+<td><a href="https://javadocs.photonvision.org/release/">PhotonLib Javadoc</a></td>
+<td><a href="https://github.com/PhotonVision/photonvision/tree/main/photonlib-java-examples">In the PhotonVision repo</a></td>
+</tr>
+<tr>
+<td><strong>XRP</strong></td>
+<td>The XRP robot (<a href="../project/10-xrp.html">Lesson 10</a>)</td>
+<td><a href="https://docs.wpilib.org/en/stable/docs/xrp-robot/index.html">XRP in the WPILib docs</a></td>
+<td>In the WPILib Javadoc, package <code>edu.wpi.first.wpilibj.xrp</code></td>
+<td>Built in: <strong>Example</strong> → XRP</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Bookmark this table</p>
+<p>Make a browser bookmark folder called <strong>FRC APIs</strong> with the guide and Javadoc link for each library your robot uses. You'll open them every build season.</p>
+</div>
+<h3 id="vendordeps-getting-a-vendor-library-into-your-project">Vendordeps: getting a vendor library into your project<a class="headerlink" href="#vendordeps-getting-a-vendor-library-into-your-project" title="Permanent link">#</a></h3>
+<p>You installed REVLib in <a href="../testbed/lab0-first-project.html">Lab 0</a>: <strong>WPILib</strong> icon in the sidebar → <strong>Vendor Dependencies</strong> → <strong>Install</strong>. That put a file like <code>REVLib.json</code> into your project's <code>vendordeps/</code> folder. Open it and you'll see what a vendordep really is: a short description that tells Gradle which library to download, and which version.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">"fileName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"REVLib.json"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"REVLib"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026.0.5"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"frcYear"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"jsonUrl"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://software-metadata.revrobotics.com/REVLib-2026.json"</span><span class="p">,</span>
+<span class="w">    </span><span class="err">...</span>
+<span class="p">}</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>version</code></td>
+<td>The library version this project builds with. Everyone on the team gets the same one, because the file is committed to git.</td>
+</tr>
+<tr>
+<td><code>frcYear</code></td>
+<td>The season it's for. It <strong>must</strong> match your WPILib year.</td>
+</tr>
+<tr>
+<td><code>jsonUrl</code></td>
+<td>Where to check for a newer version.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The library is in the Vendor Dependencies list</td>
+<td>Click <strong>Install</strong>.</td>
+</tr>
+<tr>
+<td>It isn't in the list</td>
+<td><span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Manage Vendor Libraries</strong> → <strong>Install new library (online)</strong>, and paste the vendordep URL from the vendor's install page.</td>
+</tr>
+<tr>
+<td>A newer version is out</td>
+<td>Vendor Dependencies shows an <strong>Update</strong> button. Update between events, test, and commit the new <code>.json</code>. Never update the morning of a match.</td>
+</tr>
+<tr>
+<td>No internet (at competition)</td>
+<td>Vendors publish <strong>offline installers</strong> you can run at home ahead of time. Gradle also keeps a copy once you've built with internet.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title"><code>package com.revrobotics does not exist</code></p>
+<p>That error means the code imports a vendor library that <strong>isn't installed in this project</strong>. Check <code>vendordeps/</code> for its <code>.json</code> file. This happens a lot when you copy code from another project or from the internet.</p>
+</div>
+<h3 id="reading-a-javadoc-page">Reading a Javadoc page<a class="headerlink" href="#reading-a-javadoc-page" title="Permanent link">#</a></h3>
+<p>Javadoc is the standard format for Java API references. WPILib, REV, CTRE, PathPlanner, and PhotonVision all use it, so once you can read one, you can read them all. Let's read WPILib's <code>Timer</code>.</p>
+<p>Open the <a href="https://github.wpilib.org/allwpilib/docs/release/java/index.html">WPILib Javadoc</a> and type <code>Timer</code> in the <strong>Search</strong> box at the top right. Pick <code>edu.wpi.first.wpilibj.Timer</code>. (There's more than one <code>Timer</code> in the world. The package name tells you which one.)</p>
+<p>Every class page has the same parts, top to bottom:</p>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it tells you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Package and class name</strong></td>
+<td>What to <code>import</code>: <code>edu.wpi.first.wpilibj.Timer</code></td>
+</tr>
+<tr>
+<td><strong>Class hierarchy</strong> ("extends", "implements")</td>
+<td>What it's built on. Methods from a parent class work too.</td>
+</tr>
+<tr>
+<td><strong>Description</strong></td>
+<td>What the class is for, sometimes with an example</td>
+</tr>
+<tr>
+<td><strong>Constructor Summary</strong></td>
+<td>How to make one with <code>new</code>, and what you have to pass in: <code>Timer()</code> takes nothing</td>
+</tr>
+<tr>
+<td><strong>Method Summary</strong></td>
+<td>A table of every method: return type on the left, name and parameters on the right</td>
+</tr>
+<tr>
+<td><strong>Methods inherited from...</strong></td>
+<td>Methods that come from the parent class. Easy to miss.</td>
+</tr>
+<tr>
+<td><strong>Method Details</strong></td>
+<td>Each method in full: what it does, every parameter, the return value, and <strong>the units</strong></td>
+</tr>
+</tbody>
+</table>
+<p>A row of the Method Summary reads like the first line of a method you'd write yourself:</p>
+<table>
+<thead>
+<tr>
+<th>Javadoc says</th>
+<th>It means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>void start()</code></td>
+<td>Call <code>m_timer.start();</code> It gives nothing back.</td>
+</tr>
+<tr>
+<td><code>double get()</code></td>
+<td><code>double t = m_timer.get();</code> Method Details says: "Current time value for this timer <strong>in seconds</strong>."</td>
+</tr>
+<tr>
+<td><code>boolean hasElapsed(double seconds)</code></td>
+<td>Pass a number of seconds, get back <code>true</code> or <code>false</code>.</td>
+</tr>
+<tr>
+<td><code>static double getFPGATimestamp()</code></td>
+<td><strong>static</strong>: call it on the class, <code>Timer.getFPGATimestamp()</code>, without making a <code>Timer</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Turned into code:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Timer</span><span class="w"> </span><span class="n">m_timer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Timer</span><span class="p">();</span><span class="w">   </span><span class="c1">// Constructor Summary: Timer()</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">startShot</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m_timer</span><span class="p">.</span><span class="na">restart</span><span class="p">();</span><span class="w">                          </span><span class="c1">// void restart(): back to 0 and running</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">shotFinished</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">m_timer</span><span class="p">.</span><span class="na">hasElapsed</span><span class="p">(</span><span class="mf">1.5</span><span class="p">);</span><span class="w">             </span><span class="c1">// boolean hasElapsed(double seconds)</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Always find the units</p>
+<p>The Method Details are where units hide. WPILib uses <strong>meters, seconds, and radians</strong> unless a name says otherwise. CTRE's Phoenix 6 uses <strong>rotations</strong> and rotations per second. REV's encoders report <strong>rotations</strong> and RPM unless you set a conversion factor (<a href="08-sensors.html">Lesson 8</a>). When the docs don't say, test it: turn the shaft one full turn and watch the number.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Deprecated</p>
+<p>A method or class marked <strong>Deprecated</strong> still works this year but is going away. VS Code draws it with a ~~strikethrough~~. The Javadoc says what to use instead. For example, WPILib's <code>PIDSubsystem</code> says <em>"Deprecated, for removal: Use a PIDController instead."</em> Don't write new code with deprecated APIs.</p>
+</div>
+<h3 id="the-api-is-also-inside-vs-code">The API is also inside VS Code<a class="headerlink" href="#the-api-is-also-inside-vs-code" title="Permanent link">#</a></h3>
+<p>You don't always need the browser. VS Code reads the same Javadoc from the libraries in your project.</p>
+<table>
+<thead>
+<tr>
+<th>Do this</th>
+<th>You get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Type <code>m_motor.</code> and wait (or <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-space">Space</kbd></span>)</td>
+<td>A list of every method you can call on it, with its parameters</td>
+</tr>
+<tr>
+<td><strong>Hover</strong> over a class or method</td>
+<td>Its Javadoc: description, parameters, return value</td>
+</tr>
+<tr>
+<td><span class="keys"><kbd class="key-control">Ctrl</kbd></span> + click, or <span class="keys"><kbd class="key-f12">F12</kbd></span>, on a name</td>
+<td>Jumps to where it's defined. For a library class, this opens its source code.</td>
+</tr>
+<tr>
+<td><span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-period">.</kbd></span> on a red-underlined class name</td>
+<td><strong>Quick fix</strong>: offers to add the missing <code>import</code></td>
+</tr>
+<tr>
+<td>Right-click → <strong>Find All References</strong></td>
+<td>Everywhere in your project that uses it</td>
+</tr>
+</tbody>
+</table>
+<p>Try it on <a href="../testbed/lab1-spin-motor.html">Lab 1</a>: hover over <code>startEnd</code> in <code>spinMotorCommand</code>, then <span class="keys"><kbd class="key-control">Ctrl</kbd></span> + click it. You'll land in WPILib's <code>Subsystem</code> interface, reading the actual code that the command scheduler runs.</p>
+<h3 id="same-job-different-vendors">Same job, different vendors<a class="headerlink" href="#same-job-different-vendors" title="Permanent link">#</a></h3>
+<p>Each vendor does the same jobs in its own way. Once you know the pattern for one, the docs tell you the spelling for the next.</p>
+<table>
+<thead>
+<tr>
+<th>Job</th>
+<th>WPILib (PWM, XRP)</th>
+<th>REVLib (SPARK MAX)</th>
+<th>Phoenix 6 (TalonFX)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Make one</td>
+<td><code>new PWMSparkMax(0)</code></td>
+<td><code>new SparkMax(1, MotorType.kBrushless)</code></td>
+<td><code>new TalonFX(1)</code></td>
+</tr>
+<tr>
+<td>Run at a percent</td>
+<td><code>set(0.5)</code></td>
+<td><code>set(0.5)</code></td>
+<td><code>set(0.5)</code>, or <code>setControl(new DutyCycleOut(0.5))</code></td>
+</tr>
+<tr>
+<td>Configure it</td>
+<td>Setter methods</td>
+<td>Build a <code>SparkMaxConfig</code>, then <code>configure(config, ResetMode..., PersistMode...)</code></td>
+<td>Build a <code>TalonFXConfiguration</code>, then <code>getConfigurator().apply(config)</code></td>
+</tr>
+<tr>
+<td>Read position</td>
+<td><code>Encoder.getDistance()</code></td>
+<td><code>getEncoder().getPosition()</code> (rotations)</td>
+<td><code>getPosition().getValueAsDouble()</code> (rotations)</td>
+</tr>
+<tr>
+<td>Closed-loop control</td>
+<td><code>PIDController</code> on the roboRIO</td>
+<td><code>getClosedLoopController().setSetpoint(...)</code></td>
+<td><code>setControl(new PositionVoltage(...))</code></td>
+</tr>
+</tbody>
+</table>
+<p>Every vendor motor controller also implements WPILib's <code>MotorController</code>-style methods like <code>set()</code> and <code>setVoltage()</code>, which is why WPILib classes such as <code>DifferentialDrive</code> work with any of them.</p>
+<h3 id="old-code-is-everywhere">Old code is everywhere<a class="headerlink" href="#old-code-is-everywhere" title="Permanent link">#</a></h3>
+<p>Libraries change every season. Search results, Chief Delphi posts, other teams' GitHub repos, and AI chatbots are full of code for <strong>older versions</strong> that won't compile with 2026 libraries. Learn to spot it:</p>
+<table>
+<thead>
+<tr>
+<th>If you see...</th>
+<th>It's old. In 2026 use...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CANSparkMax</code>, <code>burnFlash()</code>, <code>setSmartCurrentLimit(...)</code> called on the motor</td>
+<td><code>SparkMax</code>, with settings in a <code>SparkMaxConfig</code> passed to <code>configure(...)</code> (REVLib 2025+)</td>
+</tr>
+<tr>
+<td><code>setReference(...)</code> on a SPARK closed-loop controller</td>
+<td><code>setSetpoint(...)</code> (REVLib 2026)</td>
+</tr>
+<tr>
+<td><code>import com.ctre.phoenix.motorcontrol...</code>, <code>WPI_TalonFX</code>, <code>ControlMode.PercentOutput</code></td>
+<td>Phoenix 6: <code>com.ctre.phoenix6.hardware.TalonFX</code> with control requests</td>
+</tr>
+<tr>
+<td><code>PIDSubsystem</code>, <code>ProfiledPIDSubsystem</code></td>
+<td>A normal subsystem with a <code>PIDController</code> (<a href="../controls/12-pid.html">Lesson 12</a>)</td>
+</tr>
+<tr>
+<td>PhotonLib <code>getLatestResult()</code></td>
+<td><code>getAllUnreadResults()</code> (<a href="../going-further/18-vision.html">Lesson 18</a>)</td>
+</tr>
+<tr>
+<td>PathPlanner <code>HolonomicPathFollowerConfig</code></td>
+<td><code>RobotConfig.fromGUISettings()</code> and <code>PPHolonomicDriveController</code> (<a href="../going-further/19-pathplanner.html">Lesson 19</a>)</td>
+</tr>
+</tbody>
+</table>
+<p>Check the <strong>date</strong> on anything you find, and check that the docs page shows the right version. Most docs sites have a version picker; <code>stable</code> or <code>2026</code> is what you want.</p>
+<h3 id="recipe-getting-a-new-device-working">Recipe: getting a new device working<a class="headerlink" href="#recipe-getting-a-new-device-working" title="Permanent link">#</a></h3>
+<p>Mechanical just bolted a sensor you've never seen onto the robot. Here's the order:</p>
+<ol>
+<li><strong>Identify it.</strong> Exact product name and who makes it. That tells you which library.</li>
+<li><strong>Wire and configure it.</strong> Find out how it connects (DIO? CAN? USB?) and, for CAN, set its ID with the vendor's tool (REV Hardware Client, Phoenix Tuner X).</li>
+<li><strong>Install the vendordep</strong>, if it needs one. Commit the new <code>.json</code>.</li>
+<li><strong>Read the guide's getting-started page.</strong> Usually short: how to create the object and read one value.</li>
+<li><strong>Find an example</strong> that uses it. Get that working first, unchanged if you can.</li>
+<li><strong>Open the Javadoc</strong> for the main class. Read the constructor and the methods you need, and <strong>find the units</strong>.</li>
+<li><strong>Wrap it in a subsystem.</strong> Name methods for what they mean (<code>hasGamePiece()</code>, <code>getArmAngleDegrees()</code>), convert to useful units, and log the values (<a href="06b-dashboards.html">Lesson 6.1</a>).</li>
+<li><strong>Check it on the dashboard</strong> before any command uses it. Press it, turn it, block it, and make sure the numbers make sense.</li>
+</ol>
+<h3 id="when-the-docs-dont-answer">When the docs don't answer<a class="headerlink" href="#when-the-docs-dont-answer" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Search the examples</strong> for the method name. Seeing it used often answers the question.</li>
+<li><strong>Read the source:</strong> <span class="keys"><kbd class="key-control">Ctrl</kbd></span> + click into the library. The code is the final answer.</li>
+<li><strong>Search Chief Delphi</strong>, the FRC forum. Check the post's date.</li>
+<li><strong>Ask a mentor or another team.</strong> Bring what you tried and what happened.</li>
+<li><strong>AI chatbots</strong> can help explain code, but they often mix up versions. Check every class and method they suggest against the current Javadoc before you trust it.</li>
+</ul>
+<h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Make your <strong>FRC APIs</strong> bookmark folder with the guide and Javadoc for WPILib, REVLib, and Phoenix 6</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In the WPILib Javadoc, find <code>DigitalInput</code>. What does its constructor take? What does <code>get()</code> return?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In the REVLib Javadoc, find <code>SparkMax</code> (or its parent, <code>SparkBase</code>). Find the method that returns the motor's current, and its units.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In the Phoenix 6 Javadoc, find <code>TalonFX</code> and the method that reads its temperature. What type does it return?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Open your Lab 1 project's <code>vendordeps/REVLib.json</code>. What version is it?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In VS Code, hover over <code>setMotorSpeed</code> and <code>startEnd</code> in Lab 1, then <span class="keys"><kbd class="key-control">Ctrl</kbd></span> + click each one</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find the Motion Magic example in Phoenix6-Examples</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Challenge: this snippet is from 2024. Rewrite it for 2026 using the REVLib docs:
+    <div class="highlight"><pre><span></span><code><span class="n">CANSparkMax</span><span class="w"> </span><span class="n">motor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">CANSparkMax</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">MotorType</span><span class="p">.</span><span class="na">kBrushless</span><span class="p">);</span>
+<span class="n">motor</span><span class="p">.</span><span class="na">setSmartCurrentLimit</span><span class="p">(</span><span class="mi">40</span><span class="p">);</span>
+<span class="n">motor</span><span class="p">.</span><span class="na">burnFlash</span><span class="p">();</span>
+</code></pre></div></li>
+</ul>
+<h2 id="check-yourself">Check yourself<a class="headerlink" href="#check-yourself" title="Permanent link">#</a></h2>
+<details class="question">
+<summary>You see <code>import com.ctre.phoenix6.hardware.CANcoder;</code>. Which docs do you open?</summary>
+<p>CTRE's Phoenix 6 docs. The package name starts with <code>com.ctre</code>, so it's CTRE's library, and <code>phoenix6</code> says which version.</p>
+</details>
+<details class="question">
+<summary>Your code says <code>package com.revrobotics does not exist</code>. What's wrong?</summary>
+<p>REVLib isn't installed in this project. Install it from Vendor Dependencies and check that its <code>.json</code> file is in <code>vendordeps/</code>.</p>
+</details>
+<details class="question">
+<summary>What's the difference between the guide, the API reference, and the examples?</summary>
+<p>The guide explains ideas and setup in order. The API reference lists every class and method with parameters, return values, and units. The examples are complete working code.</p>
+</details>
+<details class="question">
+<summary>The Javadoc shows <code>static double getFPGATimestamp()</code>. How do you call it?</summary>
+<p>On the class itself: <code>Timer.getFPGATimestamp()</code>. Static methods don't need an object made with <code>new</code>.</p>
+</details>
+<details class="question">
+<summary>You found code online that uses <code>CANSparkMax</code>. Why won't it compile?</summary>
+<p>It's written for an older REVLib. Since 2025 the class is <code>SparkMax</code>, and settings go in a <code>SparkMaxConfig</code>.</p>
+</details>
+<details class="question">
+<summary>Where in a Javadoc page do you find a method's units?</summary>
+<p>In its Method Details, usually in the description of the return value or parameter.</p>
+</details>
+<details class="question">
+<summary>A vendordep's <code>frcYear</code> is 2025 and your WPILib is 2026. What happens?</summary>
+<p>It won't work with your project. Vendor libraries must match the WPILib season. Install the 2026 version.</p>
+</details>
+    </article>
+    <nav class="pager" aria-label="Lesson navigation"><a class="pager-prev" href="../testbed/lab1b-dashboard.html"><span>Previous</span>Lab 1.1: Put It on the Dashboard</a><a class="pager-next" href="09-debugging.html"><span>Next</span>9. Testing, Debugging &amp; Simulation</a></nav>
+  </main>
+</div>
+<div class="search-panel" hidden>
+  <div class="search-box" role="dialog" aria-modal="true" aria-label="Search the course">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5l6 6"/></svg>
+      <input class="search-input" type="search" placeholder="Search lessons and labs" aria-label="Search words" autocomplete="off" spellcheck="false">
+      <button class="search-close" type="button" aria-label="Close search">Esc</button>
+    </div>
+    <p class="search-status" aria-live="polite"></p>
+    <ol class="search-results"></ol>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="plaid plaid-thin" aria-hidden="true"></div>
+  <div class="footer-inner">
+    <span>4674 RoboJacks</span>
+    <span>Portions adapted from the <a href="https://docs.wpilib.org/en/stable/">WPILib documentation</a>, &copy; WPILib contributors, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. <a href="../reference/credits.html">Credits</a></span>
+    <a href="#top">^ To Top</a>
+  </div>
+</footer>
+<script>
+if (window.matchMedia("(max-width: 860px)").matches) {
+  document.querySelector(".sidebar-toggle").removeAttribute("open");
+}
+
+// Light/dark switch. With no saved choice, the site follows the device's setting.
+(function () {
+  var root = document.documentElement;
+  var toggle = document.querySelector(".theme-toggle");
+  var systemDark = window.matchMedia("(prefers-color-scheme: dark)");
+  function isDark() {
+    var chosen = root.getAttribute("data-theme");
+    return chosen ? chosen === "dark" : systemDark.matches;
+  }
+  function show() {
+    toggle.setAttribute("aria-checked", isDark() ? "true" : "false");
+  }
+  toggle.addEventListener("click", function () {
+    var next = isDark() ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  systemDark.addEventListener("change", function () {
+    show();
+    document.dispatchEvent(new CustomEvent("themechange"));
+  });
+  show();
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+
+</body>
+</html>

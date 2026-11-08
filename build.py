@@ -50,6 +50,7 @@ NAV = [
         ("6.1 Dashboards: NetworkTables and Elastic", "robot-code/06b-dashboards.md"),
         ("7. Command-Based Programming", "robot-code/07-command-based.md"),
         ("7.1 How the Command Scheduler Works", "robot-code/07b-scheduler.md"),
+        ("7.2 Finding and Using APIs", "robot-code/07c-apis.md"),
         ("8. Sensors & Units", "robot-code/08-sensors.md"),
         ("9. Testing, Debugging & Simulation", "robot-code/09-debugging.md"),
     ]),
@@ -131,7 +132,7 @@ COURSE_PATH = [
     ("Your first robot code", [
         "hardware/04-electronics.md", "hardware/04b-motors.md", "hardware/04c-spark-max.md",
         "robot-code/06-robot-program.md", "robot-code/07-command-based.md", "testbed/lab1-spin-motor.md",
-        "robot-code/06b-dashboards.md", "testbed/lab1b-dashboard.md"]),
+        "robot-code/06b-dashboards.md", "testbed/lab1b-dashboard.md", "robot-code/07c-apis.md"]),
     ("Drive a robot", [
         "robot-code/09-debugging.md", "project/10-xrp.md", "project/10-teleop.md",
         "testbed/lab2-west-coast-drive.md"]),
@@ -170,6 +171,7 @@ PRACTICE = {
     "robot-code/06b-dashboards.md": ["testbed/lab1b-dashboard.md"],
     "robot-code/07-command-based.md": ["testbed/lab1-spin-motor.md", "testbed/lab3-buttons-triggers.md"],
     "robot-code/07b-scheduler.md": ["testbed/lab3-buttons-triggers.md"],
+    "robot-code/07c-apis.md": ["testbed/lab8-navx-gyro.md"],
     "robot-code/08-sensors.md": ["testbed/lab4-limit-switch.md", "testbed/lab5-knob-speed.md",
                                  "testbed/lab6-encoder.md", "testbed/lab8-navx-gyro.md"],
     "robot-code/09-debugging.md": ["project/10-xrp.md"],

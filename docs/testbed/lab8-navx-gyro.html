@@ -57,7 +57,7 @@ try {
   <main id="content" class="content">
     <article>
 <h1 id="lab-8-turn-with-a-gyro-drive-with-encoders">Lab 8: Turn with a Gyro, Drive with Encoders<a class="headerlink" href="#lab-8-turn-with-a-gyro-drive-with-encoders" title="Permanent link">#</a></h1>
-<div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 5: Autonomous · step 28 of 47</p><p><strong>Learn it in:</strong> <a href="../hardware/04d-sensors.html">4.3 Sensors</a>, <a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a>, <a href="../project/11-autonomous.html">10.2 Autonomous on the XRP</a></p></div>
+<div class="path-box"><p class="path-where"><a href="../path.html">Course path</a> · Part 5: Autonomous · step 29 of 48</p><p><strong>Learn it in:</strong> <a href="../robot-code/07c-apis.html">7.2 Finding and Using APIs</a>, <a href="../hardware/04d-sensors.html">4.3 Sensors</a>, <a href="../robot-code/08-sensors.html">8. Sensors &amp; Units</a>, <a href="../project/11-autonomous.html">10.2 Autonomous on the XRP</a></p></div>
 <h2 id="why-it-matters">Why it matters<a class="headerlink" href="#why-it-matters" title="Permanent link">#</a></h2>
 <p>In <a href="lab7-timed-auto.html">Lab 7</a>, the timed square never closed. Every "90° turn" was really just "spin for half a second," and the robot had no idea how far it had actually turned.</p>
 <p>A <strong>gyro</strong> fixes that. It measures how far the robot has <strong>rotated</strong>, so instead of "spin for 0.5 seconds" you can say "spin until you've turned 90°." In this lab you'll add the team's <strong>NavX2</strong> to the West Coast Drive, read the robot's heading, and use it to make turns that land where you meant.</p>
@@ -138,6 +138,7 @@ try {
 <li>If it isn't in the list, use <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-p">P</kbd></span> → <strong>WPILib: Manage Vendor Libraries → Install new library (online)</strong> and paste the vendordep URL from Studica's NavX documentation.</li>
 <li>Check that a Studica <code>.json</code> file appears in <code>vendordeps/</code>.</li>
 </ol>
+<p>This is the recipe from <a href="../robot-code/07c-apis.html">Lesson 7.2</a>: find the vendor, install the vendordep, then use the vendor's docs and Javadoc to learn the class.</p>
 <h3 id="step-3-add-the-gyro-to-the-drive-subsystem">Step 3: Add the gyro to the drive subsystem<a class="headerlink" href="#step-3-add-the-gyro-to-the-drive-subsystem" title="Permanent link">#</a></h3>
 <p>Open <code>DriveSubsystem.java</code>. Add the imports:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">com.studica.frc.AHRS</span><span class="p">;</span>

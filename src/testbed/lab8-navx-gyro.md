@@ -62,6 +62,8 @@ The NavX library comes from Studica, the company that makes it.
 3. If it isn't in the list, use ++ctrl+shift+p++ → **WPILib: Manage Vendor Libraries → Install new library (online)** and paste the vendordep URL from Studica's NavX documentation.
 4. Check that a Studica `.json` file appears in `vendordeps/`.
 
+This is the recipe from [Lesson 7.2](../robot-code/07c-apis.md): find the vendor, install the vendordep, then use the vendor's docs and Javadoc to learn the class.
+
 ### Step 3: Add the gyro to the drive subsystem
 Open `DriveSubsystem.java`. Add the imports:
 
