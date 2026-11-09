@@ -30,9 +30,9 @@ Get both working on the test bed and you're ready for the elevator in [Lab 10](l
     Same rules as Lab 6: keep clear of the wheel, never stall the 775pro, and keep someone ready to disable. A badly tuned PID can swing the wheel back and forth hard.
 
 ### The scorecard
-Add three rows to your Lab 6 scorecard:
+Add three rows to your Lab 6 scorecard. As before, record **Overshoot (%)** after the wheel stops: positive is past the target, negative is short.
 
-| Attempt | Run 1 | Run 2 | Run 3 | Worst error | Notes |
+| Attempt | Run 1 (%) | Run 2 (%) | Run 3 (%) | Worst (%) | Notes |
 |---|---|---|---|---|---|
 | 3. P only | | | | | |
 | 4. P + D | | | | | |

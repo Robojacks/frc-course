@@ -217,6 +217,7 @@ try {
 <span class="w">        </span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">EncoderInverted</span><span class="p">,</span>
 <span class="w">        </span><span class="n">EncodingType</span><span class="p">.</span><span class="na">k4X</span><span class="p">);</span>
 
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">      </span><span class="c1">// where the current attempt started</span>
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">     </span><span class="c1">// where the current attempt is trying to stop</span>
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_lastVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">  </span><span class="c1">// for the dashboard</span>
 
@@ -248,7 +249,15 @@ try {
 
 <span class="w">    </span><span class="cm">/** Every attempt turns a number of rotations FROM WHEREVER THE WHEEL IS NOW. */</span>
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setTargetFromHere</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">rotations</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="n">m_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRotations</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rotations</span><span class="p">;</span>
+<span class="w">        </span><span class="n">m_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRotations</span><span class="p">();</span>
+<span class="w">        </span><span class="n">m_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rotations</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="cm">/** How far past (+) or short of (-) the target, as a percent of the move. */</span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getOvershootPercent</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">move</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_target</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">m_start</span><span class="p">;</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">move</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">               </span><span class="c1">// no move yet</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">getRotations</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">m_target</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">move</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">100.0</span><span class="p">;</span>
 <span class="w">    </span><span class="p">}</span>
 
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">zero</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
@@ -264,6 +273,7 @@ try {
 <span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Position (rot)"</span><span class="p">,</span><span class="w"> </span><span class="n">getRotations</span><span class="p">());</span>
 <span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Target (rot)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_target</span><span class="p">);</span>
 <span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Error (rot)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_target</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getRotations</span><span class="p">());</span>
+<span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Overshoot (%)"</span><span class="p">,</span><span class="w"> </span><span class="n">getOvershootPercent</span><span class="p">());</span>
 <span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Velocity (rot per s)"</span><span class="p">,</span><span class="w"> </span><span class="n">getRps</span><span class="p">());</span>
 <span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Output (V)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_lastVolts</span><span class="p">);</span>
 <span class="w">        </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Current (A)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_motor</span><span class="p">.</span><span class="na">getOutputCurrent</span><span class="p">());</span>
@@ -307,12 +317,13 @@ try {
 </table>
 <p><code>Encoder</code> is a <strong>WPILib</strong> class: the encoder is wired to the roboRIO, not to the SPARK MAX.</p>
 <h4 id="3-remembering-the-target-and-the-output">3. Remembering the target and the output<a class="headerlink" href="#3-remembering-the-target-and-the-output" title="Permanent link">#</a></h4>
-<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">     </span><span class="c1">// where the current attempt is trying to stop</span>
+<div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">      </span><span class="c1">// where the current attempt started</span>
+<span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">     </span><span class="c1">// where the current attempt is trying to stop</span>
 <span class="kd">private</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">m_lastVolts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">  </span><span class="c1">// for the dashboard</span>
 
 <span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">TelemetryTable</span><span class="w"> </span><span class="n">m_telemetry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Telemetry</span><span class="p">.</span><span class="na">getTable</span><span class="p">(</span><span class="s">"Wheel"</span><span class="p">);</span>
 </code></pre></div>
-<p>These aren't <code>final</code>, because they change while the robot runs. <code>m_target</code> is where the current move is trying to stop. <code>m_lastVolts</code> remembers the last voltage sent, so the dashboard can show it.</p>
+<p>These aren't <code>final</code>, because they change while the robot runs. <code>m_start</code> is where the current move began, and <code>m_target</code> is where it's trying to stop. <code>m_lastVolts</code> remembers the last voltage sent, so the dashboard can show it.</p>
 <h4 id="4-the-constructor">4. The constructor<a class="headerlink" href="#4-the-constructor" title="Permanent link">#</a></h4>
 <div class="highlight"><pre><span></span><code><span class="n">SparkMaxConfig</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">SparkMaxConfig</span><span class="p">();</span>
 <span class="n">config</span><span class="p">.</span><span class="na">smartCurrentLimit</span><span class="p">(</span><span class="n">kWheelConstants</span><span class="p">.</span><span class="na">CurrentLimitAmps</span><span class="p">);</span>
@@ -361,10 +372,42 @@ try {
 <p><strong><code>setVoltage</code></strong> asks for a number of <strong>volts</strong> (up to about 12), instead of a fraction like <code>set(0.5)</code>. 4 V is 4 V whether the battery is full or tired, so tests are more repeatable. Both methods also update <code>m_lastVolts</code>, so the dashboard always shows what the motor was told. They're <code>private</code>: only this subsystem's commands can move the motor.</p>
 <h4 id="7-picking-a-target-from-where-the-wheel-is-now">7. Picking a target from where the wheel is now<a class="headerlink" href="#7-picking-a-target-from-where-the-wheel-is-now" title="Permanent link">#</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">setTargetFromHere</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">rotations</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">m_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRotations</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rotations</span><span class="p">;</span>
+<span class="w">    </span><span class="n">m_start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">getRotations</span><span class="p">();</span>
+<span class="w">    </span><span class="n">m_target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rotations</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>"Turn 10 rotations" means 10 more <strong>from here</strong>, not "go to position 10." If the wheel is at 3.2, the target becomes 13.2. That way you can run an attempt again without zeroing first.</p>
+<p>"Turn 10 rotations" means 10 more <strong>from here</strong>, not "go to position 10." If the wheel is at 3.2, the start is 3.2 and the target becomes 13.2. That way you can run an attempt again without zeroing first.</p>
+<h4 id="7b-overshoot-as-a-percent">7b. Overshoot as a percent<a class="headerlink" href="#7b-overshoot-as-a-percent" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="nf">getOvershootPercent</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">move</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m_target</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">m_start</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">move</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w">               </span><span class="c1">// no move yet</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">getRotations</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">m_target</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">move</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">100.0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>How far the wheel missed, as a percent of the whole move, so you can compare a 10-turn move with a 2-turn move:</p>
+<table>
+<thead>
+<tr>
+<th>Overshoot (%)</th>
+<th>Means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>+5</strong></td>
+<td>Went 5% <strong>past</strong> the target (0.5 rotations past, on a 10-turn move)</td>
+</tr>
+<tr>
+<td><strong>0</strong></td>
+<td>Stopped exactly on the target</td>
+</tr>
+<tr>
+<td><strong>−3</strong></td>
+<td>Stopped 3% <strong>short</strong> (0.3 rotations short)</td>
+</tr>
+</tbody>
+</table>
+<p>During a move it starts at −100 (nowhere near yet) and climbs toward 0. The number to record is where it ends up after the wheel stops. Dividing by <code>move</code> also gets the sign right for backward moves.</p>
 <h4 id="8-two-simple-commands">8. Two simple commands<a class="headerlink" href="#8-two-simple-commands" title="Permanent link">#</a></h4>
 <div class="highlight"><pre><span></span><code><span class="kd">public</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="nf">zero</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">runOnce</span><span class="p">(</span><span class="n">m_encoder</span><span class="p">::</span><span class="n">reset</span><span class="p">).</span><span class="na">ignoringDisable</span><span class="p">(</span><span class="kc">true</span><span class="p">).</span><span class="na">withName</span><span class="p">(</span><span class="s">"Zero"</span><span class="p">);</span>
@@ -402,10 +445,11 @@ try {
 <span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Position (rot)"</span><span class="p">,</span><span class="w"> </span><span class="n">getRotations</span><span class="p">());</span>
 <span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Target (rot)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_target</span><span class="p">);</span>
 <span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Error (rot)"</span><span class="p">,</span><span class="w"> </span><span class="n">m_target</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">getRotations</span><span class="p">());</span>
+<span class="w">    </span><span class="n">m_telemetry</span><span class="p">.</span><span class="na">log</span><span class="p">(</span><span class="s">"Overshoot (%)"</span><span class="p">,</span><span class="w"> </span><span class="n">getOvershootPercent</span><span class="p">());</span>
 <span class="w">    </span><span class="c1">// ...velocity, output, and current</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>Error</strong> is the target minus the position: how far is left to go. It's positive before the target and negative after an overshoot. You'll watch it a lot in this lab and in Lab 9.</p>
+<p><strong>Error</strong> is the target minus the position: how far is left to go. It's positive before the target and negative after an overshoot. <strong>Overshoot (%)</strong> is the same miss turned around and scaled to the move: positive past the target, negative short of it. You'll watch both a lot in this lab and in Lab 9.</p>
 <h3 id="step-4-bind-the-wheel-controller">Step 4: Bind the wheel controller<a class="headerlink" href="#step-4-bind-the-wheel-controller" title="Permanent link">#</a></h3>
 <p>Open <code>RobotContainer.java</code>. Add the wheel subsystem and a second controller:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="kd">private</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">WheelSubsystem</span><span class="w"> </span><span class="n">m_wheel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">WheelSubsystem</span><span class="p">();</span>
@@ -525,15 +569,15 @@ try {
 </code></pre></div>
 <p>Both use <code>onTrue</code> because each command ends by itself. Press once and let it run.</p>
 <h3 id="the-scorecard">The scorecard<a class="headerlink" href="#the-scorecard" title="Permanent link">#</a></h3>
-<p>Run each attempt <strong>three times</strong> and record the <strong>final position</strong> from the dashboard. Keep this table. You'll add three more rows in Lab 9.</p>
+<p>Run each attempt <strong>three times</strong> and record <strong>Overshoot (%)</strong> from the dashboard once the wheel has stopped: positive is past the target, negative is short. For <strong>Worst</strong>, write the run farthest from 0. Keep this table. You'll add three more rows in Lab 9.</p>
 <table>
 <thead>
 <tr>
 <th>Attempt</th>
-<th>Run 1</th>
-<th>Run 2</th>
-<th>Run 3</th>
-<th>Worst error</th>
+<th>Run 1 (%)</th>
+<th>Run 2 (%)</th>
+<th>Run 3 (%)</th>
+<th>Worst (%)</th>
 <th>Notes</th>
 </tr>
 </thead>
@@ -584,6 +628,7 @@ git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </sp
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Check direction and scale, and get <strong>1.00</strong> for one turn by hand</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Watch <strong>Raw Counts</strong>, <strong>Cycles</strong>, and <strong>Position</strong> for one turn. Explain how they're related.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Press <strong>B</strong> at 4 V and watch <strong>Overshoot (%)</strong> during the move. Why does it start at −100?</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Spin the wheel by hand and watch <strong>Velocity</strong>. What's the fastest you can spin it, in rotations per second?</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Complete the scorecard</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Press <strong>B</strong> three times in a row, waiting for each move to finish. Does the overshoot add up?</li>

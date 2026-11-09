@@ -117,6 +117,7 @@ public class WheelSubsystem extends SubsystemBase {
         kWheelConstants.EncoderInverted,
         EncodingType.k4X);
 
+    private double m_start = 0.0;      // where the current attempt started
     private double m_target = 0.0;     // where the current attempt is trying to stop
     private double m_lastVolts = 0.0;  // for the dashboard
 
@@ -148,7 +149,15 @@ public class WheelSubsystem extends SubsystemBase {
 
     /** Every attempt turns a number of rotations FROM WHEREVER THE WHEEL IS NOW. */
     private void setTargetFromHere(double rotations) {
-        m_target = getRotations() + rotations;
+        m_start = getRotations();
+        m_target = m_start + rotations;
+    }
+
+    /** How far past (+) or short of (-) the target, as a percent of the move. */
+    public double getOvershootPercent() {
+        double move = m_target - m_start;
+        if (move == 0.0) return 0.0;               // no move yet
+        return (getRotations() - m_target) / move * 100.0;
     }
 
     public Command zero() {
@@ -164,6 +173,7 @@ public class WheelSubsystem extends SubsystemBase {
         m_telemetry.log("Position (rot)", getRotations());
         m_telemetry.log("Target (rot)", m_target);
         m_telemetry.log("Error (rot)", m_target - getRotations());
+        m_telemetry.log("Overshoot (%)", getOvershootPercent());
         m_telemetry.log("Velocity (rot per s)", getRps());
         m_telemetry.log("Output (V)", m_lastVolts);
         m_telemetry.log("Current (A)", m_motor.getOutputCurrent());
@@ -200,13 +210,14 @@ private final Encoder m_encoder = new Encoder(
 
 #### 3. Remembering the target and the output
 ```java
+private double m_start = 0.0;      // where the current attempt started
 private double m_target = 0.0;     // where the current attempt is trying to stop
 private double m_lastVolts = 0.0;  // for the dashboard
 
 private final TelemetryTable m_telemetry = Telemetry.getTable("Wheel");
 ```
 
-These aren't `final`, because they change while the robot runs. `m_target` is where the current move is trying to stop. `m_lastVolts` remembers the last voltage sent, so the dashboard can show it.
+These aren't `final`, because they change while the robot runs. `m_start` is where the current move began, and `m_target` is where it's trying to stop. `m_lastVolts` remembers the last voltage sent, so the dashboard can show it.
 
 #### 4. The constructor
 ```java
@@ -254,11 +265,31 @@ private void stop() {
 #### 7. Picking a target from where the wheel is now
 ```java
 private void setTargetFromHere(double rotations) {
-    m_target = getRotations() + rotations;
+    m_start = getRotations();
+    m_target = m_start + rotations;
 }
 ```
 
-"Turn 10 rotations" means 10 more **from here**, not "go to position 10." If the wheel is at 3.2, the target becomes 13.2. That way you can run an attempt again without zeroing first.
+"Turn 10 rotations" means 10 more **from here**, not "go to position 10." If the wheel is at 3.2, the start is 3.2 and the target becomes 13.2. That way you can run an attempt again without zeroing first.
+
+#### 7b. Overshoot as a percent
+```java
+public double getOvershootPercent() {
+    double move = m_target - m_start;
+    if (move == 0.0) return 0.0;               // no move yet
+    return (getRotations() - m_target) / move * 100.0;
+}
+```
+
+How far the wheel missed, as a percent of the whole move, so you can compare a 10-turn move with a 2-turn move:
+
+| Overshoot (%) | Means |
+|---|---|
+| **+5** | Went 5% **past** the target (0.5 rotations past, on a 10-turn move) |
+| **0** | Stopped exactly on the target |
+| **−3** | Stopped 3% **short** (0.3 rotations short) |
+
+During a move it starts at −100 (nowhere near yet) and climbs toward 0. The number to record is where it ends up after the wheel stops. Dividing by `move` also gets the sign right for backward moves.
 
 #### 8. Two simple commands
 ```java
@@ -284,11 +315,12 @@ public void periodic() {
     m_telemetry.log("Position (rot)", getRotations());
     m_telemetry.log("Target (rot)", m_target);
     m_telemetry.log("Error (rot)", m_target - getRotations());
+    m_telemetry.log("Overshoot (%)", getOvershootPercent());
     // ...velocity, output, and current
 }
 ```
 
-**Error** is the target minus the position: how far is left to go. It's positive before the target and negative after an overshoot. You'll watch it a lot in this lab and in Lab 9.
+**Error** is the target minus the position: how far is left to go. It's positive before the target and negative after an overshoot. **Overshoot (%)** is the same miss turned around and scaled to the move: positive past the target, negative short of it. You'll watch both a lot in this lab and in Lab 9.
 
 ### Step 4: Bind the wheel controller
 Open `RobotContainer.java`. Add the wheel subsystem and a second controller:
@@ -402,9 +434,9 @@ Bind it:
 Both use `onTrue` because each command ends by itself. Press once and let it run.
 
 ### The scorecard
-Run each attempt **three times** and record the **final position** from the dashboard. Keep this table. You'll add three more rows in Lab 9.
+Run each attempt **three times** and record **Overshoot (%)** from the dashboard once the wheel has stopped: positive is past the target, negative is short. For **Worst**, write the run farthest from 0. Keep this table. You'll add three more rows in Lab 9.
 
-| Attempt | Run 1 | Run 2 | Run 3 | Worst error | Notes |
+| Attempt | Run 1 (%) | Run 2 (%) | Run 3 (%) | Worst (%) | Notes |
 |---|---|---|---|---|---|
 | 1. Timed | | | | | |
 | 2. Bang-bang at 2 V | | | | | |
@@ -423,6 +455,7 @@ git commit -m "Lab 6: encoder, timed and bang-bang"
 ## Try it
 - [ ] Check direction and scale, and get **1.00** for one turn by hand
 - [ ] Watch **Raw Counts**, **Cycles**, and **Position** for one turn. Explain how they're related.
+- [ ] Press **B** at 4 V and watch **Overshoot (%)** during the move. Why does it start at −100?
 - [ ] Spin the wheel by hand and watch **Velocity**. What's the fastest you can spin it, in rotations per second?
 - [ ] Complete the scorecard
 - [ ] Press **B** three times in a row, waiting for each move to finish. Does the overshoot add up?

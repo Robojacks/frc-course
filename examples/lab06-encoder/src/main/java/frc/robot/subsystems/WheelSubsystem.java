@@ -28,6 +28,7 @@ public class WheelSubsystem extends SubsystemBase {
         kWheelConstants.EncoderInverted,
         EncodingType.k4X);
 
+    private double m_start = 0.0;      // where the current attempt started
     private double m_target = 0.0;     // where the current attempt is trying to stop
     private double m_lastVolts = 0.0;  // for the dashboard
 
@@ -59,7 +60,15 @@ public class WheelSubsystem extends SubsystemBase {
 
     /** Every attempt turns a number of rotations FROM WHEREVER THE WHEEL IS NOW. */
     private void setTargetFromHere(double rotations) {
-        m_target = getRotations() + rotations;
+        m_start = getRotations();
+        m_target = m_start + rotations;
+    }
+
+    /** How far past (+) or short of (-) the target, as a percent of the move. */
+    public double getOvershootPercent() {
+        double move = m_target - m_start;
+        if (move == 0.0) return 0.0;               // no move yet
+        return (getRotations() - m_target) / move * 100.0;
     }
 
     public Command zero() {
@@ -90,6 +99,7 @@ public class WheelSubsystem extends SubsystemBase {
         m_telemetry.log("Position (rot)", getRotations());
         m_telemetry.log("Target (rot)", m_target);
         m_telemetry.log("Error (rot)", m_target - getRotations());
+        m_telemetry.log("Overshoot (%)", getOvershootPercent());
         m_telemetry.log("Velocity (rot per s)", getRps());
         m_telemetry.log("Output (V)", m_lastVolts);
         m_telemetry.log("Current (A)", m_motor.getOutputCurrent());
