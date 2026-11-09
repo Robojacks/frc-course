@@ -18,9 +18,8 @@ try {
   }
 } catch (e) {}
 </script>
-<link rel="stylesheet" href="../assets/wpilib/pid-tune.css">
-<script src="../assets/wpilib/pid-tune.js"></script>
-<script src="../assets/wpilib/pid-tune-fixes.js"></script>
+<link rel="stylesheet" href="../assets/pid-lab.css">
+<script src="../assets/pid-lab.js" defer></script>
 </head>
 <body id="top" data-root="../">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -340,26 +339,15 @@ kG                   ≈ 12 × 0.088 ÷ 2.6            = 0.41 V
 <li>Add kD only if it overshoots.</li>
 </ol>
 <h2 id="try-it">Try it<a class="headerlink" href="#try-it" title="Permanent link">#</a></h2>
-<p>This is WPILib's vertical arm simulator, with <strong>feedforward and feedback</strong> together. Click a point around the arm's circle to set a new angle, or click and drag for smooth motion.</p>
-<div class="viz-div" id="lesson_arm_container">
-<div>
-<div class="col" id="lesson_arm_plotVals"></div>
-<div class="col" id="lesson_arm_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lesson_arm_viz"></div>
-<div id="lesson_arm_ctrls"></div>
-</div>
-<script>new VerticalArmPIDF("lesson_arm", "both");</script>
-</div>
-
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html">Tuning a Vertical Arm Position Controller</a> (CC BY 4.0).</p>
+<p>This is the course's <strong>PID Lab</strong> with an arm on a NEO, with <strong>feedforward (kG) and feedback (PID)</strong> together. Drag on the arm to set a new angle, or use the target buttons. The arm starts hanging straight down at −90°, and 0° is horizontal.</p>
+<div class="pidlab" data-mech="arm" data-terms="P,I,D" data-ff="kG"></div>
 
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set every PID gain to 0. Set <strong>kG</strong> until the arm holds still at horizontal.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Move the setpoint to other angles. Does the arm stay close with feedforward alone?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set every PID gain to 0. Tap the <strong>0°</strong> target, then raise <strong>kG</strong> until the arm floats up to horizontal and stays there.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Move the target to other angles. Does the arm stay close with feedforward alone? Why does it need less kG voltage near straight up?</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a small kP to remove the remaining error</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Compare with your PID-only gains from Lesson 12. How much smaller is kP now? How much better does it hold?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Now set kG back to 0 and tune with PID only. Compare: how much smaller is kP with kG? How much better does it hold?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Turn <strong>Load</strong> up to 2×. Which setup copes better, PID only or kG + P? (Hint: kG is a guess based on the old weight.)</li>
 </ul>
 <p>In code:</p>
 <ul class="task-list">

@@ -18,9 +18,8 @@ try {
   }
 } catch (e) {}
 </script>
-<link rel="stylesheet" href="../assets/wpilib/pid-tune.css">
-<script src="../assets/wpilib/pid-tune.js"></script>
-<script src="../assets/wpilib/pid-tune-fixes.js"></script>
+<link rel="stylesheet" href="../assets/pid-lab.css">
+<script src="../assets/pid-lab.js" defer></script>
 </head>
 <body id="top" data-root="../">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -507,27 +506,25 @@ try {
 <p class="admonition-title">Have the test bed?</p>
 <p>Do <a href="../testbed/lab9-pid-wheel.html">Lab 9: PID for Position and Velocity</a>, then <a href="../testbed/lab10-elevator.html">Lab 10: Elevator Position Control</a>. They're this whole lesson on real hardware.</p>
 </div>
-<h3 id="tune-a-turret-right-here">Tune a turret, right here<a class="headerlink" href="#tune-a-turret-right-here" title="Permanent link">#</a></h3>
-<p>This is WPILib's turret simulator, running <strong>PID only</strong>. Click a spot around the turret to set a new angle, or click and drag the pointer to make the setpoint move smoothly.</p>
-<div class="viz-div" id="lesson_turret_container">
-<div>
-<div class="col" id="lesson_turret_plotVals"></div>
-<div class="col" id="lesson_turret_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lesson_turret_viz"></div>
-<div id="lesson_turret_ctrls"></div>
-</div>
-<script>new TurretPIDF("lesson_turret", "feedback");</script>
-</div>
-
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html">Tuning a Turret Position Controller</a> (CC BY 4.0).</p>
+<h3 id="tune-a-pid-controller-right-here">Tune a PID controller, right here<a class="headerlink" href="#tune-a-pid-controller-right-here" title="Permanent link">#</a></h3>
+<p>This is the course's <strong>PID Lab</strong>. It simulates the test bed wheel from <a href="../testbed/lab9-pid-wheel.html">Lab 9</a>: a 775pro, a gearbox with friction, and a 6 V limit, running <strong>PID only</strong>.</p>
+<ul>
+<li><strong>Knobs:</strong> drag one up or down (hold <span class="keys"><kbd class="key-shift">Shift</kbd></span> for fine control), use the arrow keys, or type a number. Double-click a knob to reset it.</li>
+<li><strong>Step response:</strong> redraws the moment you change a gain. The faint gray line is your previous try, so you can compare. The four numbers underneath grade it, and the colored notes say what's going on in words.</li>
+<li><strong>Live:</strong> the same wheel running in real time. Drag the orange handle, or tap a target, and watch the scope. Turn on the <strong>P</strong>, <strong>I</strong>, and <strong>D</strong> chips to see each term's voltage separately.</li>
+<li><strong>Real world:</strong> make the mechanism heavier, add friction, add sensor noise or delay, and see whether your gains still work.</li>
+</ul>
+<div class="pidlab" data-mech="wheel" data-terms="P,I,D"></div>
 
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set kP, kI, kD, and kV to zero. Raise <strong>kP</strong> until the turret moves sharply to each new angle. If it oscillates too much, lower kP until it stops.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Raise <strong>kD</strong> to reduce the "lag" when you drag the setpoint smoothly. If it starts to oscillate, lower kD.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Turn on <strong>System Noise</strong>. Does your tuning still work?</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Try the <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html">arm tuning simulator</a> with <strong>PID only</strong>. Notice how hard it is to hold the arm level, and how it sags at some angles. Write down your best kP and kD. You'll compare in the next lesson.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> With every gain at 0, the wheel doesn't move. Why?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Raise <strong>kP</strong> a little at a time. At low kP, look at <strong>Final error</strong>: the wheel stops short. Why? (Hint: friction.)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Keep raising kP until it overshoots, then raise <strong>kD</strong> until the overshoot goes away.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set <strong>Noise</strong> to 1% and watch the Volts graph. What does a big kD do with a noisy sensor?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add a little <strong>kI</strong>. Then set <strong>IZone</strong> to 0 and watch what happens. That's integral windup.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set <strong>Delay</strong> to 60 ms with a high kP. What happens, and why does a slow sensor make it worse?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Get all three <strong>challenges</strong> checked. Then press <strong>Hold the cloth</strong> in the Live view: does the wheel still reach its target?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Try the <a href="13-feedforward.html#try-it">arm in Lesson 13's PID Lab</a> with <strong>kG at 0</strong> (PID only). Notice how it sags at some angles and not others. Write down your best kP and kD. You'll compare in the next lesson.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> In the <strong>ArmSimulation</strong> example project, replace its controller with your <code>goTo</code> and <code>hold</code> commands, bind them to two buttons, and tune them with the dashboard</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Graph <code>Arm/Angle</code> and <code>Arm/Setpoint</code> together in one Elastic <strong>Graph</strong> widget while you tune</li>
 </ul>

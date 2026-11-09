@@ -9,9 +9,8 @@ Everything adapted from the WPILib docs is marked where it appears:
 
 - Boxes titled **"From the WPILib docs"** contain text adapted from the docs, with a link to the original page.
 - Diagrams and screenshots from the docs have a caption naming the source page.
-- The interactive PID tuning simulators are WPILib's, with a caption naming the source page.
 
-**Changes made:** text was shortened, reworded for beginners, and combined with this course's own explanations; some terms were changed to match this course (for example, "measurement" instead of "output"). Diagrams and screenshots are unchanged. The simulator scripts are combined into one file, the same way the WPILib docs build them, and are otherwise unchanged.
+**Changes made:** text was shortened, reworded for beginners, and combined with this course's own explanations; some terms were changed to match this course (for example, "measurement" instead of "output"). Diagrams and screenshots are unchanged.
 
 ### Adapted material, by page
 
@@ -24,15 +23,13 @@ Everything adapted from the WPILib docs is marked where it appears:
 | [Lesson 7: Command-Based Programming](../robot-code/07-command-based.md) | [What Is "Command-Based" Programming?](https://docs.wpilib.org/en/stable/docs/software/commandbased/what-is-command-based.html) |
 | [Lesson 7.1: The Command Scheduler](../robot-code/07b-scheduler.md) | [The Command Scheduler](https://docs.wpilib.org/en/stable/docs/software/commandbased/command-scheduler.html); diagrams [scheduler-run-sequence](https://github.com/wpilibsuite/frc-docs/blob/stable/source/docs/software/commandbased/diagrams/scheduler-run-sequence.drawio.svg) and [scheduler](https://github.com/wpilibsuite/frc-docs/blob/stable/source/docs/software/commandbased/diagrams/scheduler.drawio.svg) from the docs source |
 | [Lesson 10.2: Autonomous on the XRP](../project/11-autonomous.md) | Diagram [concurrent-commands](https://github.com/wpilibsuite/frc-docs/blob/stable/source/docs/software/commandbased/diagrams/concurrent-commands.drawio.svg) from the docs source |
-| [Lesson 12: PID Feedback](../controls/12-pid.md) | [Introduction to PID](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html); [Control System Basics](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/control-system-basics.html); turret simulator from [Tuning a Turret Position Controller](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html) |
-| [Lesson 13: Feedforward](../controls/13-feedforward.md) | Arm simulator from [Tuning a Vertical Arm Position Controller](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html) |
+| [Lesson 12: PID Feedback](../controls/12-pid.md) | [Introduction to PID](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html); [Control System Basics](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/control-system-basics.html) |
 | [Lesson 13.1: SysId](../controls/13b-sysid.md) | Screenshot from [Viewing Diagnostics](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/system-identification/viewing-diagnostics.html) |
 | [Lab 0](../testbed/lab0-first-project.md) | Screenshots from [Creating a Robot Program](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html), [3rd Party Libraries](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/3rd-party-libraries.html), [Building and Deploying Robot Code](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/deploying-robot-code.html), and [Viewing Console Output](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html) |
 | [Lab 4](../testbed/lab4-limit-switch.md), [Lab 5](../testbed/lab5-knob-speed.md), [Lab 6](../testbed/lab6-encoder.md), [Lab 8](../testbed/lab8-navx-gyro.md) | Wiring and sensor diagrams from the hardware and sensor pages listed above |
-| [Lab 9](../testbed/lab9-pid-wheel.md) | Turret simulator from [Tuning a Turret Position Controller](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html) |
-| [Lab 10](../testbed/lab10-elevator.md) | Elevator simulator and tuning steps from [Tuning a Vertical Elevator with Motion Profiling](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html) |
+| [Lab 10](../testbed/lab10-elevator.md) | Tuning steps from [Tuning a Vertical Elevator with Motion Profiling](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html) |
 
-The simulators also load a small script of our own, `pid-tune-fixes.js`, which makes their graphs keep drawing when the simulator is taller than the screen (on phones). It doesn't change how the simulations behave.
+The **PID Lab** simulators in Lessons 12 and 13 and Labs 9 and 10 are the course's own (`assets/pid-lab.js`). Their layout (gain knobs, a graded step response, a live view with a term-by-term scope, and a motor heat meter) was inspired by the PID simulator in [FPV Tools](https://github.com/saturn-fpv/fpv-tools) by Saturn FPV, itself based on Joshua Bardwell's; no code was copied. For WPILib's own tuning simulators, see the [Introduction to PID](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html) pages.
 
 ## Mantik, by Itkan Robotics
 Lessons 17–21 and Lab 11 are partly **adapted from** [Mantik](https://github.com/itkan-robotics/mantik), an FRC programming course by Itkan Robotics. Mantik's lesson text is licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/); its code is BSD-3-Clause.

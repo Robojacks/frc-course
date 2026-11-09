@@ -18,9 +18,8 @@ try {
   }
 } catch (e) {}
 </script>
-<link rel="stylesheet" href="../assets/wpilib/pid-tune.css">
-<script src="../assets/wpilib/pid-tune.js"></script>
-<script src="../assets/wpilib/pid-tune-fixes.js"></script>
+<link rel="stylesheet" href="../assets/pid-lab.css">
+<script src="../assets/pid-lab.js" defer></script>
 </head>
 <body id="top" data-root="../">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -254,26 +253,16 @@ try {
 <p>This is already the 2027 API: in WPILib 2027, the same lines work with WPILib's own <code>Tunables</code> (<a href="../robot-code/06b-dashboards.html#moving-to-2027">Lesson 6.1</a>).</p>
 </div>
 <h3 id="warm-up-in-the-simulator">Warm up in the simulator<a class="headerlink" href="#warm-up-in-the-simulator" title="Permanent link">#</a></h3>
-<p>Before touching the real wheel, try the same idea in WPILib's turret simulator below. A turret is a lot like the test bed wheel: a motor turning something to an exact angle, with no gravity. It's running <strong>PID only</strong>.</p>
-<p>Click a spot around the circle to set a new angle.</p>
-<div class="viz-div" id="lab9_turret_container">
-<div>
-<div class="col" id="lab9_turret_plotVals"></div>
-<div class="col" id="lab9_turret_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lab9_turret_viz"></div>
-<div id="lab9_turret_ctrls"></div>
-</div>
-<script>new TurretPIDF("lab9_turret", "feedback");</script>
-</div>
-
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html">Tuning a Turret Position Controller</a> (CC BY 4.0).</p>
+<p>Before touching the real wheel, try the same thing in the <strong>PID Lab</strong> below. It simulates this exact test bed wheel: a 775pro, a gearbox with friction, a 6 V limit, and a move of 10 rotations. The numbers won't match your real wheel exactly, but the behavior will.</p>
+<p>Drag a knob up or down (or type a number), and the step response redraws instantly. The faint line is your previous try.</p>
+<div class="pidlab" data-mech="wheel" data-terms="P,I,D"></div>
 
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> With kP, kI, and kD at 0, click a new angle. Nothing happens. Why?</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Raise <strong>kP</strong> until the turret moves sharply to each new angle. If it oscillates, lower it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> With kP, kI, and kD at 0, nothing happens. Why?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Raise <strong>kP</strong> until the wheel gets to 10 quickly. At low kP, watch <strong>Final error</strong>: it stops short.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Raise <strong>kD</strong> until the overshoot settles down.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Add <strong>kI</strong>. Set <strong>IZone</strong> to 0 for a moment and watch the overshoot: that's Attempt 5's windup.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Check off all three challenges, then try <strong>Hold the cloth</strong> in the Live view.</li>
 </ul>
 <p>Now do the same thing on the real wheel.</p>
 <h3 id="attempt-3-p-only-slow-down-as-you-get-close">Attempt 3: P only (slow down as you get close)<a class="headerlink" href="#attempt-3-p-only-slow-down-as-you-get-close" title="Permanent link">#</a></h3>
@@ -582,25 +571,14 @@ try {
 </code></pre></div>
 <p>In Elastic, add <strong>Velocity kP</strong>, <strong>kV</strong>, and <strong>Target Speed</strong> from <strong>Tunables → Wheel</strong>, and put <strong>Velocity (rot per s)</strong> and <strong>Target Speed (rot per s)</strong> on one graph. Add <strong>At Speed</strong> as a <strong>Boolean Box</strong>.</p>
 <h3 id="warm-up-in-the-simulator_1">Warm up in the simulator<a class="headerlink" href="#warm-up-in-the-simulator_1" title="Permanent link">#</a></h3>
-<p>This is WPILib's flywheel simulator: a heavy wheel you want spinning at a set speed, just like Part 2. It has both <strong>kV</strong> (feedforward) and <strong>kP</strong> (feedback).</p>
-<div class="viz-div" id="lab9_flywheel_container">
-<div>
-<div class="col" id="lab9_flywheel_plotVals"></div>
-<div class="col" id="lab9_flywheel_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lab9_flywheel_viz"></div>
-<div id="lab9_flywheel_ctrls"></div>
-</div>
-<script>new FlywheelPIDF("lab9_flywheel", "both");</script>
-</div>
-
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html">Tuning a Flywheel Velocity Controller</a> (CC BY 4.0).</p>
+<p>This is the PID Lab again, now holding the same test bed wheel at a <strong>speed</strong> (4 rot/s), just like Part 2. It has <strong>kV</strong> and <strong>kS</strong> (feedforward) and <strong>kP</strong> (feedback).</p>
+<div class="pidlab" data-mech="wheelspeed" data-terms="P" data-ff="kS,kV"></div>
 
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Leave kV at 0 and raise <strong>kP</strong> until the wheel gets moving. Does it ever reach the setpoint?</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set kP back to 0 and raise <strong>kV</strong> until the wheel settles right at the setpoint on its own.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Now add a little kP on top. Turn on <strong>System Noise</strong> and watch what kP does.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Leave kV and kS at 0 and raise <strong>kP</strong>. Does it ever reach 4 rot/s? Read the note under the graph.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set kP back to 0. Set <strong>kV to 0.8</strong> and <strong>kS to 0.25</strong>. Does the wheel get to 4 rot/s on its own?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Now add a little kP on top, and press <strong>Hold the cloth</strong> in the Live view. Turn on the <strong>P</strong> chip and watch P push the voltage up.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set <strong>Noise</strong> to 1% and raise kP a lot. What happens to the voltage?</li>
 </ul>
 <h3 id="attempt-6-p-only-feedback-alone">Attempt 6: P only (feedback alone)<a class="headerlink" href="#attempt-6-p-only-feedback-alone" title="Permanent link">#</a></h3>
 <ol>

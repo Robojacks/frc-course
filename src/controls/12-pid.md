@@ -335,27 +335,24 @@ Modern motor controllers (TalonFX, SPARK MAX, SPARK Flex) can run PID **on the c
 !!! tip "Have the test bed?"
     Do [Lab 9: PID for Position and Velocity](../testbed/lab9-pid-wheel.md), then [Lab 10: Elevator Position Control](../testbed/lab10-elevator.md). They're this whole lesson on real hardware.
 
-### Tune a turret, right here
-This is WPILib's turret simulator, running **PID only**. Click a spot around the turret to set a new angle, or click and drag the pointer to make the setpoint move smoothly.
+### Tune a PID controller, right here
+This is the course's **PID Lab**. It simulates the test bed wheel from [Lab 9](../testbed/lab9-pid-wheel.md): a 775pro, a gearbox with friction, and a 6 V limit, running **PID only**.
 
-<div class="viz-div" id="lesson_turret_container">
-<div>
-<div class="col" id="lesson_turret_plotVals"></div>
-<div class="col" id="lesson_turret_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lesson_turret_viz"></div>
-<div id="lesson_turret_ctrls"></div>
-</div>
-<script>new TurretPIDF("lesson_turret", "feedback");</script>
-</div>
+- **Knobs:** drag one up or down (hold ++shift++ for fine control), use the arrow keys, or type a number. Double-click a knob to reset it.
+- **Step response:** redraws the moment you change a gain. The faint gray line is your previous try, so you can compare. The four numbers underneath grade it, and the colored notes say what's going on in words.
+- **Live:** the same wheel running in real time. Drag the orange handle, or tap a target, and watch the scope. Turn on the **P**, **I**, and **D** chips to see each term's voltage separately.
+- **Real world:** make the mechanism heavier, add friction, add sensor noise or delay, and see whether your gains still work.
 
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html">Tuning a Turret Position Controller</a> (CC BY 4.0).</p>
+<div class="pidlab" data-mech="wheel" data-terms="P,I,D"></div>
 
-- [ ] Set kP, kI, kD, and kV to zero. Raise **kP** until the turret moves sharply to each new angle. If it oscillates too much, lower kP until it stops.
-- [ ] Raise **kD** to reduce the "lag" when you drag the setpoint smoothly. If it starts to oscillate, lower kD.
-- [ ] Turn on **System Noise**. Does your tuning still work?
-- [ ] Try the [arm tuning simulator](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html) with **PID only**. Notice how hard it is to hold the arm level, and how it sags at some angles. Write down your best kP and kD. You'll compare in the next lesson.
+- [ ] With every gain at 0, the wheel doesn't move. Why?
+- [ ] Raise **kP** a little at a time. At low kP, look at **Final error**: the wheel stops short. Why? (Hint: friction.)
+- [ ] Keep raising kP until it overshoots, then raise **kD** until the overshoot goes away.
+- [ ] Set **Noise** to 1% and watch the Volts graph. What does a big kD do with a noisy sensor?
+- [ ] Add a little **kI**. Then set **IZone** to 0 and watch what happens. That's integral windup.
+- [ ] Set **Delay** to 60 ms with a high kP. What happens, and why does a slow sensor make it worse?
+- [ ] Get all three **challenges** checked. Then press **Hold the cloth** in the Live view: does the wheel still reach its target?
+- [ ] Try the [arm in Lesson 13's PID Lab](13-feedforward.md#try-it) with **kG at 0** (PID only). Notice how it sags at some angles and not others. Write down your best kP and kD. You'll compare in the next lesson.
 - [ ] In the **ArmSimulation** example project, replace its controller with your `goTo` and `hold` commands, bind them to two buttons, and tune them with the dashboard
 - [ ] Graph `Arm/Angle` and `Arm/Setpoint` together in one Elastic **Graph** widget while you tune
 

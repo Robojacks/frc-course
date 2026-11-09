@@ -28,21 +28,9 @@ In this lab you'll move the WCD's elevator between three preset heights (**START
     - The carriage can **drop when the robot is disabled**. Never reach under a raised carriage.
 
 ### Try it in the simulator first
-WPILib's elevator simulator below runs **PID only**, exactly like this lab. Click a height along the elevator's vertical support to set a new target.
+The **PID Lab** below simulates an elevator on a NEO running **PID only, following a motion profile**, exactly like this lab. The solid orange line on the graph is the profile's setpoint moving smoothly to the goal; PID chases it. Drag on the elevator, or the orange handle, to set a new height.
 
-<div class="viz-div" id="lab10_elevator_container">
-<div>
-<div class="col" id="lab10_elevator_plotVals"></div>
-<div class="col" id="lab10_elevator_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lab10_elevator_viz"></div>
-<div id="lab10_elevator_ctrls"></div>
-</div>
-<script>new VerticalElevatorPIDF("lab10_elevator", "feedback");</script>
-</div>
-
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html">Tuning a Vertical Elevator with Motion Profiling</a> (CC BY 4.0).</p>
+<div class="pidlab" data-mech="elevator" data-terms="P,I,D" data-profile="1"></div>
 
 !!! wpilib "From the WPILib docs: Tuning an elevator with PID only"
     1. Set kP, kI, and kD to zero.
@@ -50,14 +38,15 @@ WPILib's elevator simulator below runs **PID only**, exactly like this lab. Clic
     3. Increase **kI** when the elevator gets "stuck" before reaching the setpoint.
     4. Increase **kD** to help it track smoothly moving setpoints and further reduce oscillation.
 
-    Feedback-only control is **not a good control scheme** for vertical elevators, so don't be surprised if the simulator doesn't behave consistently, even with good gains. There's no perfect answer: gains around **kP = 10, kI = 2.5, kD = 0** work, but with overshoot and long settling times, and the elevator acts differently depending on the setpoint, overshooting near the top and undershooting near the bottom.
+    Feedback-only control is **not a good control scheme** for vertical elevators, so don't be surprised if a simulator doesn't behave consistently, even with good gains. There's no perfect answer: gains around **kP = 10, kI = 2.5, kD = 0** work, but with overshoot and long settling times, and the elevator acts differently depending on the setpoint, overshooting near the top and undershooting near the bottom.
 
     *Adapted from [Tuning a Vertical Elevator with Motion Profiling](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html), CC BY 4.0.*
 
 That's exactly what you'll see on the real elevator, and why: gravity pulls the same way no matter which direction the elevator is moving. Real robots usually add **feedforward** for gravity ([Lesson 13](../controls/13-feedforward.md)). This lab sticks to PID (following a motion profile) so you can see what each of P, I, and D does on its own.
 
-- [ ] Find gains that reach a new height within a few seconds
-- [ ] Notice how the elevator behaves going **up** vs. going **down**
+- [ ] Try WPILib's suggested **kP = 10, kI = 2.5**. Then find better gains: can you check off the challenges?
+- [ ] Notice how the elevator behaves going **up** vs. going **down** in the Live view
+- [ ] Change **Max vel** and **Max accel**. What happens to the step response when the profile is too fast for the motor?
 - [ ] Write down your gains. Your real elevator will need different numbers, but the same steps.
 
 ### The hardware

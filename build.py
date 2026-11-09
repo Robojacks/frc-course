@@ -460,11 +460,10 @@ document.addEventListener("themechange", draw);   // redraw diagrams when the li
 </script>"""
 
 
-# WPILib's interactive PID tuning simulators. Loaded in <head> so the inline
-# "new VerticalElevatorPIDF(...)" scripts on a page can use them right away.
-SIM_HEAD = """<link rel="stylesheet" href="{root}assets/wpilib/pid-tune.css">
-<script src="{root}assets/wpilib/pid-tune.js"></script>
-<script src="{root}assets/wpilib/pid-tune-fixes.js"></script>"""
+
+# The course's own PID Lab simulator (assets/pid-lab.js): <div class="pidlab" data-mech="...">
+PIDLAB_HEAD = """<link rel="stylesheet" href="{root}assets/pid-lab.css">
+<script src="{root}assets/pid-lab.js" defer></script>"""
 
 
 def search_entries(title: str, url: str, body: str) -> list:
@@ -503,7 +502,7 @@ def build():
     (OUT / "assets").mkdir(parents=True)
     if cname:
         (OUT / "CNAME").write_text(cname)
-    for f in ("style.css", "robojacks-logo.png", "favicon.png"):
+    for f in ("style.css", "robojacks-logo.png", "favicon.png", "pid-lab.js", "pid-lab.css"):
         shutil.copy(ASSETS / f, OUT / "assets" / f)
     # Diagrams, screenshots, and PID simulators adapted from the WPILib docs (CC BY 4.0)
     shutil.copytree(ASSETS / "wpilib", OUT / "assets" / "wpilib")
@@ -547,7 +546,7 @@ def build():
             body=body,
             pager=render_pager(path),
             mermaid=MERMAID if 'class="mermaid"' in body else "",
-            extra_head=SIM_HEAD.format(root="../" * depth) if "viz-div" in body else "",
+            extra_head=(PIDLAB_HEAD.format(root="../" * depth) if 'class="pidlab"' in body else ""),
         ), encoding="utf-8")
         search.extend(search_entries(title, out_path(path), body))
         print("built", dest.relative_to(ROOT))

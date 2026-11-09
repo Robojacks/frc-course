@@ -18,9 +18,8 @@ try {
   }
 } catch (e) {}
 </script>
-<link rel="stylesheet" href="../assets/wpilib/pid-tune.css">
-<script src="../assets/wpilib/pid-tune.js"></script>
-<script src="../assets/wpilib/pid-tune-fixes.js"></script>
+<link rel="stylesheet" href="../assets/pid-lab.css">
+<script src="../assets/pid-lab.js" defer></script>
 </head>
 <body id="top" data-root="../">
 <a class="skip-link" href="#content">Skip to content</a>
@@ -86,20 +85,8 @@ try {
 </ul>
 </div>
 <h3 id="try-it-in-the-simulator-first">Try it in the simulator first<a class="headerlink" href="#try-it-in-the-simulator-first" title="Permanent link">#</a></h3>
-<p>WPILib's elevator simulator below runs <strong>PID only</strong>, exactly like this lab. Click a height along the elevator's vertical support to set a new target.</p>
-<div class="viz-div" id="lab10_elevator_container">
-<div>
-<div class="col" id="lab10_elevator_plotVals"></div>
-<div class="col" id="lab10_elevator_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lab10_elevator_viz"></div>
-<div id="lab10_elevator_ctrls"></div>
-</div>
-<script>new VerticalElevatorPIDF("lab10_elevator", "feedback");</script>
-</div>
-
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html">Tuning a Vertical Elevator with Motion Profiling</a> (CC BY 4.0).</p>
+<p>The <strong>PID Lab</strong> below simulates an elevator on a NEO running <strong>PID only, following a motion profile</strong>, exactly like this lab. The solid orange line on the graph is the profile's setpoint moving smoothly to the goal; PID chases it. Drag on the elevator, or the orange handle, to set a new height.</p>
+<div class="pidlab" data-mech="elevator" data-terms="P,I,D" data-profile="1"></div>
 
 <div class="admonition wpilib">
 <p class="admonition-title">From the WPILib docs: Tuning an elevator with PID only</p>
@@ -109,13 +96,14 @@ try {
 <li>Increase <strong>kI</strong> when the elevator gets "stuck" before reaching the setpoint.</li>
 <li>Increase <strong>kD</strong> to help it track smoothly moving setpoints and further reduce oscillation.</li>
 </ol>
-<p>Feedback-only control is <strong>not a good control scheme</strong> for vertical elevators, so don't be surprised if the simulator doesn't behave consistently, even with good gains. There's no perfect answer: gains around <strong>kP = 10, kI = 2.5, kD = 0</strong> work, but with overshoot and long settling times, and the elevator acts differently depending on the setpoint, overshooting near the top and undershooting near the bottom.</p>
+<p>Feedback-only control is <strong>not a good control scheme</strong> for vertical elevators, so don't be surprised if a simulator doesn't behave consistently, even with good gains. There's no perfect answer: gains around <strong>kP = 10, kI = 2.5, kD = 0</strong> work, but with overshoot and long settling times, and the elevator acts differently depending on the setpoint, overshooting near the top and undershooting near the bottom.</p>
 <p><em>Adapted from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html">Tuning a Vertical Elevator with Motion Profiling</a>, CC BY 4.0.</em></p>
 </div>
 <p>That's exactly what you'll see on the real elevator, and why: gravity pulls the same way no matter which direction the elevator is moving. Real robots usually add <strong>feedforward</strong> for gravity (<a href="../controls/13-feedforward.html">Lesson 13</a>). This lab sticks to PID (following a motion profile) so you can see what each of P, I, and D does on its own.</p>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Find gains that reach a new height within a few seconds</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Notice how the elevator behaves going <strong>up</strong> vs. going <strong>down</strong></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Try WPILib's suggested <strong>kP = 10, kI = 2.5</strong>. Then find better gains: can you check off the challenges?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Notice how the elevator behaves going <strong>up</strong> vs. going <strong>down</strong> in the Live view</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Change <strong>Max vel</strong> and <strong>Max accel</strong>. What happens to the step response when the profile is too fast for the motor?</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Write down your gains. Your real elevator will need different numbers, but the same steps.</li>
 </ul>
 <h3 id="the-hardware">The hardware<a class="headerlink" href="#the-hardware" title="Permanent link">#</a></h3>

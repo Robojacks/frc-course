@@ -217,27 +217,16 @@ Compare your measurements with the estimates from step 1. If they're close (with
 5. Add kD only if it overshoots.
 
 ## Try it
-This is WPILib's vertical arm simulator, with **feedforward and feedback** together. Click a point around the arm's circle to set a new angle, or click and drag for smooth motion.
+This is the course's **PID Lab** with an arm on a NEO, with **feedforward (kG) and feedback (PID)** together. Drag on the arm to set a new angle, or use the target buttons. The arm starts hanging straight down at −90°, and 0° is horizontal.
 
-<div class="viz-div" id="lesson_arm_container">
-<div>
-<div class="col" id="lesson_arm_plotVals"></div>
-<div class="col" id="lesson_arm_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lesson_arm_viz"></div>
-<div id="lesson_arm_ctrls"></div>
-</div>
-<script>new VerticalArmPIDF("lesson_arm", "both");</script>
-</div>
-
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html">Tuning a Vertical Arm Position Controller</a> (CC BY 4.0).</p>
+<div class="pidlab" data-mech="arm" data-terms="P,I,D" data-ff="kG"></div>
 
 
-- [ ] Set every PID gain to 0. Set **kG** until the arm holds still at horizontal.
-- [ ] Move the setpoint to other angles. Does the arm stay close with feedforward alone?
+- [ ] Set every PID gain to 0. Tap the **0°** target, then raise **kG** until the arm floats up to horizontal and stays there.
+- [ ] Move the target to other angles. Does the arm stay close with feedforward alone? Why does it need less kG voltage near straight up?
 - [ ] Add a small kP to remove the remaining error
-- [ ] Compare with your PID-only gains from Lesson 12. How much smaller is kP now? How much better does it hold?
+- [ ] Now set kG back to 0 and tune with PID only. Compare: how much smaller is kP with kG? How much better does it hold?
+- [ ] Turn **Load** up to 2×. Which setup copes better, PID only or kG + P? (Hint: kG is a guess based on the old weight.)
 
 In code:
 

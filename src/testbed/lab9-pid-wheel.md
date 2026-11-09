@@ -122,27 +122,17 @@ In Elastic, add **kP**, **kI**, **kD**, and **IZone** from **Tunables → Wheel*
     This is already the 2027 API: in WPILib 2027, the same lines work with WPILib's own `Tunables` ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).
 
 ### Warm up in the simulator
-Before touching the real wheel, try the same idea in WPILib's turret simulator below. A turret is a lot like the test bed wheel: a motor turning something to an exact angle, with no gravity. It's running **PID only**.
+Before touching the real wheel, try the same thing in the **PID Lab** below. It simulates this exact test bed wheel: a 775pro, a gearbox with friction, a 6 V limit, and a move of 10 rotations. The numbers won't match your real wheel exactly, but the behavior will.
 
-Click a spot around the circle to set a new angle.
+Drag a knob up or down (or type a number), and the step response redraws instantly. The faint line is your previous try.
 
-<div class="viz-div" id="lab9_turret_container">
-<div>
-<div class="col" id="lab9_turret_plotVals"></div>
-<div class="col" id="lab9_turret_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lab9_turret_viz"></div>
-<div id="lab9_turret_ctrls"></div>
-</div>
-<script>new TurretPIDF("lab9_turret", "feedback");</script>
-</div>
+<div class="pidlab" data-mech="wheel" data-terms="P,I,D"></div>
 
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html">Tuning a Turret Position Controller</a> (CC BY 4.0).</p>
-
-- [ ] With kP, kI, and kD at 0, click a new angle. Nothing happens. Why?
-- [ ] Raise **kP** until the turret moves sharply to each new angle. If it oscillates, lower it.
+- [ ] With kP, kI, and kD at 0, nothing happens. Why?
+- [ ] Raise **kP** until the wheel gets to 10 quickly. At low kP, watch **Final error**: it stops short.
 - [ ] Raise **kD** until the overshoot settles down.
+- [ ] Add **kI**. Set **IZone** to 0 for a moment and watch the overshoot: that's Attempt 5's windup.
+- [ ] Check off all three challenges, then try **Hold the cloth** in the Live view.
 
 Now do the same thing on the real wheel.
 
@@ -401,25 +391,14 @@ Bind it on the wheel controller, in `configureBindings()`:
 In Elastic, add **Velocity kP**, **kV**, and **Target Speed** from **Tunables → Wheel**, and put **Velocity (rot per s)** and **Target Speed (rot per s)** on one graph. Add **At Speed** as a **Boolean Box**.
 
 ### Warm up in the simulator
-This is WPILib's flywheel simulator: a heavy wheel you want spinning at a set speed, just like Part 2. It has both **kV** (feedforward) and **kP** (feedback).
+This is the PID Lab again, now holding the same test bed wheel at a **speed** (4 rot/s), just like Part 2. It has **kV** and **kS** (feedforward) and **kP** (feedback).
 
-<div class="viz-div" id="lab9_flywheel_container">
-<div>
-<div class="col" id="lab9_flywheel_plotVals"></div>
-<div class="col" id="lab9_flywheel_plotVolts"></div>
-</div>
-<div class="flex-grid">
-<div class="col" id="lab9_flywheel_viz"></div>
-<div id="lab9_flywheel_ctrls"></div>
-</div>
-<script>new FlywheelPIDF("lab9_flywheel", "both");</script>
-</div>
+<div class="pidlab" data-mech="wheelspeed" data-terms="P" data-ff="kS,kV"></div>
 
-<p class="credit">Interactive simulator from the WPILib docs, <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-flywheel.html">Tuning a Flywheel Velocity Controller</a> (CC BY 4.0).</p>
-
-- [ ] Leave kV at 0 and raise **kP** until the wheel gets moving. Does it ever reach the setpoint?
-- [ ] Set kP back to 0 and raise **kV** until the wheel settles right at the setpoint on its own.
-- [ ] Now add a little kP on top. Turn on **System Noise** and watch what kP does.
+- [ ] Leave kV and kS at 0 and raise **kP**. Does it ever reach 4 rot/s? Read the note under the graph.
+- [ ] Set kP back to 0. Set **kV to 0.8** and **kS to 0.25**. Does the wheel get to 4 rot/s on its own?
+- [ ] Now add a little kP on top, and press **Hold the cloth** in the Live view. Turn on the **P** chip and watch P push the voltage up.
+- [ ] Set **Noise** to 1% and raise kP a lot. What happens to the voltage?
 
 ### Attempt 6: P only (feedback alone)
 1. Make sure **kV** is 0 in Elastic.

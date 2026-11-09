@@ -73,9 +73,8 @@ try {
 <ul>
 <li>Boxes titled <strong>"From the WPILib docs"</strong> contain text adapted from the docs, with a link to the original page.</li>
 <li>Diagrams and screenshots from the docs have a caption naming the source page.</li>
-<li>The interactive PID tuning simulators are WPILib's, with a caption naming the source page.</li>
 </ul>
-<p><strong>Changes made:</strong> text was shortened, reworded for beginners, and combined with this course's own explanations; some terms were changed to match this course (for example, "measurement" instead of "output"). Diagrams and screenshots are unchanged. The simulator scripts are combined into one file, the same way the WPILib docs build them, and are otherwise unchanged.</p>
+<p><strong>Changes made:</strong> text was shortened, reworded for beginners, and combined with this course's own explanations; some terms were changed to match this course (for example, "measurement" instead of "output"). Diagrams and screenshots are unchanged.</p>
 <h3 id="adapted-material-by-page">Adapted material, by page<a class="headerlink" href="#adapted-material-by-page" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -115,11 +114,7 @@ try {
 </tr>
 <tr>
 <td><a href="../controls/12-pid.html">Lesson 12: PID Feedback</a></td>
-<td><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a>; <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/control-system-basics.html">Control System Basics</a>; turret simulator from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html">Tuning a Turret Position Controller</a></td>
-</tr>
-<tr>
-<td><a href="../controls/13-feedforward.html">Lesson 13: Feedforward</a></td>
-<td>Arm simulator from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-vertical-arm.html">Tuning a Vertical Arm Position Controller</a></td>
+<td><a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a>; <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/control-system-basics.html">Control System Basics</a></td>
 </tr>
 <tr>
 <td><a href="../controls/13b-sysid.html">Lesson 13.1: SysId</a></td>
@@ -134,16 +129,12 @@ try {
 <td>Wiring and sensor diagrams from the hardware and sensor pages listed above</td>
 </tr>
 <tr>
-<td><a href="../testbed/lab9-pid-wheel.html">Lab 9</a></td>
-<td>Turret simulator from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-turret.html">Tuning a Turret Position Controller</a></td>
-</tr>
-<tr>
 <td><a href="../testbed/lab10-elevator.html">Lab 10</a></td>
-<td>Elevator simulator and tuning steps from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html">Tuning a Vertical Elevator with Motion Profiling</a></td>
+<td>Tuning steps from <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/tuning-elevator.html">Tuning a Vertical Elevator with Motion Profiling</a></td>
 </tr>
 </tbody>
 </table>
-<p>The simulators also load a small script of our own, <code>pid-tune-fixes.js</code>, which makes their graphs keep drawing when the simulator is taller than the screen (on phones). It doesn't change how the simulations behave.</p>
+<p>The <strong>PID Lab</strong> simulators in Lessons 12 and 13 and Labs 9 and 10 are the course's own (<code>assets/pid-lab.js</code>). Their layout (gain knobs, a graded step response, a live view with a term-by-term scope, and a motor heat meter) was inspired by the PID simulator in <a href="https://github.com/saturn-fpv/fpv-tools">FPV Tools</a> by Saturn FPV, itself based on Joshua Bardwell's; no code was copied. For WPILib's own tuning simulators, see the <a href="https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html">Introduction to PID</a> pages.</p>
 <h2 id="mantik-by-itkan-robotics">Mantik, by Itkan Robotics<a class="headerlink" href="#mantik-by-itkan-robotics" title="Permanent link">#</a></h2>
 <p>Lessons 17–21 and Lab 11 are partly <strong>adapted from</strong> <a href="https://github.com/itkan-robotics/mantik">Mantik</a>, an FRC programming course by Itkan Robotics. Mantik's lesson text is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License (CC BY 4.0)</a>; its code is BSD-3-Clause.</p>
 <p><strong>Changes made:</strong> the lessons were rewritten for beginners in this course's format, and the examples were rewritten for the RoboJacks West Coast Drive (Through Bore Encoders on the roboRIO, NavX2, CIMs), WPILib 2026, and the course's telemetry library. Some sections were added (calibration steps for the WCD, differential-drive PathPlanner setup, red-alliance notes); a few statements were corrected against vendor documentation. Each adapted page ends with a credit line.</p>
