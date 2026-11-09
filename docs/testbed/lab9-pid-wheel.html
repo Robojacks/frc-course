@@ -253,7 +253,7 @@ try {
 <p>This is already the 2027 API: in WPILib 2027, the same lines work with WPILib's own <code>Tunables</code> (<a href="../robot-code/06b-dashboards.html#moving-to-2027">Lesson 6.1</a>).</p>
 </div>
 <h3 id="warm-up-in-the-simulator">Warm up in the simulator<a class="headerlink" href="#warm-up-in-the-simulator" title="Permanent link">#</a></h3>
-<p>Before touching the real wheel, try the same thing in the <strong>PID Lab</strong> below. It simulates this exact test bed wheel: a 775pro, a gearbox with friction, a 6 V limit, and a move of 10 rotations. The numbers won't match your real wheel exactly, but the behavior will.</p>
+<p>Before touching the real wheel, try the same thing in the <strong>PID Lab</strong> below. It simulates this exact test bed wheel: a 775pro, a 16:1 VersaPlanetary with friction, a 6 V limit, and a move of 10 rotations. The numbers won't match your real wheel exactly, but the behavior will.</p>
 <p>Drag a knob up or down (or type a number), and the step response redraws instantly. The faint line is your previous try.</p>
 <div class="pidlab" data-mech="wheel" data-terms="P,I,D"></div>
 
@@ -571,12 +571,12 @@ try {
 </code></pre></div>
 <p>In Elastic, add <strong>Velocity kP</strong>, <strong>kV</strong>, and <strong>Target Speed</strong> from <strong>Tunables → Wheel</strong>, and put <strong>Velocity (rot per s)</strong> and <strong>Target Speed (rot per s)</strong> on one graph. Add <strong>At Speed</strong> as a <strong>Boolean Box</strong>.</p>
 <h3 id="warm-up-in-the-simulator_1">Warm up in the simulator<a class="headerlink" href="#warm-up-in-the-simulator_1" title="Permanent link">#</a></h3>
-<p>This is the PID Lab again, now holding the same test bed wheel at a <strong>speed</strong> (4 rot/s), just like Part 2. It has <strong>kV</strong> and <strong>kS</strong> (feedforward) and <strong>kP</strong> (feedback).</p>
+<p>This is the PID Lab again, now holding the same test bed wheel at a <strong>speed</strong> (5 rot/s), just like Part 2. It has <strong>kV</strong> and <strong>kS</strong> (feedforward) and <strong>kP</strong> (feedback).</p>
 <div class="pidlab" data-mech="wheelspeed" data-terms="P" data-ff="kS,kV"></div>
 
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Leave kV and kS at 0 and raise <strong>kP</strong>. Does it ever reach 4 rot/s? Read the note under the graph.</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set kP back to 0. Set <strong>kV to 0.8</strong> and <strong>kS to 0.25</strong>. Does the wheel get to 4 rot/s on its own?</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Leave kV and kS at 0 and raise <strong>kP</strong>. Does it ever reach 5 rot/s? Read the note under the graph.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set kP back to 0. Set <strong>kV to 0.6</strong> and <strong>kS to 0.25</strong>. Does the wheel get to 5 rot/s on its own?</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Now add a little kP on top, and press <strong>Hold the cloth</strong> in the Live view. Turn on the <strong>P</strong> chip and watch P push the voltage up.</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Set <strong>Noise</strong> to 1% and raise kP a lot. What happens to the voltage?</li>
 </ul>

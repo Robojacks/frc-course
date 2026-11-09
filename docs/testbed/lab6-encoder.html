@@ -79,7 +79,7 @@ try {
 </thead>
 <tbody>
 <tr>
-<td>775pro motor driving the wheel through a gearbox</td>
+<td>775pro motor driving the wheel through a 16:1 VersaPlanetary gearbox</td>
 <td>SPARK MAX, <strong>brushed mode</strong>, on CAN</td>
 <td>REVLib <code>SparkMax</code></td>
 </tr>
@@ -136,7 +136,7 @@ try {
 <p>For these labs the encoder goes to the <strong>roboRIO</strong>, so WPILib's <code>Encoder</code> class can read it. If it's plugged into the SPARK MAX's data port through an encoder adapter board, unplug it there and use this Dupont cable instead.</p>
 </div>
 <p><strong>Which way around?</strong> Each roboRIO DIO port is three pins in a row, and the roboRIO has a label printed next to each row of pins: the ground symbol (⏚), <strong>V</strong> (5 V), and <strong>S</strong> (signal). Turn each plug so the <strong>black</strong> wire is on <strong>ground</strong> (⏚), the <strong>red</strong> wire is on <strong>V</strong>, and the <strong>blue</strong> or <strong>yellow</strong> wire is on <strong>S</strong>. Every plug on this cable has its own red and black, so each one powers itself; that's normal. (<a href="../hardware/04d-sensors.html#wiring-the-through-bore-encoder-to-the-roborio">Lesson 4.3</a> has more.)</p>
-<p>We count turns of the <strong>wheel</strong>, not the motor. A 775pro spins about 18,700 RPM with no load, so 10 turns of the motor shaft would be over in a blink. The gearbox slows it down enough to watch.</p>
+<p>We count turns of the <strong>wheel</strong>, not the motor. A 775pro spins about 18,700 RPM with no load, so 10 turns of the motor shaft would be over in a blink. The 16:1 gearbox slows it to about 19 rot/s at full power, and the labs cap it at 6 V, so it's slow enough to watch.</p>
 <div class="admonition info">
 <p class="admonition-title">Why a second controller?</p>
 <p>Your first controller already has buttons for the brushless motor from Labs 1 to 5. Giving the wheel its own controller keeps every binding working. Real robots do the same thing: a <strong>driver</strong> controller and an <strong>operator</strong> controller. No second controller? Comment out the Lab 3 bindings while you do this lab.</p>

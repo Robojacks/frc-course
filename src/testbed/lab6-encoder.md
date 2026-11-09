@@ -17,7 +17,7 @@ In this lab you'll read the encoder on the test bed's 775pro wheel, turn its raw
 
 | Part | Connected to | In code |
 |---|---|---|
-| 775pro motor driving the wheel through a gearbox | SPARK MAX, **brushed mode**, on CAN | REVLib `SparkMax` |
+| 775pro motor driving the wheel through a 16:1 VersaPlanetary gearbox | SPARK MAX, **brushed mode**, on CAN | REVLib `SparkMax` |
 | Quadrature encoder on the wheel's shaft | roboRIO DIO ports (channel A and B) | WPILib `Encoder` |
 | A **second** Xbox controller | Driver Station, slot **1** | `CommandXboxController(1)` |
 
@@ -40,7 +40,7 @@ The REV Through Bore Encoder's cable ends in four 3-pin plugs. Only two go to th
 
 **Which way around?** Each roboRIO DIO port is three pins in a row, and the roboRIO has a label printed next to each row of pins: the ground symbol (⏚), **V** (5 V), and **S** (signal). Turn each plug so the **black** wire is on **ground** (⏚), the **red** wire is on **V**, and the **blue** or **yellow** wire is on **S**. Every plug on this cable has its own red and black, so each one powers itself; that's normal. ([Lesson 4.3](../hardware/04d-sensors.md#wiring-the-through-bore-encoder-to-the-roborio) has more.)
 
-We count turns of the **wheel**, not the motor. A 775pro spins about 18,700 RPM with no load, so 10 turns of the motor shaft would be over in a blink. The gearbox slows it down enough to watch.
+We count turns of the **wheel**, not the motor. A 775pro spins about 18,700 RPM with no load, so 10 turns of the motor shaft would be over in a blink. The 16:1 gearbox slows it to about 19 rot/s at full power, and the labs cap it at 6 V, so it's slow enough to watch.
 
 !!! info "Why a second controller?"
     Your first controller already has buttons for the brushless motor from Labs 1 to 5. Giving the wheel its own controller keeps every binding working. Real robots do the same thing: a **driver** controller and an **operator** controller. No second controller? Comment out the Lab 3 bindings while you do this lab.

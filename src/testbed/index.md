@@ -36,7 +36,7 @@ New to any of this hardware? [Lesson 4](../hardware/04-electronics.md) covers th
 | **Power distribution** with breakers | Splits battery power to everything, with a breaker on each channel |
 | **Main breaker** and **battery** | Power on and off, and the emergency off switch |
 | **Two [SPARK MAX](../hardware/04c-spark-max.md) motor controllers** | Drive the motors, connected to the roboRIO over CAN. The brushless motor's is CAN ID 8. |
-| **[775pro](../hardware/04b-motors.md) motor with a gearbox and wheel** | The motor used in Labs 6 and 9 |
+| **[775pro](../hardware/04b-motors.md) motor with a 16:1 VersaPlanetary gearbox and wheel** | The motor used in Labs 6 and 9. Two 4:1 stages; the wheel spins about 19 rot/s at 12 V. |
 | **[NEO](../hardware/04b-motors.md) brushless motor** | The motor used in Labs 1, 1.1, 3, 4, and 5 |
 | **[REV Through Bore Encoder](../hardware/04d-sensors.md)** (quadrature) | Measures how far the wheel has turned (Labs 6 and 9) |
 | **[Limit switches](../hardware/04d-sensors.md)** | On/off sensors (Lab 4) |

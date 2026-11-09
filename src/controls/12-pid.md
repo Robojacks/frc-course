@@ -336,7 +336,7 @@ Modern motor controllers (TalonFX, SPARK MAX, SPARK Flex) can run PID **on the c
     Do [Lab 9: PID for Position and Velocity](../testbed/lab9-pid-wheel.md), then [Lab 10: Elevator Position Control](../testbed/lab10-elevator.md). They're this whole lesson on real hardware.
 
 ### Tune a PID controller, right here
-This is the course's **PID Lab**. It simulates the test bed wheel from [Lab 9](../testbed/lab9-pid-wheel.md): a 775pro, a gearbox with friction, and a 6 V limit, running **PID only**.
+This is the course's **PID Lab**. It simulates the test bed wheel from [Lab 9](../testbed/lab9-pid-wheel.md): a 775pro, a 16:1 VersaPlanetary with friction, and a 6 V limit, running **PID only**.
 
 - **Knobs:** drag one up or down (hold ++shift++ for fine control), use the arrow keys, or type a number. Double-click a knob to reset it.
 - **Step response:** redraws the moment you change a gain. The faint gray line is your previous try, so you can compare. The four numbers underneath grade it, and the colored notes say what's going on in words.

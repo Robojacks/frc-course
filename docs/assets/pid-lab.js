@@ -19,10 +19,10 @@
   // ---------------------------------------------------------------------------
   var MECHS = {
     wheel: {
-      title: "Test bed wheel", kind: "position", unit: "rot", unitLong: "rotations",
+      title: "Test bed wheel (16:1)", kind: "position", unit: "rot", unitLong: "rotations",
       start: 0, goal: 10, min: -20, max: 20, barMin: 0, barMax: 20, presets: [0, 5, 10, 15],
-      plant: { kS: 0.25, kV: 0.8, kA: 0.2, kG: 0 }, maxV: 6, duration: 4, motor: "775pro", stallA: 134,
-      ranges: { kP: 10, kI: 10, kD: 2, kS: 1, kV: 2, kG: 1, iZone: 2 }, iZone: 0.5,
+      plant: { kS: 0.25, kV: 0.6, kA: 0.15, kG: 0 }, maxV: 6, duration: 4, motor: "775pro", stallA: 134,
+      ranges: { kP: 10, kI: 20, kD: 2, kS: 1, kV: 2, kG: 1, iZone: 2 }, iZone: 0.5,
       challenges: [
         ["Ends within 0.02 rot of 10", function (m) { return m.sse < 0.02; }],
         ["Overshoot under 2%", function (m) { return m.overshoot < 2; }],
@@ -35,9 +35,9 @@
       }
     },
     wheelspeed: {
-      title: "Test bed wheel speed", kind: "velocity", unit: "rot/s", unitLong: "rotations per second",
-      start: 0, goal: 4, min: -7, max: 7, barMin: 0, barMax: 7, presets: [0, 2, 4, 6],
-      plant: { kS: 0.25, kV: 0.8, kA: 0.1, kG: 0 }, maxV: 6, duration: 2.5, motor: "775pro", stallA: 134,
+      title: "Test bed wheel speed (16:1)", kind: "velocity", unit: "rot/s", unitLong: "rotations per second",
+      start: 0, goal: 5, min: -9, max: 9, barMin: 0, barMax: 9, presets: [0, 3, 5, 8],
+      plant: { kS: 0.25, kV: 0.6, kA: 0.15, kG: 0 }, maxV: 6, duration: 2.5, motor: "775pro", stallA: 134,
       ranges: { kP: 5, kI: 10, kD: 0.2, kS: 1, kV: 2, kG: 1 },
       challenges: [
         ["Holds within 0.1 rot/s of target", function (m) { return m.sse < 0.1; }],

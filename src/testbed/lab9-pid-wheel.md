@@ -122,7 +122,7 @@ In Elastic, add **kP**, **kI**, **kD**, and **IZone** from **Tunables → Wheel*
     This is already the 2027 API: in WPILib 2027, the same lines work with WPILib's own `Tunables` ([Lesson 6.1](../robot-code/06b-dashboards.md#moving-to-2027)).
 
 ### Warm up in the simulator
-Before touching the real wheel, try the same thing in the **PID Lab** below. It simulates this exact test bed wheel: a 775pro, a gearbox with friction, a 6 V limit, and a move of 10 rotations. The numbers won't match your real wheel exactly, but the behavior will.
+Before touching the real wheel, try the same thing in the **PID Lab** below. It simulates this exact test bed wheel: a 775pro, a 16:1 VersaPlanetary with friction, a 6 V limit, and a move of 10 rotations. The numbers won't match your real wheel exactly, but the behavior will.
 
 Drag a knob up or down (or type a number), and the step response redraws instantly. The faint line is your previous try.
 
@@ -391,12 +391,12 @@ Bind it on the wheel controller, in `configureBindings()`:
 In Elastic, add **Velocity kP**, **kV**, and **Target Speed** from **Tunables → Wheel**, and put **Velocity (rot per s)** and **Target Speed (rot per s)** on one graph. Add **At Speed** as a **Boolean Box**.
 
 ### Warm up in the simulator
-This is the PID Lab again, now holding the same test bed wheel at a **speed** (4 rot/s), just like Part 2. It has **kV** and **kS** (feedforward) and **kP** (feedback).
+This is the PID Lab again, now holding the same test bed wheel at a **speed** (5 rot/s), just like Part 2. It has **kV** and **kS** (feedforward) and **kP** (feedback).
 
 <div class="pidlab" data-mech="wheelspeed" data-terms="P" data-ff="kS,kV"></div>
 
-- [ ] Leave kV and kS at 0 and raise **kP**. Does it ever reach 4 rot/s? Read the note under the graph.
-- [ ] Set kP back to 0. Set **kV to 0.8** and **kS to 0.25**. Does the wheel get to 4 rot/s on its own?
+- [ ] Leave kV and kS at 0 and raise **kP**. Does it ever reach 5 rot/s? Read the note under the graph.
+- [ ] Set kP back to 0. Set **kV to 0.6** and **kS to 0.25**. Does the wheel get to 5 rot/s on its own?
 - [ ] Now add a little kP on top, and press **Hold the cloth** in the Live view. Turn on the **P** chip and watch P push the voltage up.
 - [ ] Set **Noise** to 1% and raise kP a lot. What happens to the voltage?
 
