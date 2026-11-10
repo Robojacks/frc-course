@@ -44,7 +44,7 @@ And for Part 2 (velocity), a second scorecard:
 |---|---|---|---|---|
 | 6. P only, kP = ___ | | | | |
 | 6. P only, kP = ___ | | | | |
-| 7. kV + P | | | | |
+| 7. kS + kV + P | | | | |
 
 ### Step 1: Add the PID gains
 ```java
@@ -290,9 +290,9 @@ You need one number from the real wheel before choosing gains: how fast it spins
 That number tells you two things:
 
 - **How fast to aim.** A target a little under that speed needs about 4 V to hold, comfortably under this lab's 6 V limit.
-- **How many volts each rot/s needs.** That's called **kV**, and you'll use it in Attempt 7: kV = 4 V ÷ speed at 4 V.
+- **How many volts each rot/s needs.** That's called **kV**. Part of the 4 V goes to just overcoming friction; that part is **kS**, which you'll measure at the start of Attempt 7. Then kV = (4 V − kS) ÷ speed at 4 V.
 
-**Worked example:** if the wheel runs at 5.0 rot/s at 4 V, then kV = 4 ÷ 5.0 = **0.8 V per rot/s**, and a good target is **4.0 rot/s**.
+**Worked example:** if the wheel runs at 5.0 rot/s at 4 V and kS turns out to be 0.25 V, then kV = (4 − 0.25) ÷ 5.0 = **0.75 V per rot/s**, and a good target is **4.0 rot/s**.
 
 ### Step 5: Velocity constants
 Add these inside `kWheelConstants` too, below the Part 1 gains. Use your own measured speed.
@@ -301,6 +301,7 @@ Add these inside `kWheelConstants` too, below the Part 1 gains. Use your own mea
     // Lab 9, Part 2: velocity PID
     public static final double TargetRps = 4.0;      // a bit under your speed at 4 V
     public static final double VelocityP = 1.5;      // volts per (rot per s) of speed error
+    public static final double kS = 0.0;             // volts just to get the wheel turning (Attempt 7)
     public static final double kV = 0.0;             // volts per (rot per s) of target speed (Attempt 7)
     public static final double VelocityToleranceRps = 0.25;  // "at speed" when this close
     public static final int EncoderSamplesToAverage = 4;     // smooths the speed reading
@@ -308,7 +309,7 @@ Add these inside `kWheelConstants` too, below the Part 1 gains. Use your own mea
 
 !!! info "Where these starting numbers come from"
     - **VelocityP = 1.5:** the Lesson 12 rule, kP = max output ÷ the error that should get full output. If the wheel is stopped, the error is the whole 4 rot/s target, and full output is 6 V: 6 ÷ 4 = **1.5**. Use your own target.
-    - **kV starts at 0**, so Attempt 6 is pure feedback. You'll fill it in from Step 4 for Attempt 7.
+    - **kS and kV start at 0**, so Attempt 6 is pure feedback. You'll measure kS and work out kV for Attempt 7.
     - **No kI or kD.** Most velocity loops don't use them. D reacts to changes in speed, which is mostly encoder noise, and I gets replaced by something better in Attempt 7.
 
 ### Step 6: Add a velocity controller
@@ -324,6 +325,7 @@ Make its gains and target tunable, below the other tunables:
 
 ```java
     private final TunableDouble m_velocityKP = Tunables.addDouble("Wheel/Velocity kP", kWheelConstants.VelocityP);
+    private final TunableDouble m_kS = Tunables.addDouble("Wheel/kS", kWheelConstants.kS);
     private final TunableDouble m_kV = Tunables.addDouble("Wheel/kV", kWheelConstants.kV);
     private final TunableDouble m_targetSpeed = Tunables.addDouble("Wheel/Target Speed (rot per s)", kWheelConstants.TargetRps);
 ```
@@ -344,7 +346,8 @@ public Command holdSpeed() {
     return runOnce(m_velocityPid::reset)                 // clear old history
         .andThen(run(() -> {
             m_targetRps = m_targetSpeed.get();           // read the dashboard every loop
-            double feedforward = m_kV.get() * m_targetRps;                 // Attempt 7
+            double feedforward = m_kS.get() * Math.signum(m_targetRps)     // Attempt 7
+                + m_kV.get() * m_targetRps;
             double feedback = m_velocityPid.calculate(getRps(), m_targetRps);
             double volts = feedforward + feedback;
             setVolts(MathUtil.clamp(volts, -kWheelConstants.MaxVolts, kWheelConstants.MaxVolts));
@@ -360,7 +363,7 @@ public Command holdSpeed() {
 | Part | What it does |
 |---|---|
 | `m_velocityPid.calculate(getRps(), m_targetRps)` | The same PID math as Part 1, but on **speed**: kP × (target speed − measured speed) |
-| `feedforward = kV × target` | A guess at the voltage this speed needs, worked out **before** looking at the encoder. It's 0 until Attempt 7. |
+| `feedforward = kS × sign + kV × target` | A guess at the voltage this speed needs, worked out **before** looking at the encoder: **kS** to overcome friction (in the direction of travel, which is what `Math.signum` gives: +1, 0, or −1), plus **kV** for each rot/s. It's 0 until Attempt 7. |
 | `volts = feedforward + feedback` | The guess does most of the work; PID corrects whatever the guess gets wrong |
 | No `.until(...)` | A position move ends when it arrives. A speed is something you **hold**, so this runs until you cancel it. |
 | `.finallyDo(...)` | However it ends, stop the motor and clear the target |
@@ -388,7 +391,7 @@ Bind it on the wheel controller, in `configureBindings()`:
     m_wheelController.y().toggleOnTrue(m_wheel.holdSpeed());   // Attempts 6 and 7: tap to start, tap to stop
 ```
 
-In Elastic, add **Velocity kP**, **kV**, and **Target Speed** from **Tunables → Wheel**, and put **Velocity (rot per s)** and **Target Speed (rot per s)** on one graph. Add **At Speed** as a **Boolean Box**.
+In Elastic, add **Velocity kP**, **kS**, **kV**, and **Target Speed** from **Tunables → Wheel**, and put **Velocity (rot per s)** and **Target Speed (rot per s)** on one graph. Add **At Speed** as a **Boolean Box**.
 
 ### Warm up in the simulator
 This is the PID Lab again, now holding the same test bed wheel at a **speed** (5 rot/s), just like Part 2. It has **kV** and **kS** (feedforward) and **kP** (feedback).
@@ -401,7 +404,7 @@ This is the PID Lab again, now holding the same test bed wheel at a **speed** (5
 - [ ] Set **Noise** to 1% and raise kP a lot. What happens to the voltage?
 
 ### Attempt 6: P only (feedback alone)
-1. Make sure **kV** is 0 in Elastic.
+1. Make sure **kS** and **kV** are 0 in Elastic.
 2. Tap **Y**. Watch **Velocity** and **Target Speed** on your graph for 3 or 4 seconds, then tap **Y** again to stop.
 3. Record the speed it settles at.
 4. Double **Velocity kP** and try again. Then double it again.
@@ -418,37 +421,45 @@ This is the PID Lab again, now holding the same test bed wheel at a **speed** (5
 
 This is the big difference from position: a wheel sitting **still** at its target needs 0 V, but a wheel **spinning** at its target needs voltage the whole time.
 
-### Attempt 7: kV + P (feedforward does the work)
-**The idea:** don't wait for an error. You already know about how many volts this speed needs, because you measured it in Step 4. Apply that from the start, and let P fix whatever is left.
+### Attempt 7: kS + kV + P (feedforward does the work)
+**The idea:** don't wait for an error. You can work out about how many volts this speed needs: some to overcome friction, plus some for each rot/s. Apply that from the start, and let P fix whatever is left.
 
 ```
-volts = kV × target speed  +  kP × speed error
-         (feedforward)        (feedback)
+volts = kS × sign  +  kV × target speed  +  kP × speed error
+        └────────── feedforward ─────────┘    (feedback)
 ```
 
-1. Work out **kV = 4 V ÷ your speed at 4 V** and type it into **kV** in Elastic.
+**First, measure kS.** With **Velocity kP** and **kV** both at 0, the command sends exactly kS volts, so you can use it as a voltage knob:
+
+1. Set **Velocity kP** to 0 and **kV** to 0. Tap **Y**.
+2. Raise **kS** in Elastic by 0.05 at a time (press **Enter** after each). Stop at the first value where the wheel **starts turning on its own**. Give it a light flick if it's close: it should keep creeping.
+3. That voltage is **kS**. Tap **Y** to stop. Expect a few tenths of a volt.
+
+**Then the full feedforward:**
+
+1. Work out **kV = (4 V − kS) ÷ your speed at 4 V** and type it into **kV** in Elastic.
 2. Set **Velocity kP** back to your Step 5 value.
 3. Tap **Y**. The wheel should go almost straight to the target and stay there, and **At Speed** should light up.
 4. Change **Target Speed** in Elastic while it's running. It should follow each new speed quickly.
 5. Gently drag the cloth against the wheel. The speed dips a little, and P pushes the voltage up to bring it back. (Don't stop the wheel: the 775pro must never stall.)
-6. Copy your kV and Velocity kP into `Constants.java`.
+6. Copy your kS, kV, and Velocity kP into `Constants.java`.
 
-**What you'll see:** with kV doing most of the work, kP can be **smaller** than in Attempt 6 and the wheel still holds speed better, with less jitter. Feedforward handles what you can predict; feedback handles what you can't.
+**What you'll see:** with kS and kV doing most of the work, kP can be **smaller** than in Attempt 6 and the wheel still holds speed better, with less jitter. Feedforward handles what you can predict; feedback handles what you can't.
 
 !!! info "Why not use I instead?"
-    I can fix the gap in Attempt 6 too: it adds up the error until the voltage is enough. But it's slow to build up, overshoots when the target changes, and has to build up all over again at every new speed. A feedforward is right immediately, at every speed. That's why teams use feedforward for velocity. [Lesson 13](../controls/13-feedforward.md) covers it fully, including **kS** for friction and how **SysId** measures kV for you.
+    I can fix the gap in Attempt 6 too: it adds up the error until the voltage is enough. But it's slow to build up, overshoots when the target changes, and has to build up all over again at every new speed. A feedforward is right immediately, at every speed. That's why teams use feedforward for velocity. [Lesson 13](../controls/13-feedforward.md) covers it fully, including how **SysId** measures kS and kV for you.
 
 ### What you just learned: velocity
 | Attempt | Reaches the target speed? | Why |
 |---|---|---|
 | 6. P only | No, always a little slow | P only pushes when there's error, but spinning needs voltage all the time |
-| 7. kV + P | Yes | kV supplies the voltage the speed needs; P corrects the rest |
+| 7. kS + kV + P | Yes | kS covers friction and kV the speed; P corrects the rest |
 
 | | Position (Part 1) | Velocity (Part 2) |
 |---|---|---|
 | Volts needed **at** the target | 0, the wheel is sitting still | Some, all the time, to keep it spinning |
 | P alone | Gets close; friction leaves a small gap | Always short |
-| What closes the gap | I (with an IZone) | Feedforward (kV) |
+| What closes the gap | I (with an IZone) | Feedforward (kS + kV) |
 | D | Useful, stops overshoot | Usually 0, it mostly amplifies noise |
 
 ### Commit
@@ -468,8 +479,9 @@ git commit -m "Lab 9: position and velocity PID on the wheel"
 - [ ] Add `turnPid(-10)` on another button and make sure it comes back to where it started
 - [ ] Challenge: use the test bed's 10-turn knob from [Lab 5](lab5-knob-speed.md) to set the target, so the wheel follows the knob turn for turn
 - [ ] Complete the velocity scorecard: Attempt 6 at two kP values, and Attempt 7
-- [ ] Velocity: set kV to 0, Velocity kP to 0, and add kI to the velocity controller instead. How long does it take to reach speed? What happens when you change Target Speed?
+- [ ] Velocity: set kS and kV to 0, Velocity kP to 0, and add kI to the velocity controller instead. How long does it take to reach speed? What happens when you change Target Speed?
 - [ ] Velocity: make kV 20% too big on purpose. Does the wheel go too fast? Does P fix it?
+- [ ] Velocity: set kS back to 0 but keep kV. How far below the target does it run now? Why is the gap about the same at every speed?
 - [ ] Challenge: use the knob to set **Target Speed**, so the knob controls the wheel's speed with velocity PID instead of raw power like Lab 5
 
 ## Check yourself
@@ -494,8 +506,11 @@ git commit -m "Lab 9: position and velocity PID on the wheel"
 ??? question "Why can't P alone hold the wheel at its target speed?"
     Spinning at a speed takes voltage all the time. P only gives voltage when there's error, so the wheel settles at whatever speed makes kP × error equal to the voltage it needs, which is always a little below the target.
 
-??? question "Your wheel spins at 6.0 rot/s at 4 V. What's kV, and what feedforward voltage does a 5.0 rot/s target get?"
-    kV = 4 ÷ 6.0 ≈ **0.67 V per rot/s**. Feedforward = 0.67 × 5.0 ≈ **3.3 V**.
+??? question "Your wheel spins at 6.0 rot/s at 4 V, and kS is 0.25 V. What's kV, and what feedforward voltage does a 5.0 rot/s target get?"
+    kV = (4 − 0.25) ÷ 6.0 ≈ **0.63 V per rot/s**. Feedforward = 0.25 + 0.63 × 5.0 ≈ **3.4 V**.
+
+??? question "What does kS do that kV can't?"
+    kS is the voltage needed just to overcome friction, whatever the speed. kV only adds voltage in proportion to speed, so without kS the feedforward always comes up short by about the friction voltage.
 
 ??? question "Why does `holdSpeed` have no `.until(...)`, when `turnPid` does?"
     A position move is finished once the wheel arrives. A speed is something you keep holding, so the command runs until it's cancelled (by tapping Y again).

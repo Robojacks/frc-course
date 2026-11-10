@@ -46,6 +46,7 @@ public final class Constants {
     // Lab 9, Part 2: velocity PID
     public static final double TargetRps = 4.0;      // a bit under your speed at 4 V
     public static final double VelocityP = 1.5;      // volts per (rot per s) of speed error
+    public static final double kS = 0.0;             // volts just to get the wheel turning (Attempt 7)
     public static final double kV = 0.0;             // volts per (rot per s) of target speed (Attempt 7)
     public static final double VelocityToleranceRps = 0.25;  // "at speed" when this close
     public static final int EncoderSamplesToAverage = 4;     // smooths the speed reading

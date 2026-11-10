@@ -52,6 +52,7 @@ public class WheelSubsystem extends SubsystemBase {
     private final TunableDouble m_kD = Tunables.addDouble("Wheel/kD", kWheelConstants.D);
     private final TunableDouble m_iZone = Tunables.addDouble("Wheel/IZone", kWheelConstants.IZone);
     private final TunableDouble m_velocityKP = Tunables.addDouble("Wheel/Velocity kP", kWheelConstants.VelocityP);
+    private final TunableDouble m_kS = Tunables.addDouble("Wheel/kS", kWheelConstants.kS);
     private final TunableDouble m_kV = Tunables.addDouble("Wheel/kV", kWheelConstants.kV);
     private final TunableDouble m_targetSpeed = Tunables.addDouble("Wheel/Target Speed (rot per s)", kWheelConstants.TargetRps);
 
@@ -140,7 +141,8 @@ public class WheelSubsystem extends SubsystemBase {
         return runOnce(m_velocityPid::reset)                 // clear old history
             .andThen(run(() -> {
                 m_targetRps = m_targetSpeed.get();           // read the dashboard every loop
-                double feedforward = m_kV.get() * m_targetRps;                 // Attempt 7
+                double feedforward = m_kS.get() * Math.signum(m_targetRps)     // Attempt 7
+                    + m_kV.get() * m_targetRps;
                 double feedback = m_velocityPid.calculate(getRps(), m_targetRps);
                 double volts = feedforward + feedback;
                 setVolts(MathUtil.clamp(volts, -kWheelConstants.MaxVolts, kWheelConstants.MaxVolts));
